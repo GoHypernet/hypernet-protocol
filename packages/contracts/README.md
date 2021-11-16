@@ -11,8 +11,8 @@ proposal lifecycle.
 
 This particular governance architecture has been adopted by a number of highly successful projects including
 [Uniswap](https://docs.uniswap.org/protocol/V2/concepts/governance/governance-reference) and has proven quite
-successful in practice at adopting beneficial proposals to protocol upgrades while preventing 
-[adversarial attacks](https://docs.uniswap.org/protocol/V2/concepts/governance/adversarial-circumstances). 
+successful in practice at adopting beneficial proposals to protocol upgrades while preventing
+[adversarial attacks](https://docs.uniswap.org/protocol/V2/concepts/governance/adversarial-circumstances).
 
 ![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
@@ -82,7 +82,7 @@ npx hardhat compile
 
 ## Hardhat network - full contract deployment
 
-First, start a hardhat node (edit [hardhat.config.js](https://hardhat.org/config/#networks-configuration) 
+First, start a hardhat node (edit [hardhat.config.js](https://hardhat.org/config/#networks-configuration)
 to customize the Hardhat network settings):
 
 ```shell
@@ -109,14 +109,14 @@ Get Governance contract parameters:
 npx hardhat governanceParameters --network dev
 ```
 
-Propose a new Non-Fungible Registry, your account must have at least `1000000` Hypertoken (1% of the total supply) 
+Propose a new Non-Fungible Registry, your account must have at least `1000000` Hypertoken (1% of the total supply)
 for the proposal to go through:
 
 ```shell
 npx hardhat proposeRegistry --network dev --name Gateways --symbol GTW --owner 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
 ```
 
-Additionally, if at any point during the voting process your voting power drops below this 1% threshold, your proposal 
+Additionally, if at any point during the voting process your voting power drops below this 1% threshold, your proposal
 is vulnerable to being canceled:
 
 ```shell
@@ -156,7 +156,7 @@ npx hardhat registryParameters --network dev --name Gateways
 
 and set the registry's parameters:
 
-```shell
+````shell
 npx hardhat setRegistryParameters --network dev --name HyperId --regtoken 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ``
 
@@ -164,7 +164,7 @@ Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just depl
 
 ```shell
 npx hardhat proposeRegistryEntry --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-```
+````
 
 Set the registration token address for an NFR:
 
@@ -196,7 +196,7 @@ create a new registry by burning hypertoken:
 npx hardhat createRegistryByToken --network dev --name Gateways --symbol GTW --registrar 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --enumerable true
 ```
 
-## Hardhat network - registry testing deployment 
+## Hardhat network - registry testing deployment
 
 To simply deploy two registies for registering gateways and liquidity providers, run:
 

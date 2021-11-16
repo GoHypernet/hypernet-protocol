@@ -1,5 +1,13 @@
-import React, { useEffect, useState, useMemo } from "react";
+import {
+  ERegistrySortOrder,
+  EthereumAccountAddress,
+  Registry,
+  RegistryEntry,
+} from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
+import React, { useEffect, useState, useMemo } from "react";
 import { useAlert } from "react-alert";
 
 import {
@@ -9,14 +17,6 @@ import {
   GovernanceEmptyState,
   GovernanceSwitch,
 } from "@web-ui/components";
-import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import {
-  ERegistrySortOrder,
-  EthereumAddress,
-  Registry,
-  RegistryEntry,
-} from "@hypernetlabs/objects";
 import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
@@ -31,8 +31,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const { setLoading } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
   const [registry, setRegistry] = useState<Registry>();
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
+  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
+    EthereumAccountAddress(""),
   );
   const [reversedSortingEnabled, setReversedSortingEnabled] =
     useState<boolean>(false);

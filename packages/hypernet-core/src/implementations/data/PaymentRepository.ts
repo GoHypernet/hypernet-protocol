@@ -1,5 +1,4 @@
 import {
-  EthereumAddress,
   IHypernetOfferDetails,
   Payment,
   PublicIdentifier,
@@ -32,10 +31,11 @@ import {
   InsuranceState,
   ParameterizedState,
   ChainId,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
-import { HypernetConfig } from "@interfaces/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 import {
@@ -72,10 +72,9 @@ export class PaymentRepository implements IPaymentRepository {
       this._getTransfersByPaymentId(paymentId),
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
+      this.configProvider.getConfig(),
     ])
-      .andThen((vals) => {
-        const [transfers, browserNode, context] = vals;
-
+      .andThen(([transfers, browserNode, context, config]) => {
         return this.paymentUtils
           .transfersToPayment(paymentId, transfers)
           .andThen((payment) => {
@@ -94,7 +93,7 @@ export class PaymentRepository implements IPaymentRepository {
             }
             const message: IHypernetPullPaymentDetails = {
               messageType: EMessageTransferType.PULLPAYMENT,
-              requireOnline: true,
+              requireOnline: config.requireOnline,
               paymentId: paymentId,
               to: payment.to,
               from: payment.from,
@@ -136,7 +135,7 @@ export class PaymentRepository implements IPaymentRepository {
     deltaAmount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError> {
@@ -146,9 +145,7 @@ export class PaymentRepository implements IPaymentRepository {
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
       this.blockchainTimeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
-    ]).andThen((vals) => {
-      const [browserNode, context, paymentId, timestamp, config] = vals;
-
+    ]).andThen(([browserNode, context, paymentId, timestamp, config]) => {
       const insuranceToken = config.chainAddresses[chainId]?.hypertokenAddress;
 
       if (insuranceToken == null) {
@@ -177,7 +174,7 @@ export class PaymentRepository implements IPaymentRepository {
         routerPublicIdentifier,
         chainId,
         messageType: EMessageTransferType.OFFER,
-        requireOnline: true,
+        requireOnline: config.requireOnline,
         paymentId,
         creationDate: timestamp,
         to: counterPartyAccount,
@@ -234,7 +231,7 @@ export class PaymentRepository implements IPaymentRepository {
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
@@ -286,7 +283,7 @@ export class PaymentRepository implements IPaymentRepository {
         insuranceToken,
         gatewayUrl,
         metadata,
-        requireOnline: true,
+        requireOnline: config.requireOnline,
       };
 
       // Create a message transfer, with the terms of the payment in the metadata.
@@ -589,7 +586,7 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public provideStake(
     paymentId: PaymentId,
-    gatewayAddress: EthereumAddress,
+    gatewayAddress: EthereumAccountAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError
@@ -793,5 +790,20 @@ export class PaymentRepository implements IPaymentRepository {
         TransferId(payment.details.offerTransfers[0].transferId),
       )
       .map(() => {});
+  }
+
+  protected reservedPaymentMap = new Map<string, PaymentId>();
+  public addReservedPaymentId(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, never> {
+    this.reservedPaymentMap.set(requestId, paymentId);
+    return okAsync(undefined);
+  }
+
+  public getReservedPaymentIdByRequestId(
+    requestId: string,
+  ): ResultAsync<PaymentId | null, never> {
+    return okAsync(this.reservedPaymentMap.get(requestId) ?? null);
   }
 }

@@ -1,10 +1,12 @@
-import { BigNumber, ethers } from "ethers";
 import {
-  EthereumAddress,
+  EthereumAccountAddress,
+  EthereumContractAddress,
   GovernanceAbis,
   RegistryFactoryContractError,
 } from "@hypernetlabs/objects";
+import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
+
 import { IRegistryFactoryContract } from "@contracts/interfaces/utilities";
 
 export class RegistryFactoryContract implements IRegistryFactoryContract {
@@ -13,7 +15,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner,
-    contractAddress: EthereumAddress,
+    contractAddress: EthereumContractAddress,
   ) {
     this.contract = new ethers.Contract(
       contractAddress,
@@ -22,8 +24,8 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     );
   }
 
-  public getContractAddress(): EthereumAddress {
-    return EthereumAddress(this.contract?.address || "");
+  public getContractAddress(): EthereumContractAddress {
+    return EthereumContractAddress(this.contract?.address || "");
   }
 
   public getContract(): ethers.Contract | null {
@@ -31,10 +33,12 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   }
 
   public addressToName(
-    registryAddress: EthereumAddress,
-  ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
+    registryAddress: EthereumContractAddress,
+  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.addressToName(registryAddress) as Promise<EthereumAddress>,
+      this.contract?.addressToName(
+        registryAddress,
+      ) as Promise<EthereumContractAddress>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract addressToName()",
@@ -46,9 +50,11 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
 
   public enumerableRegistries(
     index: number,
-  ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
+  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.enumerableRegistries(index) as Promise<EthereumAddress>,
+      this.contract?.enumerableRegistries(
+        index,
+      ) as Promise<EthereumContractAddress>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract enumerableRegistries()",
@@ -60,9 +66,11 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
 
   public nameToAddress(
     registryName: string,
-  ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
+  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.nameToAddress(registryName) as Promise<EthereumAddress>,
+      this.contract?.nameToAddress(
+        registryName,
+      ) as Promise<EthereumContractAddress>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract nameToAddress()",
@@ -105,7 +113,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   public createRegistryByToken(
     name: string,
     symbol: string,
-    registrarAddress: EthereumAddress,
+    registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
@@ -114,7 +122,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
         symbol,
         registrarAddress,
         enumerable,
-      ) as Promise<any>,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract createRegistryByToken()",
@@ -123,7 +131,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new RegistryFactoryContractError("Unable to wait for tx", e);
         });
       })

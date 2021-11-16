@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+
 import { EFontSize, EFontWeight, colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles((theme) => ({

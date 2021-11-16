@@ -1,7 +1,8 @@
-import React from "react";
+import { EthereumAccountAddress } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
-
+import React from "react";
 import { useAlert } from "react-alert";
 
 import {
@@ -9,14 +10,12 @@ import {
   GovernanceButton,
   GovernanceField,
 } from "@web-ui/components";
-import { EthereumAddress } from "@hypernetlabs/objects";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { useStyles } from "@web-ui/widgets/CreateIdentityWidget/CreateIdentityWidget.style";
 
 interface ICreateIdentityWidget {
   onCloseCallback: () => void;
   registryName: string;
-  currentAccountAddress: EthereumAddress;
+  currentAccountAddress: EthereumAccountAddress;
 }
 
 interface ICreateIdentityFormValues {
@@ -53,7 +52,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
       .createRegistryEntry(
         registryName,
         label,
-        EthereumAddress(recipientAddress),
+        EthereumAccountAddress(recipientAddress),
         tokenUri,
       )
       .map(() => {

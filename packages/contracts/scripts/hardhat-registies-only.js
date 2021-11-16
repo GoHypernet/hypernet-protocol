@@ -13,16 +13,22 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  const [owner] = await hre.ethers.getSigners()
+  const [owner] = await hre.ethers.getSigners();
 
   // deploy gateway registry
-  const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
+  const Registry = await ethers.getContractFactory(
+    "NonFungibleRegistryUpgradeable",
+  );
   const gateways = await Registry.deploy("Gateways", "Gs", owner.address);
   gateways_reciept = await gateways.deployTransaction.wait();
   console.log("Gateway Registry Address:", gateways.address);
 
   // deploy LP registry
-  const lps = await Registry.deploy("Liquidity Providers", "LPs", owner.address);
+  const lps = await Registry.deploy(
+    "Liquidity Providers",
+    "LPs",
+    owner.address,
+  );
   lps_reciept = await lps.deployTransaction.wait();
   console.log("LP Registry Address:", lps.address);
 }

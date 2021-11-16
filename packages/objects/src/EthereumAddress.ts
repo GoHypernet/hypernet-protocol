@@ -1,4 +1,4 @@
-import { Brand, make } from "ts-brand";
+import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 
-export type EthereumAddress = Brand<string, "EthereumAddress">;
-export const EthereumAddress = make<EthereumAddress>();
+export type EthereumAddress = EthereumContractAddress | EthereumAccountAddress;

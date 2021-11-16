@@ -1,5 +1,4 @@
 import {
-  EthereumAddress,
   IHypernetOfferDetails,
   Payment,
   PullAmount,
@@ -29,6 +28,7 @@ import {
   MessageResolver,
   InsuranceResolver,
   ParameterizedResolver,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -148,7 +148,7 @@ export class PaymentUtils implements IPaymentUtils {
       parameterizedTransferId = TransferId(
         sortedTransfers.parameterizedTransfers[0].transferId,
       );
-      paymentToken = EthereumAddress(
+      paymentToken = EthereumContractAddress(
         sortedTransfers.parameterizedTransfers[0].assetId,
       );
     }
@@ -266,7 +266,9 @@ export class PaymentUtils implements IPaymentUtils {
 
     const paymentToken =
       sortedTransfers.parameterizedTransfers.length > 0
-        ? EthereumAddress(sortedTransfers.parameterizedTransfers[0].assetId)
+        ? EthereumContractAddress(
+            sortedTransfers.parameterizedTransfers[0].assetId,
+          )
         : offerDetails.paymentToken;
 
     return okAsync(

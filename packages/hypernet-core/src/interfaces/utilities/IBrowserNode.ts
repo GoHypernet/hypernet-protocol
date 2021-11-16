@@ -1,6 +1,5 @@
 import {
   BigNumberString,
-  EthereumAddress,
   IBasicChannelResponse,
   IBasicTransferResponse,
   IConditionalTransferCreatedPayload,
@@ -20,6 +19,8 @@ import {
   UnixTimestamp,
   ChainId,
   UtilityMessageSignature,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -47,15 +48,15 @@ export interface IBrowserNode {
    * @returns channelAddress
    */
   reconcileDeposit(
-    assetId: EthereumAddress,
-    channelAddress: EthereumAddress,
-  ): ResultAsync<EthereumAddress, VectorError>;
+    assetId: EthereumContractAddress,
+    channelAddress: EthereumContractAddress,
+  ): ResultAsync<EthereumContractAddress, VectorError>;
 
   withdraw(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     amount: BigNumberString,
-    assetId: EthereumAddress,
-    recipient: EthereumAddress,
+    assetId: EthereumContractAddress,
+    recipient: EthereumAccountAddress,
     quote?: IWithdrawQuote,
     callTo?: string,
     callData?: string,
@@ -67,7 +68,7 @@ export interface IBrowserNode {
   ): ResultAsync<IFullTransferState<unknown, unknown>, VectorError>;
 
   getActiveTransfers(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
   ): ResultAsync<IFullTransferState<unknown, unknown>[], VectorError>;
 
   getTransfers(
@@ -77,7 +78,7 @@ export interface IBrowserNode {
 
   init(
     signature: Signature,
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<void, VectorError>;
 
   getRegisteredTransfers(
@@ -89,7 +90,7 @@ export interface IBrowserNode {
   ): ResultAsync<UtilityMessageSignature, VectorError>;
 
   resolveTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     transferId: TransferId,
     transferResolver:
       | MessageResolver
@@ -98,22 +99,22 @@ export interface IBrowserNode {
   ): ResultAsync<IBasicTransferResponse, VectorError>;
 
   conditionalTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     amount: BigNumberString,
-    assetId: EthereumAddress,
+    assetId: EthereumContractAddress,
     type: string,
     details: unknown,
     recipient: PublicIdentifier | undefined,
     recipientChainId: number | undefined,
-    recipientAssetId: EthereumAddress | undefined,
+    recipientAssetId: EthereumContractAddress | undefined,
     timeout: string | undefined,
     meta: unknown | null | undefined,
   ): ResultAsync<IBasicTransferResponse, VectorError>;
 
-  getStateChannels(): ResultAsync<EthereumAddress[], VectorError>;
+  getStateChannels(): ResultAsync<EthereumContractAddress[], VectorError>;
 
   getStateChannel(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
   ): ResultAsync<IFullChannelState | undefined, VectorError>;
 
   getStateChannelByParticipants(

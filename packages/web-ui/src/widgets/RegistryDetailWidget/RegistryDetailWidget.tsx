@@ -1,7 +1,16 @@
-import React, { useEffect, useState } from "react";
+import {
+  EthereumAccountAddress,
+  Registry,
+  RegistryParams,
+  BigNumberString,
+  EthereumContractAddress,
+} from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
-import { useAlert } from "react-alert";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
 import { Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+import { useAlert } from "react-alert";
 
 import {
   GovernanceChip,
@@ -11,18 +20,10 @@ import {
   GovernanceButton,
   GovernanceSwitch,
 } from "@web-ui/components";
-import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import {
-  EthereumAddress,
-  Registry,
-  RegistryParams,
-  BigNumberString,
-} from "@hypernetlabs/objects";
-import { useStyles } from "@web-ui/widgets/RegistryDetailWidget/RegistryDetailWidget.style";
 import GrantRoleWidget from "@web-ui/widgets/GrantRoleWidget";
-import RevokeRoleWidget from "@web-ui/widgets/RevokeRoleWidget";
+import { useStyles } from "@web-ui/widgets/RegistryDetailWidget/RegistryDetailWidget.style";
 import RenounceRoleWidget from "@web-ui/widgets/RenounceRoleWidget";
+import RevokeRoleWidget from "@web-ui/widgets/RevokeRoleWidget";
 
 interface IRegistryDetailFormValus {
   symbol: string;
@@ -48,8 +49,8 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   const { setLoading } = useLayoutContext();
   const [registry, setRegistry] = useState<Registry>();
   const [isEditing, setIsEditing] = useState(false);
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
+  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
+    EthereumAccountAddress(""),
   );
   const [grantRoleModalOpen, setGrantRoleModalOpen] = useState<boolean>(false);
   const [revokeRoleModalOpen, setRevokeRoleModalOpen] =
@@ -105,11 +106,11 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           allowStorageUpdate,
           allowLabelChange,
           allowTransfers,
-          EthereumAddress(registrationToken),
+          EthereumContractAddress(registrationToken),
           registrationFee,
-          EthereumAddress(burnAddress),
+          EthereumAccountAddress(burnAddress),
           Number(burnFee) * 100,
-          EthereumAddress(primaryRegistry),
+          EthereumContractAddress(primaryRegistry),
         ),
       )
       .map((registry) => {

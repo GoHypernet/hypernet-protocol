@@ -57,9 +57,25 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
         });
       }
 
+      if (connector.initiateSendFundsRequested != null) {
+        connector.initiateSendFundsRequested.subscribe((request) => {
+          this.paymentService.initiateSendFunds(request).mapErr((e) => {
+            this.logUtils.error(e);
+          });
+        });
+      }
+
       if (connector.sendFundsRequested != null) {
         connector.sendFundsRequested.subscribe((request) => {
           this.paymentService.sendFunds(request).mapErr((e) => {
+            this.logUtils.error(e);
+          });
+        });
+      }
+
+      if (connector.initiateAuthorizeFundsRequested != null) {
+        connector.initiateAuthorizeFundsRequested.subscribe((request) => {
+          this.paymentService.initiateAuthorizeFunds(request).mapErr((e) => {
             this.logUtils.error(e);
           });
         });

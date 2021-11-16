@@ -26,7 +26,8 @@ import {
   HypernetGovernorContractError,
   ERC20ContractError,
 } from "@objects/errors";
-import { EthereumAddress } from "@objects/EthereumAddress";
+import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { GatewayRegistrationFilter } from "@objects/GatewayRegistrationFilter";
 import { GatewayRegistrationInfo } from "@objects/GatewayRegistrationInfo";
 import { GatewayTokenInfo } from "@objects/GatewayTokenInfo";
@@ -34,15 +35,15 @@ import { GatewayUrl } from "@objects/GatewayUrl";
 import { HypernetLink } from "@objects/HypernetLink";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
+import { Proposal, ProposalVoteReceipt } from "@objects/Proposal";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
-import { Signature } from "@objects/Signature";
-import { Proposal, ProposalVoteReceipt } from "@objects/Proposal";
-import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 import { Registry } from "@objects/Registry";
 import { RegistryEntry } from "@objects/RegistryEntry";
 import { RegistryParams } from "@objects/RegistryParams";
+import { Signature } from "@objects/Signature";
+import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -63,7 +64,7 @@ export interface IHypernetCore {
    * This returns the linked Ethereum accounts via your installed wallet (ie: Metamask)
    */
   getEthereumAccounts(): ResultAsync<
-    EthereumAddress[],
+    EthereumAccountAddress[],
     BlockchainUnavailableError
   >;
 
@@ -124,8 +125,8 @@ export interface IHypernetCore {
    * @dev this creates a transaction on the blockchain!
    */
   depositFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
   ): ResultAsync<
     Balances,
@@ -139,10 +140,10 @@ export interface IHypernetCore {
    * @param destinationAddress
    */
   withdrawFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
-    destinationAddress: EthereumAddress,
+    destinationAddress: EthereumAccountAddress,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
@@ -270,12 +271,12 @@ export interface IHypernetCore {
   createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<Proposal, HypernetGovernorContractError>;
 
   delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
   ): ResultAsync<void, ERC20ContractError>;
 
@@ -290,7 +291,7 @@ export interface IHypernetCore {
 
   getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
+    voterAddress: EthereumAccountAddress,
   ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError>;
 
   getRegistries(
@@ -310,9 +311,9 @@ export interface IHypernetCore {
   >;
 
   getRegistryByAddress(
-    registryAddresses: EthereumAddress[],
+    registryAddresses: EthereumContractAddress[],
   ): ResultAsync<
-    Map<EthereumAddress, Registry>,
+    Map<EthereumContractAddress, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
 
@@ -382,11 +383,11 @@ export interface IHypernetCore {
   getProposalThreshold(): ResultAsync<number, HypernetGovernorContractError>;
 
   getVotingPower(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, HypernetGovernorContractError>;
 
   getHyperTokenBalance(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError>;
 
   getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
@@ -404,7 +405,7 @@ export interface IHypernetCore {
   createRegistryEntry(
     registryName: string,
     label: string,
-    recipientAddress: EthereumAddress,
+    recipientAddress: EthereumAccountAddress,
     data: string,
   ): ResultAsync<
     void,
@@ -417,7 +418,7 @@ export interface IHypernetCore {
   transferRegistryEntry(
     registryName: string,
     tokenId: number,
-    transferToAddress: EthereumAddress,
+    transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
     | NonFungibleRegistryContractError
@@ -440,13 +441,13 @@ export interface IHypernetCore {
   createRegistryByToken(
     name: string,
     symbol: string,
-    registrarAddress: EthereumAddress,
+    registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError>;
 
   grantRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -457,7 +458,7 @@ export interface IHypernetCore {
 
   revokeRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -468,7 +469,7 @@ export interface IHypernetCore {
 
   renounceRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -510,9 +511,9 @@ export interface IHypernetCore {
   onChainConnected: Subject<ChainId>;
   onGovernanceChainConnected: Subject<ChainId>;
   onChainChanged: Subject<ChainId>;
-  onAccountChanged: Subject<EthereumAddress>;
+  onAccountChanged: Subject<EthereumAccountAddress>;
   onGovernanceChainChanged: Subject<ChainId>;
-  onGovernanceAccountChanged: Subject<EthereumAddress>;
+  onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");

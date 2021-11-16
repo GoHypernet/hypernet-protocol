@@ -1,17 +1,14 @@
 import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import {
   BlockchainUnavailableError,
-  EthereumAddress,
   VectorError,
   IFullChannelState,
   IFullTransferState,
   IRegisteredTransfer,
   IWithdrawResponse,
   UtilityMessageSignature,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
-import { okAsync, ResultAsync } from "neverthrow";
-import td from "testdouble";
-
 import { IBrowserNode, IBrowserNodeProvider } from "@interfaces/utilities";
 import {
   publicIdentifier,
@@ -39,10 +36,12 @@ import {
   activeParameterizedTransfer,
   channelState,
 } from "@mock/mocks";
+import { okAsync, ResultAsync } from "neverthrow";
+import td from "testdouble";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   public browserNode: IBrowserNode;
-  public stateChannels = new Map<EthereumAddress, IFullChannelState>();
+  public stateChannels = new Map<EthereumContractAddress, IFullChannelState>();
 
   constructor(
     includeOfferTransfer = true,
@@ -79,12 +78,12 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       for (const stateChannel of this.stateChannels.values()) {
         td.when(
           this.browserNode.getStateChannel(
-            EthereumAddress(stateChannel.channelAddress),
+            EthereumContractAddress(stateChannel.channelAddress),
           ),
         ).thenReturn(
           okAsync(
             this.stateChannels.get(
-              EthereumAddress(stateChannel.channelAddress),
+              EthereumContractAddress(stateChannel.channelAddress),
             ),
           ),
         );

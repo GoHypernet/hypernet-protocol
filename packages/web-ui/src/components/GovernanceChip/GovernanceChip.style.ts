@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+
 import { EFontWeight } from "@web-ui/theme";
 
 interface IChipColorCodes {

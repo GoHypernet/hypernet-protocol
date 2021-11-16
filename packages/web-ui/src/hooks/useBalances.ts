@@ -1,9 +1,8 @@
 import {
   AssetBalance,
   Balances,
-  EthereumAddress,
-  AssetInfo,
   ActiveStateChannel,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
@@ -26,7 +25,7 @@ interface IState {
   loading: boolean;
   balances: AssetBalance[];
   balancesByChannelAddress: AssetBalance[];
-  balancesByChannelAddresses: Map<EthereumAddress, AssetBalance[]>;
+  balancesByChannelAddresses: Map<EthereumContractAddress, AssetBalance[]>;
   channelTokenSelectorOptions: ITokenSelectorOption[];
   preferredPaymentToken?: ITokenSelectorOption;
 }
@@ -224,9 +223,9 @@ export function useBalances() {
 
   function prepareBalancesByChannelAddresses(
     balance: Balances,
-  ): Map<EthereumAddress, AssetBalance[]> {
+  ): Map<EthereumContractAddress, AssetBalance[]> {
     return balance.assets.reduce(
-      (acc: Map<EthereumAddress, AssetBalance[]>, assetBalance) => {
+      (acc: Map<EthereumContractAddress, AssetBalance[]>, assetBalance) => {
         acc.set(assetBalance.channelAddress, [
           ...(acc.get(assetBalance.channelAddress) || []),
           assetBalance,

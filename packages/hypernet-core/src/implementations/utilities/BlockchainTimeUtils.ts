@@ -2,13 +2,13 @@ import {
   BlockchainUnavailableError,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
+import { ITimeUtils } from "@hypernetlabs/utils";
 import { okAsync, ResultAsync } from "neverthrow";
 
 import {
   IBlockchainProvider,
   IBlockchainTimeUtils,
 } from "@interfaces/utilities";
-import { ITimeUtils } from "@hypernetlabs/utils";
 
 export class BlockchainTimeUtils implements IBlockchainTimeUtils {
   protected lastBlockchainCheck: UnixTimestamp | undefined;

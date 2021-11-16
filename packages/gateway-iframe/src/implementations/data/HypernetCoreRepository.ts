@@ -1,12 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  IAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
+  AuthorizeFundsRequestData,
   ChainId,
   IStateChannelRequest,
   PublicIdentifier,
+  SendFundsRequestData,
   UUID,
 } from "@hypernetlabs/objects";
 import { injectable, inject } from "inversify";
@@ -33,18 +36,49 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
       });
   }
 
-  public emitSendFundsRequest(
-    request: ISendFundsRequest,
+  public emitInitiateSendFundsRequest(
+    request: SendFundsRequestData,
   ): ResultAsync<void, never> {
-    this.childApi?.emit("sendFundsRequested", request);
+    // The request has a callback on it, we need to just clone the request and remove the callback
+    const sendRequest = { ...request };
+    delete (sendRequest as any).callback;
+
+    this.childApi?.emit("initiateSendFundsRequested", sendRequest);
+
+    return okAsync(undefined);
+  }
+
+  public emitSendFundsRequest(
+    request: ISignedSendFundsRequest,
+  ): ResultAsync<void, never> {
+    // The request has a callback on it, we need to just clone the request and remove the callback
+    const sendRequest = { ...request };
+    delete (sendRequest as any).callback;
+
+    this.childApi?.emit("sendFundsRequested", sendRequest);
+
+    return okAsync(undefined);
+  }
+
+  public emitInitiateAuthorizeFundsRequest(
+    request: AuthorizeFundsRequestData,
+  ): ResultAsync<void, never> {
+    // The request has a callback on it, we need to just clone the request and remove the callback
+    const sendRequest = { ...request };
+    delete (sendRequest as any).callback;
+
+    this.childApi?.emit("initiateAuthorizeFundsRequested", sendRequest);
 
     return okAsync(undefined);
   }
 
   public emitAuthorizeFundsRequest(
-    request: IAuthorizeFundsRequest,
+    request: ISignedAuthorizeFundsRequest,
   ): ResultAsync<void, never> {
-    this.childApi?.emit("authorizeFundsRequested", request);
+    // The request has a callback on it, we need to just clone the request and remove the callback
+    const sendRequest = { ...request };
+    delete (sendRequest as any).callback;
+    this.childApi?.emit("authorizeFundsRequested", sendRequest);
 
     return okAsync(undefined);
   }

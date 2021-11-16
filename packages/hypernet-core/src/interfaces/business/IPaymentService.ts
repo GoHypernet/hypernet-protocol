@@ -1,6 +1,5 @@
 import {
   Payment,
-  EthereumAddress,
   PublicIdentifier,
   GatewayUrl,
   PaymentId,
@@ -20,10 +19,26 @@ import {
   UnixTimestamp,
   BigNumberString,
   Signature,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
-import { ResultAsync, Result } from "neverthrow";
+import { PaymentInitiationResponse } from "@interfaces/objects";
+import { ResultAsync } from "neverthrow";
 
 export interface IPaymentService {
+  initiateAuthorizeFunds(
+    gatewayUrl: GatewayUrl,
+    requestIdentifier: string,
+    channelAddress: EthereumContractAddress,
+    counterPartyAccount: PublicIdentifier,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
+    deltaTime: number,
+    requiredStake: BigNumberString,
+    paymentToken: EthereumContractAddress,
+    metadata: string | null,
+  ): ResultAsync<PaymentInitiationResponse, PaymentCreationError>;
+
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
    * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
@@ -36,15 +51,18 @@ export interface IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   authorizeFunds(
-    channelAddress: EthereumAddress,
+    requestIdentifier: string,
+    paymentId: PaymentId,
+    channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumberString,
     expirationDate: UnixTimestamp,
     deltaAmount: BigNumberString,
     deltaTime: number,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
+    gatewaySignature: Signature,
     metadata: string | null,
   ): ResultAsync<Payment, PaymentCreationError>;
 
@@ -64,6 +82,17 @@ export interface IPaymentService {
     | PaymentCreationError
   >;
 
+  initiateSendFunds(
+    gatewayUrl: GatewayUrl,
+    requestIdentifier: string,
+    channelAddress: EthereumContractAddress,
+    counterPartyAccount: PublicIdentifier,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
+    paymentToken: EthereumContractAddress,
+    metadata: string | null,
+  ): ResultAsync<PaymentInitiationResponse, PaymentCreationError>;
   /**
    * Send funds to another person.
    * @param counterPartyAccount the account we wish to send funds to
@@ -74,13 +103,16 @@ export interface IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   sendFunds(
-    channelAddress: EthereumAddress,
+    requestIdentifier: string,
+    paymentId: PaymentId,
+    channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
+    gatewaySignature: Signature,
     metadata: string | null,
   ): ResultAsync<Payment, PaymentCreationError>;
 

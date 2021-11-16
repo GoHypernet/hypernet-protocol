@@ -1,4 +1,5 @@
 import { Signature } from "@hypernetlabs/objects";
+
 import { ExpectedRedirect } from "@gateway-iframe/interfaces/objects";
 
 export interface IPersistenceRepository {

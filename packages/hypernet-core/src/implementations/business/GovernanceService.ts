@@ -1,19 +1,18 @@
 import {
   Proposal,
-  EthereumAddress,
   EProposalVoteSupport,
   ProposalVoteReceipt,
   HypernetGovernorContractError,
   ERC20ContractError,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
-import { inject } from "inversify";
-
 import { IGovernanceService } from "@interfaces/business";
 import {
   IGovernanceRepository,
   IGovernanceRepositoryType,
 } from "@interfaces/data";
+import { inject } from "inversify";
+import { ResultAsync } from "neverthrow";
 
 export class GovernanceService implements IGovernanceService {
   constructor(
@@ -38,7 +37,7 @@ export class GovernanceService implements IGovernanceService {
   public createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.createProposal(
@@ -50,7 +49,7 @@ export class GovernanceService implements IGovernanceService {
   }
 
   public delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
   ): ResultAsync<void, ERC20ContractError> {
     return this.governanceRepository.delegateVote(delegateAddress, amount);
@@ -71,7 +70,7 @@ export class GovernanceService implements IGovernanceService {
 
   public getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
+    voterAddress: EthereumAccountAddress,
   ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
     return this.governanceRepository.getProposalVotesReceipt(
       proposalId,
@@ -105,13 +104,13 @@ export class GovernanceService implements IGovernanceService {
   }
 
   public getVotingPower(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, HypernetGovernorContractError> {
     return this.governanceRepository.getVotingPower(account);
   }
 
   public getHyperTokenBalance(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError> {
     return this.governanceRepository.getHyperTokenBalance(account);
   }

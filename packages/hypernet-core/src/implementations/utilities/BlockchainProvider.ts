@@ -3,9 +3,9 @@ import {
   BlockchainUnavailableError,
   InvalidParametersError,
   PrivateCredentials,
-  EthereumAddress,
   ChainId,
   GovernanceSignerUnavailableError,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
@@ -39,7 +39,6 @@ import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 // An actuall non metamask provider set up should be implemented in this class.
 @injectable()
 export class EthersBlockchainProvider implements IBlockchainProvider {
-  protected address: EthereumAddress | undefined;
   protected privateCredentialsPromiseResolve: (
     privateCredentials: PrivateCredentials,
   ) => void;
@@ -66,7 +65,6 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
     this.privateCredentialsPromiseResolve = () => null;
-    this.address = undefined;
   }
 
   /**
@@ -401,7 +399,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     config: HypernetConfig,
     useMetamask: boolean,
     tokenName: string,
-    tokenAddress: EthereumAddress,
+    tokenAddress: EthereumContractAddress,
   ): ResultAsync<void, BlockchainUnavailableError> {
     const storedTokens = this._getStoredTokenAddresses();
     if (storedTokens.includes(tokenAddress)) {

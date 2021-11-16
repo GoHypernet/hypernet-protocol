@@ -3,8 +3,8 @@ import {
   InvalidPaymentIdError,
   PaymentId,
   UUID,
+  EPaymentType,
 } from "@hypernetlabs/objects";
-import { EPaymentType } from "@hypernetlabs/objects";
 
 import { PaymentIdUtils } from "@implementations/utilities/PaymentIdUtils";
 

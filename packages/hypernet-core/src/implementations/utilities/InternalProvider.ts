@@ -1,6 +1,6 @@
 import {
   ChainId,
-  EthereumAddress,
+  EthereumAccountAddress,
   PrivateCredentials,
 } from "@hypernetlabs/objects";
 import { HypernetConfig } from "@interfaces/objects";
@@ -51,11 +51,11 @@ export class InternalProvider implements IInternalProvider {
     });
   }
 
-  public getAddress(): ResultAsync<EthereumAddress, never> {
+  public getAddress(): ResultAsync<EthereumAccountAddress, never> {
     return ResultAsync.fromSafePromise<void, never>(
       this.providerPromise,
     ).andThen(() => {
-      return okAsync(EthereumAddress(this._wallet?.address as string));
+      return okAsync(EthereumAccountAddress(this._wallet?.address as string));
     });
   }
 }

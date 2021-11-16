@@ -91,7 +91,6 @@ export function useLinks(): IState {
     });
 
     coreProxy.onPullPaymentReceived.subscribe((payment) => {
-
       const paymentsAutoAccept = getPaymentAutoAccept();
       if (
         paymentsAutoAccept == true &&
@@ -104,7 +103,6 @@ export function useLinks(): IState {
     });
 
     coreProxy.onPushPaymentReceived.subscribe((payment) => {
-
       const paymentsAutoAccept = getPaymentAutoAccept();
       if (
         paymentsAutoAccept == true &&
@@ -117,7 +115,6 @@ export function useLinks(): IState {
     });
 
     coreProxy.onPullPaymentUpdated.subscribe((payment) => {
-
       const paymentsAutoAccept = getPaymentAutoAccept();
       if (
         paymentsAutoAccept == true &&
@@ -130,7 +127,6 @@ export function useLinks(): IState {
     });
 
     coreProxy.onPushPaymentUpdated.subscribe((payment) => {
-
       const paymentsAutoAccept = getPaymentAutoAccept();
       if (
         paymentsAutoAccept == true &&

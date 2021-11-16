@@ -1,32 +1,32 @@
-import { ethers, BigNumber } from "ethers";
-
 import {
   RegistryFactoryContractError,
-  EthereumAddress,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
+import { ethers, BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 export interface IRegistryFactoryContract {
   addressToName(
-    registryAddress: EthereumAddress,
-  ): ResultAsync<EthereumAddress, RegistryFactoryContractError>;
+    registryAddress: EthereumContractAddress,
+  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError>;
   enumerableRegistries(
     index: number,
-  ): ResultAsync<EthereumAddress, RegistryFactoryContractError>;
+  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError>;
   nameToAddress(
     registryName: string,
-  ): ResultAsync<EthereumAddress, RegistryFactoryContractError>;
+  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError>;
   getNumberOfEnumerableRegistries(): ResultAsync<
     number,
     RegistryFactoryContractError
   >;
   registrationFee(): ResultAsync<BigNumber, RegistryFactoryContractError>;
-  getContractAddress(): EthereumAddress;
+  getContractAddress(): EthereumContractAddress;
   getContract(): ethers.Contract | null;
   createRegistryByToken(
     name: string,
     symbol: string,
-    registrarAddress: EthereumAddress,
+    registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError>;
 }

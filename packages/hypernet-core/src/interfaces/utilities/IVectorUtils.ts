@@ -19,6 +19,8 @@ import {
   ETransferType,
   BlockchainUnavailableError,
   ChainId,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -93,13 +95,13 @@ export interface IVectorUtils {
    *
    */
   createOfferTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
   createPullNotificationTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
@@ -119,10 +121,10 @@ export interface IVectorUtils {
    * @param UUID
    */
   createInsuranceTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
-    mediatorAddress: EthereumAddress,
+    mediatorAddress: EthereumAccountAddress,
     amount: BigNumberString,
     expiration: UnixTimestamp,
     paymentId: PaymentId,
@@ -145,11 +147,11 @@ export interface IVectorUtils {
    * @param deltaAmount
    */
   createParameterizedTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,
-    assetAddress: EthereumAddress,
+    assetAddress: EthereumContractAddress,
     paymentId: PaymentId,
     start: UnixTimestamp,
     expiration: UnixTimestamp,

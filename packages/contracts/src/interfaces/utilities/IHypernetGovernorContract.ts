@@ -1,14 +1,14 @@
-import { BigNumber, ethers } from "ethers";
-
 import {
   HypernetGovernorContractError,
-  EthereumAddress,
+  EthereumAccountAddress,
+  EthereumContractAddress,
   EProposalVoteSupport,
 } from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 export interface IHypernetGovernorContract {
-  getContractAddress(): EthereumAddress;
+  getContractAddress(): EthereumContractAddress;
   _proposalIdTracker(): ResultAsync<number, HypernetGovernorContractError>;
   _proposalMap(
     index: number,
@@ -36,7 +36,7 @@ export interface IHypernetGovernorContract {
   ): ResultAsync<void, HypernetGovernorContractError>;
   getReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
+    voterAddress: EthereumAccountAddress,
   ): ResultAsync<
     {
       hasVoted: boolean;

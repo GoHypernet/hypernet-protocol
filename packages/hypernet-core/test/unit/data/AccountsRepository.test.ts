@@ -1,16 +1,17 @@
 import {
   VectorError,
   BlockchainUnavailableError,
-  EthereumAddress,
   AssetBalance,
   Balances,
   IFullChannelState,
   BigNumberString,
   PersistenceError,
   PublicIdentifier,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data/";
+import { IBrowserNodeProvider, IBlockchainUtils } from "@interfaces/utilities";
 import {
   account,
   activeRouters,
@@ -32,7 +33,6 @@ import td from "testdouble";
 
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { IStorageUtils } from "@interfaces/data/utilities";
-import { IBrowserNodeProvider, IBlockchainUtils } from "@interfaces/utilities";
 import {
   BlockchainProviderMock,
   BrowserNodeProviderMock,
@@ -87,8 +87,8 @@ class AccountsRepositoryMocks {
       assets: [
         new AssetBalance(
           routerChannelAddress,
-          EthereumAddress(this.stateChannel?.assetIds[0]),
-          `Unknown Token (${EthereumAddress(this.stateChannel?.assetIds[0])})`,
+          EthereumContractAddress(this.stateChannel?.assetIds[0]),
+          `Unknown Token (${this.stateChannel?.assetIds[0]})`,
           "Unk",
           0,
           BigNumberString(this.stateChannel?.balances[0].amount[1]),
@@ -216,7 +216,7 @@ describe("AccountsRepository tests", () => {
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-    const assetId = EthereumAddress(
+    const assetId = EthereumContractAddress(
       accountsRepositoryMocks.stateChannel?.assetIds[0] as string,
     );
 
