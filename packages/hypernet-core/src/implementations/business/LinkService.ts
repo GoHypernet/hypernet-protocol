@@ -4,6 +4,7 @@ import {
   InvalidParametersError,
   BlockchainUnavailableError,
   InvalidPaymentError,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ILinkService } from "@interfaces/business";
 import { ILinkRepository } from "@interfaces/data";
@@ -21,6 +22,7 @@ export class LinkService implements ILinkService {
     | InvalidParametersError
     | VectorError
     | BlockchainUnavailableError
+    | InvalidPaymentIdError
   > {
     return this.linkRepository.getHypernetLinks();
   }

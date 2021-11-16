@@ -39,7 +39,10 @@ export interface IPaymentUtils {
   sortTransfers(
     _paymentId: PaymentId,
     transfers: IFullTransferState[],
-  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError>;
+  ): ResultAsync<
+    SortedTransfers,
+    InvalidPaymentError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    *
@@ -52,7 +55,11 @@ export interface IPaymentUtils {
     transfers: IFullTransferState[],
   ): ResultAsync<
     Payment[],
-    VectorError | InvalidPaymentError | InvalidParametersError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -67,7 +74,11 @@ export interface IPaymentUtils {
     transfers: IFullTransferState[],
   ): ResultAsync<
     Payment,
-    InvalidPaymentError | InvalidParametersError | VectorError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**

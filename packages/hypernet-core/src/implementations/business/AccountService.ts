@@ -119,7 +119,7 @@ export class AccountService implements IAccountService {
 
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
   > {
     return this.accountRepository.getBalances();
   }

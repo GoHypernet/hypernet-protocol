@@ -20,6 +20,7 @@ import {
   UnixTimestamp,
   Signature,
   ChainId,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -36,6 +37,7 @@ export interface IPaymentRepository {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -104,6 +106,7 @@ export interface IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -123,6 +126,7 @@ export interface IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -138,10 +142,11 @@ export interface IPaymentRepository {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | PaymentFinalizeError
-    | TransferResolutionError
     | InvalidPaymentError
     | InvalidParametersError
+    | TransferResolutionError
+    | PaymentFinalizeError
+    | InvalidPaymentIdError
   >;
 
   resolveInsurance(

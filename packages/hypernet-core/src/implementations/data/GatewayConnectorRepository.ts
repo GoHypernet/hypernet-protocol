@@ -6,6 +6,7 @@ import {
   PersistenceError,
   GatewayRegistrationInfo,
   VectorError,
+  BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import {
@@ -138,7 +139,10 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   public addAuthorizedGateway(
     gatewayUrl: GatewayUrl,
     authorizationSignature: Signature,
-  ): ResultAsync<void, PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     return this.getAuthorizedGateways().andThen((authorizedGateways) => {
       // The connector has been authorized, store it as an authorized connector
       authorizedGateways.set(gatewayUrl, authorizationSignature);
@@ -152,7 +156,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
    */
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.storageUtils
       .read<IAuthorizedGatewayEntry[]>(AuthorizedGatewaysSchema.title)
@@ -174,7 +178,10 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
 
   public deauthorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     return this.getAuthorizedGateways().andThen((authorizedGateways) => {
       authorizedGateways.delete(gatewayUrl);
 
@@ -192,7 +199,10 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
 
   protected _setAuthorizedGateways(
     authorizedGatewayMap: Map<GatewayUrl, Signature>,
-  ): ResultAsync<void, PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     const authorizedGatewayEntries = new Array<IAuthorizedGatewayEntry>();
 
     for (const [gatewayUrl, authorizationSignature] of authorizedGatewayMap) {

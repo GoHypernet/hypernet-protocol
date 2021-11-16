@@ -727,7 +727,7 @@ export class HypernetCore implements IHypernetCore {
    */
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
   > {
     return this.accountService.getBalances().mapErr((e) => {
       this.logUtils.error(e);
@@ -783,6 +783,7 @@ export class HypernetCore implements IHypernetCore {
     | TransferResolutionError
     | AcceptPaymentError
     | InsufficientBalanceError
+    | InvalidPaymentIdError
   > {
     return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
       this.logUtils.error(e);
@@ -975,6 +976,7 @@ export class HypernetCore implements IHypernetCore {
     | BlockchainUnavailableError
     | GatewayActivationError
     | VectorError
+    | GatewayValidationError
   > {
     return this.gatewayConnectorService
       .deauthorizeGateway(gatewayUrl)
@@ -986,7 +988,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.gatewayConnectorService
       .getAuthorizedGatewaysConnectorsStatus()
@@ -1000,13 +1002,14 @@ export class HypernetCore implements IHypernetCore {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayTokenInfo[]>,
-    | VectorError
     | ProxyError
     | PersistenceError
     | GatewayAuthorizationDeniedError
     | BalancesUnavailableError
     | BlockchainUnavailableError
     | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   > {
     return this.gatewayConnectorService
       .getGatewayTokenInfo(gatewayUrls)
@@ -1029,7 +1032,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.gatewayConnectorService.getAuthorizedGateways().mapErr((e) => {
       this.logUtils.error(e);
@@ -1039,7 +1042,18 @@ export class HypernetCore implements IHypernetCore {
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+  > {
     return this.gatewayConnectorService
       .closeGatewayIFrame(gatewayUrl)
       .mapErr((e) => {
@@ -1050,7 +1064,18 @@ export class HypernetCore implements IHypernetCore {
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+  > {
     return this.gatewayConnectorService
       .displayGatewayIFrame(gatewayUrl)
       .mapErr((e) => {

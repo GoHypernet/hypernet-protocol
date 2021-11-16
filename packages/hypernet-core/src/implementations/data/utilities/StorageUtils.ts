@@ -1,4 +1,8 @@
-import { PersistenceError, VectorError } from "@hypernetlabs/objects";
+import {
+  BlockchainUnavailableError,
+  PersistenceError,
+  VectorError,
+} from "@hypernetlabs/objects";
 import {
   ILogUtils,
   ILogUtilsType,
@@ -31,7 +35,10 @@ export class StorageUtils implements IStorageUtils {
   public write<T>(
     keyName: string,
     data: T,
-  ): ResultAsync<void, PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     return ResultUtils.race([
       this._writeSessionStorage(keyName, data),
       ResultUtils.backoffAndRetry(
@@ -52,7 +59,10 @@ export class StorageUtils implements IStorageUtils {
 
   public read<T>(
     keyName: string,
-  ): ResultAsync<T | null, PersistenceError | VectorError> {
+  ): ResultAsync<
+    T | null,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     // Read from session storage first.
     this.logUtils.debug(`Reading value for key ${keyName}`);
     return this._readSessionStorage<T>(keyName)
@@ -93,7 +103,10 @@ export class StorageUtils implements IStorageUtils {
 
   public remove(
     keyName: string,
-  ): ResultAsync<void, PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     return ResultUtils.race([
       this._removeSessionStorage(keyName),
       ResultUtils.backoffAndRetry(

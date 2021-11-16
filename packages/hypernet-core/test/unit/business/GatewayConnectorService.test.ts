@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { VectorError } from "@connext/vector-types";
 import {
   ActiveStateChannel,
   AuthorizedGatewaysSchema,
@@ -8,6 +7,7 @@ import {
   BigNumberString,
   BlockchainUnavailableError,
   EPaymentState,
+  EthereumAddress,
   GatewayActivationError,
   GatewayConnectorError,
   GatewayRegistrationInfo,
@@ -23,6 +23,7 @@ import {
   Signature,
   SortedTransfers,
   SupportedToken,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import {
@@ -727,7 +728,7 @@ describe("GatewayConnectorService tests", () => {
     const mocks = new GatewayConnectorServiceMocks();
 
     mocks.contextProvider.initializedContext.activeStateChannels = [];
-    const err = new VectorError("");
+    const err = new VectorError();
     td.when(
       mocks.accountRepository.createStateChannel(
         routerPublicIdentifier,

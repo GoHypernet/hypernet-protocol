@@ -6,6 +6,7 @@ import {
   InvalidPaymentError,
   PublicIdentifier,
   EthereumAddress,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -22,6 +23,7 @@ export interface ILinkRepository {
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -37,6 +39,7 @@ export interface ILinkRepository {
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
+    | InvalidPaymentIdError
   >;
 }
 

@@ -25,7 +25,7 @@ export interface IAccountsRepository {
    */
   getActiveRouters(): ResultAsync<
     PublicIdentifier[],
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   >;
 
   /**
@@ -34,7 +34,10 @@ export interface IAccountsRepository {
    */
   addActiveRouter(
     routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, PersistenceError | VectorError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Returns an array of ActiveStateChannel objects.

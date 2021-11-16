@@ -6,6 +6,7 @@ import {
   GatewayAuthorizationDeniedError,
   GatewayRegistrationInfo,
   VectorError,
+  BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -19,7 +20,10 @@ export interface IGatewayConnectorRepository {
   addAuthorizedGateway(
     gatewayUrl: GatewayUrl,
     authorizationSignature: Signature,
-  ): ResultAsync<void, PersistenceError | VectorError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Returns the activated proxy for the requested gateway URL.
@@ -45,7 +49,10 @@ export interface IGatewayConnectorRepository {
    */
   deauthorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, PersistenceError | VectorError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Returns a list of authorized gateways and the user's authorization signature for that
@@ -53,7 +60,7 @@ export interface IGatewayConnectorRepository {
    */
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   >;
 
   destroyProxy(gatewayUrl: GatewayUrl): void;

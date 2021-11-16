@@ -7,6 +7,7 @@ import {
   InvalidParametersError,
   VectorError,
   InvalidPaymentError,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ITimeUtils, ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
@@ -47,6 +48,7 @@ export class LinkRepository implements ILinkRepository {
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -88,6 +90,7 @@ export class LinkRepository implements ILinkRepository {
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
+    | InvalidPaymentIdError
   > {
     return this.browserNodeProvider
       .getBrowserNode()

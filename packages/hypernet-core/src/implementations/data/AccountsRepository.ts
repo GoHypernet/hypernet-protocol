@@ -81,7 +81,7 @@ export class AccountsRepository implements IAccountsRepository {
 
   public getActiveRouters(): ResultAsync<
     PublicIdentifier[],
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.storageUtils
       .read<PublicIdentifier[]>(this.activeRoutersKey)
@@ -95,7 +95,10 @@ export class AccountsRepository implements IAccountsRepository {
 
   public addActiveRouter(
     routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     return this.getActiveRouters().andThen((activeRouters) => {
       if (activeRouters == null) {
         activeRouters = [];

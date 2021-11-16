@@ -32,6 +32,7 @@ import {
   InsuranceState,
   ParameterizedState,
   ChainId,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
@@ -431,6 +432,7 @@ export class PaymentRepository implements IPaymentRepository {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.vectorUtils.getAllActiveTransfers(),
@@ -537,6 +539,7 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidParametersError
     | TransferResolutionError
     | PaymentFinalizeError
+    | InvalidPaymentIdError
   > {
     let browserNode: IBrowserNode;
     let existingTransfers: IFullTransferState[];
@@ -624,6 +627,7 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -711,6 +715,7 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),

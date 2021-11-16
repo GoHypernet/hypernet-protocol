@@ -171,7 +171,10 @@ export interface IHypernetCore {
    */
   getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError | ProxyError
+    | BalancesUnavailableError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
   >;
 
   /**
@@ -211,6 +214,7 @@ export interface IHypernetCore {
     | AcceptPaymentError
     | InsufficientBalanceError
     | ProxyError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -266,16 +270,17 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | GatewayActivationError
     | VectorError
+    | GatewayValidationError
   >;
 
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError | VectorError | ProxyError
+    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
   >;
 
   getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError | VectorError | ProxyError
+    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
   >;
 
   /**
@@ -287,13 +292,14 @@ export interface IHypernetCore {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayTokenInfo[]>,
-    | VectorError
     | ProxyError
     | PersistenceError
     | GatewayAuthorizationDeniedError
     | BalancesUnavailableError
     | BlockchainUnavailableError
     | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   >;
 
   /**
@@ -312,13 +318,31 @@ export interface IHypernetCore {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    GatewayConnectorError | PersistenceError | VectorError | ProxyError
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+    | ProxyError
   >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    GatewayConnectorError | PersistenceError | VectorError | ProxyError
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+    | ProxyError
   >;
 
   providePrivateCredentials(

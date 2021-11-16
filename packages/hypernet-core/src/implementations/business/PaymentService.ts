@@ -30,6 +30,7 @@ import {
   IBasicTransferResponse,
   LogicalError,
   ProxyError,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
@@ -172,6 +173,7 @@ export class PaymentService implements IPaymentService {
     | InvalidParametersError
     | BalancesUnavailableError
     | PaymentCreationError
+    | InvalidPaymentIdError
   > {
     // Pull the up the payment
     return this.paymentRepository
@@ -322,6 +324,7 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   > {
     const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -394,6 +397,7 @@ export class PaymentService implements IPaymentService {
     | TransferResolutionError
     | AcceptPaymentError
     | InsufficientBalanceError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
@@ -457,6 +461,7 @@ export class PaymentService implements IPaymentService {
               | TransferResolutionError
               | AcceptPaymentError
               | InsufficientBalanceError
+              | InvalidPaymentIdError
             >(
               new AcceptPaymentError(
                 `Gateway ${payment.gatewayUrl} is not currently active!`,
@@ -507,6 +512,7 @@ export class PaymentService implements IPaymentService {
                   | PaymentStakeError
                   | TransferResolutionError
                   | InsufficientBalanceError
+                  | InvalidPaymentIdError
                 >(
                   new InsufficientBalanceError(
                     "Not enough Hypertoken to cover provided payments.",
@@ -543,6 +549,7 @@ export class PaymentService implements IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   > {
     this.logUtils.debug(`Insurance transfer created for payment ${paymentId}`);
 
@@ -591,6 +598,7 @@ export class PaymentService implements IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   > {
     this.logUtils.debug(`Payment transfer created for payment ${paymentId}`);
 
@@ -638,6 +646,7 @@ export class PaymentService implements IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -678,6 +687,7 @@ export class PaymentService implements IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   > {
     this.logUtils.debug(`Offer transfer resolved for payment ${paymentId}`);
 
@@ -725,6 +735,7 @@ export class PaymentService implements IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   > {
     this.logUtils.debug(`Insurance transfer resolved for payment ${paymentId}`);
 
@@ -766,6 +777,7 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -805,6 +817,7 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
+    | InvalidPaymentIdError
   > {
     // Get the payment
     return this.paymentRepository
@@ -904,6 +917,7 @@ export class PaymentService implements IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds(paymentIds),
@@ -925,6 +939,7 @@ export class PaymentService implements IPaymentService {
             | TransferCreationError
             | ProxyError
             | BalancesUnavailableError
+            | InvalidPaymentIdError
           >
         >();
         for (const payment of payments.values()) {
@@ -944,6 +959,7 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
+    | InvalidPaymentIdError
   > {
     // Recover payments will work to restore a "borked" payment to a usable status.
     // First step, get the payments.
@@ -1214,6 +1230,7 @@ export class PaymentService implements IPaymentService {
     | ProxyError
     | BalancesUnavailableError
     | TransferCreationError
+    | InvalidPaymentIdError
   > {
     this.logUtils.debug(`Advancing payment ${payment.id}`);
     this.logUtils.debug(`Current payment status is ${payment.state}`);
@@ -1263,6 +1280,7 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   > {
     // Notified the UI, move on to advancing the state of the payment.
     // Payment state must be in "staked" in order to progress

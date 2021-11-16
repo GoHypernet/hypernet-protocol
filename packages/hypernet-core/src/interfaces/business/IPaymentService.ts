@@ -21,6 +21,7 @@ import {
   BigNumberString,
   Signature,
   ProxyError,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ResultAsync, Result } from "neverthrow";
 
@@ -71,6 +72,7 @@ export interface IPaymentService {
     | InvalidParametersError
     | BalancesUnavailableError
     | PaymentCreationError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -118,6 +120,7 @@ export interface IPaymentService {
     | TransferResolutionError
     | AcceptPaymentError
     | InsufficientBalanceError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -138,6 +141,7 @@ export interface IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -157,6 +161,7 @@ export interface IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /** Notify the service that an insurance payment has resolved
@@ -176,6 +181,7 @@ export interface IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -196,6 +202,7 @@ export interface IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -211,6 +218,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -231,6 +239,7 @@ export interface IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -247,6 +256,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -268,6 +278,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -292,6 +303,7 @@ export interface IPaymentService {
     | TransferCreationError
     | ProxyError
     | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -312,6 +324,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
+    | InvalidPaymentIdError
   >;
 }
 

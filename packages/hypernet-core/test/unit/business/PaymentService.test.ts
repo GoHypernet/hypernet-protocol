@@ -704,7 +704,7 @@ describe("PaymentService tests", () => {
         commonPaymentId,
         account,
       ),
-    ).thenReturn(errAsync(new Error("test error")));
+    ).thenReturn(errAsync(new InvalidPaymentError("test error")));
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
