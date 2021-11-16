@@ -409,6 +409,7 @@ const func: DeployFunction = async () => {
         nativeToken: true,
         erc20: false,
         decimals: 18,
+        logoUrl: "",
       }),
     ),
     await tokenRegistryContract.register(
@@ -422,6 +423,7 @@ const func: DeployFunction = async () => {
         nativeToken: true,
         erc20: false,
         decimals: 18,
+        logoUrl: "",
       }),
     ),
     await tokenRegistryContract.register(
@@ -435,6 +437,7 @@ const func: DeployFunction = async () => {
         nativeToken: true,
         erc20: false,
         decimals: 18,
+        logoUrl: "",
       }),
     ),
     await tokenRegistryContract.register(
@@ -448,6 +451,7 @@ const func: DeployFunction = async () => {
         nativeToken: false,
         erc20: true,
         decimals: 18,
+        logoUrl: "",
       }),
     ),
     await tokenRegistryContract.register(
@@ -461,6 +465,7 @@ const func: DeployFunction = async () => {
         nativeToken: false,
         erc20: true,
         decimals: 18,
+        logoUrl: "",
       }),
     ),
     await tokenRegistryContract.register(
@@ -474,6 +479,7 @@ const func: DeployFunction = async () => {
         nativeToken: false,
         erc20: true,
         decimals: 18,
+        logoUrl: "",
       }),
     ),
   ];

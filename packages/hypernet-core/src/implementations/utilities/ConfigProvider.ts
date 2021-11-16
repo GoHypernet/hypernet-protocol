@@ -3,17 +3,17 @@ import {
   AuthorizedGatewaysSchema,
   ChainId,
   DefinitionName,
+  EthereumContractAddress,
   ProviderUrl,
   SchemaUrl,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { HypernetChainAddresses, HypernetConfig } from "@interfaces/objects";
-import { IConfigProvider } from "@interfaces/utilities";
+import { HypernetConfig } from "@interfaces/objects";
 import { ResultAsync, okAsync } from "neverthrow";
 
+import { IConfigProvider } from "@interfaces/utilities";
+
 declare const __IFRAME_SOURCE__: string;
-declare const __CHAIN_PROVIDERS__: string;
-declare const __CHAIN_ADDRESSES__: string;
 declare const __NATS_URL__: string;
 declare const __AUTH_URL__: string;
 declare const __VALIDATOR_IFRAME_URL__: string;
@@ -22,6 +22,7 @@ declare const __DEBUG__: boolean;
 declare const __INFURA_ID__: string;
 declare const __GOVERNANCE_CHAIN_ID__: string;
 declare const __GOVERNANCE_PROVIDER_URLS__: string;
+declare const __CHAIN_REGISTRY_ADDRESS__: string;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -30,20 +31,6 @@ export class ConfigProvider implements IConfigProvider {
     if (config != null) {
       this.config = config;
       return;
-    }
-
-    // Convert the __CHAIN_PROVIDERS__ and __CHAIN_ADDRESSES__ json to
-    // proper objects
-    const chainProvidersObj = JSON.parse(__CHAIN_PROVIDERS__);
-    const chainProviders: ChainProviders = {};
-    for (const chainIdStr in chainProvidersObj) {
-      chainProviders[parseInt(chainIdStr)] = chainProvidersObj[chainIdStr];
-    }
-
-    const chainAddressesObj = JSON.parse(__CHAIN_ADDRESSES__);
-    const chainAddresses: HypernetChainAddresses = {};
-    for (const chainIdStr in chainAddressesObj) {
-      chainAddresses[parseInt(chainIdStr)] = chainAddressesObj[chainIdStr];
     }
 
     const governanceProviderUrls = JSON.parse(
@@ -55,10 +42,9 @@ export class ConfigProvider implements IConfigProvider {
       __INFURA_ID__, // infuraId
       ChainId(parseInt(__GOVERNANCE_CHAIN_ID__)), // governanceChainId
       governanceProviderUrls, // governanceEthProviderUrl
+      EthereumContractAddress(__CHAIN_REGISTRY_ADDRESS__), // chainRegistryAddress
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
-      chainProviders, // chainProviders
-      chainAddresses, // chainAddresses
       __NATS_URL__, // natsUrl
       __AUTH_URL__, // authUrl
       __VALIDATOR_IFRAME_URL__, // gatewayIframeUrl

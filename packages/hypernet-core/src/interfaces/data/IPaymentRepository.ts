@@ -127,6 +127,7 @@ export interface IPaymentRepository {
     | InvalidParametersError
     | TransferCreationError
     | InvalidPaymentIdError
+    | PaymentCreationError
   >;
 
   /**

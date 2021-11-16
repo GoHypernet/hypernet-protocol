@@ -1,5 +1,7 @@
 export * from "@implementations/data/AccountsRepository";
+export * from "@implementations/data/ChainInformationRepository";
 export * from "@implementations/data/GatewayConnectorRepository";
+export * from "@implementations/data/GatewayRegistrationRepository";
 export * from "@implementations/data/LinkRepository";
 export * from "@implementations/data/NatsMessagingRepository";
 export * from "@implementations/data/PaymentRepository";

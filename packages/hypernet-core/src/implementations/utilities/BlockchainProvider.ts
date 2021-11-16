@@ -209,6 +209,15 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     return okAsync(undefined);
   }
 
+  private _isMetamask = false;
+  public isMetamask(): boolean {
+    if (!this.initialized) {
+      throw new Error("Initialization must be completed first!");
+    }
+    return this._isMetamask;
+  }
+
+  private initialized = false;
   public initialize(): ResultAsync<
     void,
     BlockchainUnavailableError | InvalidParametersError
@@ -218,267 +227,137 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       this.initializeResult = ResultUtils.combine([
         this.contextProvider.getContext(),
         this.configProvider.getConfig(),
-      ]).andThen((vals) => {
-        const [context, config] = vals;
-        const providerOptions: IProviderOptions = {
-          walletconnect: {
-            package: WalletConnectProvider,
-            options: {
-              infuraId: config.infuraId,
-              rpc: {
-                1337: "http://localhost:8545",
-                1369: "https://eth-provider-dev.hypernetlabs.io",
-              },
-            } as IWCEthRpcConnectionOptions,
-          },
-        };
-        this.logUtils.debug("Initializing Web3Modal");
-        const web3Modal = new Web3Modal({
-          cacheProvider: true,
-          providerOptions,
-        });
+      ])
+        .andThen((vals) => {
+          const [context, config] = vals;
+          const providerOptions: IProviderOptions = {
+            walletconnect: {
+              package: WalletConnectProvider,
+              options: {
+                infuraId: config.infuraId,
+                rpc: {
+                  1337: "http://localhost:8545",
+                  1369: "https://eth-provider-dev.hypernetlabs.io",
+                },
+              } as IWCEthRpcConnectionOptions,
+            },
+          };
+          this.logUtils.debug("Initializing Web3Modal");
+          const web3Modal = new Web3Modal({
+            cacheProvider: true,
+            providerOptions,
+          });
 
-        // Open the core iframe if we don't have a cached provider
-        if (web3Modal.cachedProvider != "injected") {
-          context.onCoreIFrameDisplayRequested.next();
-        }
+          // Open the core iframe if we don't have a cached provider
+          if (web3Modal.cachedProvider != "injected") {
+            context.onCoreIFrameDisplayRequested.next();
+          }
 
-        // Display the modal
-        return ResultAsync.fromPromise(web3Modal.connect(), (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to create Web3Modal",
-            e,
-          );
-        })
-          .andThen((modalProvider) => {
-            this.logUtils.debug("Web3Modal initialized");
-            const provider = new providers.Web3Provider(modalProvider);
-
-            // Hide the iframe
-            context.onCoreIFrameCloseRequested.next();
-
-            // Return the values for use
-            this.provider = provider;
-            this.signer = provider.getSigner();
-
-            const useMetamask = web3Modal.cachedProvider == "injected";
-            const hypertokenAddress =
-              config.chainAddresses[config.governanceChainId]
-                ?.hypertokenAddress;
-            if (useMetamask && hypertokenAddress != null) {
-              return ResultUtils.combine([
-                this.addNetwork(config.governanceChainId, config),
-                this.addTokenAddress(
-                  config,
-                  useMetamask,
-                  "HyperToken",
-                  hypertokenAddress,
-                ),
-              ]).map(() => {});
-            }
-
-            return okAsync(undefined);
+          // Display the modal
+          return ResultAsync.fromPromise(web3Modal.connect(), (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to create Web3Modal",
+              e,
+            );
           })
-          .orElse((e) => {
-            this.logUtils.info(
-              "Reverting to using JsonRPCProvider as the blockchain provider, waiting for a key or mnemonic to be provided.",
-            );
+            .map((modalProvider) => {
+              this.logUtils.debug("Web3Modal initialized");
+              const provider = new providers.Web3Provider(modalProvider);
 
-            // Fire an onPrivateCredentialsRequested
-            const privateKeyPromise: Promise<PrivateCredentials> = new Promise(
-              (resolve) => {
-                this.privateCredentialsPromiseResolve = resolve;
-              },
-            );
+              // Hide the iframe
+              context.onCoreIFrameCloseRequested.next();
 
-            // Emit an event that sends a callback to the user. The user can execute the callback to provide their private key or mnemonic._getAccountPromise
-            context.onPrivateCredentialsRequested.next();
+              // Return the values for use
+              this.provider = provider;
+              this.signer = provider.getSigner();
 
-            // Wait on
-            return ResultAsync.fromSafePromise<PrivateCredentials, never>(
-              privateKeyPromise,
-            )
-              .andThen((privateCredentials) => {
-                if (privateCredentials.mnemonic != null) {
-                  this.logUtils.info(
-                    "Mnemonic provided, initializing JsonRPCprovider",
+              this._isMetamask = web3Modal.cachedProvider == "injected";
+            })
+            .orElse((e) => {
+              this.logUtils.info(
+                "Reverting to using JsonRPCProvider as the blockchain provider, waiting for a key or mnemonic to be provided.",
+              );
+
+              // Fire an onPrivateCredentialsRequested
+              const privateKeyPromise: Promise<PrivateCredentials> =
+                new Promise((resolve) => {
+                  this.privateCredentialsPromiseResolve = resolve;
+                });
+
+              // Emit an event that sends a callback to the user. The user can execute the callback to provide their private key or mnemonic._getAccountPromise
+              context.onPrivateCredentialsRequested.next();
+
+              // Wait on
+              return ResultAsync.fromSafePromise<PrivateCredentials, never>(
+                privateKeyPromise,
+              )
+                .andThen((privateCredentials) => {
+                  if (privateCredentials.mnemonic != null) {
+                    this.logUtils.info(
+                      "Mnemonic provided, initializing JsonRPCprovider",
+                    );
+                  } else if (privateCredentials.privateKey != null) {
+                    this.logUtils.info(
+                      "Private key provided, initializing JsonRPCprovider",
+                    );
+                  } else {
+                    this.logUtils.info(
+                      "Neither a mnemonic nor a private key was provided, error iminent!",
+                    );
+                  }
+
+                  // Inject a InternalProviderFactory to do this
+                  return this.internalProviderFactory.factoryInternalProvider(
+                    privateCredentials,
                   );
-                } else if (privateCredentials.privateKey != null) {
-                  this.logUtils.info(
-                    "Private key provided, initializing JsonRPCprovider",
-                  );
-                } else {
-                  this.logUtils.info(
-                    "Neither a mnemonic nor a private key was provided, error iminent!",
-                  );
+                })
+                .andThen((internalProvider) => {
+                  return internalProvider.getProvider();
+                })
+                .map((provider) => {
+                  this.provider = provider;
+                  this.signer = provider.getSigner();
+                });
+            })
+            .andThen(() => {
+              // Now we have the main provider, as given by the modal or provided externally. We now need to check if that provider is connected to
+              // the governance chain. If it is, great! We're done. If it's not, we need to create a provider using our configured ProviderUrls.
+              // In this case, a signer will not be available.
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              const mainProvider = this.provider!;
+              return ResultAsync.fromPromise(mainProvider.getNetwork(), (e) => {
+                return new BlockchainUnavailableError(
+                  "Could not get the network for the main blockchain provider!",
+                  e,
+                );
+              }).andThen((mainNetwork) => {
+                if (mainNetwork.chainId == config.governanceChainId) {
+                  // Whoo-hoo!
+                  this.governanceProvider = mainProvider;
+                  this.governanceSigner = mainProvider.getSigner();
+                  return okAsync(undefined);
                 }
 
-                // Inject a InternalProviderFactory to do this
-                return this.internalProviderFactory.factoryInternalProvider(
-                  privateCredentials,
+                // We will have to create a provider for the governance chain. We won't bother with the a signer.
+                const providers = config.governanceEthProviderUrls.map(
+                  (providerUrl) => {
+                    return new ethers.providers.JsonRpcProvider(
+                      providerUrl,
+                      config.governanceChainId,
+                    );
+                  },
                 );
-              })
-              .andThen((internalProvider) => {
-                return internalProvider.getProvider();
-              })
-              .map((provider) => {
-                this.provider = provider;
-                this.signer = provider.getSigner();
-              });
-          })
-          .andThen(() => {
-            // Now we have the main provider, as given by the modal or provided externally. We now need to check if that provider is connected to
-            // the governance chain. If it is, great! We're done. If it's not, we need to create a provider using our configured ProviderUrls.
-            // In this case, a signer will not be available.
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const mainProvider = this.provider!;
-            return ResultAsync.fromPromise(mainProvider.getNetwork(), (e) => {
-              return new BlockchainUnavailableError(
-                "Could not get the network for the main blockchain provider!",
-                e,
-              );
-            }).andThen((mainNetwork) => {
-              if (mainNetwork.chainId == config.governanceChainId) {
-                // Whoo-hoo!
-                this.governanceProvider = mainProvider;
-                this.governanceSigner = mainProvider.getSigner();
+                this.governanceProvider = new ethers.providers.FallbackProvider(
+                  providers,
+                );
                 return okAsync(undefined);
-              }
-
-              // We will have to create a provider for the governance chain. We won't bother with the a signer.
-              const providers = config.governanceEthProviderUrls.map(
-                (providerUrl) => {
-                  return new ethers.providers.JsonRpcProvider(
-                    providerUrl,
-                    config.governanceChainId,
-                  );
-                },
-              );
-              this.governanceProvider = new ethers.providers.FallbackProvider(
-                providers,
-              );
-              return okAsync(undefined);
+              });
             });
-          });
-      });
+        })
+        .map(() => {
+          this.initialized = true;
+        });
     }
     return this.initializeResult;
-  }
-
-  protected addNetwork(
-    chainId: ChainId,
-    config: HypernetConfig,
-  ): ResultAsync<void, BlockchainUnavailableError> {
-    const network = config.chainProviders[chainId];
-    const storedNetworks = this._getStoredNetworks();
-    if (network.includes("localhost") || storedNetworks.includes(network)) {
-      return okAsync(undefined);
-    }
-
-    if (this.provider == null) {
-      throw new Error("addNetwork requires the provider to be set");
-    }
-
-    return ResultAsync.fromPromise(
-      this.provider.send("wallet_addEthereumChain", [
-        {
-          chainId: `0x${chainId.toString(16)}`,
-          chainName: "Hypernet Protocol Dev Network",
-          rpcUrls: [network],
-        },
-      ]),
-      (e: unknown) => {
-        const errorMessage = "Unable to add network to provider";
-        this.logUtils.error(errorMessage);
-        return new BlockchainUnavailableError(errorMessage, e);
-      },
-    ).map(() => {
-      return this._storeNetwork(network);
-    });
-  }
-
-  protected addTokenAddress(
-    config: HypernetConfig,
-    useMetamask: boolean,
-    tokenName: string,
-    tokenAddress: EthereumContractAddress,
-  ): ResultAsync<void, BlockchainUnavailableError> {
-    const storedTokens = this._getStoredTokenAddresses();
-    if (storedTokens.includes(tokenAddress)) {
-      return okAsync(undefined);
-    }
-
-    if (this.provider == null) {
-      throw new Error("addTokenAddress requires the provider to be set");
-    }
-
-    if (useMetamask) {
-      return ResultAsync.fromPromise(
-        this.provider.send("wallet_watchAsset", {
-          type: "ERC20",
-          options: {
-            address: tokenAddress,
-            symbol: tokenName,
-            decimals: 18,
-          },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as unknown as any[]),
-        (e) => {
-          const errorMessage = "Unable to add token to provider";
-          this.logUtils.error(errorMessage);
-          return new BlockchainUnavailableError(errorMessage, e);
-        },
-      ).map(() => {
-        return this._storeTokenAddress(tokenAddress);
-      });
-    }
-
-    return ResultAsync.fromPromise(
-      this.provider.send("wallet_watchAsset", [
-        {
-          type: "ERC20",
-          options: {
-            address: tokenAddress,
-            symbol: tokenName,
-            decimals: 18,
-          },
-        },
-      ]),
-      (e) => {
-        const errorMessage = "Unable to add token to provider";
-        this.logUtils.error(errorMessage);
-        return new BlockchainUnavailableError(errorMessage, e);
-      },
-    ).map(() => {
-      return this._storeTokenAddress(tokenAddress);
-    });
-  }
-
-  private _getStoredNetworks(): string[] {
-    const networksStr = this.localStorageUtils.getItem("AddedNetworks");
-    return networksStr == null ? [] : (JSON.parse(networksStr) as string[]);
-  }
-
-  private _storeNetwork(network: string): void {
-    const addedNetworks = this._getStoredNetworks();
-    this.localStorageUtils.setItem(
-      "AddedNetworks",
-      JSON.stringify([...addedNetworks, network]),
-    );
-  }
-
-  private _getStoredTokenAddresses(): string[] {
-    const tokenAddressesStr = this.localStorageUtils.getItem("TokenAddresses");
-    return tokenAddressesStr == null
-      ? []
-      : (JSON.parse(tokenAddressesStr) as string[]);
-  }
-
-  private _storeTokenAddress(token: string): void {
-    const addedTokenAdresses = this._getStoredTokenAddresses();
-    this.localStorageUtils.setItem(
-      "TokenAddresses",
-      JSON.stringify([...addedTokenAdresses, token]),
-    );
   }
 }
