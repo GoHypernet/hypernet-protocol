@@ -145,7 +145,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           transform: translate(-50%, -50%);
         }
         #__hypernet-protocol-iframe-container__ {
-          position: absolute;
+          position: fixed;
           display: none;
           top: 0;
           left: 0;
