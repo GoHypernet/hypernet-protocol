@@ -2,8 +2,8 @@ import React from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import { TextField, Typography } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
-import { useStyles } from "@web-ui/components/GovernanceAutocomplete/GovernanceAutocomplete.style";
 import { GovernanceCheckbox } from "@web-ui/components/GovernanceCheckbox";
+import { useStyles } from "@web-ui/components/GovernanceAutocomplete/GovernanceAutocomplete.style";
 
 export interface IGovernanceAutocompleteOption {
   label: string;
