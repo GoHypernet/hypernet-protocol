@@ -1,8 +1,8 @@
-import { Typography } from "@material-ui/core";
+import { GovernanceTypography } from "@hypernetlabs/web-ui";
 
 export default {
-  title: "Layout/Typography",
-  component: Typography,
+  title: "Layout/GovernanceTypography",
+  component: GovernanceTypography,
 };
 
 const Template = (args) => (
@@ -14,15 +14,33 @@ const Template = (args) => (
       justifyContent: "space-evenly",
     }}
   >
-    <Typography variant="h1">Something lorem ipsum lolo !</Typography>
-    <Typography variant="h2">Something lorem ipsum lolo !</Typography>
-    <Typography variant="h3">Something lorem ipsum lolo !</Typography>
-    <Typography variant="h4">Something lorem ipsum lolo !</Typography>
-    <Typography variant="h5">Something lorem ipsum lolo !</Typography>
-    <Typography variant="h6">Something lorem ipsum lolo !</Typography>
-    <Typography variant="subtitle1">Somethin g lorem ipsum lolo !</Typography>
-    <Typography variant="body1">Something lorem ipsum lolo !</Typography>
-    <Typography variant="body2">Something lorem ipsum lolo !</Typography>
+    <GovernanceTypography variant="h1">
+      Something lorem ipsum lolo !
+    </GovernanceTypography>
+    <GovernanceTypography variant="h2">
+      Something lorem ipsum lolo !
+    </GovernanceTypography>
+    <GovernanceTypography variant="h3">
+      Something lorem ipsum lolo !
+    </GovernanceTypography>
+    <GovernanceTypography variant="h4">
+      Something lorem ipsum lolo !
+    </GovernanceTypography>
+    <GovernanceTypography variant="h5">
+      Something lorem ipsum lolo !
+    </GovernanceTypography>
+    <GovernanceTypography variant="h6">
+      Something lorem ipsum lolo !
+    </GovernanceTypography>
+    <GovernanceTypography variant="subtitle1">
+      Somethin g lorem ipsum lolo !
+    </GovernanceTypography>
+    <GovernanceTypography variant="body1">
+      Something lorem ipsum lolo !
+    </GovernanceTypography>
+    <GovernanceTypography variant="body2">
+      Something lorem ipsum lolo !
+    </GovernanceTypography>
   </div>
 );
 
