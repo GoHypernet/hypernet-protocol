@@ -8,9 +8,8 @@ contract MerkleModule {
 
     string public name; 
 
-    constructor(bytes32 merkleroot, string memory _name)
+    constructor(string memory _name)
     {
-
         name = _name; 
     }
 
@@ -37,7 +36,7 @@ contract MerkleModule {
     }
 
     function _verify(bytes32 leaf, bytes32[] memory proof, bytes32 root)
-    internal view returns (bool)
+    internal pure returns (bool)
     {
         return MerkleProof.verify(proof, root, leaf);
     }

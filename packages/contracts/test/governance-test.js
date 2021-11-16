@@ -90,7 +90,7 @@ describe("Governance", function () {
         expect(await hypernetgovernor.hasVoted(proposalID, addr1.address)).to.equal(false);
 
         // fast forward 20 blocks to get past proposal deadline
-        hre.timeAndMine.mine(20);
+        hre.timeAndMine.mine(290);
 
         // check state of proposal, should be 4 for passed
         expect(await hypernetgovernor.state(proposalID)).to.equal(4);

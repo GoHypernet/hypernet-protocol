@@ -1,6 +1,13 @@
 const { BN, expectRevert } = require("@openzeppelin/test-helpers");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
+const { MerkleTree } = require('merkletreejs');
+const keccak256 = require('keccak256');
+const tokens = require('./tokens.json');
+
+function hashToken(tokenId, account, label, registrationData) {
+    return Buffer.from(ethers.utils.solidityKeccak256(['address', 'string', 'string', 'uint256'], [account, label, registrationData, tokenId]).slice(2), 'hex')
+}
 
 describe("Registry with No Enumeration", function () {
     let hypertoken;
@@ -194,13 +201,13 @@ describe("Registry with No Enumeration", function () {
 
         // only owner or approved address can update
         await expectRevert(
-            registry.connect(addr2).updateRegistration(1, "new URI"),
+            registry.connect(addr2).updateRegistration(1, "000h0000000000030000000061672e7d"),
             "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
         );
 
-        tx = await registry.updateRegistration(1, "new URI");
+        tx = await registry.updateRegistration(1, "00000h00000000030000000061672e7d");
         tx.wait();
-        expect(await registry.tokenURI(1)).to.equal("new URI");
+        expect(await registry.tokenURI(1)).to.equal("00000h00000000030000000061672e7d");
 
         // can't update label if updating is disabled
         await expectRevert(
@@ -432,5 +439,75 @@ describe("Registry with No Enumeration", function () {
       lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
       "ERC721: token already minted",
     )
+  });
+
+  it("Test merkle drop.", async function () {
+    // first deploy the LazyMintModule
+    const MerkleModule = await ethers.getContractFactory("MerkleModule");
+    merklemodule = await MerkleModule.deploy("Merkle Drop");
+    await merklemodule.deployTransaction.wait();
+
+    // then get the merkle tree
+    merkleTree = new MerkleTree(Object.entries(tokens).map(([tokenId, tokenData]) => hashToken(tokenId, tokenData.account, tokenData.label, tokenData.registrationData)), keccak256, { sortPairs: true });
+
+    // update the merkle root in the registry and freeze it
+    let tx = await registry.setMerkleRoot(merkleTree.getHexRoot(), true);
+    tx.wait(); 
+    
+    // once froze, merkle Root cannot be updated
+    await expectRevert(
+        registry.setMerkleRoot(merkleTree.getHexRoot(), true),
+        "NonFungibleRegistry: merkleRoot has been frozen.",
+    )
+
+    // then add the merkle module as a REGISTRAR
+    const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+    tx = await registry.grantRole(REGISTRAR_ROLE, merklemodule.address);
+    tx.wait();
+
+    // mint the tokens from the tokens.json file
+    for (const [tokenId, tokenData] of Object.entries(tokens)) {
+        /**
+         * Create merkle proof (anyone with knowledge of the merkle tree)
+         */
+        const proof = merkleTree.getHexProof(hashToken(tokenId, tokenData.account, tokenData.label, tokenData.registrationData));
+        /**
+         * Redeems token using merkle proof (anyone with the proof can call)
+         */
+        await expect(merklemodule.redeem(tokenData.account, tokenData.label, tokenData.registrationData, tokenId, proof, registry.address))
+          .to.emit(registry, 'Transfer')
+          .withArgs(ethers.constants.AddressZero, tokenData.account, tokenId);
+    }
+
+    // replay attack is prevented by tokenId uniqueness 
+    for (const [tokenId, tokenData] of Object.entries(tokens)) {
+        /**
+         * Create merkle proof (anyone with knowledge of the merkle tree)
+         */
+        const proof = merkleTree.getHexProof(hashToken(tokenId, tokenData.account, tokenData.label, tokenData.registrationData));
+        /**
+         * Redeems token using merkle proof (anyone with the proof can call)
+         */
+        await expectRevert(
+            merklemodule.redeem(tokenData.account, tokenData.label, tokenData.registrationData, tokenId, proof, registry.address),
+            "ERC721: token already minted"
+            )
+    }
+
+    // frontrun/mint manipulation attack is prevented 
+    for (const [tokenId, tokenData] of Object.entries(tokens)) {
+        /**
+         * Create merkle proof (anyone with knowledge of the merkle tree)
+         */
+        const proof = merkleTree.getHexProof(hashToken(tokenId, tokenData.account, tokenData.label, tokenData.registrationData));
+        /**
+         * Redeems token using merkle proof (anyone with the proof can call)
+         */
+        await expectRevert(
+            merklemodule.redeem(tokenData.account, "dummy", tokenData.registrationData, tokenId, proof, registry.address),
+            "MerkleModule: Invalid merkle proof"
+            )
+    }
+
   });
 });

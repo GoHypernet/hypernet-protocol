@@ -75,6 +75,13 @@ contract NonFungibleRegistryUpgradeable is
     // an NFI
     address public primaryRegistry;
 
+    // optional merkle proof that can be used with the external merkle drop module
+    bytes32 public merkleRoot; 
+
+    // flag used in conjunction with merkleRoot, if true then the merkleRoot can no 
+    // longer be updated by the REGISTRAR_ROLE
+    bool public frozen;
+
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
@@ -84,6 +91,8 @@ contract NonFungibleRegistryUpgradeable is
     event LabelUpdated(uint256 tokenId, string label);
 
     event StorageUpdated(uint256 tokenId, bytes32 registrationData);
+
+    event MerkleRootUpdated(bytes32 merkleRoot, bool frozen); 
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -114,6 +123,7 @@ contract NonFungibleRegistryUpgradeable is
         burnAddress = _admin;
         burnFee = 500; // basis points
         primaryRegistry = address(0);
+        frozen = false;
     }
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
@@ -139,6 +149,18 @@ contract NonFungibleRegistryUpgradeable is
             "NonFungibleRegistry: burnFee must be le 10000.");
             burnFee = params._burnFee[0]; 
         }
+    }
+
+    /// @notice setMerkleRoot enable or disable requirement for pre-registration
+    /// @dev only callable by the DEFAULT_ADMIN_ROLE
+    /// @param _merkleRoot address to set as the primary registry
+    function setMerkleRoot(bytes32 _merkleRoot, bool freeze) external {
+        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
+        require(!frozen, "NonFungibleRegistry: merkleRoot has been frozen."); 
+
+        merkleRoot = _merkleRoot;
+        frozen = freeze; 
+        emit MerkleRootUpdated(merkleRoot, frozen);
     }
 
     /// @notice setPrimaryRegistry enable or disable requirement for pre-registration
