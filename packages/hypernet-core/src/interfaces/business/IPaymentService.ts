@@ -161,6 +161,7 @@ export interface IPaymentService {
     | AcceptPaymentError
     | InsufficientBalanceError
     | InvalidPaymentIdError
+    | PaymentCreationError
   >;
 
   /**

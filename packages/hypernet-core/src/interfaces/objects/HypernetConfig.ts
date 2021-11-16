@@ -1,4 +1,3 @@
-import { ChainProviders } from "@connext/vector-types";
 import {
   ChainId,
   DefinitionName,
@@ -13,10 +12,9 @@ export class HypernetConfig {
     public infuraId: string,
     public governanceChainId: ChainId,
     public governanceEthProviderUrls: ProviderUrl[],
+    public chainRegistryAddress: EthereumContractAddress,
     public hypernetProtocolDomain: string,
     public defaultPaymentExpiryLength: number,
-    public chainProviders: ChainProviders,
-    public chainAddresses: HypernetChainAddresses,
     public natsUrl: string,
     public authUrl: string,
     public gatewayIframeUrl: string,
@@ -26,24 +24,5 @@ export class HypernetConfig {
     public controlClaimSubject: string,
     public requireOnline: boolean,
     public debug: boolean,
-  ) {}
-}
-
-export class HypernetChainAddresses {
-  [chainId: number]: HypernetContractAddresses | null;
-}
-
-export class HypernetContractAddresses {
-  constructor(
-    public channelFactoryAddress: EthereumContractAddress,
-    public transferRegistryAddress: EthereumContractAddress,
-    public hypertokenAddress: EthereumContractAddress,
-    public messageTransferAddress: EthereumContractAddress,
-    public insuranceTransferAddress: EthereumContractAddress,
-    public parameterizedTransferAddress: EthereumContractAddress,
-    public gatewayRegistryAddress: EthereumContractAddress,
-    public liquidityRegistryAddress: EthereumContractAddress,
-    public hypernetGovernorAddress: EthereumContractAddress,
-    public registryFactoryAddress: EthereumContractAddress,
   ) {}
 }

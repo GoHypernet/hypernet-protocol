@@ -8,9 +8,9 @@ import {
   BlockchainUnavailableError,
   BigNumberString,
   HexString,
-  ChainId,
   EthereumAccountAddress,
   EthereumContractAddress,
+  ChainInformation,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -38,7 +38,7 @@ export interface IBlockchainUtils {
    * @returns An array consisting of the ABI for the EncodedCancel resolver and the encoded hexstring itself.
    */
   getMessageTransferEncodedCancelData(
-    chainId: ChainId,
+    chainInfo: ChainInformation,
   ): ResultAsync<[string, HexString], BlockchainUnavailableError>;
 
   /**
@@ -46,7 +46,7 @@ export interface IBlockchainUtils {
    * @returns An array consisting of the ABI for the EncodedCancel resolver and the encoded hexstring itself.
    */
   getInsuranceTransferEncodedCancelData(
-    chainId: ChainId,
+    chainInfo: ChainInformation,
   ): ResultAsync<[string, HexString], BlockchainUnavailableError>;
 
   /**
@@ -54,13 +54,8 @@ export interface IBlockchainUtils {
    * @returns An array consisting of the ABI for the EncodedCancel resolver and the encoded hexstring itself.
    */
   getParameterizedTransferEncodedCancelData(
-    chainId: ChainId,
+    chainInfo: ChainInformation,
   ): ResultAsync<[string, HexString], BlockchainUnavailableError>;
-
-  getERC721Entry<T>(
-    contractAddress: EthereumContractAddress,
-    key: string,
-  ): ResultAsync<T, BlockchainUnavailableError>;
 }
 
 export const IBlockchainUtilsType = Symbol.for("IBlockchainUtils");

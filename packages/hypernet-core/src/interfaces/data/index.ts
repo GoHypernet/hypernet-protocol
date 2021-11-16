@@ -1,4 +1,5 @@
 export * from "@interfaces/data/IAccountsRepository";
+export * from "@interfaces/data/IChainInformationRepository";
 export * from "@interfaces/data/ILinkRepository";
 export * from "@interfaces/data/IGatewayConnectorRepository";
 export * from "@interfaces/data/IGatewayRegistrationRepository";

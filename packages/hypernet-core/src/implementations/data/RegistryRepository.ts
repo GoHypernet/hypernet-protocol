@@ -21,18 +21,24 @@ import {
   RegistryParams,
   RegistryPermissionError,
   EthereumAccountAddress,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IRegistryRepository } from "@interfaces/data";
+import { BigNumber, ethers } from "ethers";
+import { injectable, inject } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
+import {
+  IChainInformationUtils,
+  IChainInformationUtilsType,
+} from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
   IConfigProvider,
   IConfigProviderType,
 } from "@interfaces/utilities";
-import { BigNumber, ethers } from "ethers";
-import { injectable, inject } from "inversify";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 @injectable()
 export class RegistryRepository implements IRegistryRepository {
@@ -45,6 +51,8 @@ export class RegistryRepository implements IRegistryRepository {
     {} as NonFungibleRegistryEnumerableUpgradeableContract;
 
   constructor(
+    @inject(IChainInformationUtilsType)
+    protected chainInformationUtils: IChainInformationUtils,
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
@@ -328,7 +336,9 @@ export class RegistryRepository implements IRegistryRepository {
                 > = this.nonFungibleRegistryContract
                   .tokenByIndex(index)
                   .andThen((tokenId) => {
-                    return this.getRegistryEntryByTokenId(tokenId);
+                    return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+                      tokenId,
+                    );
                   });
 
                 registryEntryListResult.push(
@@ -365,7 +375,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryEntryDetailByTokenId(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
     RegistryFactoryContractError | NonFungibleRegistryContractError
@@ -380,13 +390,15 @@ export class RegistryRepository implements IRegistryRepository {
             registryAddress,
           );
 
-        return this.getRegistryEntryByTokenId(tokenId);
+        return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+          tokenId,
+        );
       });
   }
 
   public updateRegistryEntryTokenURI(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
@@ -431,14 +443,16 @@ export class RegistryRepository implements IRegistryRepository {
       return this.nonFungibleRegistryContract
         .updateRegistration(tokenId, registrationData)
         .andThen(() => {
-          return this.getRegistryEntryByTokenId(tokenId);
+          return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+            tokenId,
+          );
         });
     });
   }
 
   public updateRegistryEntryLabel(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
     RegistryEntry,
@@ -483,14 +497,16 @@ export class RegistryRepository implements IRegistryRepository {
       return this.nonFungibleRegistryContract
         .updateLabel(tokenId, label)
         .andThen(() => {
-          return this.getRegistryEntryByTokenId(tokenId);
+          return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+            tokenId,
+          );
         });
     });
   }
 
   public transferRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
@@ -532,21 +548,23 @@ export class RegistryRepository implements IRegistryRepository {
           registry.address,
         );
 
-      return this.getRegistryEntryByTokenId(tokenId).andThen(
-        (registryEntry) => {
+      return this.nonFungibleRegistryContract
+        .getRegistryEntryByTokenId(tokenId)
+        .andThen((registryEntry) => {
           return this.nonFungibleRegistryContract
             .transferFrom(tokenId, registryEntry.owner, transferToAddress)
             .andThen(() => {
-              return this.getRegistryEntryByTokenId(tokenId);
+              return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+                tokenId,
+              );
             });
-        },
-      );
+        });
     });
   }
 
   public burnRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1015,19 +1033,6 @@ export class RegistryRepository implements IRegistryRepository {
       });
   }
 
-  private getRegistryEntryByTokenId(
-    tokenId: number,
-  ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
-    return ResultUtils.combine([
-      this.nonFungibleRegistryContract.reverseRegistryMap(tokenId),
-      this.nonFungibleRegistryContract.ownerOf(tokenId),
-      this.nonFungibleRegistryContract.tokenURI(tokenId),
-    ]).andThen((vals) => {
-      const [label, owner, tokenURI] = vals;
-      return okAsync(new RegistryEntry(label, tokenId, owner, tokenURI, null));
-    });
-  }
-
   private getRegistryContractRegistrarRoleAddresses(): ResultAsync<
     EthereumAccountAddress[],
     NonFungibleRegistryContractError
@@ -1092,15 +1097,14 @@ export class RegistryRepository implements IRegistryRepository {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).map(([config, provider]) => {
+      this.chainInformationUtils.getGovernanceChainInformation(),
+    ]).map(([config, provider, governanceChainInfo]) => {
       this.provider = provider;
 
-      const registryFactoryAddress =
-        config.chainAddresses[config.governanceChainId]?.registryFactoryAddress;
-      const hypertokenAddress =
-        config.chainAddresses[config.governanceChainId]?.hypertokenAddress;
-
-      if (registryFactoryAddress == null || hypertokenAddress == null) {
+      if (
+        governanceChainInfo.registryFactoryAddress == null ||
+        governanceChainInfo.hypertokenAddress == null
+      ) {
         throw new Error(
           `Chain addresses for the governance chain ${config.governanceChainId} are missing!`,
         );
@@ -1108,9 +1112,12 @@ export class RegistryRepository implements IRegistryRepository {
 
       this.registryFactoryContract = new RegistryFactoryContract(
         provider,
-        registryFactoryAddress,
+        governanceChainInfo.registryFactoryAddress,
       );
-      this.hypertokenContract = new ERC20Contract(provider, hypertokenAddress);
+      this.hypertokenContract = new ERC20Contract(
+        provider,
+        governanceChainInfo.hypertokenAddress,
+      );
     });
   }
 
@@ -1123,15 +1130,14 @@ export class RegistryRepository implements IRegistryRepository {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceSigner(),
-    ]).map(([config, signer]) => {
+      this.chainInformationUtils.getGovernanceChainInformation(),
+    ]).map(([config, signer, governanceChainInfo]) => {
       this.signer = signer;
 
-      const registryFactoryAddress =
-        config.chainAddresses[config.governanceChainId]?.registryFactoryAddress;
-      const hypertokenAddress =
-        config.chainAddresses[config.governanceChainId]?.hypertokenAddress;
-
-      if (registryFactoryAddress == null || hypertokenAddress == null) {
+      if (
+        governanceChainInfo.registryFactoryAddress == null ||
+        governanceChainInfo.hypertokenAddress == null
+      ) {
         throw new Error(
           `Chain addresses for the governance chain ${config.governanceChainId} are missing!`,
         );
@@ -1139,9 +1145,12 @@ export class RegistryRepository implements IRegistryRepository {
 
       this.registryFactoryContract = new RegistryFactoryContract(
         signer,
-        registryFactoryAddress,
+        governanceChainInfo.registryFactoryAddress,
       );
-      this.hypertokenContract = new ERC20Contract(signer, hypertokenAddress);
+      this.hypertokenContract = new ERC20Contract(
+        signer,
+        governanceChainInfo.hypertokenAddress,
+      );
     });
   }
 }

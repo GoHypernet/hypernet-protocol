@@ -1,8 +1,7 @@
+import { ChainId } from "@objects/ChainId";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 
-import { ChainId } from "@objects/ChainId";
-
-export class SupportedToken {
+export class TokenInformation {
   public constructor(
     public name: string,
     public symbol: string,
@@ -11,5 +10,6 @@ export class SupportedToken {
     public nativeToken: boolean,
     public erc20: boolean,
     public decimals: number,
+    public logoUrl: string,
   ) {}
 }

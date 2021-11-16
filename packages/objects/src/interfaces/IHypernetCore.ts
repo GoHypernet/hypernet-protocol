@@ -50,6 +50,7 @@ import { PushPayment } from "@objects/PushPayment";
 import { Registry } from "@objects/Registry";
 import { RegistryEntry } from "@objects/RegistryEntry";
 import { RegistryParams } from "@objects/RegistryParams";
+import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
 import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 
@@ -413,7 +414,7 @@ export interface IHypernetCore {
 
   getRegistryEntryDetailByTokenId(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
@@ -433,7 +434,7 @@ export interface IHypernetCore {
 
   updateRegistryEntryTokenURI(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
@@ -446,7 +447,7 @@ export interface IHypernetCore {
 
   updateRegistryEntryLabel(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
     RegistryEntry,
@@ -518,7 +519,7 @@ export interface IHypernetCore {
 
   transferRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
@@ -531,7 +532,7 @@ export interface IHypernetCore {
 
   burnRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError

@@ -1,3 +1,4 @@
+import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/contracts";
 import {
   BlockchainUnavailableError,
   GatewayUrl,
@@ -15,11 +16,18 @@ import {
   ILogUtilsType,
 } from "@hypernetlabs/utils";
 import { IGatewayRegistrationRepository } from "@interfaces/data";
+import { injectable, inject } from "inversify";
+import { errAsync, ResultAsync } from "neverthrow";
+
+import {
+  IChainInformationUtils,
+  IChainInformationUtilsType,
+  IStorageUtils,
+  IStorageUtilsType,
+} from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
-  IBlockchainUtils,
-  IBlockchainUtilsType,
   IConfigProvider,
   IConfigProviderType,
   IContextProvider,
@@ -27,10 +35,6 @@ import {
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
-import { injectable, inject } from "inversify";
-import { errAsync, ResultAsync } from "neverthrow";
-
-import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IGatewayConnectorProxyFactory,
   IGatewayConnectorProxyFactoryType,
@@ -53,9 +57,10 @@ export class GatewayRegistrationRepository
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
+    @inject(IChainInformationUtilsType)
+    protected chainInformationUtils: IChainInformationUtils,
     @inject(IGatewayConnectorProxyFactoryType)
     protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory,
-    @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
     this.gatewayRegistrationInfoMap = new Map();
@@ -67,13 +72,14 @@ export class GatewayRegistrationRepository
     Map<GatewayUrl, GatewayRegistrationInfo>,
     BlockchainUnavailableError
   > {
-    return this.configProvider.getConfig().andThen((config) => {
-      const gatewayRegistryAddress =
-        config.chainAddresses[config.governanceChainId]?.gatewayRegistryAddress;
-      if (gatewayRegistryAddress == null) {
+    return ResultUtils.combine([
+      this.chainInformationUtils.getGovernanceChainInformation(),
+      this.blockchainProvider.getGovernanceProvider(),
+    ]).andThen(([governanceChainInfo, provider]) => {
+      if (governanceChainInfo.gatewayRegistryAddress == null) {
         return errAsync(
           new BlockchainUnavailableError(
-            `Unable to getGatewayRegistrationInfo for chain ${config.governanceChainId}. No configuration info for that chain is available`,
+            `Unable to getGatewayRegistrationInfo for chain ${governanceChainInfo.name}. Governance contracts are not deployed on this chain.`,
           ),
         );
       }
@@ -82,6 +88,12 @@ export class GatewayRegistrationRepository
       const newGatewayResults = new Array<
         ResultAsync<void, BlockchainUnavailableError>
       >();
+
+      const gatewayRegistryContract =
+        new NonFungibleRegistryEnumerableUpgradeableContract(
+          provider,
+          governanceChainInfo.gatewayRegistryAddress,
+        );
 
       // Check for entries that are already cached.
       for (const gatewayUrl of gatewayUrls) {
@@ -92,17 +104,24 @@ export class GatewayRegistrationRepository
         } else {
           // We need to get the registration info that's not in the cache
           newGatewayResults.push(
-            this.blockchainUtils
-              .getERC721Entry<IGatewayRegistryEntry>(
-                gatewayRegistryAddress,
-                gatewayUrl,
-              )
+            gatewayRegistryContract
+              .getRegistryEntryByLabel(gatewayUrl)
               .map((registryEntry) => {
                 // Convert the registry entry
+                if (registryEntry.tokenURI == null) {
+                  throw new Error(
+                    `Gateway registry entry for ${gatewayUrl} is invalid, it does not have a tokenURI`,
+                  );
+                }
+
+                const parsedEntry = JSON.parse(
+                  registryEntry.tokenURI,
+                ) as IGatewayRegistryEntry;
+
                 const registrationInfo = new GatewayRegistrationInfo(
                   gatewayUrl,
-                  registryEntry.address,
-                  registryEntry.signature,
+                  parsedEntry.address,
+                  parsedEntry.signature,
                 );
 
                 // Set it into the return info

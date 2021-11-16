@@ -53,6 +53,10 @@ import {
   HypernetContext,
   PaymentInitiationResponse,
 } from "@interfaces/objects";
+import { BigNumber } from "ethers";
+import { injectable, inject } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import {
   IBlockchainUtils,
   IBlockchainUtilsType,
@@ -65,9 +69,6 @@ import {
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
-import { BigNumber } from "ethers";
-import { injectable, inject } from "inversify";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
@@ -580,6 +581,7 @@ export class PaymentService implements IPaymentService {
     | AcceptPaymentError
     | InsufficientBalanceError
     | InvalidPaymentIdError
+    | PaymentCreationError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
@@ -684,7 +686,7 @@ export class PaymentService implements IPaymentService {
                 )
               ) {
                 return errAsync<
-                  Payment,
+                  PushPayment | PullPayment,
                   | TransferCreationError
                   | VectorError
                   | BalancesUnavailableError
@@ -1179,10 +1181,10 @@ export class PaymentService implements IPaymentService {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     GetPaymentResponse,
-    | BlockchainUnavailableError
-    | VectorError
-    | InvalidPaymentError
     | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
     | InvalidPaymentIdError
   > {
     return this.paymentRepository

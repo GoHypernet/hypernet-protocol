@@ -6,12 +6,12 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 export class RouterDetails {
   constructor(
     public publicIdentifier: PublicIdentifier,
-    public supportedTokens: SupportedToken[],
+    public supportedTokens: RouterSupportedToken[],
     public allowedGateways: GatewayUrl[],
   ) {}
 }
 
-export class SupportedToken {
+export class RouterSupportedToken {
   constructor(
     public chainId: ChainId,
     public tokenAddress: EthereumContractAddress,

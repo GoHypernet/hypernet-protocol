@@ -52,6 +52,7 @@ import {
   PaymentFinalizeError,
   EthereumAccountAddress,
   EthereumContractAddress,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -91,21 +92,9 @@ import {
   LinkRepository,
   GovernanceRepository,
   RegistryRepository,
+  GatewayRegistrationRepository,
+  ChainInformationRepository,
 } from "@implementations/data";
-import {
-  BrowserNodeProvider,
-  ConfigProvider,
-  ContextProvider,
-  EthersBlockchainProvider,
-  LinkUtils,
-  PaymentUtils,
-  PaymentIdUtils,
-  VectorUtils,
-  EthersBlockchainUtils,
-  CeramicUtils,
-  MessagingProvider,
-  BlockchainTimeUtils,
-} from "@implementations/utilities";
 import {
   IBlockchainListener,
   IGatewayConnectorListener,
@@ -132,8 +121,39 @@ import {
   IGatewayRegistrationRepository,
   IGovernanceRepository,
   IRegistryRepository,
+  IChainInformationRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
+import { ok, Result, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
+import {
+  ChainInformationUtils,
+  StorageUtils,
+} from "@implementations/data/utilities";
+import {
+  BrowserNodeProvider,
+  ConfigProvider,
+  ContextProvider,
+  EthersBlockchainProvider,
+  LinkUtils,
+  PaymentUtils,
+  PaymentIdUtils,
+  VectorUtils,
+  EthersBlockchainUtils,
+  CeramicUtils,
+  MessagingProvider,
+  BlockchainTimeUtils,
+} from "@implementations/utilities";
+import {
+  GatewayConnectorProxyFactory,
+  BrowserNodeFactory,
+  InternalProviderFactory,
+} from "@implementations/utilities/factory";
+import {
+  IChainInformationUtils,
+  IStorageUtils,
+} from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -148,18 +168,6 @@ import {
   IMessagingProvider,
   IBlockchainTimeUtils,
 } from "@interfaces/utilities";
-import { ok, Result, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
-
-import { GatewayRegistrationRepository } from "./data/GatewayRegistrationRepository";
-
-import { StorageUtils } from "@implementations/data/utilities";
-import {
-  GatewayConnectorProxyFactory,
-  BrowserNodeFactory,
-  InternalProviderFactory,
-} from "@implementations/utilities/factory";
-import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
@@ -211,19 +219,22 @@ export class HypernetCore implements IHypernetCore {
   protected blockchainProvider: IBlockchainProvider;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
-  protected browserNodeProvider: IBrowserNodeProvider;
-  protected vectorUtils: IVectorUtils;
-  protected paymentUtils: IPaymentUtils;
   protected linkUtils: ILinkUtils;
   protected paymentIdUtils: IPaymentIdUtils;
   protected logUtils: ILogUtils;
   protected ajaxUtils: IAjaxUtils;
   protected blockchainUtils: IBlockchainUtils;
   protected localStorageUtils: ILocalStorageUtils;
-  protected ceramicUtils: ICeramicUtils;
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
   protected messagingProvider: IMessagingProvider;
+  protected chainInformationUtils: IChainInformationUtils;
+
+  // Dependent on the browser node
+  protected browserNodeProvider: IBrowserNodeProvider;
+  protected vectorUtils: IVectorUtils;
+  protected paymentUtils: IPaymentUtils;
+  protected ceramicUtils: ICeramicUtils;
 
   // Factories
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
@@ -240,6 +251,7 @@ export class HypernetCore implements IHypernetCore {
   protected routerRepository: IRouterRepository;
   protected governanceRepository: IGovernanceRepository;
   protected registryRepository: IRegistryRepository;
+  protected chainInformationRepository: IChainInformationRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
@@ -336,7 +348,11 @@ export class HypernetCore implements IHypernetCore {
     });
 
     this.logUtils = new LogUtils();
+    this.timeUtils = new TimeUtils();
     this.localStorageUtils = new LocalStorageUtils();
+    this.ajaxUtils = new AxiosAjaxUtils();
+    this.validationUtils = new ValidationUtils();
+
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
       this.onControlYielded,
@@ -375,17 +391,10 @@ export class HypernetCore implements IHypernetCore {
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
-
+    this.internalProviderFactory = new InternalProviderFactory();
     this.gatewayConnectorProxyFactory = new GatewayConnectorProxyFactory(
       this.configProvider,
       this.contextProvider,
-    );
-    this.browserNodeFactory = new BrowserNodeFactory(
-      this.configProvider,
-      this.logUtils,
-    );
-    this.internalProviderFactory = new InternalProviderFactory(
-      this.configProvider,
     );
 
     this.blockchainProvider = new EthersBlockchainProvider(
@@ -395,7 +404,19 @@ export class HypernetCore implements IHypernetCore {
       this.internalProviderFactory,
       this.logUtils,
     );
-    this.timeUtils = new TimeUtils();
+
+    this.chainInformationUtils = new ChainInformationUtils(
+      this.blockchainProvider,
+      this.configProvider,
+      this.logUtils,
+    );
+
+    this.browserNodeFactory = new BrowserNodeFactory(
+      this.chainInformationUtils,
+      this.configProvider,
+      this.logUtils,
+    );
+
     this.blockchainTimeUtils = new BlockchainTimeUtils(
       this.blockchainProvider,
       this.timeUtils,
@@ -446,8 +467,7 @@ export class HypernetCore implements IHypernetCore {
       this.browserNodeProvider,
       this.timeUtils,
     );
-    this.ajaxUtils = new AxiosAjaxUtils();
-    this.validationUtils = new ValidationUtils();
+
     this.messagingProvider = new MessagingProvider(
       this.configProvider,
       this.contextProvider,
@@ -466,6 +486,7 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.paymentRepository = new PaymentRepository(
+      this.chainInformationUtils,
       this.browserNodeProvider,
       this.vectorUtils,
       this.configProvider,
@@ -498,8 +519,8 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.vectorUtils,
       this.storageUtils,
+      this.chainInformationUtils,
       this.gatewayConnectorProxyFactory,
-      this.blockchainUtils,
       this.logUtils,
     );
     this.messagingRepository = new NatsMessagingRepository(
@@ -508,21 +529,28 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.routerRepository = new RouterRepository(
+      this.chainInformationUtils,
       this.blockchainUtils,
       this.blockchainProvider,
       this.configProvider,
     );
 
     this.governanceRepository = new GovernanceRepository(
+      this.chainInformationUtils,
       this.blockchainProvider,
       this.configProvider,
       this.logUtils,
     );
 
     this.registryRepository = new RegistryRepository(
+      this.chainInformationUtils,
       this.blockchainProvider,
       this.configProvider,
       this.logUtils,
+    );
+
+    this.chainInformationRepository = new ChainInformationRepository(
+      this.chainInformationUtils,
     );
 
     this.paymentService = new PaymentService(
@@ -533,6 +561,7 @@ export class HypernetCore implements IHypernetCore {
       this.paymentRepository,
       this.gatewayConnectorRepository,
       this.gatewayRegistrationRepository,
+      this.chainInformationRepository,
       this.vectorUtils,
       this.paymentUtils,
       this.blockchainUtils,
@@ -840,6 +869,9 @@ export class HypernetCore implements IHypernetCore {
     let context: HypernetContext;
     this._initializeResult = this.blockchainProvider
       .initialize()
+      .andThen(() => {
+        return this.chainInformationUtils.initialize();
+      })
       .andThen(() => {
         this.logUtils.debug("Getting Ethereum accounts");
         return ResultUtils.combine([
@@ -1196,7 +1228,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getRegistryEntryDetailByTokenId(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
     RegistryFactoryContractError | NonFungibleRegistryContractError
@@ -1227,7 +1259,7 @@ export class HypernetCore implements IHypernetCore {
 
   public updateRegistryEntryTokenURI(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
@@ -1245,7 +1277,7 @@ export class HypernetCore implements IHypernetCore {
 
   public updateRegistryEntryLabel(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
     RegistryEntry,
@@ -1329,7 +1361,7 @@ export class HypernetCore implements IHypernetCore {
 
   public transferRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
@@ -1347,7 +1379,7 @@ export class HypernetCore implements IHypernetCore {
 
   public burnRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError

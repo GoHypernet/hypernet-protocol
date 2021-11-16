@@ -8,7 +8,7 @@ import {
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
-import { IHypernetGovernorContract } from "@contracts/interfaces/utilities";
+import { IHypernetGovernorContract } from "@contracts/IHypernetGovernorContract";
 
 export class HypernetGovernorContract implements IHypernetGovernorContract {
   protected contract: ethers.Contract | null = null;

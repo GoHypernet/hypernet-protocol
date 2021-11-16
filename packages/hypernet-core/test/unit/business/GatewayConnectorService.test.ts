@@ -23,6 +23,7 @@ import {
   SortedTransfers,
   SupportedToken,
   VectorError,
+  RouterSupportedToken,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import {
@@ -31,10 +32,6 @@ import {
   IGatewayRegistrationRepository,
   IRouterRepository,
 } from "@interfaces/data";
-import {
-  IBlockchainUtils,
-  IGatewayConnectorProxy,
-} from "@interfaces/utilities";
 import {
   gatewayUrl,
   account,
@@ -66,6 +63,10 @@ import td from "testdouble";
 
 import { GatewayConnectorService } from "@implementations/business/GatewayConnectorService";
 import { IGatewayConnectorService } from "@interfaces/business/IGatewayConnectorService";
+import {
+  IBlockchainUtils,
+  IGatewayConnectorProxy,
+} from "@interfaces/utilities";
 import {
   BlockchainProviderMock,
   ConfigProviderMock,
@@ -267,7 +268,7 @@ class GatewayConnectorServiceMocks {
             routerPublicIdentifier,
             new RouterDetails(
               routerPublicIdentifier,
-              [new SupportedToken(chainId, hyperTokenAddress)],
+              [new RouterSupportedToken(chainId, hyperTokenAddress)],
               [gatewayUrl, gatewayUrl2],
             ),
           ],
@@ -653,7 +654,7 @@ describe("GatewayConnectorService tests", () => {
             routerPublicIdentifier,
             new RouterDetails(
               routerPublicIdentifier,
-              [new SupportedToken(chainId, hyperTokenAddress)],
+              [new RouterSupportedToken(chainId, hyperTokenAddress)],
               [gatewayUrl2],
             ),
           ],

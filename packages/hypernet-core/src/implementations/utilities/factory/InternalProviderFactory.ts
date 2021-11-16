@@ -1,18 +1,22 @@
 import {
   PrivateCredentials,
   InvalidParametersError,
+  ChainInformation,
 } from "@hypernetlabs/objects";
-import { errAsync, ResultAsync } from "neverthrow";
+import { injectable } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { InternalProvider } from "@implementations/utilities";
-import { IInternalProvider, IConfigProvider } from "@interfaces/utilities";
+import { IInternalProvider } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 
+@injectable()
 export class InternalProviderFactory implements IInternalProviderFactory {
-  constructor(protected configProvider: IConfigProvider) {}
+  constructor() {}
 
   public factoryInternalProvider(
     privateCredentials: PrivateCredentials,
+    governanceChainInfo: ChainInformation,
   ): ResultAsync<IInternalProvider, InvalidParametersError> {
     if (!privateCredentials.privateKey && !privateCredentials.mnemonic) {
       return errAsync(
@@ -21,12 +25,9 @@ export class InternalProviderFactory implements IInternalProviderFactory {
         ),
       );
     }
-    return this.configProvider.getConfig().map((config) => {
-      return new InternalProvider(
-        config.governanceChainId,
-        config,
-        privateCredentials,
-      );
-    });
+
+    return okAsync(
+      new InternalProvider(governanceChainInfo, privateCredentials),
+    );
   }
 }
