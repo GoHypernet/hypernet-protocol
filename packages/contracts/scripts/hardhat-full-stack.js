@@ -84,22 +84,22 @@ async function main() {
   const enumerableregistry = await EnumerableRegistry.deploy();
   const enumerable_registry_reciept = await enumerableregistry.deployTransaction.wait();
   console.log("Enumerable Registry Beacon Address:", enumerableregistry.address);
-  console.log("Factory Gas Fee:", enumerable_registry_reciept.gasUsed.toString());
+  console.log("Enumerable Registry Gas Fee:", enumerable_registry_reciept.gasUsed.toString());
 
   // deploy registry contract
   const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
   const registry = await Registry.deploy();
   const registry_reciept = await registry.deployTransaction.wait();
   console.log("Registry Beacon Address:", registry.address);
-  console.log("Factory Gas Fee:", registry_reciept.gasUsed.toString());
+  console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString());
 
   // deploy factory contract
   const FactoryRegistry = await ethers.getContractFactory("UpgradeableRegistryFactory");
   const factoryregistry = await FactoryRegistry.deploy(
             timelock.address, 
-            ["HyperId"], 
-            ["HID"], 
-            [timelock.address], 
+            ["Hypernet Profiles", "Gateways", "Liquidity Providers"], 
+            ["HPs", "Gs", "LPs"], 
+            [timelock.address, timelock.address, timelock.address], 
             enumerableregistry.address, 
             registry.address, 
             hypertoken.address,

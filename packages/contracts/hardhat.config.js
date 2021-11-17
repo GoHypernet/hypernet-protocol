@@ -9,7 +9,9 @@ require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 require("hardhat-tracer");
 
-require("./tasks/hypernet-tasks.js");
+require("./tasks/general-tasks.js");
+require("./tasks/governance-tasks.js");
+require("./tasks/registry-tasks.js");
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -35,7 +37,7 @@ module.exports = {
       },
     },
     dev: {
-      url: 'http://127.0.0.1:8545'
+      url: 'http://127.0.0.1:8569'
     },
     DevNet: {
       url: "https://eth-provider-dev.hypernetlabs.io",

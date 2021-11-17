@@ -1,7 +1,7 @@
-// const HT = require("../artifacts/contracts/governance/Hypertoken.sol/Hypertoken.json");
-// const HG = require("../artifacts/contracts/governance/HypernetGovernor.sol/HypernetGovernor.json");
-// const RF = require("../artifacts/contracts/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
-// const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
+const HT = require("../artifacts/contracts/governance/Hypertoken.sol/Hypertoken.json");
+const HG = require("../artifacts/contracts/governance/HypernetGovernor.sol/HypernetGovernor.json");
+const RF = require("../artifacts/contracts/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
+const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
 
 // define some dynamic imports
 const hAddress = function(){
@@ -40,14 +40,14 @@ const factoryAddress = function(){
     }
 }
 
-// module.exports = {
-//   HT,
-//   HG,
-//   RF,
-//   NFR,
-//   govAddress,
-//   timelockAddress,
-//   factoryAddress,
-//   hAddress
-// };
+module.exports = {
+  HT,
+  HG,
+  RF,
+  NFR,
+  govAddress,
+  timelockAddress,
+  factoryAddress,
+  hAddress
+};
 

@@ -101,12 +101,21 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         numModules = modules.length;
     }
 
-    /// @notice addModule setter function for configuring which ERC20 token is burned when adding new apps
+    /// @notice addModule setter function for adding an approved module to the protocol
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _module address of goverance approved module contract
     function addModule(address _module) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to add module");
         modules.push(_module);
+    }
+
+    /// @notice removeModule function for removing a module from the protocol's supported list
+    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
+    /// @param _index index module contract to remove from module list
+    function removeModule(uint _index) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to add module");
+        require(_index < modules.length, "RegistryFactory: index must be less than module list length");
+        delete modules[_index];
     }
 
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
