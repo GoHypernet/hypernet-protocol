@@ -48,3 +48,7 @@ export * from "./GovernanceTabs";
 export * from "./GovernanceEmptyState";
 export * from "./GovernanceChip";
 export * from "./GovernanceSwitch";
+export * from "./GovernanceTypography";
+export * from "./GovernanceAutocomplete";
+export * from "./GovernanceRadio";
+export * from "./GovernanceCheckbox";

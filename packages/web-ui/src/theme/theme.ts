@@ -18,7 +18,7 @@ export const colors = {
   GRAY100: "#FAFBFC",
   GRAY150: "#F4F5F7",
   GRAY200: "#DFE1E6",
-  GRAY300: "#C1C7D0",
+  GRAY300: "#EBECF0",
   GRAY400: "#7A869A",
   GRAY500: "#42526E",
   GRAY600: "#172B4D",
@@ -37,7 +37,7 @@ export const colors = {
 
   BLUE100: "#DEEBFF",
   BLUE200: "#B3D4FF",
-  BLUE400: "#4C9AFF",
+  BLUE400: "#0052CC",
   BLUE700: "#0747A6",
 
   RED100: "#FFEBE6",
@@ -152,6 +152,19 @@ const MuiButton = {
   },
 };
 
+const MuiCheckbox = {
+  root: {
+    "&&:hover": {
+      backgroundColor: "transparent",
+    },
+  },
+  colorPrimary: {
+    "&$checked": {
+      color: colors.BLUE400,
+    },
+  },
+};
+
 const MuiButtonBase = {
   disableRipple: true,
   root: {
@@ -165,6 +178,24 @@ const MuiTextField = {
     background: colors.GRAY100,
     border: `2px solid ${colors.GRAY200}`,
     borderRadius: 3,
+  },
+};
+
+const MuiAutocomplete = {
+  option: {
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+};
+
+const MuiChip = {
+  root: {
+    borderRadius: 3,
+  },
+  deleteIcon: {
+    margin: "0 4px 0 0",
+    width: 16,
+    height: 16,
   },
 };
 
@@ -244,6 +275,9 @@ export const lightTheme = createTheme({
     MuiButton,
     MuiTextField,
     MuiLinearProgress,
+    MuiAutocomplete,
+    MuiChip,
+    MuiCheckbox,
   },
   props: {
     MuiButtonBase,
