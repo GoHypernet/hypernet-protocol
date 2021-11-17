@@ -80,6 +80,13 @@ npx hardhat test --logs
 npx hardhat compile
 ```
 
+## Environment Variables
+
+`ETH_PROVIDER_URL`: URL that hardhat will use for its RPC provider, if blank then localhost is assumed. 
+
+`MNEMONIC`: Mnemonic phrase that hardhat will use to generate accounts for use in scripts and tasks. If blank the 
+default is `test test test test test test test test test test test junk`.  
+
 ## Hardhat network - full contract deployment
 
 First, start a hardhat node (edit [hardhat.config.js](https://hardhat.org/config/#networks-configuration) 
