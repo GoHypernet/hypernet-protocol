@@ -133,7 +133,9 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
   public getGovernanceSigner(): ResultAsync<
     ethers.providers.JsonRpcSigner,
-    GovernanceSignerUnavailableError
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
   > {
     if (this.initializeResult == null) {
       throw new Error(

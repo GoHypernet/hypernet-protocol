@@ -19,6 +19,7 @@ import {
   UnixTimestamp,
   Signature,
   ChainId,
+  InvalidPaymentIdError,
   EthereumContractAddress,
   EthereumAccountAddress,
 } from "@hypernetlabs/objects";
@@ -37,6 +38,7 @@ export interface IPaymentRepository {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -54,7 +56,14 @@ export interface IPaymentRepository {
     paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError>;
+  ): ResultAsync<
+    PushPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 
   createPullPayment(
     routerPublicIdentifier: PublicIdentifier,
@@ -68,7 +77,14 @@ export interface IPaymentRepository {
     paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError>;
+  ): ResultAsync<
+    PullPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 
   createPullRecord(
     paymentId: PaymentId,
@@ -91,6 +107,7 @@ export interface IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -110,6 +127,7 @@ export interface IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -125,10 +143,11 @@ export interface IPaymentRepository {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | PaymentFinalizeError
-    | TransferResolutionError
     | InvalidPaymentError
     | InvalidParametersError
+    | TransferResolutionError
+    | PaymentFinalizeError
+    | InvalidPaymentIdError
   >;
 
   resolveInsurance(
@@ -142,7 +161,12 @@ export interface IPaymentRepository {
    * This method will resolve the offer transfer for a payment
    * @param payment the payment to finalize
    */
-  finalizePayment(payment: Payment): ResultAsync<void, TransferResolutionError>;
+  finalizePayment(
+    payment: Payment,
+  ): ResultAsync<
+    void,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  >;
 
   addReservedPaymentId(
     requestId: string,

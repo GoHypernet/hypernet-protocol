@@ -105,7 +105,7 @@ export class GovernanceService implements IGovernanceService {
 
   public getVotingPower(
     account: EthereumAccountAddress,
-  ): ResultAsync<number, HypernetGovernorContractError> {
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
     return this.governanceRepository.getVotingPower(account);
   }
 

@@ -8,6 +8,8 @@ import {
   ERegistrySortOrder,
   NonFungibleRegistryContractError,
   RegistryFactoryContractError,
+  GovernanceSignerUnavailableError,
+  ERC20ContractError,
   EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { IRegistryService } from "@interfaces/business";
@@ -131,7 +133,7 @@ export class RegistryService implements IRegistryService {
 
   public getNumberOfRegistries(): ResultAsync<
     number,
-    RegistryFactoryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryRepository.getNumberOfRegistries();
   }
@@ -155,10 +157,11 @@ export class RegistryService implements IRegistryService {
     data: string,
   ): ResultAsync<
     void,
-    | NonFungibleRegistryContractError
     | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ERC20ContractError
   > {
     return this.registryRepository.createRegistryEntry(
       registryName,
@@ -204,7 +207,7 @@ export class RegistryService implements IRegistryService {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError> {
+  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
     return this.registryRepository.createRegistryByToken(
       name,
       symbol,

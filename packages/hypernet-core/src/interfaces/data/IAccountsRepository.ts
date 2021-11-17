@@ -23,7 +23,10 @@ export interface IAccountsRepository {
    * Returns an array of public identifiers of routers we have a connection with
    * ActiveRouters are held in HNP persistence, but can be recovered via evaluation of the blockchain and subgraphs.
    */
-  getActiveRouters(): ResultAsync<PublicIdentifier[], PersistenceError>;
+  getActiveRouters(): ResultAsync<
+    PublicIdentifier[],
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Stores an active router into the hypernet core persistence layer
@@ -31,7 +34,10 @@ export interface IAccountsRepository {
    */
   addActiveRouter(
     routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, PersistenceError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Returns an array of ActiveStateChannel objects.
@@ -52,7 +58,10 @@ export interface IAccountsRepository {
   createStateChannel(
     routerPublicIdentifier: PublicIdentifier,
     chainId: ChainId,
-  ): ResultAsync<EthereumContractAddress, PersistenceError | VectorError>;
+  ): ResultAsync<
+    EthereumContractAddress,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   getPublicIdentifier(): ResultAsync<
     PublicIdentifier,
@@ -62,11 +71,17 @@ export interface IAccountsRepository {
     EthereumAccountAddress[],
     BlockchainUnavailableError
   >;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
+  >;
   getBalanceByAsset(
     channelAddress: EthereumContractAddress,
     assetAddress: EthereumContractAddress,
-  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError>;
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
+  >;
   depositFunds(
     channelAddress: EthereumContractAddress,
     assetAddress: EthereumContractAddress,

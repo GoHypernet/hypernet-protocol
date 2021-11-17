@@ -19,6 +19,8 @@ import {
   UnixTimestamp,
   BigNumberString,
   Signature,
+  ProxyError,
+  InvalidPaymentIdError,
   EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { PaymentInitiationResponse } from "@interfaces/objects";
@@ -37,7 +39,10 @@ export interface IPaymentService {
     requiredStake: BigNumberString,
     paymentToken: EthereumContractAddress,
     metadata: string | null,
-  ): ResultAsync<PaymentInitiationResponse, PaymentCreationError>;
+  ): ResultAsync<
+    PaymentInitiationResponse,
+    PaymentCreationError | InvalidParametersError
+  >;
 
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
@@ -64,7 +69,14 @@ export interface IPaymentService {
     gatewayUrl: GatewayUrl,
     gatewaySignature: Signature,
     metadata: string | null,
-  ): ResultAsync<Payment, PaymentCreationError>;
+  ): ResultAsync<
+    Payment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 
   /**
    * Record a pull against a Pull Payment's authorized funds. Doesn't actually
@@ -79,7 +91,9 @@ export interface IPaymentService {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | BalancesUnavailableError
     | PaymentCreationError
+    | InvalidPaymentIdError
   >;
 
   initiateSendFunds(
@@ -92,7 +106,10 @@ export interface IPaymentService {
     requiredStake: BigNumberString,
     paymentToken: EthereumContractAddress,
     metadata: string | null,
-  ): ResultAsync<PaymentInitiationResponse, PaymentCreationError>;
+  ): ResultAsync<
+    PaymentInitiationResponse,
+    PaymentCreationError | InvalidParametersError
+  >;
   /**
    * Send funds to another person.
    * @param counterPartyAccount the account we wish to send funds to
@@ -114,7 +131,14 @@ export interface IPaymentService {
     gatewayUrl: GatewayUrl,
     gatewaySignature: Signature,
     metadata: string | null,
-  ): ResultAsync<Payment, PaymentCreationError>;
+  ): ResultAsync<
+    Payment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 
   /**
    * Called by the person on the receiving end of a push payment,
@@ -124,14 +148,17 @@ export interface IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | InsufficientBalanceError
-    | AcceptPaymentError
-    | BalancesUnavailableError
-    | GatewayValidationError
+    | TransferCreationError
     | VectorError
+    | BalancesUnavailableError
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | PaymentStakeError
+    | TransferResolutionError
+    | AcceptPaymentError
+    | InsufficientBalanceError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -150,6 +177,9 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -167,6 +197,9 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /** Notify the service that an insurance payment has resolved
@@ -184,6 +217,9 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -202,6 +238,9 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -216,6 +255,8 @@ export interface IPaymentService {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -234,6 +275,9 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -249,6 +293,8 @@ export interface IPaymentService {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -270,6 +316,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -292,6 +339,9 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -312,6 +362,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
+    | InvalidPaymentIdError
   >;
 }
 

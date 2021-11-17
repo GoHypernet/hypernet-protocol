@@ -42,6 +42,14 @@ import {
   RegistryFactoryContractError,
   HypernetGovernorContractError,
   ERC20ContractError,
+  InvalidPaymentError,
+  GatewayActivationError,
+  InvalidPaymentIdError,
+  GovernanceSignerUnavailableError,
+  TransferResolutionError,
+  TransferCreationError,
+  PaymentStakeError,
+  PaymentFinalizeError,
   EthereumAccountAddress,
   EthereumContractAddress,
 } from "@hypernetlabs/objects";
@@ -258,6 +266,15 @@ export class HypernetCore implements IHypernetCore {
     | GatewayConnectorError
     | GatewayValidationError
     | ProxyError
+    | PersistenceError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | InvalidPaymentIdError
+    | GovernanceSignerUnavailableError
+    | TransferResolutionError
+    | TransferCreationError
+    | PaymentStakeError
+    | PaymentFinalizeError
   > | null;
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
@@ -710,7 +727,10 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Returns the current balances for this instance of Hypernet Core.
    */
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError> {
+  public getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
+  > {
     return this.accountService.getBalances().mapErr((e) => {
       this.logUtils.error(e);
       return e;
@@ -753,7 +773,20 @@ export class HypernetCore implements IHypernetCore {
    */
   public acceptOffer(
     paymentId: PaymentId,
-  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
+  ): ResultAsync<
+    Payment,
+    | TransferCreationError
+    | VectorError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | PaymentStakeError
+    | TransferResolutionError
+    | AcceptPaymentError
+    | InsufficientBalanceError
+    | InvalidPaymentIdError
+  > {
     return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
       this.logUtils.error(e);
       return e;
@@ -797,7 +830,16 @@ export class HypernetCore implements IHypernetCore {
     | RouterChannelUnknownError
     | GatewayConnectorError
     | GatewayValidationError
+    | PersistenceError
     | ProxyError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | InvalidPaymentIdError
+    | GovernanceSignerUnavailableError
+    | TransferResolutionError
+    | TransferCreationError
+    | PaymentStakeError
+    | PaymentFinalizeError
   > {
     if (this._initializeResult != null) {
       return this._initializeResult;
@@ -908,7 +950,15 @@ export class HypernetCore implements IHypernetCore {
 
   public authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayValidationError> {
+  ): ResultAsync<
+    void,
+    | PersistenceError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayAuthorizationDeniedError
+    | GatewayActivationError
+    | VectorError
+  > {
     return this.gatewayConnectorService
       .authorizeGateway(gatewayUrl)
       .mapErr((e) => {
@@ -921,7 +971,14 @@ export class HypernetCore implements IHypernetCore {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   > {
     return this.gatewayConnectorService
       .deauthorizeGateway(gatewayUrl)
@@ -933,7 +990,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.gatewayConnectorService
       .getAuthorizedGatewaysConnectorsStatus()
@@ -947,7 +1004,14 @@ export class HypernetCore implements IHypernetCore {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayTokenInfo[]>,
-    ProxyError | PersistenceError | GatewayAuthorizationDeniedError
+    | ProxyError
+    | PersistenceError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   > {
     return this.gatewayConnectorService
       .getGatewayTokenInfo(gatewayUrls)
@@ -970,7 +1034,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.gatewayConnectorService.getAuthorizedGateways().mapErr((e) => {
       this.logUtils.error(e);
@@ -980,7 +1044,18 @@ export class HypernetCore implements IHypernetCore {
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+  > {
     return this.gatewayConnectorService
       .closeGatewayIFrame(gatewayUrl)
       .mapErr((e) => {
@@ -991,7 +1066,18 @@ export class HypernetCore implements IHypernetCore {
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+  > {
     return this.gatewayConnectorService
       .displayGatewayIFrame(gatewayUrl)
       .mapErr((e) => {
@@ -1201,7 +1287,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getVotingPower(
     account: EthereumAccountAddress,
-  ): ResultAsync<number, HypernetGovernorContractError> {
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
     return this.governanceService.getVotingPower(account);
   }
 
@@ -1213,7 +1299,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getNumberOfRegistries(): ResultAsync<
     number,
-    RegistryFactoryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryService.getNumberOfRegistries();
   }
@@ -1241,6 +1327,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ERC20ContractError
   > {
     return this.registryService.createRegistryEntry(
       registryName,
@@ -1286,7 +1373,7 @@ export class HypernetCore implements IHypernetCore {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError> {
+  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
     return this.registryService.createRegistryByToken(
       name,
       symbol,

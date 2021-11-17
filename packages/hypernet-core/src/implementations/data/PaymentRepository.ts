@@ -31,6 +31,7 @@ import {
   InsuranceState,
   ParameterizedState,
   ChainId,
+  InvalidPaymentIdError,
   EthereumContractAddress,
   EthereumAccountAddress,
 } from "@hypernetlabs/objects";
@@ -87,9 +88,12 @@ export class PaymentRepository implements IPaymentRepository {
             });
 
             if (stateChannel == null) {
-              return errAsync<IBasicTransferResponse, PaymentCreationError>(
-                new PaymentCreationError(`State channel does not exist`),
-              );
+              return errAsync<
+                IBasicTransferResponse,
+                | InvalidParametersError
+                | TransferCreationError
+                | PaymentCreationError
+              >(new PaymentCreationError(`State channel does not exist`));
             }
             const message: IHypernetPullPaymentDetails = {
               messageType: EMessageTransferType.PULLPAYMENT,
@@ -138,7 +142,14 @@ export class PaymentRepository implements IPaymentRepository {
     paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError> {
+  ): ResultAsync<
+    PullPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
@@ -234,7 +245,14 @@ export class PaymentRepository implements IPaymentRepository {
     paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError> {
+  ): ResultAsync<
+    PushPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
@@ -342,7 +360,7 @@ export class PaymentRepository implements IPaymentRepository {
               transferType: ETransferType;
               transfer: IFullTransferState;
             },
-            VectorError
+            VectorError | BlockchainUnavailableError
           >
         >();
         for (const transfer of transfers) {
@@ -411,6 +429,7 @@ export class PaymentRepository implements IPaymentRepository {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.vectorUtils.getAllActiveTransfers(),
@@ -434,7 +453,7 @@ export class PaymentRepository implements IPaymentRepository {
               transferType: ETransferType;
               transfer: IFullTransferState;
             },
-            VectorError | Error
+            VectorError | BlockchainUnavailableError
           >
         >();
         for (const transfer of transfers) {
@@ -513,10 +532,11 @@ export class PaymentRepository implements IPaymentRepository {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | PaymentFinalizeError
-    | TransferResolutionError
     | InvalidPaymentError
     | InvalidParametersError
+    | TransferResolutionError
+    | PaymentFinalizeError
+    | InvalidPaymentIdError
   > {
     let browserNode: IBrowserNode;
     let existingTransfers: IFullTransferState[];
@@ -540,7 +560,15 @@ export class PaymentRepository implements IPaymentRepository {
           .getPaymentState(sortedTransfers)
           .andThen((paymentState) => {
             if (paymentState != EPaymentState.Approved) {
-              return errAsync(
+              return errAsync<
+                IBasicTransferResponse,
+                | VectorError
+                | BlockchainUnavailableError
+                | InvalidPaymentError
+                | InvalidParametersError
+                | TransferResolutionError
+                | PaymentFinalizeError
+              >(
                 new PaymentFinalizeError(
                   `Cannot finalize payment ${paymentId}, no parameterized transfer exists for this!`,
                 ),
@@ -596,6 +624,7 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -625,7 +654,16 @@ export class PaymentRepository implements IPaymentRepository {
           });
 
           if (stateChannel == null) {
-            return errAsync<IBasicTransferResponse, PaymentStakeError>(
+            return errAsync<
+              IBasicTransferResponse,
+              | BlockchainUnavailableError
+              | PaymentStakeError
+              | TransferResolutionError
+              | VectorError
+              | InvalidPaymentError
+              | InvalidParametersError
+              | TransferCreationError
+            >(
               new PaymentStakeError(
                 `State channel for payment ${payment.id} does not exist`,
               ),
@@ -674,6 +712,7 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -784,7 +823,10 @@ export class PaymentRepository implements IPaymentRepository {
 
   public finalizePayment(
     payment: Payment,
-  ): ResultAsync<void, TransferResolutionError> {
+  ): ResultAsync<
+    void,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  > {
     return this.vectorUtils
       .resolveMessageTransfer(
         TransferId(payment.details.offerTransfers[0].transferId),

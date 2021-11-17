@@ -56,7 +56,10 @@ export interface IAccountService {
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError
   >;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
+  >;
   providePrivateCredentials(
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError>;

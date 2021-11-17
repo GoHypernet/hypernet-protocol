@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { VectorError } from "@connext/vector-types";
 import {
   ActiveStateChannel,
   Balances,
@@ -7,6 +6,7 @@ import {
   BigNumberString,
   BlockchainUnavailableError,
   EPaymentState,
+  EthereumAddress,
   GatewayActivationError,
   GatewayConnectorError,
   GatewayRegistrationInfo,
@@ -22,6 +22,7 @@ import {
   Signature,
   SortedTransfers,
   SupportedToken,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import {
@@ -535,7 +536,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks();
 
-    const err = new PersistenceError();
+    const err = new GatewayActivationError();
     td.when(
       mocks.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
     ).thenReturn(errAsync(err));
@@ -590,7 +591,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks();
 
-    const err = new PersistenceError();
+    const err = new BlockchainUnavailableError();
     td.when(
       mocks.routerRepository.getRouterDetails([routerPublicIdentifier]),
     ).thenReturn(errAsync(err));
@@ -724,7 +725,7 @@ describe("GatewayConnectorService tests", () => {
     const mocks = new GatewayConnectorServiceMocks();
 
     mocks.contextProvider.initializedContext.activeStateChannels = [];
-    const err = new VectorError("");
+    const err = new VectorError();
     td.when(
       mocks.accountRepository.createStateChannel(
         routerPublicIdentifier,

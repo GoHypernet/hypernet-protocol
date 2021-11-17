@@ -308,13 +308,13 @@ export class GatewayConnectorProxy
 
   public notifyPublicIdentifier(
     public_identifier: PublicIdentifier,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyPublicIdentifier", public_identifier);
   }
 
   public notifyBalancesReceived(
     balances: Balances,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyBalancesReceived", balances);
   }
 

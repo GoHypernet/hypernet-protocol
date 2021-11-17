@@ -60,7 +60,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(
           EthereumContractAddress(result.getValue().channelAddress),
@@ -93,7 +93,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue() as IWithdrawResponse);
       }
@@ -108,7 +108,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue() as IFullTransferState);
       }
@@ -122,7 +122,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue() as IFullTransferState[]);
       }
@@ -137,7 +137,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -156,7 +156,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -171,7 +171,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(
           UtilityMessageSignature(result.getValue().signedMessage),
@@ -197,7 +197,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -232,7 +232,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -248,7 +248,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(
           result.getValue().map((val) => {
@@ -267,7 +267,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -283,7 +283,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -306,7 +306,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }

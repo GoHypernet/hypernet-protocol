@@ -25,6 +25,14 @@ import {
   NonFungibleRegistryContractError,
   HypernetGovernorContractError,
   ERC20ContractError,
+  InvalidPaymentError,
+  GatewayActivationError,
+  InvalidPaymentIdError,
+  GovernanceSignerUnavailableError,
+  TransferResolutionError,
+  TransferCreationError,
+  PaymentStakeError,
+  PaymentFinalizeError,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -65,7 +73,7 @@ export interface IHypernetCore {
    */
   getEthereumAccounts(): ResultAsync<
     EthereumAccountAddress[],
-    BlockchainUnavailableError
+    BlockchainUnavailableError | ProxyError
   >;
 
   /**
@@ -81,7 +89,16 @@ export interface IHypernetCore {
     | RouterChannelUnknownError
     | GatewayConnectorError
     | GatewayValidationError
+    | PersistenceError
     | ProxyError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | InvalidPaymentIdError
+    | GovernanceSignerUnavailableError
+    | TransferResolutionError
+    | TransferCreationError
+    | PaymentStakeError
+    | PaymentFinalizeError
   >;
 
   /**
@@ -97,7 +114,7 @@ export interface IHypernetCore {
    */
   getActiveStateChannels(): ResultAsync<
     ActiveStateChannel[],
-    VectorError | BlockchainUnavailableError | PersistenceError
+    VectorError | BlockchainUnavailableError | PersistenceError | ProxyError
   >;
 
   /**
@@ -113,7 +130,7 @@ export interface IHypernetCore {
     chainId: ChainId,
   ): ResultAsync<
     ActiveStateChannel,
-    VectorError | BlockchainUnavailableError | PersistenceError
+    VectorError | BlockchainUnavailableError | PersistenceError | ProxyError
   >;
 
   /**
@@ -153,7 +170,13 @@ export interface IHypernetCore {
    * Returns the balance account, including funds within
    * the general channel, and funds locked inside transfers within the channel.
    */
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError>;
+  getBalances(): ResultAsync<
+    Balances,
+    | BalancesUnavailableError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+  >;
 
   /**
    * Returns all Hypernet Ledger for the user
@@ -179,7 +202,21 @@ export interface IHypernetCore {
    */
   acceptOffer(
     paymentId: PaymentId,
-  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError>;
+  ): ResultAsync<
+    Payment,
+    | TransferCreationError
+    | VectorError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | PaymentStakeError
+    | TransferResolutionError
+    | AcceptPaymentError
+    | InsufficientBalanceError
+    | ProxyError
+    | InvalidPaymentIdError
+  >;
 
   /**
    * Pulls an incremental amount from an authorized payment
@@ -207,27 +244,44 @@ export interface IHypernetCore {
    */
   mintTestToken(
     amount: BigNumberString,
-  ): ResultAsync<void, BlockchainUnavailableError>;
+  ): ResultAsync<void, BlockchainUnavailableError | ProxyError>;
 
   authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayValidationError>;
+  ): ResultAsync<
+    void,
+    | PersistenceError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayAuthorizationDeniedError
+    | GatewayActivationError
+    | VectorError
+    | ProxyError
+    | GatewayValidationError
+  >;
 
   deauthorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   >;
 
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
   >;
 
   getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
   >;
 
   /**
@@ -239,7 +293,14 @@ export interface IHypernetCore {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayTokenInfo[]>,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | ProxyError
+    | PersistenceError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   >;
 
   /**
@@ -249,50 +310,80 @@ export interface IHypernetCore {
    */
   getGatewayRegistrationInfo(
     filter?: GatewayRegistrationFilter,
-  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError>;
+  ): ResultAsync<
+    GatewayRegistrationInfo[],
+    PersistenceError | VectorError | ProxyError
+  >;
 
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+    | ProxyError
+  >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+    | ProxyError
+  >;
 
   providePrivateCredentials(
     privateKey: string | null,
     mnemonic: string | null,
-  ): ResultAsync<void, InvalidParametersError>;
+  ): ResultAsync<void, InvalidParametersError | ProxyError>;
 
   getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], HypernetGovernorContractError>;
+  ): ResultAsync<Proposal[], HypernetGovernorContractError | ProxyError>;
 
   createProposal(
     name: string,
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   delegateVote(
     delegateAddress: EthereumAccountAddress,
     amount: number | null,
-  ): ResultAsync<void, ERC20ContractError>;
+  ): ResultAsync<void, ERC20ContractError | ProxyError>;
 
   getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   getProposalVotesReceipt(
     proposalId: string,
     voterAddress: EthereumAccountAddress,
-  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError>;
+  ): ResultAsync<
+    ProposalVoteReceipt,
+    HypernetGovernorContractError | ProxyError
+  >;
 
   getRegistries(
     pageNumber: number,
@@ -300,21 +391,21 @@ export interface IHypernetCore {
     sortOrder: ERegistrySortOrder,
   ): ResultAsync<
     Registry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
   getRegistryByName(
     registryNames: string[],
   ): ResultAsync<
     Map<string, Registry>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
   getRegistryByAddress(
     registryAddresses: EthereumContractAddress[],
   ): ResultAsync<
     Map<EthereumContractAddress, Registry>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
   getRegistryEntries(
@@ -324,7 +415,7 @@ export interface IHypernetCore {
     sortOrder: ERegistrySortOrder,
   ): ResultAsync<
     RegistryEntry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
   getRegistryEntryDetailByTokenId(
@@ -332,20 +423,20 @@ export interface IHypernetCore {
     tokenId: number,
   ): ResultAsync<
     RegistryEntry,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
   queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   updateRegistryEntryTokenURI(
     registryName: string,
@@ -357,6 +448,7 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | ProxyError
   >;
 
   updateRegistryEntryLabel(
@@ -369,28 +461,41 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | ProxyError
   >;
 
-  getProposalsCount(): ResultAsync<number, HypernetGovernorContractError>;
+  getProposalsCount(): ResultAsync<
+    number,
+    HypernetGovernorContractError | ProxyError
+  >;
 
   getRegistryEntriesTotalCount(
     registryNames: string[],
   ): ResultAsync<
     Map<string, number>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
-  getProposalThreshold(): ResultAsync<number, HypernetGovernorContractError>;
+  getProposalThreshold(): ResultAsync<
+    number,
+    HypernetGovernorContractError | ProxyError
+  >;
 
   getVotingPower(
     account: EthereumAccountAddress,
-  ): ResultAsync<number, HypernetGovernorContractError>;
+  ): ResultAsync<
+    number,
+    HypernetGovernorContractError | ERC20ContractError | ProxyError
+  >;
 
   getHyperTokenBalance(
     account: EthereumAccountAddress,
-  ): ResultAsync<number, ERC20ContractError>;
+  ): ResultAsync<number, ERC20ContractError | ProxyError>;
 
-  getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
+  getNumberOfRegistries(): ResultAsync<
+    number,
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  >;
 
   updateRegistryParams(
     registryParams: RegistryParams,
@@ -400,6 +505,7 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   >;
 
   createRegistryEntry(
@@ -413,6 +519,8 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ERC20ContractError
+    | ProxyError
   >;
 
   transferRegistryEntry(
@@ -425,6 +533,7 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   >;
 
   burnRegistryEntry(
@@ -436,6 +545,7 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   >;
 
   createRegistryByToken(
@@ -443,7 +553,10 @@ export interface IHypernetCore {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError>;
+  ): ResultAsync<
+    void,
+    RegistryFactoryContractError | ERC20ContractError | ProxyError
+  >;
 
   grantRegistrarRole(
     registryName: string,
@@ -454,6 +567,7 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   >;
 
   revokeRegistrarRole(
@@ -465,6 +579,7 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   >;
 
   renounceRegistrarRole(
@@ -476,6 +591,7 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   >;
 
   /**

@@ -6,6 +6,8 @@ import {
   HypernetGovernorContractError,
   ERC20ContractError,
   GovernanceSignerUnavailableError,
+  BlockchainUnavailableError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -48,12 +50,17 @@ export interface IGovernanceRepository {
   getProposalThreshold(): ResultAsync<number, HypernetGovernorContractError>;
   getVotingPower(
     account: EthereumAccountAddress,
-  ): ResultAsync<number, HypernetGovernorContractError>;
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError>;
   getHyperTokenBalance(
     account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError>;
   initializeReadOnly(): ResultAsync<void, never>;
-  initializeForWrite(): ResultAsync<void, GovernanceSignerUnavailableError>;
+  initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 }
 
 export const IGovernanceRepositoryType = Symbol.for("IGovernanceRepository");
