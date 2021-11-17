@@ -14,6 +14,8 @@ async function main() {
   // await hre.run('compile');
 
   const [owner] = await hre.ethers.getSigners();
+  console.log("Deployment Wallet Address:", owner.address)
+  console.log("RPC URL:", hre.network.config.url)
 
   // deploy hypertoken contract
   const Hypertoken = await ethers.getContractFactory("Hypertoken");
