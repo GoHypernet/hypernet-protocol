@@ -24,7 +24,7 @@ ref?.parentNode?.insertBefore(style, ref);
 Spinner();
 Spinner.show();
 
-const gatewayUrl = GatewayUrl("http://localhost:5010");
+const gatewayUrl = GatewayUrl("http://localhost:3000/users/v0");
 
 client
   .getReady()

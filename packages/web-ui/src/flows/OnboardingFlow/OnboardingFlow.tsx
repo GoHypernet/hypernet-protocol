@@ -19,6 +19,11 @@ import {
   AUTHENTICATION_IMAGE_URL,
   AUTHENTICATION_SUCCESS_IMAGE_URL,
 } from "@web-ui/constants";
+import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
+
+declare global {
+  interface Window {}
+}
 
 enum EOnboardingScreens {
   IDLE = 0,
@@ -182,14 +187,38 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       case EOnboardingScreens.EMPTY_BALANCE:
         return (
           <>
-            <Box className={classes.balancesEmptyLabel}>
-              You have successfully connected your wallet!
-            </Box>
+            <GovernanceTypography variant="h4">Success!</GovernanceTypography>
+            <GovernanceTypography variant="subtitle1">
+              You have successfully connected your wallet.
+            </GovernanceTypography>
             <img
               className={classes.authenticationSuccessImg}
               src={AUTHENTICATION_SUCCESS_IMAGE_URL}
             />
-            {renderFundWalletButton()}
+            <Box mb={2}>
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={goToFundWalletScreen}
+              >
+                Fund My Wallet
+              </GovernanceButton>
+              </Box>
+
+            <GovernanceButton
+              fullWidth
+              variant="text"
+              color="default"
+              onClick={() => {
+                document.open(
+                  "https://hypernet-protocol-dashboard-dev.hypernetlabs.io",
+                  "_blank",
+                );
+              }}
+            >
+              View your Hypernet Protocol acoount.
+            </GovernanceButton>
           </>
         );
       case EOnboardingScreens.FUND_WIDGET:
@@ -199,16 +228,30 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
           <>
             {balances?.length && <BalancesWidget />}
 
-            <Box className={classes.doneButtonWrapper}>
-              <Button
-                label="Done"
-                onClick={goToSuccessScreen}
-                fullWidth={true}
-                bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-              />
+            <Box mb={2}>
+            <GovernanceButton
+              fullWidth
+              color="primary"
+              variant="contained"
+              onClick={goToSuccessScreen}
+            >
+              Done
+            </GovernanceButton>
             </Box>
 
-            {renderFundWalletButton(EButtonStatus.secondary)}
+            <GovernanceButton
+              fullWidth
+              variant="outlined"
+              color="default"
+              onClick={() => {
+                document.open(
+                  "https://hypernet-protocol-dashboard-dev.hypernetlabs.io",
+                  "_blank",
+                );
+              }}
+            >
+              Fund My Wallet
+            </GovernanceButton>
           </>
         );
       case EOnboardingScreens.ONBOARDING_SUCCESS:
