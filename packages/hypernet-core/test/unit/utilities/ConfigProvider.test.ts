@@ -1,8 +1,9 @@
-import td from "testdouble";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { IConfigProvider } from "@interfaces/utilities";
-import { ConfigProvider } from "@implementations/utilities";
 import { HypernetConfig } from "@interfaces/objects";
+import td from "testdouble";
+
+import { ConfigProvider } from "@implementations/utilities";
+import { IConfigProvider } from "@interfaces/utilities";
 
 class ConfigProviderMocks {
   public logUtils = td.object<ILogUtils>();

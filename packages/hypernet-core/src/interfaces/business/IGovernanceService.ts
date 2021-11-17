@@ -1,10 +1,10 @@
 import {
   Proposal,
-  EthereumAddress,
   EProposalVoteSupport,
   ProposalVoteReceipt,
   HypernetGovernorContractError,
   ERC20ContractError,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -17,11 +17,11 @@ export interface IGovernanceService {
   createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<Proposal, HypernetGovernorContractError>;
   delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
   ): ResultAsync<void, ERC20ContractError>;
   getProposalDetails(
@@ -33,7 +33,7 @@ export interface IGovernanceService {
   ): ResultAsync<Proposal, HypernetGovernorContractError>;
   getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
+    voterAddress: EthereumAccountAddress,
   ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError>;
   queueProposal(
     proposalId: string,
@@ -46,9 +46,9 @@ export interface IGovernanceService {
   ): ResultAsync<Proposal, HypernetGovernorContractError>;
   getProposalThreshold(): ResultAsync<number, HypernetGovernorContractError>;
   getVotingPower(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError>;
   getHyperTokenBalance(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError>;
 }

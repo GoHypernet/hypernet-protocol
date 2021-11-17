@@ -1,6 +1,6 @@
 import {
   BlockchainUnavailableError,
-  EthereumAddress,
+  EthereumAccountAddress,
   RegistryEntry,
   Registry,
   RegistryParams,
@@ -10,12 +10,12 @@ import {
   RegistryFactoryContractError,
   GovernanceSignerUnavailableError,
   ERC20ContractError,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
-import { inject } from "inversify";
-
 import { IRegistryService } from "@interfaces/business";
 import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
+import { inject } from "inversify";
+import { ResultAsync } from "neverthrow";
 
 export class RegistryService implements IRegistryService {
   constructor(
@@ -48,9 +48,9 @@ export class RegistryService implements IRegistryService {
   }
 
   public getRegistryByAddress(
-    registryAddresses: EthereumAddress[],
+    registryAddresses: EthereumContractAddress[],
   ): ResultAsync<
-    Map<EthereumAddress, Registry>,
+    Map<EthereumContractAddress, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryRepository.getRegistryByAddress(registryAddresses);
@@ -153,7 +153,7 @@ export class RegistryService implements IRegistryService {
   public createRegistryEntry(
     registryName: string,
     label: string,
-    recipientAddress: EthereumAddress,
+    recipientAddress: EthereumAccountAddress,
     data: string,
   ): ResultAsync<
     void,
@@ -174,7 +174,7 @@ export class RegistryService implements IRegistryService {
   public transferRegistryEntry(
     registryName: string,
     tokenId: number,
-    transferToAddress: EthereumAddress,
+    transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
     | NonFungibleRegistryContractError
@@ -205,7 +205,7 @@ export class RegistryService implements IRegistryService {
   public createRegistryByToken(
     name: string,
     symbol: string,
-    registrarAddress: EthereumAddress,
+    registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
     return this.registryRepository.createRegistryByToken(
@@ -218,7 +218,7 @@ export class RegistryService implements IRegistryService {
 
   public grantRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -231,7 +231,7 @@ export class RegistryService implements IRegistryService {
 
   public revokeRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -244,7 +244,7 @@ export class RegistryService implements IRegistryService {
 
   public renounceRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError

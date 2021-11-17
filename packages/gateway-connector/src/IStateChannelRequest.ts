@@ -1,7 +1,6 @@
 import {
   ActiveStateChannel,
   ChainId,
-  EthereumAddress,
   PublicIdentifier,
 } from "@hypernetlabs/objects";
 

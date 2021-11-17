@@ -11,7 +11,6 @@ import {
   GatewayAuthorizationDeniedError,
   GatewayUrl,
   Signature,
-  EthereumAddress,
   ChainId,
   PublicIdentifier,
   RouterUnauthorizedError,

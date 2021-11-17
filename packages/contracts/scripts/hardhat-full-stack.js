@@ -26,7 +26,7 @@ async function main() {
   console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString());
   console.log("Hypertoken recipient:", owner.address);
   console.log("Recipient Balance:", recipientBalance.toString());
-  
+
   // all tokens are currently owned by owner signer
   // delegate all votes to self
   // if delegate() is not called, the account has no voting power
@@ -80,30 +80,43 @@ async function main() {
   const tx4_reciept = await tx4.wait();
 
   // deploy enumerable registry contract
-  const EnumerableRegistry = await ethers.getContractFactory("NonFungibleRegistryEnumerableUpgradeable");
+  const EnumerableRegistry = await ethers.getContractFactory(
+    "NonFungibleRegistryEnumerableUpgradeable",
+  );
   const enumerableregistry = await EnumerableRegistry.deploy();
-  const enumerable_registry_reciept = await enumerableregistry.deployTransaction.wait();
-  console.log("Enumerable Registry Beacon Address:", enumerableregistry.address);
-  console.log("Factory Gas Fee:", enumerable_registry_reciept.gasUsed.toString());
+  const enumerable_registry_reciept =
+    await enumerableregistry.deployTransaction.wait();
+  console.log(
+    "Enumerable Registry Beacon Address:",
+    enumerableregistry.address,
+  );
+  console.log(
+    "Factory Gas Fee:",
+    enumerable_registry_reciept.gasUsed.toString(),
+  );
 
   // deploy registry contract
-  const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
+  const Registry = await ethers.getContractFactory(
+    "NonFungibleRegistryUpgradeable",
+  );
   const registry = await Registry.deploy();
   const registry_reciept = await registry.deployTransaction.wait();
   console.log("Registry Beacon Address:", registry.address);
   console.log("Factory Gas Fee:", registry_reciept.gasUsed.toString());
 
   // deploy factory contract
-  const FactoryRegistry = await ethers.getContractFactory("UpgradeableRegistryFactory");
+  const FactoryRegistry = await ethers.getContractFactory(
+    "UpgradeableRegistryFactory",
+  );
   const factoryregistry = await FactoryRegistry.deploy(
-            timelock.address, 
-            ["HyperId"], 
-            ["HID"], 
-            [timelock.address], 
-            enumerableregistry.address, 
-            registry.address, 
-            hypertoken.address,
-        );
+    timelock.address,
+    ["HyperId"],
+    ["HID"],
+    [timelock.address],
+    enumerableregistry.address,
+    registry.address,
+    hypertoken.address,
+  );
   const factory_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);
   console.log("Factory Gas Fee:", factory_reciept.gasUsed.toString());

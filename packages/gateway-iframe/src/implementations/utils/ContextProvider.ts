@@ -2,7 +2,7 @@ import {
   Signature,
   GatewayUrl,
   GatewayValidationError,
-  EthereumAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
@@ -19,7 +19,7 @@ export class ContextProvider implements IContextProvider {
 
   constructor(
     gatewayUrl: GatewayUrl,
-    gatewayAddress: EthereumAddress,
+    gatewayAddress: EthereumAccountAddress,
     gatewaySignature: Signature,
   ) {
     const connectorValidatedPromise = new Promise<void>((resolve, reject) => {

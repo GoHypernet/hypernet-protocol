@@ -1,19 +1,18 @@
 import {
   BigNumberString,
-  EthereumAddress,
+  EthereumAccountAddress,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
-
 import { IDevelopmentService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
+import { ResultAsync } from "neverthrow";
 
 export class DevelopmentService implements IDevelopmentService {
   constructor(protected accountRepo: IAccountsRepository) {}
 
   public mintTestToken(
     amount: BigNumberString,
-    to: EthereumAddress,
+    to: EthereumAccountAddress,
   ): ResultAsync<void, BlockchainUnavailableError> {
     return this.accountRepo.mintTestToken(amount, to);
   }

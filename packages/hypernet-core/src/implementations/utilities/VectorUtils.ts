@@ -1,4 +1,3 @@
-import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 import {
   IHypernetOfferDetails,
@@ -7,7 +6,6 @@ import {
   IBasicTransferResponse,
   IFullChannelState,
   IFullTransferState,
-  EthereumAddress,
   PaymentId,
   TransferId,
   Signature,
@@ -36,6 +34,8 @@ import {
   IMessageTransferData,
   IRegisteredTransfer,
   ChainId,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -92,7 +92,7 @@ export class VectorUtils implements IVectorUtils {
         .andThen((transfer) => {
           this.logUtils.debug(`Resolving offer transfer ${transferId}`);
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             {
               message: message, // This can be literally anything except the blank string; that would be the same as canceling it
@@ -152,7 +152,7 @@ export class VectorUtils implements IVectorUtils {
           };
 
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             resolver,
           );
@@ -206,7 +206,7 @@ export class VectorUtils implements IVectorUtils {
           };
 
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             resolver,
           );
@@ -225,7 +225,7 @@ export class VectorUtils implements IVectorUtils {
       .andThen((browserNode) => {
         return browserNode.getTransfer(transferId).andThen((transfer) => {
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             {
               message: "",
@@ -246,7 +246,7 @@ export class VectorUtils implements IVectorUtils {
       .andThen((browserNode) => {
         return browserNode.getTransfer(transferId).andThen((transfer) => {
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             {
               data: {
@@ -273,7 +273,7 @@ export class VectorUtils implements IVectorUtils {
       .andThen((browserNode) => {
         return browserNode.getTransfer(transferId).andThen((transfer) => {
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             {
               data: {
@@ -296,7 +296,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createPullNotificationTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
@@ -370,7 +370,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createOfferTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<
@@ -428,10 +428,10 @@ export class VectorUtils implements IVectorUtils {
    * @param paymentId a length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
    */
   public createInsuranceTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
-    mediatorAddress: EthereumAddress,
+    mediatorAddress: EthereumAccountAddress,
     amount: BigNumberString,
     expiration: UnixTimestamp,
     paymentId: PaymentId,
@@ -494,18 +494,18 @@ export class VectorUtils implements IVectorUtils {
           undefined,
           undefined,
           undefined,
-          {}, // left intentionally blank!
+          { requireOnline: config.requireOnline },
         );
       })
       .mapErr((err) => new TransferCreationError(err, err?.message));
   }
 
   public createParameterizedTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,
-    assetAddress: EthereumAddress,
+    assetAddress: EthereumContractAddress,
     paymentId: PaymentId,
     start: UnixTimestamp,
     expiration: UnixTimestamp,
@@ -521,75 +521,122 @@ export class VectorUtils implements IVectorUtils {
     return this.browserNodeProvider
       .getBrowserNode()
       .andThen((browserNode) => {
-        const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
-
-        // @todo toEthAddress isn't really an eth address, it's the internal signing key
-        // therefore we need to actually do the signing of the payment transfer (on resolve)
-        // with this internal key!
-
-        const infiniteRate = {
-          deltaAmount: amount,
-          deltaTime: "1",
-        };
-
-        let ourRate: Rate;
-        // Have to throw this error, or the ourRate object below will complain that one
-        // of the params is possibly undefined.
-        if (type == EPaymentType.Pull) {
-          if (deltaTime == null || deltaAmount == null) {
-            this.logUtils.error(
-              "Somehow, deltaTime or deltaAmount were not set!",
-            );
-            return errAsync<
-              IBasicTransferResponse,
-              | TransferCreationError
-              | InvalidParametersError
-              | VectorError
-              | BlockchainUnavailableError
-            >(
-              new InvalidParametersError(
-                "Somehow, deltaTime or deltaAmount were not set!",
-              ),
-            );
-          }
-
-          if (deltaTime == 0 || deltaAmount == "0") {
-            this.logUtils.error("deltatime & deltaAmount cannot be zero!");
-            return errAsync(
-              new InvalidParametersError(
-                "deltatime & deltaAmount cannot be zero!",
-              ),
-            );
-          }
-
-          ourRate = {
-            deltaTime: deltaTime?.toString(),
-            deltaAmount: deltaAmount,
-          };
-        } else {
-          ourRate = infiniteRate;
+        // Sanity check
+        if (type === EPaymentType.Pull && deltaTime == null) {
+          this.logUtils.error("Must provide deltaTime for Pull payments");
+          return errAsync(
+            new InvalidParametersError(
+              "Must provide deltaTime for Pull payments",
+            ),
+          );
         }
 
-        const initialState: ParameterizedState = {
-          receiver: toEthAddress,
-          start: start.toString(),
-          expiration: expiration.toString(),
-          UUID: paymentId,
-          rate: ourRate,
-        };
+        if (type === EPaymentType.Pull && deltaAmount == null) {
+          this.logUtils.error("Must provide deltaAmount for Pull payments");
+          return errAsync(
+            new InvalidParametersError(
+              "Must provide deltaAmount for Pull payments",
+            ),
+          );
+        }
 
-        return browserNode.conditionalTransfer(
-          channelAddress,
-          amount,
-          assetAddress,
-          this.parameterizedTransferTypeName,
-          initialState,
-          toAddress,
-          undefined,
-          undefined,
-          undefined,
-          {}, // intentially left blank!
-        );
+        if (BigNumber.from(amount).isZero()) {
+          this.logUtils.error("Amount cannot be zero.");
+          return errAsync(new InvalidParametersError("Amount cannot be zero."));
+        }
+
+        // Make sure the paymentId is valid:
+        const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
+        if (validPayment.isErr()) {
+          this.logUtils.error(validPayment.error);
+          return errAsync(validPayment.error);
+        } else {
+          if (!validPayment.value) {
+            this.logUtils.error(
+              `CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`,
+            );
+            return errAsync(
+              new InvalidParametersError(
+                `CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`,
+              ),
+            );
+          }
+        }
+
+        return ResultUtils.combine([
+          this.browserNodeProvider.getBrowserNode(),
+          this.configProvider.getConfig(),
+        ]).andThen(([browserNode, config]) => {
+          const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
+
+          // @todo toEthAddress isn't really an eth address, it's the internal signing key
+          // therefore we need to actually do the signing of the payment transfer (on resolve)
+          // with this internal key!
+
+          const infiniteRate = {
+            deltaAmount: amount,
+            deltaTime: "1",
+          };
+
+          let ourRate: Rate;
+          // Have to throw this error, or the ourRate object below will complain that one
+          // of the params is possibly undefined.
+          if (type == EPaymentType.Pull) {
+            if (deltaTime == null || deltaAmount == null) {
+              this.logUtils.error(
+                "Somehow, deltaTime or deltaAmount were not set!",
+              );
+              return errAsync<
+                IBasicTransferResponse,
+                | TransferCreationError
+                | InvalidParametersError
+                | VectorError
+                | BlockchainUnavailableError
+              >(
+                new InvalidParametersError(
+                  "Somehow, deltaTime or deltaAmount were not set!",
+                ),
+              );
+            }
+
+            if (deltaTime == 0 || deltaAmount == "0") {
+              this.logUtils.error("deltatime & deltaAmount cannot be zero!");
+              return errAsync(
+                new InvalidParametersError(
+                  "deltatime & deltaAmount cannot be zero!",
+                ),
+              );
+            }
+
+            ourRate = {
+              deltaTime: deltaTime?.toString(),
+              deltaAmount: deltaAmount,
+            };
+          } else {
+            ourRate = infiniteRate;
+          }
+
+          const initialState: ParameterizedState = {
+            receiver: toEthAddress,
+            start: start.toString(),
+            expiration: expiration.toString(),
+            UUID: paymentId,
+            rate: ourRate,
+          };
+
+          return browserNode.conditionalTransfer(
+            channelAddress,
+            amount,
+            assetAddress,
+            this.parameterizedTransferTypeName,
+            initialState,
+            toAddress,
+            undefined,
+            undefined,
+            undefined,
+            { requireOnline: config.requireOnline },
+          );
+        });
       })
       .map((val) => val as IBasicTransferResponse)
       .mapErr((err) => new TransferCreationError(err, err?.message));
@@ -652,16 +699,18 @@ export class VectorUtils implements IVectorUtils {
     // We need to get the registered transfer definitions as canonical by the browser node
     return this._getRegisteredTransfers(ChainId(transfer.chainId)).map(
       (registeredTransfers) => {
-        const transferMap: Map<EthereumAddress, string> = new Map();
+        const transferMap: Map<EthereumContractAddress, string> = new Map();
         for (const registeredTransfer of registeredTransfers) {
           transferMap.set(
-            EthereumAddress(registeredTransfer.definition),
+            EthereumContractAddress(registeredTransfer.definition),
             registeredTransfer.name,
           );
         }
 
         // If the transfer address is not one we know, we don't know what this is
-        if (!transferMap.has(EthereumAddress(transfer.transferDefinition))) {
+        if (
+          !transferMap.has(EthereumContractAddress(transfer.transferDefinition))
+        ) {
           this.logUtils.log(
             `Transfer type not recognized. Transfer definition: ${
               transfer.transferDefinition
@@ -672,7 +721,7 @@ export class VectorUtils implements IVectorUtils {
           // This is a transfer we know about, but not necessarily one we want.
           // Narrow down to insurance, parameterized, or  offer/messagetransfer
           const thisTransfer = transferMap.get(
-            EthereumAddress(transfer.transferDefinition),
+            EthereumContractAddress(transfer.transferDefinition),
           );
           if (thisTransfer == null) {
             throw new LogicalError(
@@ -781,7 +830,7 @@ export class VectorUtils implements IVectorUtils {
   }
 
   protected _getStateChannel(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     browserNode: IBrowserNode,
   ): ResultAsync<IFullChannelState, RouterChannelUnknownError | VectorError> {
     return browserNode.getStateChannel(channelAddress).andThen((channel) => {

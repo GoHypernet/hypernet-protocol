@@ -1,25 +1,25 @@
-import { BigNumber } from "ethers";
-
 import {
   ERC20ContractError,
   BigNumberString,
-  EthereumAddress,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 export interface IERC20Contract {
   approve(
-    registryAddress: EthereumAddress,
+    registryAddress: EthereumContractAddress,
     registrationFee: BigNumberString,
   ): ResultAsync<void, ERC20ContractError>;
   delegate(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
   ): ResultAsync<void, ERC20ContractError>;
   balanceOf(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<BigNumber, ERC20ContractError>;
   getVotes(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<BigNumber, ERC20ContractError>;
 }
 

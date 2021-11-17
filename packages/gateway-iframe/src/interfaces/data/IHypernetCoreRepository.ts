@@ -1,16 +1,30 @@
 import {
-  IAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
-import { ChainId, UUID, PublicIdentifier } from "@hypernetlabs/objects";
+import {
+  ChainId,
+  UUID,
+  PublicIdentifier,
+  AuthorizeFundsRequestData,
+  SendFundsRequestData,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IHypernetCoreRepository {
-  emitSendFundsRequest(request: ISendFundsRequest): ResultAsync<void, never>;
+  emitInitiateSendFundsRequest(
+    request: SendFundsRequestData,
+  ): ResultAsync<void, never>;
+  emitSendFundsRequest(
+    request: ISignedSendFundsRequest,
+  ): ResultAsync<void, never>;
 
+  emitInitiateAuthorizeFundsRequest(
+    request: AuthorizeFundsRequestData,
+  ): ResultAsync<void, never>;
   emitAuthorizeFundsRequest(
-    request: IAuthorizeFundsRequest,
+    request: ISignedAuthorizeFundsRequest,
   ): ResultAsync<void, never>;
 
   emitResolveInsuranceRequest(

@@ -1,8 +1,16 @@
 import {
+  IRegistryFactoryContract,
+  IERC20Contract,
+  IHypernetGovernorContract,
+  HypernetGovernorContract,
+  RegistryFactoryContract,
+  ERC20Contract,
+} from "@hypernetlabs/contracts";
+import {
   BigNumberString,
   BlockchainUnavailableError,
-  EthereumAddress,
   EProposalVoteSupport,
+  EthereumAccountAddress,
   Proposal,
   ProposalVoteReceipt,
   stringToProposalState,
@@ -13,23 +21,15 @@ import {
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGovernanceRepository } from "@interfaces/data";
-import { injectable, inject } from "inversify";
-import { ResultAsync } from "neverthrow";
-import { ethers, utils } from "ethers";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
   IConfigProvider,
   IConfigProviderType,
 } from "@interfaces/utilities";
-import {
-  IRegistryFactoryContract,
-  IERC20Contract,
-  IHypernetGovernorContract,
-  HypernetGovernorContract,
-  RegistryFactoryContract,
-  ERC20Contract,
-} from "@hypernetlabs/contracts";
+import { ethers, utils } from "ethers";
+import { injectable, inject } from "inversify";
+import { ResultAsync } from "neverthrow";
 
 @injectable()
 export class GovernanceRepository implements IGovernanceRepository {
@@ -83,7 +83,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   public createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<Proposal, HypernetGovernorContractError> {
     const descriptionHash = ethers.utils.id(name);
@@ -116,7 +116,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   }
 
   public delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
   ): ResultAsync<void, ERC20ContractError> {
     return this.hypertokenContract.delegate(delegateAddress);
@@ -157,7 +157,7 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
+    voterAddress: EthereumAccountAddress,
   ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
     return this.hypernetGovernorContract
       .getReceipt(proposalId, voterAddress)
@@ -217,7 +217,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   }
 
   public getVotingPower(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
     return this.hypertokenContract.getVotes(account).map((votes) => {
       return Number(ethers.utils.formatUnits(votes.toString(), "ether"));
@@ -225,7 +225,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   }
 
   public getHyperTokenBalance(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError> {
     return this.hypertokenContract.balanceOf(account).map((balance) => {
       return Number(ethers.utils.formatUnits(balance.toString(), "ether"));
@@ -236,24 +236,36 @@ export class GovernanceRepository implements IGovernanceRepository {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).map((vals) => {
-      const [config, provider] = vals;
+    ]).map(([config, provider]) => {
       this.provider = provider;
+
+      const hypernetGovernorAddress =
+        config.chainAddresses[config.governanceChainId]
+          ?.hypernetGovernorAddress;
+      const registryFactoryAddress =
+        config.chainAddresses[config.governanceChainId]?.registryFactoryAddress;
+      const hypertokenAddress =
+        config.chainAddresses[config.governanceChainId]?.hypertokenAddress;
+
+      if (
+        registryFactoryAddress == null ||
+        hypertokenAddress == null ||
+        hypernetGovernorAddress == null
+      ) {
+        throw new Error(
+          `Chain addresses for the governance chain ${config.governanceChainId} are missing!`,
+        );
+      }
+
       this.hypernetGovernorContract = new HypernetGovernorContract(
         provider,
-        config.chainAddresses[config.governanceChainId]
-          ?.hypernetGovernorAddress as EthereumAddress,
+        hypernetGovernorAddress,
       );
       this.registryFactoryContract = new RegistryFactoryContract(
         provider,
-        config.chainAddresses[config.governanceChainId]
-          ?.registryFactoryAddress as EthereumAddress,
+        registryFactoryAddress,
       );
-      this.hypertokenContract = new ERC20Contract(
-        provider,
-        config.chainAddresses[config.governanceChainId]
-          ?.hypertokenAddress as EthereumAddress,
-      );
+      this.hypertokenContract = new ERC20Contract(provider, hypertokenAddress);
     });
   }
 
@@ -266,24 +278,36 @@ export class GovernanceRepository implements IGovernanceRepository {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceSigner(),
-    ]).map((vals) => {
-      const [config, signer] = vals;
+    ]).map(([config, signer]) => {
       this.signer = signer;
+
+      const hypernetGovernorAddress =
+        config.chainAddresses[config.governanceChainId]
+          ?.hypernetGovernorAddress;
+      const registryFactoryAddress =
+        config.chainAddresses[config.governanceChainId]?.registryFactoryAddress;
+      const hypertokenAddress =
+        config.chainAddresses[config.governanceChainId]?.hypertokenAddress;
+
+      if (
+        registryFactoryAddress == null ||
+        hypertokenAddress == null ||
+        hypernetGovernorAddress == null
+      ) {
+        throw new Error(
+          `Chain addresses for the governance chain ${config.governanceChainId} are missing!`,
+        );
+      }
+
       this.hypernetGovernorContract = new HypernetGovernorContract(
         signer,
-        config.chainAddresses[config.governanceChainId]
-          ?.hypernetGovernorAddress as EthereumAddress,
+        hypernetGovernorAddress,
       );
       this.registryFactoryContract = new RegistryFactoryContract(
         signer,
-        config.chainAddresses[config.governanceChainId]
-          ?.registryFactoryAddress as EthereumAddress,
+        registryFactoryAddress,
       );
-      this.hypertokenContract = new ERC20Contract(
-        signer,
-        config.chainAddresses[config.governanceChainId]
-          ?.hypertokenAddress as EthereumAddress,
-      );
+      this.hypertokenContract = new ERC20Contract(signer, hypertokenAddress);
     });
   }
 }

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { EthereumAccountAddress } from "@hypernetlabs/objects";
 import { Typography, Box } from "@material-ui/core";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IRenderParams } from "@web-ui/interfaces";
+import React, { useEffect, useState } from "react";
 import { useAlert } from "react-alert";
 
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress } from "@hypernetlabs/objects";
-import { IRenderParams } from "@web-ui/interfaces";
 import { useStyles } from "@web-ui/widgets/ConnectedAccountWidget/ConnectedAccountWidget.style";
 
 interface ConnectedAccountWidgetParams extends IRenderParams {}
@@ -14,7 +14,8 @@ const ConnectedAccountWidget: React.FC<ConnectedAccountWidgetParams> = () => {
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>();
+  const [accountAddress, setAccountAddress] =
+    useState<EthereumAccountAddress>();
 
   useEffect(() => {
     setLoading(true);

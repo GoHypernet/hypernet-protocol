@@ -1,5 +1,5 @@
 import {
-  EthereumAddress,
+  EthereumAccountAddress,
   BlockchainUnavailableError,
   BigNumberString,
 } from "@hypernetlabs/objects";
@@ -8,6 +8,6 @@ import { ResultAsync } from "neverthrow";
 export interface IDevelopmentService {
   mintTestToken(
     amount: BigNumberString,
-    to: EthereumAddress,
+    to: EthereumAccountAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
 }

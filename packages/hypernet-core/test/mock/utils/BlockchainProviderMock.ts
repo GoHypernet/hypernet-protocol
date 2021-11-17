@@ -6,19 +6,18 @@ import {
   PrivateCredentials,
   BlockchainUnavailableError,
   InvalidParametersError,
-  EthereumAddress,
   GovernanceSignerUnavailableError,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
+import { CeramicEIP1193Bridge } from "@implementations/utilities";
+import { IBlockchainProvider } from "@interfaces/utilities";
 import { routerChannelAddress, commonAmount, mockUtils } from "@mock/mocks";
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
-import { IBlockchainProvider } from "@interfaces/utilities";
-import { CeramicEIP1193Bridge } from "@implementations/utilities";
-
 interface ISendTransactionVals {
-  to: EthereumAddress;
+  to: EthereumContractAddress;
   value: BigNumber;
 }
 

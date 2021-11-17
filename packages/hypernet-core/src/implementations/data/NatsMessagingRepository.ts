@@ -1,9 +1,9 @@
 import { ControlClaim, MessagingError } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
+import { IMessagingRepository } from "@interfaces/data";
 import { inject, injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 
-import { IMessagingRepository } from "@interfaces/data";
 import {
   IConfigProvider,
   IConfigProviderType,

@@ -1,51 +1,31 @@
-import { DEFAULT_CHANNEL_TIMEOUT, VectorError } from "@connext/vector-types";
-import {
-  ETransferState,
-  IFullTransferState,
-  InsuranceResolver,
-  MessageResolver,
-  MessageState,
-  ParameterizedResolver,
-} from "@hypernetlabs/objects";
+import { ETransferState } from "@hypernetlabs/objects";
 import { ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
-import { errAsync, okAsync } from "neverthrow";
-import td from "testdouble";
-
-import { VectorUtils } from "@implementations/utilities/VectorUtils";
-import {
-  IBlockchainTimeUtils,
-  IBlockchainUtils,
-  IBrowserNode,
-  IBrowserNodeProvider,
-  IPaymentIdUtils,
-} from "@interfaces/utilities";
 import {
   activeParameterizedTransfer,
   canceledInsuranceTransfer,
   canceledOfferTransfer,
   canceledParameterizedTransfer,
   chainId,
-  destinationAddress,
-  erc20AssetAddress,
-  insuranceTransferDefinitionAddress,
   insuranceTransferEncodedCancel,
   insuranceTransferResolverEncoding,
-  messageTransferDefinitionAddress,
   messageTransferEncodedCancel,
   messageTransferResolverEncoding,
-  offerTransferId,
-  parameterizedTransferDefinitionAddress,
   parameterizedTransferEncodedCancel,
   parameterizedTransferResolverEncoding,
-  publicIdentifier,
-  publicIdentifier2,
   resolvedInsuranceTransfer,
   resolvedOfferTransfer,
   resolvedParameterizedTransfer,
-  routerChannelAddress,
-  routerPublicIdentifier,
   unixNow,
 } from "@mock/mocks";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
+
+import { VectorUtils } from "@implementations/utilities/VectorUtils";
+import {
+  IBlockchainTimeUtils,
+  IBlockchainUtils,
+  IPaymentIdUtils,
+} from "@interfaces/utilities";
 import {
   ConfigProviderMock,
   ContextProviderMock,

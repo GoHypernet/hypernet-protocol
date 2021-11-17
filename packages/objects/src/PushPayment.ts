@@ -1,6 +1,6 @@
 import { BigNumberString } from "@objects/BigNumberString";
 import { ChainId } from "@objects/ChainId";
-import { EthereumAddress } from "@objects/EthereumAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
@@ -17,7 +17,7 @@ export class PushPayment extends Payment {
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     requiredStake: BigNumberString,
     amountStaked: BigNumberString,
     expirationDate: UnixTimestamp,

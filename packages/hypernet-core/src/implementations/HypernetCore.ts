@@ -1,7 +1,6 @@
 import {
   Balances,
   ControlClaim,
-  EthereumAddress,
   HypernetLink,
   Payment,
   PublicIdentifier,
@@ -51,6 +50,8 @@ import {
   TransferCreationError,
   PaymentStakeError,
   PaymentFinalizeError,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -92,6 +93,20 @@ import {
   RegistryRepository,
 } from "@implementations/data";
 import {
+  BrowserNodeProvider,
+  ConfigProvider,
+  ContextProvider,
+  EthersBlockchainProvider,
+  LinkUtils,
+  PaymentUtils,
+  PaymentIdUtils,
+  VectorUtils,
+  EthersBlockchainUtils,
+  CeramicUtils,
+  MessagingProvider,
+  BlockchainTimeUtils,
+} from "@implementations/utilities";
+import {
   IBlockchainListener,
   IGatewayConnectorListener,
   IMessagingListener,
@@ -119,32 +134,6 @@ import {
   IRegistryRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
-import { ok, Result, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
-
-import { GatewayRegistrationRepository } from "./data/GatewayRegistrationRepository";
-
-import { StorageUtils } from "@implementations/data/utilities";
-import {
-  BrowserNodeProvider,
-  ConfigProvider,
-  ContextProvider,
-  EthersBlockchainProvider,
-  LinkUtils,
-  PaymentUtils,
-  PaymentIdUtils,
-  VectorUtils,
-  EthersBlockchainUtils,
-  CeramicUtils,
-  MessagingProvider,
-  BlockchainTimeUtils,
-} from "@implementations/utilities";
-import {
-  GatewayConnectorProxyFactory,
-  BrowserNodeFactory,
-  InternalProviderFactory,
-} from "@implementations/utilities/factory";
-import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -159,6 +148,18 @@ import {
   IMessagingProvider,
   IBlockchainTimeUtils,
 } from "@interfaces/utilities";
+import { ok, Result, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
+import { GatewayRegistrationRepository } from "./data/GatewayRegistrationRepository";
+
+import { StorageUtils } from "@implementations/data/utilities";
+import {
+  GatewayConnectorProxyFactory,
+  BrowserNodeFactory,
+  InternalProviderFactory,
+} from "@implementations/utilities/factory";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
@@ -200,9 +201,9 @@ export class HypernetCore implements IHypernetCore {
   public onChainConnected: Subject<ChainId>;
   public onGovernanceChainConnected: Subject<ChainId>;
   public onChainChanged: Subject<ChainId>;
-  public onAccountChanged: Subject<EthereumAddress>;
+  public onAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceChainChanged: Subject<ChainId>;
-  public onGovernanceAccountChanged: Subject<EthereumAddress>;
+  public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -534,6 +535,7 @@ export class HypernetCore implements IHypernetCore {
       this.gatewayRegistrationRepository,
       this.vectorUtils,
       this.paymentUtils,
+      this.blockchainUtils,
       this.logUtils,
     );
 
@@ -628,7 +630,7 @@ export class HypernetCore implements IHypernetCore {
    * Returns a list of Ethereum accounts associated with this instance of Hypernet Core.
    */
   public getEthereumAccounts(): ResultAsync<
-    EthereumAddress[],
+    EthereumAccountAddress[],
     BlockchainUnavailableError
   > {
     return this.accountService.getAccounts().mapErr((e) => {
@@ -683,8 +685,8 @@ export class HypernetCore implements IHypernetCore {
    * @param amount the amount of the token to deposit
    */
   public depositFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
   ): ResultAsync<
     Balances,
@@ -706,10 +708,10 @@ export class HypernetCore implements IHypernetCore {
    * @param destinationAddress the (Ethereum) address to withdraw to
    */
   public withdrawFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
-    destinationAddress: EthereumAddress,
+    destinationAddress: EthereumAccountAddress,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
@@ -1106,7 +1108,7 @@ export class HypernetCore implements IHypernetCore {
   public createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.createProposal(
@@ -1118,7 +1120,7 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
   ): ResultAsync<void, ERC20ContractError> {
     return this.governanceService.delegateVote(delegateAddress, amount);
@@ -1139,7 +1141,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
+    voterAddress: EthereumAccountAddress,
   ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
     return this.governanceService.getProposalVotesReceipt(
       proposalId,
@@ -1168,9 +1170,9 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public getRegistryByAddress(
-    registryAddresses: EthereumAddress[],
+    registryAddresses: EthereumContractAddress[],
   ): ResultAsync<
-    Map<EthereumAddress, Registry>,
+    Map<EthereumContractAddress, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryService.getRegistryByAddress(registryAddresses);
@@ -1284,13 +1286,13 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public getVotingPower(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
     return this.governanceService.getVotingPower(account);
   }
 
   public getHyperTokenBalance(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError> {
     return this.governanceService.getHyperTokenBalance(account);
   }
@@ -1317,7 +1319,7 @@ export class HypernetCore implements IHypernetCore {
   public createRegistryEntry(
     registryName: string,
     label: string,
-    recipientAddress: EthereumAddress,
+    recipientAddress: EthereumAccountAddress,
     data: string,
   ): ResultAsync<
     void,
@@ -1338,7 +1340,7 @@ export class HypernetCore implements IHypernetCore {
   public transferRegistryEntry(
     registryName: string,
     tokenId: number,
-    transferToAddress: EthereumAddress,
+    transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
     | NonFungibleRegistryContractError
@@ -1369,7 +1371,7 @@ export class HypernetCore implements IHypernetCore {
   public createRegistryByToken(
     name: string,
     symbol: string,
-    registrarAddress: EthereumAddress,
+    registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
     return this.registryService.createRegistryByToken(
@@ -1382,7 +1384,7 @@ export class HypernetCore implements IHypernetCore {
 
   public grantRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1395,7 +1397,7 @@ export class HypernetCore implements IHypernetCore {
 
   public revokeRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1408,7 +1410,7 @@ export class HypernetCore implements IHypernetCore {
 
   public renounceRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError

@@ -1,11 +1,13 @@
 import {
   BigNumberString,
   BlockchainUnavailableError,
-  EthereumAddress,
   Signature,
   TransferAbis,
   ChainId,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
+import { EthersBlockchainUtils } from "@implementations/utilities";
+import { IBlockchainUtils } from "@interfaces/utilities";
 import {
   gatewayUrl,
   gatewayUrlError,
@@ -24,8 +26,6 @@ import {
 import { ethers } from "ethers";
 import td from "testdouble";
 
-import { EthersBlockchainUtils } from "@implementations/utilities";
-import { IBlockchainUtils } from "@interfaces/utilities";
 import { BlockchainProviderMock, ConfigProviderMock } from "@tests/mock/utils";
 
 const gatewayRegistryTokenIndex = 1;
@@ -54,7 +54,7 @@ jest.mock("ethers", () => {
           resolve(new TransactionReceiptMock());
         });
       }
-      public mint(to: EthereumAddress, _: BigNumberString) {
+      public mint(to: EthereumAccountAddress, _: BigNumberString) {
         return new Promise((resolve, reject) => {
           if (to === errorAccount) {
             reject(new BlockchainUnavailableError());

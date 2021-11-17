@@ -1,7 +1,6 @@
 import {
   Balances,
   ControlClaim,
-  EthereumAddress,
   HypernetLink,
   PublicIdentifier,
   PullPayment,
@@ -46,6 +45,8 @@ import {
   TransferCreationError,
   PaymentStakeError,
   TransferResolutionError,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -212,7 +213,7 @@ export default class HypernetIFrameProxy
           this.onChainChanged.next(data);
         });
 
-        child.on("onAccountChanged", (data: EthereumAddress) => {
+        child.on("onAccountChanged", (data: EthereumAccountAddress) => {
           this.onAccountChanged.next(data);
         });
 
@@ -220,9 +221,12 @@ export default class HypernetIFrameProxy
           this.onGovernanceChainChanged.next(data);
         });
 
-        child.on("onGovernanceAccountChanged", (data: EthereumAddress) => {
-          this.onGovernanceAccountChanged.next(data);
-        });
+        child.on(
+          "onGovernanceAccountChanged",
+          (data: EthereumAccountAddress) => {
+            this.onGovernanceAccountChanged.next(data);
+          },
+        );
 
         // Setup a listener for the "initialized" event.
         child.on("initialized", () => {
@@ -304,7 +308,7 @@ export default class HypernetIFrameProxy
   }
 
   public getEthereumAccounts(): ResultAsync<
-    EthereumAddress[],
+    EthereumAccountAddress[],
     BlockchainUnavailableError | ProxyError
   > {
     return this._createCall("getEthereumAccounts", null);
@@ -348,8 +352,8 @@ export default class HypernetIFrameProxy
   }
 
   public depositFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
   ): ResultAsync<
     Balances,
@@ -363,10 +367,10 @@ export default class HypernetIFrameProxy
   }
 
   public withdrawFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
-    destinationAddress: EthereumAddress,
+    destinationAddress: EthereumAccountAddress,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
@@ -496,7 +500,10 @@ export default class HypernetIFrameProxy
         if (gatewaysMap.get(gatewayUrl) == true) {
           this._displayCoreIFrame();
 
-          return this._createCall("displayGatewayIFrame", gatewayUrl);
+          return this._createCall<void, GatewayConnectorError>(
+            "displayGatewayIFrame",
+            gatewayUrl,
+          );
         } else {
           alert(
             `Gateway ${gatewayUrl} is not activated at the moment, try again later`,
@@ -541,7 +548,7 @@ export default class HypernetIFrameProxy
   public createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("createProposal", {
@@ -553,7 +560,7 @@ export default class HypernetIFrameProxy
   }
 
   public delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
   ): ResultAsync<void, ERC20ContractError | ProxyError> {
     return this._createCall("delegateVote", {
@@ -580,7 +587,7 @@ export default class HypernetIFrameProxy
 
   public getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
+    voterAddress: EthereumAccountAddress,
   ): ResultAsync<
     ProposalVoteReceipt,
     HypernetGovernorContractError | ProxyError
@@ -616,9 +623,9 @@ export default class HypernetIFrameProxy
   }
 
   public getRegistryByAddress(
-    registryAddresses: EthereumAddress[],
+    registryAddresses: EthereumContractAddress[],
   ): ResultAsync<
-    Map<EthereumAddress, Registry>,
+    Map<EthereumContractAddress, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryByAddress", registryAddresses);
@@ -734,7 +741,7 @@ export default class HypernetIFrameProxy
   }
 
   public getVotingPower(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<
     number,
     HypernetGovernorContractError | ERC20ContractError | ProxyError
@@ -743,7 +750,7 @@ export default class HypernetIFrameProxy
   }
 
   public getHyperTokenBalance(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError | ProxyError> {
     return this._createCall("getHyperTokenBalance", account);
   }
@@ -771,7 +778,7 @@ export default class HypernetIFrameProxy
   public createRegistryEntry(
     registryName: string,
     label: string,
-    recipientAddress: EthereumAddress,
+    recipientAddress: EthereumAccountAddress,
     data: string,
   ): ResultAsync<
     void,
@@ -792,7 +799,7 @@ export default class HypernetIFrameProxy
   public transferRegistryEntry(
     registryName: string,
     tokenId: number,
-    transferToAddress: EthereumAddress,
+    transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
     | NonFungibleRegistryContractError
@@ -828,7 +835,7 @@ export default class HypernetIFrameProxy
   public createRegistryByToken(
     name: string,
     symbol: string,
-    registrarAddress: EthereumAddress,
+    registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<
     void,
@@ -844,7 +851,7 @@ export default class HypernetIFrameProxy
 
   public grantRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -861,7 +868,7 @@ export default class HypernetIFrameProxy
 
   public revokeRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -878,7 +885,7 @@ export default class HypernetIFrameProxy
 
   public renounceRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -950,7 +957,7 @@ export default class HypernetIFrameProxy
   public onChainConnected: Subject<ChainId>;
   public onGovernanceChainConnected: Subject<ChainId>;
   public onChainChanged: Subject<ChainId>;
-  public onAccountChanged: Subject<EthereumAddress>;
+  public onAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceChainChanged: Subject<ChainId>;
-  public onGovernanceAccountChanged: Subject<EthereumAddress>;
+  public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
 }

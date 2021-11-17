@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/gateway-connector",
-  "version": "0.0.1",
+  "version": "0.0.10",
   "description": "Package that defines how to write a Hypernet Gateway.",
   "license": "ISC",
   "repository": {
@@ -32,13 +32,10 @@
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
     "generate-docs": "npx typedoc --options typedoc.json",
-    "prepare": "yarn build",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "prepare": "yarn build"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.0.1"
+    "@hypernetlabs/objects": "^0.3.6"
   }
 }

@@ -1,5 +1,5 @@
 import { ChainId } from "@objects/ChainId";
-import { EthereumAddress } from "@objects/EthereumAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { GatewayUrl } from "@objects/GatewayUrl";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 
@@ -12,5 +12,8 @@ export class RouterDetails {
 }
 
 export class SupportedToken {
-  constructor(public chainId: ChainId, public tokenAddress: EthereumAddress) {}
+  constructor(
+    public chainId: ChainId,
+    public tokenAddress: EthereumContractAddress,
+  ) {}
 }

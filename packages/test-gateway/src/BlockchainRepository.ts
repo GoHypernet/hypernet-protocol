@@ -1,4 +1,4 @@
-import { EthereumAddress, GatewayUrl, Signature, TransferAbis } from "@hypernetlabs/objects";
+import { EthereumAccountAddress, GatewayUrl, Signature, TransferAbis } from "@hypernetlabs/objects";
 import { Contract, ethers } from "ethers";
 
 export class BlockchainRepository {
@@ -10,7 +10,7 @@ export class BlockchainRepository {
   protected wallet: ethers.Wallet;
 
   protected signature: Signature | null = null;
-  protected address: EthereumAddress;
+  protected address: EthereumAccountAddress;
 
   constructor() {
     try {
@@ -20,7 +20,7 @@ export class BlockchainRepository {
       // Create a wallet using that provider. Wallet combines a provider and a signer.
       this.wallet = new ethers.Wallet(this.gatewayAccountPrivateKey, this.provider);
 
-      this.address = EthereumAddress(this.wallet.address);
+      this.address = EthereumAccountAddress(this.wallet.address);
       console.log(`Address: ${this.address}`);
       console.log(this.gatewayAccount == this.address);
     } catch (e) {
@@ -78,6 +78,6 @@ export class BlockchainRepository {
 }
 
 interface IGatewayRegistryEntry {
-  address: EthereumAddress;
+  address: EthereumAccountAddress;
   signature: Signature;
 }

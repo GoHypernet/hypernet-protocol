@@ -16,7 +16,7 @@ Compiles the package AND the `test-gateway-connector` package. These two are a s
 
 `yarn dockerize`
 
-Builds the docker image that hosts the test gateway. 
+Builds the docker image that hosts the test gateway.
 
 `yarn docker-push`
 

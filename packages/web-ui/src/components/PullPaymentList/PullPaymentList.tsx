@@ -282,7 +282,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
       <GovernanceTable isExpandable columns={tableColumns} rows={rows} />
       {pullPayments.length > 0 && (
         <GovernancePagination
-        className={classes.pagination}
+          className={classes.pagination}
           customPageOptions={{
             itemsPerPage: PULL_PAYMENTS_PER_PAGE,
             totalItems: pullPayments.length,

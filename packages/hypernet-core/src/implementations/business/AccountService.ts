@@ -1,18 +1,18 @@
 import {
   Balances,
-  EthereumAddress,
   InvalidParametersError,
   PrivateCredentials,
   PublicIdentifier,
   BalancesUnavailableError,
   BlockchainUnavailableError,
   VectorError,
-  Signature,
   BigNumberString,
   ActiveStateChannel,
   PersistenceError,
   ChainId,
   UtilityMessageSignature,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountService } from "@interfaces/business";
@@ -44,7 +44,7 @@ export class AccountService implements IAccountService {
   }
 
   public getAccounts(): ResultAsync<
-    EthereumAddress[],
+    EthereumAccountAddress[],
     BlockchainUnavailableError
   > {
     return this.accountRepository.getAccounts();
@@ -125,8 +125,8 @@ export class AccountService implements IAccountService {
   }
 
   public depositFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
   ): ResultAsync<
     Balances,
@@ -160,10 +160,10 @@ export class AccountService implements IAccountService {
   }
 
   public withdrawFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
-    destinationAddress: EthereumAddress,
+    destinationAddress: EthereumAccountAddress,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError

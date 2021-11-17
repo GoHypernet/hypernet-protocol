@@ -1,11 +1,13 @@
-import { BigNumber, ethers } from "ethers";
 import {
   EProposalVoteSupport,
-  EthereumAddress,
+  EthereumAccountAddress,
+  EthereumContractAddress,
   GovernanceAbis,
   HypernetGovernorContractError,
 } from "@hypernetlabs/objects";
+import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
+
 import { IHypernetGovernorContract } from "@contracts/interfaces/utilities";
 
 export class HypernetGovernorContract implements IHypernetGovernorContract {
@@ -14,7 +16,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     protected providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner,
-    protected contractAddress: EthereumAddress,
+    protected contractAddress: EthereumContractAddress,
   ) {
     this.contract = new ethers.Contract(
       contractAddress,
@@ -23,8 +25,8 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     );
   }
 
-  public getContractAddress(): EthereumAddress {
-    return EthereumAddress(this.contract?.address || "");
+  public getContractAddress(): EthereumContractAddress {
+    return EthereumContractAddress(this.contract?.address || "");
   }
 
   public _proposalIdTracker(): ResultAsync<
@@ -136,7 +138,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
         [0],
         [transferCalldata],
         name,
-      ) as Promise<any>,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract propose()",
@@ -145,7 +147,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
         });
       })
@@ -161,7 +163,10 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     }
 
     return ResultAsync.fromPromise(
-      this.contract?.castVote(proposalId, support) as Promise<any>,
+      this.contract?.castVote(
+        proposalId,
+        support,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract castVote()",
@@ -170,7 +175,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
         });
       })
@@ -179,7 +184,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
 
   public getReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
+    voterAddress: EthereumAccountAddress,
   ): ResultAsync<
     {
       hasVoted: boolean;
@@ -211,7 +216,9 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     }
 
     return ResultAsync.fromPromise(
-      this.contract["queue(uint256)"](proposalId) as Promise<any>,
+      this.contract["queue(uint256)"](
+        proposalId,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract queue()",
@@ -220,7 +227,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
         });
       })
@@ -235,7 +242,9 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     }
 
     return ResultAsync.fromPromise(
-      this.contract["cancel(uint256)"](proposalId) as Promise<any>,
+      this.contract["cancel(uint256)"](
+        proposalId,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract cancel()",
@@ -244,7 +253,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
         });
       })
@@ -259,7 +268,9 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     }
 
     return ResultAsync.fromPromise(
-      this.contract["execute(uint256)"](proposalId) as Promise<any>,
+      this.contract["execute(uint256)"](
+        proposalId,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract execute()",
@@ -268,7 +279,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
         });
       })

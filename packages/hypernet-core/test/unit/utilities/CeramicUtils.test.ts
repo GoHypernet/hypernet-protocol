@@ -1,11 +1,6 @@
-import {
-  Signature,
-  Balances,
-  AuthorizedGatewaysSchema,
-  GatewayRegistrationInfo,
-  ProxyError,
-} from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
+import td from "testdouble";
+
 import { CeramicUtils } from "@implementations/utilities/CeramicUtils";
 import { ICeramicUtils } from "@interfaces/utilities/ICeramicUtils";
 import {
@@ -14,9 +9,6 @@ import {
   ContextProviderMock,
   BrowserNodeProviderMock,
 } from "@mock/utils";
-
-import { errAsync, okAsync } from "neverthrow";
-import td from "testdouble";
 
 class CeramicUtilsMocks {
   public blockchainProvider = new BlockchainProviderMock();

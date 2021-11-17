@@ -3,25 +3,23 @@ import {
   Balances,
   ChainId,
   ControlClaim,
-  EthereumAddress,
   GatewayUrl,
   PullPayment,
   PushPayment,
   Signature,
-  PersistenceError,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
   InitializedHypernetContext,
 } from "@interfaces/objects";
-import { account, activeStateChannel, publicIdentifier } from "@mock/mocks";
-import { okAsync, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
-
 import {
   IContextProvider,
   IGatewayConnectorProxy,
 } from "@interfaces/utilities";
+import { account, activeStateChannel, publicIdentifier } from "@mock/mocks";
+import { okAsync, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
 
 export class ContextProviderMock implements IContextProvider {
   public context: HypernetContext;
@@ -89,19 +87,19 @@ export class ContextProviderMock implements IContextProvider {
   public onGovernanceChainConnectedActivations: ChainId[] = [];
   public onChainChanged: Subject<ChainId>;
   public onChainChangedActivations: ChainId[] = [];
-  public onAccountChanged: Subject<EthereumAddress>;
-  public onAccountChangedActivations: EthereumAddress[] = [];
+  public onAccountChanged: Subject<EthereumAccountAddress>;
+  public onAccountChangedActivations: EthereumAccountAddress[] = [];
   public onGovernanceChainChanged: Subject<ChainId>;
   public onGovernanceChainChangedActivations: ChainId[] = [];
-  public onGovernanceAccountChanged: Subject<EthereumAddress>;
-  public onGovernanceAccountChangedActivations: EthereumAddress[] = [];
+  public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
+  public onGovernanceAccountChangedActivations: EthereumAccountAddress[] = [];
 
   public authorizedGateways: Map<GatewayUrl, Signature>;
 
   constructor(
     context: HypernetContext | null = null,
     initializedContext: InitializedHypernetContext | null = null,
-    uninitializedAccount: EthereumAddress | null = null,
+    uninitializedAccount: EthereumAccountAddress | null = null,
   ) {
     this.onControlClaimed = new Subject();
     this.onControlClaimed.subscribe((val) => {

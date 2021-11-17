@@ -2,10 +2,11 @@ import {
   BlockchainUnavailableError,
   ERC20ContractError,
   ERegistrySortOrder,
-  EthereumAddress,
   GovernanceSignerUnavailableError,
   InvalidParametersError,
   NonFungibleRegistryContractError,
+  EthereumAccountAddress,
+  EthereumContractAddress,
   Registry,
   RegistryEntry,
   RegistryFactoryContractError,
@@ -13,7 +14,6 @@ import {
   RegistryPermissionError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
-import { ethers } from "ethers";
 
 export interface IRegistryRepository {
   getRegistries(
@@ -31,9 +31,9 @@ export interface IRegistryRepository {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   getRegistryByAddress(
-    registryAddresses: EthereumAddress[],
+    registryAddresses: EthereumContractAddress[],
   ): ResultAsync<
-    Map<EthereumAddress, Registry>,
+    Map<EthereumContractAddress, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   getRegistryEntries(
@@ -96,7 +96,7 @@ export interface IRegistryRepository {
   createRegistryEntry(
     registryName: string,
     label: string,
-    recipientAddress: EthereumAddress,
+    recipientAddress: EthereumAccountAddress,
     data: string,
   ): ResultAsync<
     void,
@@ -109,7 +109,7 @@ export interface IRegistryRepository {
   transferRegistryEntry(
     registryName: string,
     tokenId: number,
-    transferToAddress: EthereumAddress,
+    transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
     | NonFungibleRegistryContractError
@@ -130,12 +130,12 @@ export interface IRegistryRepository {
   createRegistryByToken(
     name: string,
     symbol: string,
-    registrarAddress: EthereumAddress,
+    registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError>;
   grantRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -145,7 +145,7 @@ export interface IRegistryRepository {
   >;
   revokeRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -155,7 +155,7 @@ export interface IRegistryRepository {
   >;
   renounceRegistrarRole(
     registryName: string,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError

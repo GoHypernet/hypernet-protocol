@@ -1,4 +1,4 @@
-import { ChainId, EthereumAddress } from "@hypernetlabs/objects";
+import { ChainId, EthereumAccountAddress } from "@hypernetlabs/objects";
 import { ILogUtils, ILogUtilsType, ResultUtils } from "@hypernetlabs/utils";
 import { IBlockchainListener } from "@interfaces/api";
 import { inject, injectable } from "inversify";
@@ -32,7 +32,7 @@ export class BlockchainListener implements IBlockchainListener {
     ]).map((vals) => {
       const [provider, governanceProvider, config, context] = vals;
       // Subscribe to accounts change
-      provider.on("accountsChanged", (accounts: EthereumAddress[]) => {
+      provider.on("accountsChanged", (accounts: EthereumAccountAddress[]) => {
         this.logUtils.debug(
           `Accounts changed to ${accounts}. Need to refresh iframe and the UI`,
         );
@@ -70,7 +70,7 @@ export class BlockchainListener implements IBlockchainListener {
       // The governance provider may or may not be the same as the main provider, but it does have a whole different set of events.
       governanceProvider.on(
         "accountsChanged",
-        (accounts: EthereumAddress[]) => {
+        (accounts: EthereumAccountAddress[]) => {
           this.logUtils.warning(
             `Goveranance accounts changed. Governance is read only so this is not yet an error, but this should never happen. The accounts are: ${accounts}`,
           );

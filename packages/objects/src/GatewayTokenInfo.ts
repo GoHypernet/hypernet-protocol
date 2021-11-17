@@ -1,10 +1,10 @@
 import { ChainId } from "@objects/ChainId";
-import { EthereumAddress } from "@objects/EthereumAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 
 export class GatewayTokenInfo {
   constructor(
-    public tokenAddress: EthereumAddress,
+    public tokenAddress: EthereumContractAddress,
     public chainId: ChainId,
     public routerPublicIdentifiers: PublicIdentifier[],
   ) {}

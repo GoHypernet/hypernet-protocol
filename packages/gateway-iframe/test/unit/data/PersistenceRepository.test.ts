@@ -1,7 +1,7 @@
 import { GatewayUrl, Signature } from "@hypernetlabs/objects";
+import { ILocalStorageUtils } from "@hypernetlabs/utils";
 import td from "testdouble";
 
-import { ILocalStorageUtils } from "@hypernetlabs/utils";
 import { PersistenceRepository } from "@gateway-iframe/implementations/data";
 import { IPersistenceRepository } from "@gateway-iframe/interfaces/data";
 import { ExpectedRedirect } from "@gateway-iframe/interfaces/objects";

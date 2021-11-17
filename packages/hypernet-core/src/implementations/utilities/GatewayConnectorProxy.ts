@@ -1,8 +1,7 @@
 import {
-  IAuthorizeFundsRequest,
-  IResolutionResult,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   GatewayConnectorError,
@@ -20,6 +19,9 @@ import {
   GatewayTokenInfo,
   ActiveStateChannel,
   UtilityMessageSignature,
+  PaymentId,
+  AuthorizeFundsRequestData,
+  SendFundsRequestData,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { HypernetContext } from "@interfaces/objects";
@@ -50,15 +52,22 @@ export class GatewayConnectorProxy
     super(element, iframeUrl, iframeName, debug);
 
     this.signMessageRequested = new Subject();
+
+    this.initiateSendFundsRequested = new Subject();
     this.sendFundsRequested = new Subject();
+
+    this.initiateAuthorizeFundsRequested = new Subject();
     this.authorizeFundsRequested = new Subject();
+
     this.resolveInsuranceRequested = new Subject();
     this.stateChannelRequested = new Subject();
   }
 
   public signMessageRequested: Subject<string>;
-  public sendFundsRequested: Subject<ISendFundsRequest>;
-  public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
+  public initiateSendFundsRequested: Subject<SendFundsRequestData>;
+  public sendFundsRequested: Subject<ISignedSendFundsRequest>;
+  public initiateAuthorizeFundsRequested: Subject<AuthorizeFundsRequestData>;
+  public authorizeFundsRequested: Subject<ISignedAuthorizeFundsRequest>;
   public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
   public stateChannelRequested: Subject<IStateChannelRequest>;
 
@@ -153,13 +162,30 @@ export class GatewayConnectorProxy
         }
       });
 
-      this.child?.on("sendFundsRequested", (request: ISendFundsRequest) => {
-        this.sendFundsRequested.next(request);
-      });
+      this.child?.on(
+        "initiateSendFundsRequested",
+        (request: SendFundsRequestData) => {
+          this.initiateSendFundsRequested.next(request);
+        },
+      );
+
+      this.child?.on(
+        "sendFundsRequested",
+        (request: ISignedSendFundsRequest) => {
+          this.sendFundsRequested.next(request);
+        },
+      );
+
+      this.child?.on(
+        "initiateAuthorizeFundsRequested",
+        (request: AuthorizeFundsRequestData) => {
+          this.initiateAuthorizeFundsRequested.next(request);
+        },
+      );
 
       this.child?.on(
         "authorizeFundsRequested",
-        (request: IAuthorizeFundsRequest) => {
+        (request: ISignedAuthorizeFundsRequest) => {
           this.authorizeFundsRequested.next(request);
         },
       );
@@ -193,7 +219,10 @@ export class GatewayConnectorProxy
       this._pushOpenedGatewayIFrame(this.gatewayUrl);
       this._showGatewayIFrame(context);
 
-      return this._createCall("gatewayIFrameDisplayed", this.gatewayUrl);
+      return this._createCall<void, GatewayConnectorError | ProxyError>(
+        "gatewayIFrameDisplayed",
+        this.gatewayUrl,
+      );
     });
   }
 
@@ -210,7 +239,10 @@ export class GatewayConnectorProxy
       }
 
       // notify the child in gateway connector to tell him that the gateway iframe is going to close up.
-      return this._createCall("gatewayIFrameClosed", this.gatewayUrl);
+      return this._createCall<void, GatewayConnectorError | ProxyError>(
+        "gatewayIFrameClosed",
+        this.gatewayUrl,
+      );
     });
   }
 
@@ -300,6 +332,25 @@ export class GatewayConnectorProxy
     return this._createCall("returnStateChannel", {
       id,
       stateChannel,
+    });
+  }
+
+  public sendFundsInitiated(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, ProxyError> {
+    return this._createCall("sendFundsInitiated", {
+      requestId,
+      paymentId,
+    });
+  }
+  public authorizeFundsInitiated(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, ProxyError> {
+    return this._createCall("authorizeFundsInitiated", {
+      requestId,
+      paymentId,
     });
   }
 

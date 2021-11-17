@@ -4,11 +4,11 @@ import {
   PullPayment,
   PushPayment,
   Balances,
-  EthereumAddress,
   GatewayUrl,
   Signature,
   ActiveStateChannel,
   ChainId,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -16,7 +16,7 @@ import { IGatewayConnectorProxy } from "@interfaces/utilities";
 
 export class HypernetContext {
   constructor(
-    public account: EthereumAddress | null,
+    public account: EthereumAccountAddress | null,
     public publicIdentifier: PublicIdentifier | null,
     public activeStateChannels: ActiveStateChannel[] | null,
     public inControl: boolean,
@@ -51,16 +51,16 @@ export class HypernetContext {
     public onChainConnected: Subject<ChainId>,
     public onGovernanceChainConnected: Subject<ChainId>,
     public onChainChanged: Subject<ChainId>,
-    public onAccountChanged: Subject<EthereumAddress>,
+    public onAccountChanged: Subject<EthereumAccountAddress>,
     public onGovernanceChainChanged: Subject<ChainId>,
-    public onGovernanceAccountChanged: Subject<EthereumAddress>,
+    public onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
   ) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class InitializedHypernetContext {
   constructor(
-    public account: EthereumAddress,
+    public account: EthereumAccountAddress,
     public publicIdentifier: PublicIdentifier,
     public activeStateChannels: ActiveStateChannel[],
     public inControl: boolean,
@@ -95,9 +95,9 @@ export class InitializedHypernetContext {
     public onChainConnected: Subject<ChainId>,
     public onGovernanceChainConnected: Subject<ChainId>,
     public onChainChanged: Subject<ChainId>,
-    public onAccountChanged: Subject<EthereumAddress>,
+    public onAccountChanged: Subject<EthereumAccountAddress>,
     public onGovernanceChainChanged: Subject<ChainId>,
-    public onGovernanceAccountChanged: Subject<EthereumAddress>,
+    public onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
     public authorizedMediators: Map<GatewayUrl, Signature>,
   ) {}
 }

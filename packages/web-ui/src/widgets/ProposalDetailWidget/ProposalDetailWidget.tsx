@@ -1,5 +1,13 @@
-import React, { useEffect, useState, useMemo } from "react";
+import {
+  EProposalState,
+  Proposal,
+  EthereumAccountAddress,
+  EProposalVoteSupport,
+} from "@hypernetlabs/objects";
 import { Box, Typography, Grid } from "@material-ui/core";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IProposalDetailWidgetParams } from "@web-ui/interfaces";
+import React, { useEffect, useState, useMemo } from "react";
 import { useAlert } from "react-alert";
 
 import {
@@ -10,14 +18,6 @@ import {
   GovernanceButton,
 } from "@web-ui/components";
 import { useStyles } from "@web-ui/widgets/ProposalDetailWidget/ProposalDetailWidget.style";
-import { IProposalDetailWidgetParams } from "@web-ui/interfaces";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import {
-  EProposalState,
-  Proposal,
-  EthereumAddress,
-  EProposalVoteSupport,
-} from "@hypernetlabs/objects";
 
 const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   onProposalListNavigate,
@@ -28,7 +28,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>();
+  const [accountAddress, setAccountAddress] =
+    useState<EthereumAccountAddress>();
   const [supportStatus, setSupportStatus] = useState<EProposalVoteSupport>();
 
   useEffect(() => {
@@ -52,7 +53,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
     });
   };
 
-  const getProposalVotesReceipt = (account: EthereumAddress) => {
+  const getProposalVotesReceipt = (account: EthereumAccountAddress) => {
     setLoading(true);
 
     coreProxy
@@ -143,7 +144,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
     () =>
       proposal &&
       accountAddress &&
-      EthereumAddress(proposal.originator) === accountAddress,
+      EthereumAccountAddress(proposal.originator) === accountAddress,
     [JSON.stringify(proposal), accountAddress],
   );
 
