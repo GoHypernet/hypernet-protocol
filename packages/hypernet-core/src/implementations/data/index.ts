@@ -7,3 +7,4 @@ export * from "@implementations/data/PaymentRepository";
 export * from "@implementations/data/RouterRepository";
 export * from "@implementations/data/GovernanceRepository";
 export * from "@implementations/data/RegistryRepository";
+export * from "@implementations/data/TokenInformationRepository";
