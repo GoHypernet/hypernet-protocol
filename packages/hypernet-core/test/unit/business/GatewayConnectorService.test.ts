@@ -4,9 +4,7 @@ import {
   Balances,
   BalancesUnavailableError,
   BigNumberString,
-  BlockchainUnavailableError,
   EPaymentState,
-  EthereumAddress,
   GatewayActivationError,
   GatewayConnectorError,
   GatewayRegistrationInfo,
@@ -21,9 +19,9 @@ import {
   RouterUnauthorizedError,
   Signature,
   SortedTransfers,
-  SupportedToken,
   VectorError,
   RouterSupportedToken,
+  NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import {
@@ -396,7 +394,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks();
 
-    const err = new BlockchainUnavailableError();
+    const err = new NonFungibleRegistryContractError();
     td.when(
       mocks.gatewayRegistrationRepository.getGatewayRegistrationInfo(
         td.matchers.contains([gatewayUrl]),
@@ -592,7 +590,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks();
 
-    const err = new BlockchainUnavailableError();
+    const err = new NonFungibleRegistryContractError();
     td.when(
       mocks.routerRepository.getRouterDetails([routerPublicIdentifier]),
     ).thenReturn(errAsync(err));
@@ -918,7 +916,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks(true);
 
-    const err = new BlockchainUnavailableError();
+    const err = new NonFungibleRegistryContractError();
     td.when(
       mocks.gatewayRegistrationRepository.getGatewayRegistrationInfo(
         td.matchers.contains([gatewayUrl]),

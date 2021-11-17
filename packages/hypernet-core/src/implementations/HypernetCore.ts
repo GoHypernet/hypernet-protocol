@@ -53,6 +53,7 @@ import {
   EthereumAccountAddress,
   EthereumContractAddress,
   RegistryTokenId,
+  PaymentCreationError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -93,7 +94,6 @@ import {
   GovernanceRepository,
   RegistryRepository,
   GatewayRegistrationRepository,
-  ChainInformationRepository,
 } from "@implementations/data";
 import {
   IBlockchainListener,
@@ -121,16 +121,12 @@ import {
   IGatewayRegistrationRepository,
   IGovernanceRepository,
   IRegistryRepository,
-  IChainInformationRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
-import {
-  ChainInformationUtils,
-  StorageUtils,
-} from "@implementations/data/utilities";
+import { StorageUtils } from "@implementations/data/utilities";
 import {
   BrowserNodeProvider,
   ConfigProvider,
@@ -150,10 +146,7 @@ import {
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
-import {
-  IChainInformationUtils,
-  IStorageUtils,
-} from "@interfaces/data/utilities";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -228,7 +221,6 @@ export class HypernetCore implements IHypernetCore {
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
   protected messagingProvider: IMessagingProvider;
-  protected chainInformationUtils: IChainInformationUtils;
 
   // Dependent on the browser node
   protected browserNodeProvider: IBrowserNodeProvider;
@@ -251,7 +243,6 @@ export class HypernetCore implements IHypernetCore {
   protected routerRepository: IRouterRepository;
   protected governanceRepository: IGovernanceRepository;
   protected registryRepository: IRegistryRepository;
-  protected chainInformationRepository: IChainInformationRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
@@ -391,7 +382,9 @@ export class HypernetCore implements IHypernetCore {
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
-    this.internalProviderFactory = new InternalProviderFactory();
+    this.internalProviderFactory = new InternalProviderFactory(
+      this.configProvider,
+    );
     this.gatewayConnectorProxyFactory = new GatewayConnectorProxyFactory(
       this.configProvider,
       this.contextProvider,
@@ -405,14 +398,7 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
-    this.chainInformationUtils = new ChainInformationUtils(
-      this.blockchainProvider,
-      this.configProvider,
-      this.logUtils,
-    );
-
     this.browserNodeFactory = new BrowserNodeFactory(
-      this.chainInformationUtils,
       this.configProvider,
       this.logUtils,
     );
@@ -486,7 +472,6 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.paymentRepository = new PaymentRepository(
-      this.chainInformationUtils,
       this.browserNodeProvider,
       this.vectorUtils,
       this.configProvider,
@@ -519,7 +504,6 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.vectorUtils,
       this.storageUtils,
-      this.chainInformationUtils,
       this.gatewayConnectorProxyFactory,
       this.logUtils,
     );
@@ -529,28 +513,21 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.routerRepository = new RouterRepository(
-      this.chainInformationUtils,
       this.blockchainUtils,
       this.blockchainProvider,
       this.configProvider,
     );
 
     this.governanceRepository = new GovernanceRepository(
-      this.chainInformationUtils,
       this.blockchainProvider,
       this.configProvider,
       this.logUtils,
     );
 
     this.registryRepository = new RegistryRepository(
-      this.chainInformationUtils,
       this.blockchainProvider,
       this.configProvider,
       this.logUtils,
-    );
-
-    this.chainInformationRepository = new ChainInformationRepository(
-      this.chainInformationUtils,
     );
 
     this.paymentService = new PaymentService(
@@ -561,7 +538,6 @@ export class HypernetCore implements IHypernetCore {
       this.paymentRepository,
       this.gatewayConnectorRepository,
       this.gatewayRegistrationRepository,
-      this.chainInformationRepository,
       this.vectorUtils,
       this.paymentUtils,
       this.blockchainUtils,
@@ -805,6 +781,8 @@ export class HypernetCore implements IHypernetCore {
     | AcceptPaymentError
     | InsufficientBalanceError
     | InvalidPaymentIdError
+    | PaymentCreationError
+    | NonFungibleRegistryContractError
   > {
     return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
       this.logUtils.error(e);
@@ -869,9 +847,6 @@ export class HypernetCore implements IHypernetCore {
     let context: HypernetContext;
     this._initializeResult = this.blockchainProvider
       .initialize()
-      .andThen(() => {
-        return this.chainInformationUtils.initialize();
-      })
       .andThen(() => {
         this.logUtils.debug("Getting Ethereum accounts");
         return ResultUtils.combine([
@@ -980,6 +955,7 @@ export class HypernetCore implements IHypernetCore {
     | GatewayAuthorizationDeniedError
     | GatewayActivationError
     | VectorError
+    | NonFungibleRegistryContractError
   > {
     return this.gatewayConnectorService
       .authorizeGateway(gatewayUrl)
@@ -1001,6 +977,7 @@ export class HypernetCore implements IHypernetCore {
     | GatewayActivationError
     | VectorError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   > {
     return this.gatewayConnectorService
       .deauthorizeGateway(gatewayUrl)
@@ -1034,6 +1011,7 @@ export class HypernetCore implements IHypernetCore {
     | GatewayActivationError
     | VectorError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   > {
     return this.gatewayConnectorService
       .getGatewayTokenInfo(gatewayUrls)
@@ -1077,6 +1055,7 @@ export class HypernetCore implements IHypernetCore {
     | BalancesUnavailableError
     | GatewayActivationError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   > {
     return this.gatewayConnectorService
       .closeGatewayIFrame(gatewayUrl)
@@ -1099,6 +1078,7 @@ export class HypernetCore implements IHypernetCore {
     | BalancesUnavailableError
     | GatewayActivationError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   > {
     return this.gatewayConnectorService
       .displayGatewayIFrame(gatewayUrl)

@@ -7,6 +7,7 @@ import {
   EthereumContractAddress,
   GatewayRegistrationInfo,
   GatewayUrl,
+  GovernanceChainInformation,
   HexString,
   IFullChannelState,
   IFullTransferState,
@@ -18,6 +19,7 @@ import {
   ParameterizedResolver,
   ParameterizedState,
   PaymentId,
+  ProviderUrl,
   PublicIdentifier,
   Signature,
   TransferId,
@@ -120,12 +122,37 @@ export const gatewayRegistryAddress = EthereumContractAddress(
 export const liquidityRegistryAddress = EthereumContractAddress(
   "liquidityRegistryAddress",
 );
+export const tokenRegistryAddress = EthereumContractAddress(
+  "tokenRegistryAddress",
+);
+export const chainRegistryAddress = EthereumContractAddress(
+  "chainRegistryAddress",
+);
 export const hypernetGovernorAddress = EthereumContractAddress(
   "hypernetGovernorAddress",
 );
 
 export const registryFactoryAddress = EthereumContractAddress(
   "registryFactoryAddress",
+);
+
+export const governanceChainInformation = new GovernanceChainInformation(
+  "Mock Chain",
+  chainId,
+  true,
+  channelFactoryAddress,
+  transferRegistryAddress,
+  hyperTokenAddress,
+  messageTransferAddress,
+  insuranceTransferAddress,
+  parameterizedTransferAddress,
+  hypernetGovernorAddress,
+  registryFactoryAddress,
+  gatewayRegistryAddress,
+  liquidityRegistryAddress,
+  tokenRegistryAddress,
+  chainRegistryAddress,
+  [ProviderUrl("http://localhost:8545")],
 );
 
 export const validDomain = "hypernetProtocolDomain";

@@ -1,7 +1,7 @@
 import {
   BlockchainUnavailableError,
-  ChainInformation,
   EthereumContractAddress,
+  GovernanceChainInformation,
   NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import {
@@ -12,10 +12,6 @@ import {
   ResultUtils,
 } from "@hypernetlabs/utils";
 import { IInjectedProviderService } from "@interfaces/business";
-import {
-  IChainInformationRepository,
-  IChainInformationRepositoryType,
-} from "@interfaces/data";
 import { ethers } from "ethers";
 import { inject, injectable } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -23,18 +19,19 @@ import { okAsync, ResultAsync } from "neverthrow";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
+  IConfigProvider,
+  IConfigProviderType,
 } from "@interfaces/utilities";
 
 @injectable()
 export class InjectedProviderService implements IInjectedProviderService {
   public constructor(
-    @inject(IChainInformationRepositoryType)
-    protected chainInformationRepository: IChainInformationRepository,
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(ILocalStorageUtilsType)
     protected localStorageUtils: ILocalStorageUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
+    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
   ) {}
 
   public setupInjectedProvider(): ResultAsync<
@@ -43,15 +40,15 @@ export class InjectedProviderService implements IInjectedProviderService {
   > {
     if (this.blockchainProvider.isMetamask()) {
       return ResultUtils.combine([
-        this.chainInformationRepository.getGovernanceChainInformation(),
+        this.configProvider.getConfig(),
         this.blockchainProvider.getProvider(),
       ])
-        .andThen(([chainInformation, provider]) => {
+        .andThen(([config, provider]) => {
           return ResultUtils.combine([
-            this.addNetwork(chainInformation, provider),
+            this.addNetwork(config.governanceChainInformation, provider),
             this.addTokenAddress(
               "HyperToken",
-              chainInformation.hypertokenAddress,
+              config.governanceChainInformation.hypertokenAddress,
               provider,
             ),
           ]);
@@ -63,7 +60,7 @@ export class InjectedProviderService implements IInjectedProviderService {
   }
 
   protected addNetwork(
-    governanceChainInfo: ChainInformation,
+    governanceChainInfo: GovernanceChainInformation,
     provider: ethers.providers.JsonRpcProvider,
   ): ResultAsync<void, BlockchainUnavailableError> {
     const network = governanceChainInfo.providerUrls[0];

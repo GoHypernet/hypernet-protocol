@@ -26,10 +26,6 @@ import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
 
 import {
-  IChainInformationUtils,
-  IChainInformationUtilsType,
-} from "@interfaces/data/utilities";
-import {
   IBlockchainProvider,
   IBlockchainProviderType,
   IConfigProvider,
@@ -47,8 +43,6 @@ export class GovernanceRepository implements IGovernanceRepository {
   protected hypertokenContract: IERC20Contract = {} as ERC20Contract;
 
   constructor(
-    @inject(IChainInformationUtilsType)
-    protected chainInformationUtils: IChainInformationUtils,
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
@@ -243,31 +237,20 @@ export class GovernanceRepository implements IGovernanceRepository {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
-      this.chainInformationUtils.getGovernanceChainInformation(),
-    ]).map(([config, provider, governanceChainInfo]) => {
+    ]).map(([config, provider]) => {
       this.provider = provider;
-
-      if (
-        governanceChainInfo.registryFactoryAddress == null ||
-        governanceChainInfo.hypertokenAddress == null ||
-        governanceChainInfo.hypernetGovernorAddress == null
-      ) {
-        throw new Error(
-          `Chain addresses for the governance chain ${config.governanceChainId} are missing!`,
-        );
-      }
 
       this.hypernetGovernorContract = new HypernetGovernorContract(
         provider,
-        governanceChainInfo.hypernetGovernorAddress,
+        config.governanceChainInformation.hypernetGovernorAddress,
       );
       this.registryFactoryContract = new RegistryFactoryContract(
         provider,
-        governanceChainInfo.registryFactoryAddress,
+        config.governanceChainInformation.registryFactoryAddress,
       );
       this.hypertokenContract = new ERC20Contract(
         provider,
-        governanceChainInfo.hypertokenAddress,
+        config.governanceChainInformation.hypertokenAddress,
       );
     });
   }
@@ -281,31 +264,20 @@ export class GovernanceRepository implements IGovernanceRepository {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceSigner(),
-      this.chainInformationUtils.getGovernanceChainInformation(),
-    ]).map(([config, signer, governanceChainInfo]) => {
+    ]).map(([config, signer]) => {
       this.signer = signer;
-
-      if (
-        governanceChainInfo.registryFactoryAddress == null ||
-        governanceChainInfo.hypertokenAddress == null ||
-        governanceChainInfo.hypernetGovernorAddress == null
-      ) {
-        throw new Error(
-          `Chain addresses for the governance chain ${config.governanceChainId} are missing!`,
-        );
-      }
 
       this.hypernetGovernorContract = new HypernetGovernorContract(
         signer,
-        governanceChainInfo.hypernetGovernorAddress,
+        config.governanceChainInformation.hypernetGovernorAddress,
       );
       this.registryFactoryContract = new RegistryFactoryContract(
         signer,
-        governanceChainInfo.registryFactoryAddress,
+        config.governanceChainInformation.registryFactoryAddress,
       );
       this.hypertokenContract = new ERC20Contract(
         signer,
-        governanceChainInfo.hypertokenAddress,
+        config.governanceChainInformation.hypertokenAddress,
       );
     });
   }

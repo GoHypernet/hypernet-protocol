@@ -1,16 +1,15 @@
-import { ChainProviders } from "@connext/vector-types";
 import {
   AuthorizedGatewaysSchema,
   ChainId,
   DefinitionName,
-  EthereumContractAddress,
-  ProviderUrl,
+  GovernanceChainInformation,
   SchemaUrl,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { HypernetConfig } from "@interfaces/objects";
 import { ResultAsync, okAsync } from "neverthrow";
 
+import { chainConfig } from "@implementations/configuration/chains.config";
 import { IConfigProvider } from "@interfaces/utilities";
 
 declare const __IFRAME_SOURCE__: string;
@@ -19,10 +18,7 @@ declare const __AUTH_URL__: string;
 declare const __VALIDATOR_IFRAME_URL__: string;
 declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
-declare const __INFURA_ID__: string;
 declare const __GOVERNANCE_CHAIN_ID__: string;
-declare const __GOVERNANCE_PROVIDER_URLS__: string;
-declare const __CHAIN_REGISTRY_ADDRESS__: string;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -33,16 +29,26 @@ export class ConfigProvider implements IConfigProvider {
       return;
     }
 
-    const governanceProviderUrls = JSON.parse(
-      __GOVERNANCE_PROVIDER_URLS__,
-    ) as ProviderUrl[];
+    const governanceChainId = ChainId(parseInt(__GOVERNANCE_CHAIN_ID__));
+    const governanceChainInformation = chainConfig.get(governanceChainId);
+
+    if (governanceChainInformation == null) {
+      throw new Error(
+        `Invalid configuration! No ChainInformation exists for governance chain ${governanceChainId}`,
+      );
+    }
+
+    if (!(governanceChainInformation instanceof GovernanceChainInformation)) {
+      throw new Error(
+        `Invalid configuration! Governance chain ${governanceChainId} is not a GovernanceChainInformation`,
+      );
+    }
 
     this.config = new HypernetConfig(
       __IFRAME_SOURCE__, // iframeSource
-      __INFURA_ID__, // infuraId
-      ChainId(parseInt(__GOVERNANCE_CHAIN_ID__)), // governanceChainId
-      governanceProviderUrls, // governanceEthProviderUrl
-      EthereumContractAddress(__CHAIN_REGISTRY_ADDRESS__), // chainRegistryAddress
+      governanceChainId, // governanceChainId
+      chainConfig, // chainInfo
+      governanceChainInformation, // governanceChainInformation
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       __NATS_URL__, // natsUrl

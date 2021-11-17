@@ -13,10 +13,6 @@ import { inject, injectable } from "inversify";
 import { errAsync, ResultAsync } from "neverthrow";
 
 import {
-  IChainInformationUtils,
-  IChainInformationUtilsType,
-} from "@interfaces/data/utilities";
-import {
   IBlockchainProvider,
   IBlockchainProviderType,
   IBlockchainUtils,
@@ -30,8 +26,6 @@ export class RouterRepository implements IRouterRepository {
   protected routerRegistrationInfoMap: Map<PublicIdentifier, RouterDetails>;
 
   constructor(
-    @inject(IChainInformationUtilsType)
-    protected chainInformationUtils: IChainInformationUtils,
     @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
@@ -44,23 +38,12 @@ export class RouterRepository implements IRouterRepository {
     publicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
     Map<PublicIdentifier, RouterDetails>,
-    BlockchainUnavailableError | NonFungibleRegistryContractError
+    NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.chainInformationUtils.getGovernanceChainInformation(),
+      this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([governanceChainInformation, provider]) => {
-      if (governanceChainInformation.liquidityRegistryAddress == null) {
-        return errAsync<
-          Map<PublicIdentifier, RouterDetails>,
-          BlockchainUnavailableError
-        >(
-          new BlockchainUnavailableError(
-            `Unable to getRouterDetails for chain ${governanceChainInformation.chainId}. No configuration info for that chain is available`,
-          ),
-        );
-      }
-
+    ]).andThen(([config, provider]) => {
       const returnInfo = new Map<PublicIdentifier, RouterDetails>();
       const newRouterResults = new Array<
         ResultAsync<void, NonFungibleRegistryContractError>
@@ -69,7 +52,7 @@ export class RouterRepository implements IRouterRepository {
       const routerRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          governanceChainInformation.liquidityRegistryAddress,
+          config.governanceChainInformation.liquidityRegistryAddress,
         );
 
       // Check for entries that are already cached.

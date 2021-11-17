@@ -1,4 +1,4 @@
-import { EthereumAccountAddress } from "@hypernetlabs/objects";
+import { EthereumAccountAddress, RegistryTokenId } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
@@ -16,7 +16,7 @@ interface ITransferIdentityWidget {
   onCloseCallback: () => void;
   onSuccessCallback: () => void;
   registryName: string;
-  tokenId: number;
+  tokenId: RegistryTokenId;
 }
 
 const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({

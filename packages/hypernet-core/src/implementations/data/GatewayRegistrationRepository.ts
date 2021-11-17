@@ -7,6 +7,7 @@ import {
   GatewayRegistrationFilter,
   Signature,
   EthereumAccountAddress,
+  NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -17,14 +18,9 @@ import {
 } from "@hypernetlabs/utils";
 import { IGatewayRegistrationRepository } from "@interfaces/data";
 import { injectable, inject } from "inversify";
-import { errAsync, ResultAsync } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 
-import {
-  IChainInformationUtils,
-  IChainInformationUtilsType,
-  IStorageUtils,
-  IStorageUtilsType,
-} from "@interfaces/data/utilities";
+import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
@@ -57,8 +53,6 @@ export class GatewayRegistrationRepository
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
-    @inject(IChainInformationUtilsType)
-    protected chainInformationUtils: IChainInformationUtils,
     @inject(IGatewayConnectorProxyFactoryType)
     protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
@@ -70,29 +64,21 @@ export class GatewayRegistrationRepository
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    BlockchainUnavailableError
+    NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.chainInformationUtils.getGovernanceChainInformation(),
+      this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([governanceChainInfo, provider]) => {
-      if (governanceChainInfo.gatewayRegistryAddress == null) {
-        return errAsync(
-          new BlockchainUnavailableError(
-            `Unable to getGatewayRegistrationInfo for chain ${governanceChainInfo.name}. Governance contracts are not deployed on this chain.`,
-          ),
-        );
-      }
-
+    ]).andThen(([config, provider]) => {
       const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
       const newGatewayResults = new Array<
-        ResultAsync<void, BlockchainUnavailableError>
+        ResultAsync<void, NonFungibleRegistryContractError>
       >();
 
       const gatewayRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          governanceChainInfo.gatewayRegistryAddress,
+          config.governanceChainInformation.gatewayRegistryAddress,
         );
 
       // Check for entries that are already cached.
