@@ -3,9 +3,7 @@ import {
   BlockchainUnavailableError,
   InvalidParametersError,
   PrivateCredentials,
-  ChainId,
   GovernanceSignerUnavailableError,
-  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
@@ -14,8 +12,7 @@ import {
   ILogUtilsType,
   ResultUtils,
 } from "@hypernetlabs/utils";
-import { HypernetConfig } from "@interfaces/objects";
-import { IWCEthRpcConnectionOptions } from "@walletconnect/types";
+import { IWCEthRpcConnectionOptions, IRPCMap } from "@walletconnect/types";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers, providers } from "ethers";
 import { inject, injectable } from "inversify";
@@ -228,17 +225,21 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
         this.contextProvider.getContext(),
         this.configProvider.getConfig(),
       ])
-        .andThen((vals) => {
-          const [context, config] = vals;
+        .andThen(([context, config]) => {
+          // Convert all the chain information into an RPC map for wallet connect. This eliminates the need for infura
+          const rpcMap = Array.from(config.chainInformation.entries()).reduce(
+            (prev, [chainId, chainInfo]) => {
+              prev[chainId] = chainInfo.providerUrls[0];
+              return prev;
+            },
+            {} as IRPCMap,
+          );
+
           const providerOptions: IProviderOptions = {
             walletconnect: {
               package: WalletConnectProvider,
               options: {
-                infuraId: config.infuraId,
-                rpc: {
-                  1337: "http://localhost:8545",
-                  1369: "https://eth-provider-dev.hypernetlabs.io",
-                },
+                rpc: rpcMap,
               } as IWCEthRpcConnectionOptions,
             },
           };
@@ -339,14 +340,15 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
                 }
 
                 // We will have to create a provider for the governance chain. We won't bother with the a signer.
-                const providers = config.governanceEthProviderUrls.map(
-                  (providerUrl) => {
-                    return new ethers.providers.JsonRpcProvider(
-                      providerUrl,
-                      config.governanceChainId,
-                    );
-                  },
-                );
+                const providers =
+                  config.governanceChainInformation.providerUrls.map(
+                    (providerUrl) => {
+                      return new ethers.providers.JsonRpcProvider(
+                        providerUrl,
+                        config.governanceChainId,
+                      );
+                    },
+                  );
                 this.governanceProvider = new ethers.providers.FallbackProvider(
                   providers,
                 );

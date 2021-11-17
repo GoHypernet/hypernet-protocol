@@ -46,10 +46,6 @@ import { inject, injectable } from "inversify";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 import {
-  IChainInformationUtils,
-  IChainInformationUtilsType,
-} from "@interfaces/data/utilities";
-import {
   IBlockchainTimeUtils,
   IBlockchainTimeUtilsType,
   IBrowserNode,
@@ -72,8 +68,6 @@ import {
 @injectable()
 export class PaymentRepository implements IPaymentRepository {
   constructor(
-    @inject(IChainInformationUtilsType)
-    protected chainInformationUtils: IChainInformationUtils,
     @inject(IBrowserNodeProviderType)
     protected browserNodeProvider: IBrowserNodeProvider,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
@@ -95,9 +89,8 @@ export class PaymentRepository implements IPaymentRepository {
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
       this.configProvider.getConfig(),
-      this.chainInformationUtils.getChainInformation(),
     ])
-      .andThen(([transfers, browserNode, context, config, chainInfo]) => {
+      .andThen(([transfers, browserNode, context, config]) => {
         return this.paymentUtils
           .transfersToPayment(paymentId, transfers)
           .andThen((payment) => {
@@ -119,9 +112,9 @@ export class PaymentRepository implements IPaymentRepository {
             }
 
             // Lookup the chain info
-            const paymentChainInfo = chainInfo.find((ci) => {
-              return ci.chainId == payment.chainId;
-            });
+            const paymentChainInfo = config.chainInformation.get(
+              payment.chainId,
+            );
 
             if (paymentChainInfo == null) {
               return errAsync<IBasicTransferResponse, PaymentCreationError>(
@@ -200,72 +193,72 @@ export class PaymentRepository implements IPaymentRepository {
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
       this.blockchainTimeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
-      this.chainInformationUtils.getGovernanceChainInformation(),
-    ]).andThen(
-      ([
-        browserNode,
-        context,
+    ]).andThen(([browserNode, context, paymentId, timestamp, config]) => {
+      // Get the state channel to use
+      const stateChannel = context.activeStateChannels.find((asc) => {
+        return (
+          asc.chainId == chainId &&
+          asc.routerPublicIdentifier == routerPublicIdentifier
+        );
+      });
+
+      if (stateChannel == null) {
+        return errAsync(
+          new PaymentCreationError(`State channel does not exist`),
+        );
+      }
+
+      const chainInfo = config.chainInformation.get(chainId);
+
+      if (chainInfo == null) {
+        return errAsync(
+          new PaymentCreationError(
+            `Can not create a payment on chain ${chainId}, no configuration information exists for this chain.`,
+          ),
+        );
+      }
+
+      const message: IHypernetOfferDetails = {
+        routerPublicIdentifier,
+        chainId,
+        messageType: EMessageTransferType.OFFER,
+        requireOnline: config.requireOnline,
         paymentId,
-        timestamp,
-        config,
-        governanceChainInfo,
-      ]) => {
-        // Get the state channel to use
-        const stateChannel = context.activeStateChannels.find((asc) => {
-          return (
-            asc.chainId == chainId &&
-            asc.routerPublicIdentifier == routerPublicIdentifier
-          );
-        });
+        creationDate: timestamp,
+        to: counterPartyAccount,
+        from: context.publicIdentifier,
+        requiredStake,
+        paymentAmount: maximumAmount,
+        expirationDate,
+        paymentToken,
+        insuranceToken: chainInfo.hypertokenAddress,
+        gatewayUrl,
+        metadata,
+        rate: {
+          deltaAmount,
+          deltaTime,
+        },
+      };
 
-        if (stateChannel == null) {
-          return errAsync(
-            new PaymentCreationError(`State channel does not exist`),
-          );
-        }
-
-        const message: IHypernetOfferDetails = {
-          routerPublicIdentifier,
-          chainId,
-          messageType: EMessageTransferType.OFFER,
-          requireOnline: config.requireOnline,
-          paymentId,
-          creationDate: timestamp,
-          to: counterPartyAccount,
-          from: context.publicIdentifier,
-          requiredStake,
-          paymentAmount: maximumAmount,
-          expirationDate,
-          paymentToken,
-          insuranceToken: governanceChainInfo.hypertokenAddress,
-          gatewayUrl,
-          metadata,
-          rate: {
-            deltaAmount,
-            deltaTime,
-          },
-        };
-
-        // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils
-          .createOfferTransfer(
-            stateChannel.channelAddress,
-            counterPartyAccount,
-            message,
-          )
-          .andThen((transferInfo) => {
-            return browserNode.getTransfer(TransferId(transferInfo.transferId));
-          })
-          .andThen((transfer) => {
-            // Return the payment
-            return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
-          })
-          .map((payment) => {
-            return payment as PullPayment;
-          })
-          .mapErr((err) => new PaymentCreationError(err?.message, err));
-      },
-    );
+      // Create a message transfer, with the terms of the payment in the metadata.
+      return this.vectorUtils
+        .createOfferTransfer(
+          stateChannel.channelAddress,
+          counterPartyAccount,
+          message,
+        )
+        .andThen((transferInfo) => {
+          return browserNode.getTransfer(TransferId(transferInfo.transferId));
+        })
+        .andThen((transfer) => {
+          // Return the payment
+          return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+        })
+        .map((payment) => {
+          return payment as PullPayment;
+        })
+        .mapErr((err) => new PaymentCreationError(err?.message, err));
+    });
   }
 
   /**
@@ -303,68 +296,68 @@ export class PaymentRepository implements IPaymentRepository {
       this.paymentUtils.createPaymentId(EPaymentType.Push),
       this.blockchainTimeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
-      this.chainInformationUtils.getGovernanceChainInformation(),
-    ]).andThen(
-      ([
-        browserNode,
-        context,
+    ]).andThen(([browserNode, context, paymentId, timestamp, config]) => {
+      // Get the state channel to use
+      const stateChannel = context.activeStateChannels.find((asc) => {
+        return (
+          asc.chainId == chainId &&
+          asc.routerPublicIdentifier == routerPublicIdentifier
+        );
+      });
+
+      if (stateChannel == null) {
+        return errAsync(
+          new PaymentCreationError(`State channel does not exist`),
+        );
+      }
+
+      const chainInfo = config.chainInformation.get(chainId);
+
+      if (chainInfo == null) {
+        return errAsync(
+          new PaymentCreationError(
+            `Can not create a payment on chain ${chainId}, no configuration information exists for this chain.`,
+          ),
+        );
+      }
+
+      const message: IHypernetOfferDetails = {
+        routerPublicIdentifier,
+        chainId,
+        messageType: EMessageTransferType.OFFER,
         paymentId,
-        timestamp,
-        config,
-        governanceChainInfo,
-      ]) => {
-        // Get the state channel to use
-        const stateChannel = context.activeStateChannels.find((asc) => {
-          return (
-            asc.chainId == chainId &&
-            asc.routerPublicIdentifier == routerPublicIdentifier
-          );
-        });
+        creationDate: timestamp,
+        to: counterPartyAccount,
+        from: context.publicIdentifier,
+        requiredStake: requiredStake,
+        paymentAmount: amount,
+        expirationDate: expirationDate,
+        paymentToken,
+        insuranceToken: chainInfo.hypertokenAddress,
+        gatewayUrl,
+        metadata,
+        requireOnline: config.requireOnline,
+      };
 
-        if (stateChannel == null) {
-          return errAsync(
-            new PaymentCreationError(`State channel does not exist`),
-          );
-        }
-
-        const message: IHypernetOfferDetails = {
-          routerPublicIdentifier,
-          chainId,
-          messageType: EMessageTransferType.OFFER,
-          paymentId,
-          creationDate: timestamp,
-          to: counterPartyAccount,
-          from: context.publicIdentifier,
-          requiredStake: requiredStake,
-          paymentAmount: amount,
-          expirationDate: expirationDate,
-          paymentToken,
-          insuranceToken: governanceChainInfo.hypertokenAddress,
-          gatewayUrl,
-          metadata,
-          requireOnline: config.requireOnline,
-        };
-
-        // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils
-          .createOfferTransfer(
-            stateChannel.channelAddress,
-            counterPartyAccount,
-            message,
-          )
-          .andThen((transferInfo) => {
-            return browserNode.getTransfer(TransferId(transferInfo.transferId));
-          })
-          .andThen((transfer) => {
-            // Return the payment
-            return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
-          })
-          .map((payment) => {
-            return payment as PushPayment;
-          })
-          .mapErr((err) => new PaymentCreationError(err?.message, err));
-      },
-    );
+      // Create a message transfer, with the terms of the payment in the metadata.
+      return this.vectorUtils
+        .createOfferTransfer(
+          stateChannel.channelAddress,
+          counterPartyAccount,
+          message,
+        )
+        .andThen((transferInfo) => {
+          return browserNode.getTransfer(TransferId(transferInfo.transferId));
+        })
+        .andThen((transfer) => {
+          // Return the payment
+          return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+        })
+        .map((payment) => {
+          return payment as PushPayment;
+        })
+        .mapErr((err) => new PaymentCreationError(err?.message, err));
+    });
   }
 
   /**
@@ -675,16 +668,8 @@ export class PaymentRepository implements IPaymentRepository {
       this.contextProvider.getInitializedContext(),
       this._getTransfersByPaymentId(paymentId),
       this.blockchainTimeUtils.getBlockchainTimestamp(),
-      this.chainInformationUtils.getChainInformation(),
     ]).andThen(
-      ([
-        browserNode,
-        config,
-        context,
-        existingTransfers,
-        timestamp,
-        chainInfo,
-      ]) => {
+      ([browserNode, config, context, existingTransfers, timestamp]) => {
         return this.paymentUtils
           .transfersToPayment(paymentId, existingTransfers)
           .andThen((payment) => {
@@ -712,9 +697,9 @@ export class PaymentRepository implements IPaymentRepository {
             }
 
             // Lookup the chain info
-            const paymentChainInfo = chainInfo.find((ci) => {
-              return ci.chainId == payment.chainId;
-            });
+            const paymentChainInfo = config.chainInformation.get(
+              payment.chainId,
+            );
 
             if (paymentChainInfo == null) {
               return errAsync<IBasicTransferResponse, PaymentCreationError>(

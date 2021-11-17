@@ -2,6 +2,7 @@ import {
   EthereumAccountAddress,
   Registry,
   RegistryEntry,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -83,7 +84,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
     coreProxy
       .updateRegistryEntryLabel(
         registryName,
-        registryEntry?.tokenId as number,
+        registryEntry?.tokenId as RegistryTokenId,
         val,
       )
       .map((registryEntry: RegistryEntry) => {
@@ -98,7 +99,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
     coreProxy
       .updateRegistryEntryTokenURI(
         registryName,
-        registryEntry?.tokenId as number,
+        registryEntry?.tokenId as RegistryTokenId,
         val,
       )
       .map((registryEntry: RegistryEntry) => {

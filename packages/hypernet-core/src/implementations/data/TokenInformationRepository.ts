@@ -4,14 +4,13 @@ import {
   NonFungibleRegistryContractError,
   TokenInformation,
   EthereumContractAddress,
-  ProviderUrl,
   ChainId,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ILogUtilsType, ResultUtils } from "@hypernetlabs/utils";
+import { ITokenInformationRepository } from "@interfaces/data";
 import { injectable, inject } from "inversify";
 import { ResultAsync, okAsync } from "neverthrow";
 
-import { ITokenInformationUtils } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
@@ -28,7 +27,10 @@ export class TokenInformationRepository implements ITokenInformationRepository {
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
-  public getTokenInformation(): ResultAsync<TokenInformation[], never> {
+  public getTokenInformation(): ResultAsync<
+    TokenInformation[],
+    NonFungibleRegistryContractError
+  > {
     return ResultUtils.combine([
       this.blockchainProvider.getGovernanceProvider(),
       this.configProvider.getConfig(),
@@ -36,7 +38,7 @@ export class TokenInformationRepository implements ITokenInformationRepository {
       const nonFungibleRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          config.tokenRegistryAddress,
+          config.governanceChainInformation.tokenRegistryAddress,
         );
       return nonFungibleRegistryContract
         .totalSupply()
@@ -64,7 +66,7 @@ export class TokenInformationRepository implements ITokenInformationRepository {
           return ResultUtils.combine(registryEntryListResult);
         })
         .map((registryEntriesOrNulls) => {
-          this.chainInfo = registryEntriesOrNulls
+          return registryEntriesOrNulls
             .filter((val) => {
               return val != null;
             })
@@ -79,10 +81,8 @@ export class TokenInformationRepository implements ITokenInformationRepository {
               }
 
               // Parse the tokenURI; it's not really a TokenInformation but this is easie
-              const info = JSON.parse(
-                registryEntry.tokenURI,
-              ) as IChainTokenInfo;
-              const chainInfo = new TokenInformation(
+              const info = JSON.parse(registryEntry.tokenURI) as ITokenInfo;
+              return new TokenInformation(
                 info.name,
                 info.symbol,
                 ChainId(info.chainId),
@@ -90,15 +90,8 @@ export class TokenInformationRepository implements ITokenInformationRepository {
                 info.nativeToken,
                 info.erc20,
                 info.decimals,
-                info.logoUrl
+                info.logoUrl,
               );
-
-              // If this is the governance chain info, we'll stash that too
-              if (chainInfo.chainId == config.governanceChainId) {
-                this.governanceChainInfo = chainInfo;
-              }
-
-              return chainInfo;
             });
         });
     });

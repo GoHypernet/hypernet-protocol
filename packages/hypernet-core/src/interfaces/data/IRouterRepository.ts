@@ -1,5 +1,5 @@
 import {
-  BlockchainUnavailableError,
+  NonFungibleRegistryContractError,
   PublicIdentifier,
   RouterDetails,
 } from "@hypernetlabs/objects";
@@ -10,7 +10,7 @@ export interface IRouterRepository {
     publicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
     Map<PublicIdentifier, RouterDetails>,
-    BlockchainUnavailableError
+    NonFungibleRegistryContractError
   >;
 }
 
