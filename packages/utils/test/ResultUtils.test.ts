@@ -1,8 +1,54 @@
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
-import { ResultUtils } from "../src/ResultUtils";
+import { ResultUtils } from "@utils/ResultUtils";
 
 describe("ResultUtils tests", () => {
+  test("combine returns after each method completes", async () => {
+    // Arrange
+    let value = 0;
+    function asyncMethod() {
+      return okAsync<number, Error>(value++);
+    }
+
+    // Act
+    const result = await ResultUtils.combine([
+      asyncMethod(),
+      asyncMethod(),
+      asyncMethod(),
+    ]);
+
+    // Assert
+    expect(result.isErr()).toBeFalsy();
+    const results = result._unsafeUnwrap();
+    expect(results).toStrictEqual([0, 1, 2]);
+    expect(value).toBe(3);
+  });
+
+  test("combine returns an error if one method fails", async () => {
+    // Arrange
+    let value = 0;
+    function asyncMethod() {
+      return okAsync<number, Error>(value++);
+    }
+
+    const err = new Error();
+    function errorMethod() {
+      return errAsync<number, Error>(err);
+    }
+
+    // Act
+    const result = await ResultUtils.combine([
+      asyncMethod(),
+      errorMethod(),
+      asyncMethod(),
+    ]);
+
+    // Assert
+    expect(result.isErr()).toBeTruthy();
+    const errResult = result._unsafeUnwrapErr();
+    expect(errResult).toBe(err);
+  });
+
   test("executeSerially executes resultAsyncs sequentially", async () => {
     // Arrange
     let value = 0;

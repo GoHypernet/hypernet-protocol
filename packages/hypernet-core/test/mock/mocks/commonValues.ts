@@ -45,7 +45,7 @@ export const ethereumAddress = EthereumContractAddress(
   "0x0000000000000000000000000000000000000000",
 );
 export const chainId = ChainId(1337);
-export const hyperTokenAddress = EthereumContractAddress(constants.AddressZero);
+export const hyperTokenAddress = EthereumContractAddress("0xhyperTokenAddress");
 export const commonAmount = BigNumberString("1");
 export const uncommonAmount = BigNumberString("2");
 export const destinationAddress = EthereumAccountAddress(

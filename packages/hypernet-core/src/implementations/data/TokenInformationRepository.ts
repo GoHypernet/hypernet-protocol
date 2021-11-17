@@ -39,74 +39,62 @@ export class TokenInformationRepository implements ITokenInformationRepository {
           return nonFungibleRegistryContract
             .totalSupply()
             .andThen((totalCount) => {
-              const registryEntryListResult: ResultAsync<
-                RegistryEntry | null,
+              const registryEntryListResults: ResultAsync<
+                RegistryEntry,
                 NonFungibleRegistryContractError
               >[] = [];
               for (let i = 1; i <= totalCount; i++) {
                 const registryEntryResult = nonFungibleRegistryContract
                   .tokenByIndex(i)
-                  .andThen<
-                    RegistryEntry | null,
-                    NonFungibleRegistryContractError
-                  >((tokenId) => {
+                  .andThen((tokenId) => {
                     return nonFungibleRegistryContract.getRegistryEntryByTokenId(
                       tokenId,
                     );
-                  })
-                  .orElse(() => {
-                    return okAsync(null);
                   });
 
-                registryEntryListResult.push(registryEntryResult);
+                registryEntryListResults.push(registryEntryResult);
               }
-              return ResultUtils.combine(registryEntryListResult);
+              return ResultUtils.combine(registryEntryListResults);
             })
-            .map((registryEntriesOrNulls) => {
-              registryEntriesOrNulls
-                .filter((val) => {
-                  return val != null;
-                })
-                .map((registryEntry) => {
-                  if (registryEntry == null) {
-                    throw new Error(
-                      "Oh no! Bear is driving! How can this be?!",
-                    );
-                  }
-                  if (registryEntry.tokenURI == null) {
-                    throw new Error(
-                      `Invalid entry in Token Registry. The tokenURI is null! Token ID is ${registryEntry.tokenId}`,
-                    );
-                  }
-
-                  // Parse the tokenURI; it's not really a TokenInformation but this is easie
-                  const info = JSON.parse(registryEntry.tokenURI) as ITokenInfo;
-                  const chainId = ChainId(info.chainId);
-                  const address = EthereumContractAddress(info.address);
-                  const tokenInfo = new TokenInformation(
-                    info.name,
-                    info.symbol,
-                    chainId,
-                    address,
-                    info.nativeToken,
-                    info.erc20,
-                    info.decimals,
-                    info.logoUrl,
+            .map((registryEntries) => {
+              registryEntries.forEach((registryEntry) => {
+                if (registryEntry == null) {
+                  throw new Error("Oh no! Bear is driving! How can this be?!");
+                }
+                if (registryEntry.tokenURI == null) {
+                  throw new Error(
+                    `Invalid entry in Token Registry. The tokenURI is null! Token ID is ${registryEntry.tokenId}`,
                   );
+                }
 
-                  // Get the map for this token's chain. Create it if necessary
-                  let chainMap = this.tokenInformation.get(chainId);
-                  if (chainMap == null) {
-                    chainMap = new Map<
-                      EthereumContractAddress,
-                      TokenInformation
-                    >();
-                    this.tokenInformation.set(chainId, chainMap);
-                  }
+                // Parse the tokenURI; it's not really a TokenInformation but this is easie
+                const info = JSON.parse(registryEntry.tokenURI) as ITokenInfo;
+                const chainId = ChainId(info.chainId);
+                const address = EthereumContractAddress(info.address);
+                const tokenInfo = new TokenInformation(
+                  info.name,
+                  info.symbol,
+                  chainId,
+                  address,
+                  info.nativeToken,
+                  info.erc20,
+                  info.decimals,
+                  info.logoUrl,
+                );
 
-                  // Store the token information
-                  chainMap.set(address, tokenInfo);
-                });
+                // Get the map for this token's chain. Create it if necessary
+                let chainMap = this.tokenInformation.get(chainId);
+                if (chainMap == null) {
+                  chainMap = new Map<
+                    EthereumContractAddress,
+                    TokenInformation
+                  >();
+                  this.tokenInformation.set(chainId, chainMap);
+                }
+
+                // Store the token information
+                chainMap.set(address, tokenInfo);
+              });
             });
         });
     });
