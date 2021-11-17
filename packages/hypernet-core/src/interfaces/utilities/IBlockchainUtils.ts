@@ -4,14 +4,13 @@ import {
   TypedDataField,
 } from "@ethersproject/abstract-signer";
 import {
-  EthereumAddress,
   Signature,
   BlockchainUnavailableError,
   BigNumberString,
   HexString,
-  GatewayUrl,
-  GatewayRegistrationInfo,
   ChainId,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -21,17 +20,17 @@ export interface IBlockchainUtils {
     types: Record<string, Array<TypedDataField>>,
     value: Record<string, unknown>,
     signature: Signature,
-  ): EthereumAddress;
+  ): EthereumAccountAddress;
 
   erc20Transfer(
-    assetAddress: EthereumAddress,
+    assetAddress: EthereumContractAddress,
     channelAddress: string,
     amount: BigNumberString,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 
   mintToken(
     amount: BigNumberString,
-    to: EthereumAddress,
+    to: EthereumAccountAddress,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 
   /**
@@ -59,9 +58,9 @@ export interface IBlockchainUtils {
   ): ResultAsync<[string, HexString], BlockchainUnavailableError>;
 
   getERC721Entry<T>(
-    contractAddress: EthereumAddress,
+    contractAddress: EthereumContractAddress,
     key: string,
-  ): ResultAsync<T, BlockchainUnavailableError>
+  ): ResultAsync<T, BlockchainUnavailableError>;
 }
 
 export const IBlockchainUtilsType = Symbol.for("IBlockchainUtils");

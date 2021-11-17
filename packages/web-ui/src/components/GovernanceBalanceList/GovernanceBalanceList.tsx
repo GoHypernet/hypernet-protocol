@@ -28,7 +28,9 @@ export const GovernanceBalanceList: React.FC<GovernanceBalanceListProps> = (
             <img
               className={classes.tokenLogo}
               src={
-                balance.symbol === "HYPR" || balance.symbol === "HYPR"
+                balance.symbol === "HYPR" ||
+                balance.symbol === "H" ||
+                balance.symbol === "HPT"
                   ? HYPER_TOKEN_LOGO_URL
                   : `https://cryptoicon-api.vercel.app/api/icon/${balance.symbol.toLocaleLowerCase()}`
               }

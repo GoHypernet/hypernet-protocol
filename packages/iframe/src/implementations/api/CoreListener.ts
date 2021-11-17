@@ -4,7 +4,6 @@ import {
   ICoreUIServiceType,
 } from "@core-iframe/interfaces/business";
 import {
-  EthereumAddress,
   IHypernetCore,
   IHypernetCoreType,
   PaymentId,
@@ -15,9 +14,16 @@ import {
   GatewayRegistrationFilter,
   EProposalVoteSupport,
   RegistryParams,
+  ERegistrySortOrder,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
-import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
-import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
+import {
+  IIFrameCallData,
+  ChildProxy,
+  ILogUtils,
+  ILogUtilsType,
+} from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
 import Postmate from "postmate";
 
@@ -74,8 +80,8 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       depositFunds: (
         data: IIFrameCallData<{
-          channelAddress: EthereumAddress;
-          assetAddress: EthereumAddress;
+          channelAddress: EthereumContractAddress;
+          assetAddress: EthereumContractAddress;
           amount: BigNumberString;
         }>,
       ) => {
@@ -90,10 +96,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
       withdrawFunds: (
         data: IIFrameCallData<{
-          channelAddress: EthereumAddress;
-          assetAddress: EthereumAddress;
+          channelAddress: EthereumContractAddress;
+          assetAddress: EthereumContractAddress;
           amount: BigNumberString;
-          destinationAddress: EthereumAddress;
+          destinationAddress: EthereumAccountAddress;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -206,7 +212,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         data: IIFrameCallData<{
           name: string;
           symbol: string;
-          owner: EthereumAddress;
+          owner: EthereumAccountAddress;
           enumerable: boolean;
         }>,
       ) => {
@@ -221,7 +227,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       delegateVote: (
         data: IIFrameCallData<{
-          delegateAddress: EthereumAddress;
+          delegateAddress: EthereumAccountAddress;
           amount: number | null;
         }>,
       ) => {
@@ -250,7 +256,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getProposalVotesReceipt: (
         data: IIFrameCallData<{
           proposalId: string;
-          voterAddress: EthereumAddress;
+          voterAddress: EthereumAccountAddress;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -260,33 +266,18 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
-      proposeRegistryEntry: (
-        data: IIFrameCallData<{
-          registryName: string;
-          label: string;
-          data: string;
-          recipient: EthereumAddress;
-        }>,
-      ) => {
-        this.returnForModel(() => {
-          return this.core.proposeRegistryEntry(
-            data.data.registryName,
-            data.data.label,
-            data.data.data,
-            data.data.recipient,
-          );
-        }, data.callId);
-      },
       getRegistries: (
         data: IIFrameCallData<{
           pageNumber: number;
           pageSize: number;
+          sortOrder: ERegistrySortOrder;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.getRegistries(
             data.data.pageNumber,
             data.data.pageSize,
+            data.data.sortOrder,
           );
         }, data.callId);
       },
@@ -295,7 +286,9 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getRegistryByName(data.data);
         }, data.callId);
       },
-      getRegistryByAddress: (data: IIFrameCallData<EthereumAddress[]>) => {
+      getRegistryByAddress: (
+        data: IIFrameCallData<EthereumContractAddress[]>,
+      ) => {
         this.returnForModel(() => {
           return this.core.getRegistryByAddress(data.data);
         }, data.callId);
@@ -310,6 +303,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           registryName: string;
           pageNumber: number;
           pageSize: number;
+          sortOrder: ERegistrySortOrder;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -317,6 +311,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.registryName,
             data.data.pageNumber,
             data.data.pageSize,
+            data.data.sortOrder,
           );
         }, data.callId);
       },
@@ -388,12 +383,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getProposalThreshold();
         }, data.callId);
       },
-      getVotingPower: (data: IIFrameCallData<EthereumAddress>) => {
+      getVotingPower: (data: IIFrameCallData<EthereumAccountAddress>) => {
         this.returnForModel(() => {
           return this.core.getVotingPower(data.data);
         }, data.callId);
       },
-      getHyperTokenBalance: (data: IIFrameCallData<EthereumAddress>) => {
+      getHyperTokenBalance: (data: IIFrameCallData<EthereumAccountAddress>) => {
         this.returnForModel(() => {
           return this.core.getHyperTokenBalance(data.data);
         }, data.callId);
@@ -412,7 +407,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         data: IIFrameCallData<{
           registryName: string;
           label: string;
-          recipientAddress: EthereumAddress;
+          recipientAddress: EthereumAccountAddress;
           data: string;
         }>,
       ) => {
@@ -429,7 +424,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         data: IIFrameCallData<{
           registryName: string;
           tokenId: number;
-          transferToAddress: EthereumAddress;
+          transferToAddress: EthereumAccountAddress;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -450,6 +445,62 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.burnRegistryEntry(
             data.data.registryName,
             data.data.tokenId,
+          );
+        }, data.callId);
+      },
+      createRegistryByToken: (
+        data: IIFrameCallData<{
+          name: string;
+          symbol: string;
+          registrarAddress: EthereumAccountAddress;
+          enumerable: boolean;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.createRegistryByToken(
+            data.data.name,
+            data.data.symbol,
+            data.data.registrarAddress,
+            data.data.enumerable,
+          );
+        }, data.callId);
+      },
+      grantRegistrarRole: (
+        data: IIFrameCallData<{
+          registryName: string;
+          address: EthereumAccountAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.grantRegistrarRole(
+            data.data.registryName,
+            data.data.address,
+          );
+        }, data.callId);
+      },
+      revokeRegistrarRole: (
+        data: IIFrameCallData<{
+          registryName: string;
+          address: EthereumAccountAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.revokeRegistrarRole(
+            data.data.registryName,
+            data.data.address,
+          );
+        }, data.callId);
+      },
+      renounceRegistrarRole: (
+        data: IIFrameCallData<{
+          registryName: string;
+          address: EthereumAccountAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.renounceRegistrarRole(
+            data.data.registryName,
+            data.data.address,
           );
         }, data.callId);
       },

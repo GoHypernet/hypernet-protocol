@@ -1,7 +1,7 @@
 import {
-  IAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import { GatewayUrl, PaymentId } from "@hypernetlabs/objects";
 import {
@@ -50,6 +50,14 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
     GatewayUrl,
     Subscription
   >();
+  protected initiateSendFundsSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
+  protected initiateAuthorizeFundsSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
 
   constructor(
     @inject(IAccountServiceType) protected accountService: IAccountService,
@@ -71,6 +79,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
 
         this._advanceGatewayRelatedPayments(proxy.gatewayUrl);
 
+        // ******* signMessageRequested ********************************************************
         // When the gateway iframe wants a message signed, we can do it.
         const signMessageRequestedSubscription =
           proxy.signMessageRequested.subscribe((message) => {
@@ -93,6 +102,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           signMessageRequestedSubscription,
         );
 
+        // ******* stateChannelRequested ********************************************************
         const stateChannelRequestedSubscription =
           proxy.stateChannelRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -117,6 +127,42 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           stateChannelRequestedSubscription,
         );
 
+        // ******* initiateSendFundsRequested ********************************************************
+        const initiateSendFundsSubscription =
+          proxy.initiateSendFundsRequested.subscribe((request) => {
+            this.logUtils.debug(
+              `Gateway Connector ${proxy.gatewayUrl} initiated sending funds`,
+            );
+
+            this.paymentService
+              .initiateSendFunds(
+                proxy.gatewayUrl,
+                request.requestIdentifier,
+                request.channelAddress,
+                request.recipientPublicIdentifier,
+                request.amount,
+                request.expirationDate,
+                request.requiredStake,
+                request.paymentToken,
+                request.metadata,
+              )
+              .andThen((response) => {
+                return proxy.sendFundsInitiated(
+                  request.requestIdentifier,
+                  response.paymentId,
+                );
+              })
+              .mapErr((e) => {
+                this.logUtils.error(e);
+              });
+          });
+
+        this.initiateSendFundsSubscriptionMap.set(
+          proxy.gatewayUrl,
+          initiateSendFundsSubscription,
+        );
+
+        // ******* sendFundsRequested ********************************************************
         const sendFundsRequestedSubscription =
           proxy.sendFundsRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -127,6 +173,8 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
             if (this.validateSendFundsRequest(request)) {
               this.paymentService
                 .sendFunds(
+                  request.requestIdentifier,
+                  request.paymentId,
                   request.channelAddress,
                   request.recipientPublicIdentifier,
                   request.amount,
@@ -134,6 +182,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                   request.requiredStake,
                   request.paymentToken,
                   proxy.gatewayUrl,
+                  request.gatewaySignature,
                   request.metadata,
                 )
                 .mapErr((e) => {
@@ -141,7 +190,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                 });
             } else {
               this.logUtils.error(
-                `Invalid ISendFundsRequest from gateway connector ${proxy.gatewayUrl}`,
+                `Invalid ISignedSendFundsRequest from gateway connector ${proxy.gatewayUrl}`,
               );
             }
           });
@@ -151,6 +200,44 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           sendFundsRequestedSubscription,
         );
 
+        // ******* initiateAuthorizeFundsRequested ********************************************************
+        const initiateAuthorizeFundsSubscription =
+          proxy.initiateAuthorizeFundsRequested.subscribe((request) => {
+            this.logUtils.debug(
+              `Gateway Connector ${proxy.gatewayUrl} initiated authorizing funds`,
+            );
+
+            this.paymentService
+              .initiateAuthorizeFunds(
+                proxy.gatewayUrl,
+                request.requestIdentifier,
+                request.channelAddress,
+                request.recipientPublicIdentifier,
+                request.totalAuthorized,
+                request.expirationDate,
+                request.deltaAmount,
+                request.deltaTime,
+                request.requiredStake,
+                request.paymentToken,
+                request.metadata,
+              )
+              .andThen((response) => {
+                return proxy.authorizeFundsInitiated(
+                  request.requestIdentifier,
+                  response.paymentId,
+                );
+              })
+              .mapErr((e) => {
+                this.logUtils.error(e);
+              });
+          });
+
+        this.initiateAuthorizeFundsSubscriptionMap.set(
+          proxy.gatewayUrl,
+          initiateAuthorizeFundsSubscription,
+        );
+
+        // ******* authorizeFundsRequested ********************************************************
         const authorizeFundsRequestedSubscription =
           proxy.authorizeFundsRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -160,6 +247,8 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
             if (this.validateAuthorizeFundsRequest(request)) {
               this.paymentService
                 .authorizeFunds(
+                  request.requestIdentifier,
+                  request.paymentId,
                   request.channelAddress,
                   request.recipientPublicIdentifier,
                   request.totalAuthorized,
@@ -169,6 +258,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                   request.requiredStake,
                   request.paymentToken,
                   proxy.gatewayUrl,
+                  request.gatewaySignature,
                   request.metadata,
                 )
                 .mapErr((e) => {
@@ -176,7 +266,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                 });
             } else {
               this.logUtils.error(
-                `Invalid IAuthorizeFundsRequest from gateway connector ${proxy.gatewayUrl}`,
+                `Invalid ISignedAuthorizeFundsRequest from gateway connector ${proxy.gatewayUrl}`,
               );
             }
           });
@@ -186,6 +276,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           authorizeFundsRequestedSubscription,
         );
 
+        // ******* resolveInsuranceRequested ********************************************************
         const resolveInsuranceRequestedSubscription =
           proxy.resolveInsuranceRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -218,14 +309,21 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
       // Stop listening for gateway connector events when gateway deauthorization starts
       context.onGatewayDeauthorizationStarted.subscribe((gatewayUrl) => {
         this.signMessageRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
+        this.stateChannelRequestedSubscriptionMap
+          .get(gatewayUrl)
+          ?.unsubscribe();
+
+        this.initiateSendFundsSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.sendFundsRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
+
+        this.initiateAuthorizeFundsSubscriptionMap
+          .get(gatewayUrl)
+          ?.unsubscribe();
         this.authorizeFundsRequestedSubscriptionMap
           .get(gatewayUrl)
           ?.unsubscribe();
+
         this.resolveInsuranceRequestedSubscriptionMap
-          .get(gatewayUrl)
-          ?.unsubscribe();
-        this.stateChannelRequestedSubscriptionMap
           .get(gatewayUrl)
           ?.unsubscribe();
       });
@@ -252,7 +350,9 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
       });
   }
 
-  protected validateSendFundsRequest(request: ISendFundsRequest): boolean {
+  protected validateSendFundsRequest(
+    request: ISignedSendFundsRequest,
+  ): boolean {
     if (
       !this.validationUtils.validatePublicIdentifier(
         request.recipientPublicIdentifier,
@@ -283,7 +383,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
   }
 
   protected validateAuthorizeFundsRequest(
-    request: IAuthorizeFundsRequest,
+    request: ISignedAuthorizeFundsRequest,
   ): boolean {
     if (
       !this.validationUtils.validatePublicIdentifier(

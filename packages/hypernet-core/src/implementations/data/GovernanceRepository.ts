@@ -1,35 +1,46 @@
 import {
+  IRegistryFactoryContract,
+  IERC20Contract,
+  IHypernetGovernorContract,
+  HypernetGovernorContract,
+  RegistryFactoryContract,
+  ERC20Contract,
+} from "@hypernetlabs/contracts";
+import {
   BigNumberString,
   BlockchainUnavailableError,
-  EthereumAddress,
   EProposalVoteSupport,
+  EthereumAccountAddress,
   Proposal,
   ProposalVoteReceipt,
   stringToProposalState,
+  HypernetGovernorContractError,
+  ERC20ContractError,
+  GovernanceSignerUnavailableError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGovernanceRepository } from "@interfaces/data";
-import { injectable, inject } from "inversify";
-import { okAsync, ResultAsync } from "neverthrow";
-import { BigNumber, ethers, utils } from "ethers";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
   IConfigProvider,
   IConfigProviderType,
 } from "@interfaces/utilities";
-import { GovernanceAbis } from "@hypernetlabs/objects";
-
-class GovernanceContracts {
-  constructor(
-    public hypernetGovernorContract: ethers.Contract,
-    public hypertokenContract: ethers.Contract,
-    public registryFactoryContract: ethers.Contract,
-  ) {}
-}
+import { ethers, utils } from "ethers";
+import { injectable, inject } from "inversify";
+import { ResultAsync } from "neverthrow";
 
 @injectable()
 export class GovernanceRepository implements IGovernanceRepository {
+  protected provider: ethers.providers.Provider | undefined;
+  protected signer: ethers.providers.JsonRpcSigner | undefined;
+  protected hypernetGovernorContract: IHypernetGovernorContract =
+    {} as HypernetGovernorContract;
+  protected registryFactoryContract: IRegistryFactoryContract =
+    {} as RegistryFactoryContract;
+  protected hypertokenContract: IERC20Contract = {} as ERC20Contract;
+
   constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
@@ -40,29 +51,21 @@ export class GovernanceRepository implements IGovernanceRepository {
   public getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen((governanceContracts) => {
-      return this.getProposalsCount().andThen((totalCount) => {
+  ): ResultAsync<Proposal[], HypernetGovernorContractError> {
+    return this.hypernetGovernorContract
+      ._proposalIdTracker()
+      .andThen((totalCount) => {
         const proposalListResult: ResultAsync<
           Proposal,
-          BlockchainUnavailableError
+          HypernetGovernorContractError
         >[] = [];
         for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
           const index = totalCount - (pageNumber - 1) * pageSize - i;
 
           if (index >= 0) {
             proposalListResult.push(
-              ResultAsync.fromPromise(
-                governanceContracts.hypernetGovernorContract._proposalMap(
-                  index + 1,
-                ) as Promise<BigNumber>,
-                (e) => {
-                  return new BlockchainUnavailableError(
-                    "Unable to retrieve proposals id",
-                    e,
-                  );
-                },
-              )
+              this.hypernetGovernorContract
+                ._proposalMap(index + 1)
                 .andThen((proposalId) => {
                   return this.getProposalDetails(proposalId.toString());
                 })
@@ -75,203 +78,90 @@ export class GovernanceRepository implements IGovernanceRepository {
         }
         return ResultUtils.combine(proposalListResult);
       });
-    });
-  }
-
-  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypernetGovernorContract._proposalIdTracker() as Promise<BigNumber>,
-        (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to retrieve proposals count",
-            e,
-          );
-        },
-      ).map((proposalCounts) => {
-        return proposalCounts.toNumber();
-      });
-    });
   }
 
   public createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.initializeForWrite().andThen((governanceContracts) => {
-      const descriptionHash = ethers.utils.id(name);
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+    const descriptionHash = ethers.utils.id(name);
 
-      const transferCalldata =
-        governanceContracts.registryFactoryContract.interface.encodeFunctionData(
-          "createRegistry",
-          [name, symbol, owner, enumerable],
-        );
+    const transferCalldata = this.registryFactoryContract
+      .getContract()
+      ?.interface.encodeFunctionData("createRegistry", [
+        name,
+        symbol,
+        owner,
+        enumerable,
+      ]);
 
-      return ResultAsync.fromPromise(
-        governanceContracts.hypernetGovernorContract.hashProposal(
-          [governanceContracts.registryFactoryContract.address],
-          [0],
-          [transferCalldata],
-          descriptionHash,
-        ) as Promise<string>,
-        (e) => {
-          return new BlockchainUnavailableError("Unable to hashProposal", e);
-        },
-      ).andThen((proposalID) => {
-        return ResultAsync.fromPromise(
-          governanceContracts.hypernetGovernorContract[
-            "propose(address[],uint256[],bytes[],string)"
-          ](
-            [governanceContracts.registryFactoryContract.address],
-            [0],
-            [transferCalldata],
-            name,
-          ) as Promise<any>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to propose proposal",
-              e,
-            );
-          },
-        ).andThen((tx) => {
-          return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-            return new BlockchainUnavailableError("Unable to wait for tx", e);
-          }).andThen(() => {
+    const registryFactoryAddress =
+      this.registryFactoryContract.getContractAddress();
+
+    return this.hypernetGovernorContract
+      .hashProposal(
+        registryFactoryAddress,
+        transferCalldata as string,
+        descriptionHash,
+      )
+      .andThen((proposalID) => {
+        return this.hypernetGovernorContract
+          .propose(registryFactoryAddress, transferCalldata as string, name)
+          .andThen(() => {
             return this.getProposalDetails(proposalID);
           });
-        });
       });
-    });
   }
 
   public delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
-  ): ResultAsync<void, BlockchainUnavailableError> {
-    return this.initializeForWrite().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypertokenContract.delegate(
-          delegateAddress,
-        ) as Promise<any>,
-        (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to delegate votes",
-            e,
-          );
-        },
-      ).andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-          return new BlockchainUnavailableError("Unable to wait for tx", e);
-        }).andThen(() => {
-          return okAsync(undefined);
-        });
-      });
-    });
+  ): ResultAsync<void, ERC20ContractError> {
+    return this.hypertokenContract.delegate(delegateAddress);
   }
 
   public getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen((governanceContracts) => {
-      return ResultUtils.combine([
-        ResultAsync.fromPromise(
-          governanceContracts.hypernetGovernorContract.proposals(
-            proposalId,
-          ) as Promise<string>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to retrieve proposal",
-              e,
-            );
-          },
-        ),
-        ResultAsync.fromPromise(
-          governanceContracts.hypernetGovernorContract.state(
-            proposalId,
-          ) as Promise<string>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to retrieve proposal state",
-              e,
-            );
-          },
-        ),
-        ResultAsync.fromPromise(
-          governanceContracts.hypernetGovernorContract.proposalDescriptions(
-            proposalId,
-          ) as Promise<string>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to retrieve proposal description",
-              e,
-            );
-          },
-        ),
-      ]).map((vals) => {
-        const [proposal, propsalState, proposalDescription] = vals;
-        return new Proposal(
-          BigNumberString(proposalId), // proposalId
-          stringToProposalState(propsalState.toString()), // propsalState
-          proposal[1], // proposalOriginator
-          Number(utils.formatEther(proposal[5])), // proposalVotesFor
-          Number(utils.formatEther(proposal[6])), // proposalVotesAgainst
-          Number(utils.formatEther(proposal[7])), // proposalAbstain
-          proposalDescription, // proposalDescription
-          null, // proposalNumber
-        );
-      });
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+    return ResultUtils.combine([
+      this.hypernetGovernorContract.proposals(proposalId),
+      this.hypernetGovernorContract.state(proposalId),
+      this.hypernetGovernorContract.proposalDescriptions(proposalId),
+    ]).map((vals) => {
+      const [proposal, propsalState, proposalDescription] = vals;
+      return new Proposal(
+        BigNumberString(proposalId), // proposalId
+        stringToProposalState(propsalState.toString()), // propsalState
+        proposal[1], // proposalOriginator
+        Number(utils.formatEther(proposal[5])), // proposalVotesFor
+        Number(utils.formatEther(proposal[6])), // proposalVotesAgainst
+        Number(utils.formatEther(proposal[7])), // proposalAbstain
+        proposalDescription, // proposalDescription
+        null, // proposalNumber
+      );
     });
   }
 
   public castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.initializeForWrite().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypernetGovernorContract.castVote(
-          proposalId,
-          support,
-        ) as Promise<any>,
-        (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to castVote proposal",
-            e,
-          );
-        },
-      ).andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-          return new BlockchainUnavailableError("Unable to wait for tx", e);
-        }).andThen(() => {
-          return this.getProposalDetails(proposalId);
-        });
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+    return this.hypernetGovernorContract
+      .castVote(proposalId, support)
+      .andThen(() => {
+        return this.getProposalDetails(proposalId);
       });
-    });
   }
 
   public getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
-  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypernetGovernorContract.getReceipt(
-          proposalId,
-          voterAddress,
-        ) as Promise<{
-          hasVoted: boolean;
-          support: EProposalVoteSupport;
-          votes: number;
-        }>,
-        (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to getReceipt proposal",
-            e,
-          );
-        },
-      ).map((receipt) => {
+    voterAddress: EthereumAccountAddress,
+  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
+    return this.hypernetGovernorContract
+      .getReceipt(proposalId, voterAddress)
+      .map((receipt) => {
         return new ProposalVoteReceipt(
           BigNumberString(proposalId),
           voterAddress,
@@ -280,254 +170,144 @@ export class GovernanceRepository implements IGovernanceRepository {
           receipt.votes,
         );
       });
-    });
+  }
+
+  public getProposalsCount(): ResultAsync<
+    number,
+    HypernetGovernorContractError
+  > {
+    return this.hypernetGovernorContract._proposalIdTracker();
   }
 
   public queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.initializeForWrite().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypernetGovernorContract["queue(uint256)"](
-          proposalId,
-        ) as Promise<any>,
-        (e) => {
-          return new BlockchainUnavailableError("Unable to queue proposal", e);
-        },
-      ).andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-          return new BlockchainUnavailableError("Unable to wait for tx", e);
-        }).andThen(() => {
-          return this.getProposalDetails(proposalId);
-        });
-      });
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+    return this.hypernetGovernorContract.queue(proposalId).andThen(() => {
+      return this.getProposalDetails(proposalId);
     });
   }
 
   public cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.initializeForWrite().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypernetGovernorContract["cancel(uint256)"](
-          proposalId,
-        ) as Promise<any>,
-        (e) => {
-          return new BlockchainUnavailableError("Unable to cancel proposal", e);
-        },
-      ).andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-          return new BlockchainUnavailableError("Unable to wait for tx", e);
-        }).andThen(() => {
-          return this.getProposalDetails(proposalId);
-        });
-      });
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+    return this.hypernetGovernorContract.cancel(proposalId).andThen(() => {
+      return this.getProposalDetails(proposalId);
     });
   }
 
   public executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.initializeForWrite().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypernetGovernorContract["execute(uint256)"](
-          proposalId,
-        ) as Promise<any>,
-        (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to execute proposal",
-            e,
-          );
-        },
-      ).andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-          return new BlockchainUnavailableError("Unable to wait for tx", e);
-        }).andThen(() => {
-          return this.getProposalDetails(proposalId);
-        });
-      });
-    });
-  }
-
-  public proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return ResultUtils.combine([
-      this.blockchainProvider.getGovernanceSigner(),
-      this.initializeForWrite(),
-    ]).andThen((vals) => {
-      const [signer, governanceContracts] = vals;
-      return ResultAsync.fromPromise(
-        governanceContracts.registryFactoryContract.nameToAddress(
-          registryName,
-        ) as Promise<string>,
-        (e) => {
-          return new BlockchainUnavailableError("Unable to nameToAddress", e);
-        },
-      ).andThen((registryAddress) => {
-        const registryAddressContract = new ethers.Contract(
-          registryAddress,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
-        );
-
-        const descriptionHash = ethers.utils.id(label);
-
-        const transferCalldata =
-          registryAddressContract?.interface.encodeFunctionData("register", [
-            recipient,
-            label,
-            data,
-          ]);
-
-        return ResultAsync.fromPromise(
-          governanceContracts.hypernetGovernorContract.hashProposal(
-            [registryAddress],
-            [0],
-            [transferCalldata],
-            descriptionHash,
-          ) as Promise<string>,
-          (e) => {
-            return new BlockchainUnavailableError("Unable to hashProposal", e);
-          },
-        ).andThen((proposalID) => {
-          return ResultAsync.fromPromise(
-            governanceContracts.hypernetGovernorContract[
-              "propose(address[],uint256[],bytes[],string)"
-            ](
-              [registryAddress],
-              [0],
-              [transferCalldata],
-              label,
-            ) as Promise<any>,
-            (e) => {
-              return new BlockchainUnavailableError(
-                "Unable to propose proposal",
-                e,
-              );
-            },
-          ).andThen((tx) => {
-            return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-              return new BlockchainUnavailableError("Unable to wait for tx", e);
-            }).andThen(() => {
-              return this.getProposalDetails(proposalID);
-            });
-          });
-        });
-      });
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+    return this.hypernetGovernorContract.execute(proposalId).andThen(() => {
+      return this.getProposalDetails(proposalId);
     });
   }
 
   public getProposalThreshold(): ResultAsync<
     number,
-    BlockchainUnavailableError
+    HypernetGovernorContractError
   > {
-    return this.initializeReadOnly().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypernetGovernorContract.proposalThreshold() as Promise<BigNumber>,
-        (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to call proposalThreshold",
-            e,
-          );
-        },
-      ).map((poposalThreshold) => {
+    return this.hypernetGovernorContract
+      .proposalThreshold()
+      .map((poposalThreshold) => {
         return Number(
           ethers.utils.formatUnits(poposalThreshold.toString(), "ether"),
         );
       });
-    });
   }
 
   public getVotingPower(
-    account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypertokenContract.getVotes(
-          account,
-        ) as Promise<BigNumber>,
-        (e) => {
-          return new BlockchainUnavailableError("Unable to call getVotes", e);
-        },
-      ).map((votes) => {
-        return Number(ethers.utils.formatUnits(votes.toString(), "ether"));
-      });
+    account: EthereumAccountAddress,
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
+    return this.hypertokenContract.getVotes(account).map((votes) => {
+      return Number(ethers.utils.formatUnits(votes.toString(), "ether"));
     });
   }
 
   public getHyperTokenBalance(
-    account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen((governanceContracts) => {
-      return ResultAsync.fromPromise(
-        governanceContracts.hypertokenContract.balanceOf(
-          account,
-        ) as Promise<BigNumber>,
-        (e) => {
-          return new BlockchainUnavailableError("Unable to call getVotes", e);
-        },
-      ).map((balance) => {
-        return Number(ethers.utils.formatUnits(balance.toString(), "ether"));
-      });
+    account: EthereumAccountAddress,
+  ): ResultAsync<number, ERC20ContractError> {
+    return this.hypertokenContract.balanceOf(account).map((balance) => {
+      return Number(ethers.utils.formatUnits(balance.toString(), "ether"));
     });
   }
 
-  private initializeForWrite(): ResultAsync<
-    GovernanceContracts,
-    BlockchainUnavailableError
-  > {
-    return this.blockchainProvider.getGovernanceSigner().andThen((signer) => {
-      return this.initializeContracts(signer);
+  public initializeReadOnly(): ResultAsync<void, never> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getGovernanceProvider(),
+    ]).map(([config, provider]) => {
+      this.provider = provider;
+
+      const hypernetGovernorAddress =
+        config.chainAddresses[config.governanceChainId]
+          ?.hypernetGovernorAddress;
+      const registryFactoryAddress =
+        config.chainAddresses[config.governanceChainId]?.registryFactoryAddress;
+      const hypertokenAddress =
+        config.chainAddresses[config.governanceChainId]?.hypertokenAddress;
+
+      if (
+        registryFactoryAddress == null ||
+        hypertokenAddress == null ||
+        hypernetGovernorAddress == null
+      ) {
+        throw new Error(
+          `Chain addresses for the governance chain ${config.governanceChainId} are missing!`,
+        );
+      }
+
+      this.hypernetGovernorContract = new HypernetGovernorContract(
+        provider,
+        hypernetGovernorAddress,
+      );
+      this.registryFactoryContract = new RegistryFactoryContract(
+        provider,
+        registryFactoryAddress,
+      );
+      this.hypertokenContract = new ERC20Contract(provider, hypertokenAddress);
     });
   }
 
-  private initializeReadOnly(): ResultAsync<
-    GovernanceContracts,
-    BlockchainUnavailableError
+  public initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
   > {
-    return this.blockchainProvider
-      .getGovernanceProvider()
-      .andThen((provider) => {
-        return this.initializeContracts(provider);
-      });
-  }
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getGovernanceSigner(),
+    ]).map(([config, signer]) => {
+      this.signer = signer;
 
-  private initializeContracts(
-    providerOrSigner:
-      | ethers.providers.Provider
-      | ethers.providers.JsonRpcSigner,
-  ): ResultAsync<GovernanceContracts, never> {
-    return this.configProvider.getConfig().map((config) => {
-      const hypernetGovernorContract = new ethers.Contract(
+      const hypernetGovernorAddress =
         config.chainAddresses[config.governanceChainId]
-          ?.hypernetGovernorAddress as string,
-        GovernanceAbis.HypernetGovernor.abi,
-        providerOrSigner,
-      );
+          ?.hypernetGovernorAddress;
+      const registryFactoryAddress =
+        config.chainAddresses[config.governanceChainId]?.registryFactoryAddress;
+      const hypertokenAddress =
+        config.chainAddresses[config.governanceChainId]?.hypertokenAddress;
 
-      const hypertokenContract = new ethers.Contract(
-        config.chainAddresses[config.governanceChainId]
-          ?.hypertokenAddress as string,
-        GovernanceAbis.Hypertoken.abi,
-        providerOrSigner,
-      );
+      if (
+        registryFactoryAddress == null ||
+        hypertokenAddress == null ||
+        hypernetGovernorAddress == null
+      ) {
+        throw new Error(
+          `Chain addresses for the governance chain ${config.governanceChainId} are missing!`,
+        );
+      }
 
-      const registryFactoryContract = new ethers.Contract(
-        config.chainAddresses[config.governanceChainId]
-          ?.registryFactoryAddress as string,
-        GovernanceAbis.UpgradeableRegistryFactory.abi,
-        providerOrSigner,
+      this.hypernetGovernorContract = new HypernetGovernorContract(
+        signer,
+        hypernetGovernorAddress,
       );
-
-      return new GovernanceContracts(
-        hypernetGovernorContract,
-        hypertokenContract,
-        registryFactoryContract,
+      this.registryFactoryContract = new RegistryFactoryContract(
+        signer,
+        registryFactoryAddress,
       );
+      this.hypertokenContract = new ERC20Contract(signer, hypertokenAddress);
     });
   }
 }

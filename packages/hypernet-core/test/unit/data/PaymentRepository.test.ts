@@ -2,25 +2,12 @@ import {
   PushPayment,
   EPaymentState,
   VectorError,
-  PaymentCreationError,
   TransferResolutionError,
-  UnixTimestamp,
   BigNumberString,
   SortedTransfers,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
-import { BigNumber } from "ethers";
-import { okAsync, errAsync } from "neverthrow";
-import td from "testdouble";
-
-import { PaymentRepository } from "@implementations/data/PaymentRepository";
-import {
-  IVectorUtils,
-  IBrowserNodeProvider,
-  IPaymentUtils,
-  IBlockchainTimeUtils,
-} from "@interfaces/utilities";
 import {
   commonAmount,
   publicIdentifier,
@@ -35,6 +22,15 @@ import {
   routerPublicIdentifier,
   chainId,
 } from "@mock/mocks";
+import { okAsync, errAsync } from "neverthrow";
+import td from "testdouble";
+
+import { PaymentRepository } from "@implementations/data/PaymentRepository";
+import {
+  IBrowserNodeProvider,
+  IPaymentUtils,
+  IBlockchainTimeUtils,
+} from "@interfaces/utilities";
 import {
   BlockchainProviderMock,
   BrowserNodeProviderMock,

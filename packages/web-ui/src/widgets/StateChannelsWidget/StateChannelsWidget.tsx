@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Box, Typography } from "@material-ui/core";
-import { IRenderParams } from "@web-ui/interfaces";
-
-import { GovernanceDialogSelectField } from "@web-ui/components";
-import { useStoreContext } from "@web-ui/contexts";
 import {
   ActiveStateChannel,
   ChainId,
-  EthereumAddress,
+  EthereumContractAddress,
   PublicIdentifier,
 } from "@hypernetlabs/objects";
+import { Box, Typography } from "@material-ui/core";
+import { useStoreContext } from "@web-ui/contexts";
+import { IRenderParams } from "@web-ui/interfaces";
 import { Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+
+import { GovernanceDialogSelectField } from "@web-ui/components";
 import { useStyles } from "@web-ui/widgets/StateChannelsWidget/StateChannelsWidget.style";
 
 interface IStateChannelsWidget extends IRenderParams {}
@@ -23,27 +23,27 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
       [],
     );
     const [selectedStateChannelAddress, setSelectedStateChannelAddress] =
-      useState<EthereumAddress>(EthereumAddress(""));
+      useState<EthereumContractAddress>(EthereumContractAddress(""));
 
-      useEffect(() => {
-        coreProxy.getActiveStateChannels().map((_stateChannels) => {
-          setStateChannels(_stateChannels);
-          if (_stateChannels[0] != null) {
-            setSelectedStateChannelAddress(_stateChannels[0].channelAddress);
-            UIData.onSelectedStateChannelChanged.next(_stateChannels[0]);
-          }
-        });
-    
-        coreProxy.onStateChannelCreated.subscribe((activeStateChannel) => {
-          setStateChannels([...stateChannels, activeStateChannel]);
-          if (stateChannels.length === 0) {
-            setSelectedStateChannelAddress(activeStateChannel.channelAddress);
-            UIData.onSelectedStateChannelChanged.next(activeStateChannel);
-          }
-        });
-      }, []);
+    useEffect(() => {
+      coreProxy.getActiveStateChannels().map((_stateChannels) => {
+        setStateChannels(_stateChannels);
+        if (_stateChannels[0] != null) {
+          setSelectedStateChannelAddress(_stateChannels[0].channelAddress);
+          UIData.onSelectedStateChannelChanged.next(_stateChannels[0]);
+        }
+      });
 
-    const handleChange = (address: EthereumAddress) => {
+      coreProxy.onStateChannelCreated.subscribe((activeStateChannel) => {
+        setStateChannels([...stateChannels, activeStateChannel]);
+        if (stateChannels.length === 0) {
+          setSelectedStateChannelAddress(activeStateChannel.channelAddress);
+          UIData.onSelectedStateChannelChanged.next(activeStateChannel);
+        }
+      });
+    }, []);
+
+    const handleChange = (address: EthereumContractAddress) => {
       // Publish an event to other widgets
       setSelectedStateChannelAddress(address);
       UIData.onSelectedStateChannelChanged.next(
@@ -70,7 +70,7 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
               <Form onSubmit={handleSubmit} className={classes.form}>
                 <GovernanceDialogSelectField
                   required
-                  dialogTitle="State Channel"
+                  dialogTitle="Hypernet Account"
                   name="stateChannel"
                   type="select"
                   options={stateChannels.map(({ channelAddress }) => ({

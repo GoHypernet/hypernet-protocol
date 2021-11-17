@@ -2,24 +2,23 @@ import { Balances, AssetBalance, BigNumberString } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
-import { okAsync } from "neverthrow";
-import td from "testdouble";
-
-import { AccountService } from "@implementations/business/AccountService";
 import { IBlockchainProvider } from "@interfaces/utilities";
 import {
   account,
+  account2,
   activeStateChannel,
   chainId,
-  mockUtils,
+  hyperTokenAddress,
   publicIdentifier,
   routerChannelAddress,
   routerPublicIdentifier,
 } from "@mock/mocks";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
+
+import { AccountService } from "@implementations/business/AccountService";
 import { ContextProviderMock } from "@mock/utils";
 
-const assetAddress = mockUtils.generateRandomEtherAdress();
-const destinationAddress = mockUtils.generateRandomEtherAdress();
 const amount = BigNumberString("42");
 
 class AccountServiceMocks {
@@ -33,7 +32,7 @@ class AccountServiceMocks {
     this.balances = new Balances([
       new AssetBalance(
         routerChannelAddress,
-        assetAddress,
+        hyperTokenAddress,
         "PhoebeCoin",
         "BEEP",
         4,
@@ -49,16 +48,16 @@ class AccountServiceMocks {
     td.when(
       this.accountRepository.depositFunds(
         routerChannelAddress,
-        assetAddress,
+        hyperTokenAddress,
         amount,
       ),
     ).thenReturn(okAsync(null));
     td.when(
       this.accountRepository.withdrawFunds(
         routerChannelAddress,
-        assetAddress,
+        hyperTokenAddress,
         amount,
-        destinationAddress,
+        account2,
       ),
     ).thenReturn(okAsync(undefined));
     td.when(this.accountRepository.getBalances()).thenReturn(
@@ -142,7 +141,7 @@ describe("AccountService tests", () => {
     // Act
     const response = await accountService.depositFunds(
       routerChannelAddress,
-      assetAddress,
+      hyperTokenAddress,
       amount,
     );
 
@@ -166,9 +165,9 @@ describe("AccountService tests", () => {
     // Act
     const response = await accountService.withdrawFunds(
       routerChannelAddress,
-      assetAddress,
+      hyperTokenAddress,
       amount,
-      destinationAddress,
+      account2,
     );
 
     // Assert

@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
-import { Form, Formik } from "formik";
+import { EthereumContractAddress } from "@hypernetlabs/objects";
 import { IRenderParams } from "@web-ui/interfaces";
+import { Form, Formik } from "formik";
+import React, { useMemo } from "react";
 
 import {
   GovernanceButton,
@@ -10,12 +11,11 @@ import {
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
-import { EthereumAddress } from "@hypernetlabs/objects";
 
 interface IValues {
   amount: string;
-  tokenAddress: EthereumAddress;
-  stateChannelAddress: EthereumAddress;
+  tokenAddress: EthereumContractAddress;
+  stateChannelAddress: EthereumContractAddress;
 }
 
 interface IFundWidget extends IRenderParams {}
@@ -57,7 +57,7 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
       title={!noLabel ? "Deposit Funds" : undefined}
       description={
         !noLabel
-          ? "Move tokens from your Ethereum wallet into your Hypernet Protocol account."
+          ? "Move tokens from your Ethereum wallet into your Hypernet account."
           : undefined
       }
     >
@@ -79,7 +79,7 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
             <Form onSubmit={handleSubmit}>
               <GovernanceDialogSelectField
                 required
-                title="State Channel"
+                title="Hypernet Account"
                 name="stateChannelAddress"
                 options={uniqueActiveStateChannels.map((option) => ({
                   primaryText: option.channelAddress,

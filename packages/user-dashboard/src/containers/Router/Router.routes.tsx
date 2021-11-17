@@ -3,7 +3,6 @@ import { FC } from "react";
 import Summary from "@user-dashboard/pages/Summary";
 import DepositAndWithdraw from "@user-dashboard/pages/DepositAndWithdraw";
 import BalancesSummary from "@user-dashboard/pages/BalancesSummary";
-import Gateways from "@user-dashboard/pages/Gateways";
 import Proposals from "@user-dashboard/pages/Governance/Proposals";
 import ProposalDetail from "@user-dashboard/pages/Governance/ProposalDetail";
 import ProposalCreate from "@user-dashboard/pages/Governance/ProposalCreate";
@@ -36,12 +35,6 @@ export const routes: IRoute[] = [
     path: "/balances",
     component: BalancesSummary,
     name: "Balances",
-    isHeaderItem: true,
-  },
-  {
-    path: "/gateways",
-    component: Gateways,
-    name: "Gateways",
     isHeaderItem: true,
   },
   {

@@ -1,12 +1,13 @@
 import {
   BlockchainUnavailableError,
-  EthereumAddress,
   HypernetLink,
   Payment,
   PublicIdentifier,
   InvalidParametersError,
   VectorError,
   InvalidPaymentError,
+  InvalidPaymentIdError,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ITimeUtils, ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
@@ -47,6 +48,7 @@ export class LinkRepository implements ILinkRepository {
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
+    | InvalidPaymentIdError
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -80,7 +82,7 @@ export class LinkRepository implements ILinkRepository {
    * @param counterpartyId The ID of the link to retrieve
    */
   public getHypernetLink(
-    routerChannelAddress: EthereumAddress,
+    routerChannelAddress: EthereumContractAddress,
     counterpartyId: PublicIdentifier,
   ): ResultAsync<
     HypernetLink,
@@ -88,6 +90,7 @@ export class LinkRepository implements ILinkRepository {
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
+    | InvalidPaymentIdError
   > {
     return this.browserNodeProvider
       .getBrowserNode()

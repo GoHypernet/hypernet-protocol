@@ -4,7 +4,6 @@ import {
   CONDITIONAL_TRANSFER_RESOLVED_EVENT,
 } from "@connext/vector-types";
 import {
-  EthereumAddress,
   PublicIdentifier,
   IBasicChannelResponse,
   IBasicTransferResponse,
@@ -25,6 +24,8 @@ import {
   ParameterizedResolver,
   ChainId,
   UtilityMessageSignature,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
@@ -39,7 +40,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public init(
     signature: Signature,
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<void, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.init({
@@ -51,26 +52,28 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
 
   public reconcileDeposit(
-    assetId: EthereumAddress,
-    channelAddress: EthereumAddress,
-  ): ResultAsync<EthereumAddress, VectorError> {
+    assetId: EthereumContractAddress,
+    channelAddress: EthereumContractAddress,
+  ): ResultAsync<EthereumContractAddress, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.reconcileDeposit({ assetId, channelAddress }),
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
-        return okAsync(EthereumAddress(result.getValue().channelAddress));
+        return okAsync(
+          EthereumContractAddress(result.getValue().channelAddress),
+        );
       }
     });
   }
 
   public withdraw(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     amount: BigNumberString,
-    assetId: EthereumAddress,
-    recipient: EthereumAddress,
+    assetId: EthereumContractAddress,
+    recipient: EthereumAccountAddress,
     quote?: IWithdrawQuote,
     callTo?: string,
     callData?: string,
@@ -90,7 +93,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue() as IWithdrawResponse);
       }
@@ -105,21 +108,21 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue() as IFullTransferState);
       }
     });
   }
   public getActiveTransfers(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
   ): ResultAsync<IFullTransferState<unknown, unknown>[], VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getActiveTransfers({ channelAddress }),
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue() as IFullTransferState[]);
       }
@@ -134,7 +137,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -153,7 +156,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -168,7 +171,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(
           UtilityMessageSignature(result.getValue().signedMessage),
@@ -178,7 +181,7 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
 
   public resolveTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     transferId: TransferId,
     transferResolver:
       | MessageResolver
@@ -194,7 +197,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -202,14 +205,14 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
 
   public conditionalTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     amount: BigNumberString,
-    assetId: EthereumAddress,
+    assetId: EthereumContractAddress,
     type: string,
     details: any,
     recipient?: PublicIdentifier,
     recipientChainId?: number,
-    recipientAssetId?: EthereumAddress,
+    recipientAssetId?: EthereumContractAddress,
     timeout?: string,
     meta?: any,
   ): ResultAsync<IBasicTransferResponse, VectorError> {
@@ -229,24 +232,27 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
     });
   }
 
-  public getStateChannels(): ResultAsync<EthereumAddress[], VectorError> {
+  public getStateChannels(): ResultAsync<
+    EthereumContractAddress[],
+    VectorError
+  > {
     return ResultAsync.fromPromise(
       this.browserNode.getStateChannels(),
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(
           result.getValue().map((val) => {
-            return EthereumAddress(val);
+            return EthereumContractAddress(val);
           }),
         );
       }
@@ -254,14 +260,14 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
 
   public getStateChannel(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
   ): ResultAsync<IFullChannelState | undefined, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getStateChannel({ channelAddress }),
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -277,7 +283,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }
@@ -300,7 +306,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as VectorError));
+        return errAsync(new VectorError(result.getError()));
       } else {
         return okAsync(result.getValue());
       }

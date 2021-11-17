@@ -1,7 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import {
+  EthereumAccountAddress,
+  Registry,
+  RegistryParams,
+  BigNumberString,
+  EthereumContractAddress,
+} from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
-import { useAlert } from "react-alert";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
 import { Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+import { useAlert } from "react-alert";
 
 import {
   GovernanceChip,
@@ -11,15 +20,10 @@ import {
   GovernanceButton,
   GovernanceSwitch,
 } from "@web-ui/components";
-import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import {
-  EthereumAddress,
-  Registry,
-  RegistryParams,
-  BigNumberString,
-} from "@hypernetlabs/objects";
+import GrantRoleWidget from "@web-ui/widgets/GrantRoleWidget";
 import { useStyles } from "@web-ui/widgets/RegistryDetailWidget/RegistryDetailWidget.style";
+import RenounceRoleWidget from "@web-ui/widgets/RenounceRoleWidget";
+import RevokeRoleWidget from "@web-ui/widgets/RevokeRoleWidget";
 
 interface IRegistryDetailFormValus {
   symbol: string;
@@ -28,7 +32,7 @@ interface IRegistryDetailFormValus {
   primaryRegistry: string;
   registrationToken: string;
   burnAddress: string;
-  burnFee: BigNumberString;
+  burnFee: string;
   allowStorageUpdate: boolean;
   allowLabelChange: boolean;
   allowTransfers: boolean;
@@ -45,9 +49,14 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   const { setLoading } = useLayoutContext();
   const [registry, setRegistry] = useState<Registry>();
   const [isEditing, setIsEditing] = useState(false);
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
+  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
+    EthereumAccountAddress(""),
   );
+  const [grantRoleModalOpen, setGrantRoleModalOpen] = useState<boolean>(false);
+  const [revokeRoleModalOpen, setRevokeRoleModalOpen] =
+    useState<boolean>(false);
+  const [renounceRoleModalOpen, setRenounceRoleModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     coreProxy.getEthereumAccounts().map((accounts) => {
@@ -56,8 +65,11 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   }, []);
 
   useEffect(() => {
-    setLoading(true);
+    getRegistryDetails();
+  }, []);
 
+  const getRegistryDetails = () => {
+    setLoading(true);
     coreProxy
       .getRegistryByName([registryName])
       .map((registryMap) => {
@@ -66,9 +78,9 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
       })
 
       .mapErr(handleError);
-  }, []);
+  };
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     setIsEditing(false);
     alert.error(err?.message || "Something went wrong!");
@@ -94,11 +106,11 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           allowStorageUpdate,
           allowLabelChange,
           allowTransfers,
-          EthereumAddress(registrationToken),
+          EthereumContractAddress(registrationToken),
           registrationFee,
-          EthereumAddress(burnAddress),
-          burnFee,
-          EthereumAddress(primaryRegistry),
+          EthereumAccountAddress(burnAddress),
+          Number(burnFee) * 100,
+          EthereumContractAddress(primaryRegistry),
         ),
       )
       .map((registry) => {
@@ -119,13 +131,31 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           <GovernanceWidgetHeader
             label={registry.name}
             description={
-              <Box className={classes.headerDescriptionContainer}>
-                <Typography>Address:</Typography>
-                <GovernanceChip
-                  className={classes.addressChip}
-                  label={registry?.address}
-                  color="gray"
-                />
+              <Box>
+                <Box className={classes.headerDescriptionContainer}>
+                  <Typography>Address:</Typography>
+                  <GovernanceChip
+                    className={classes.addressChip}
+                    label={registry?.address}
+                    color="gray"
+                  />
+                </Box>
+                <Box className={classes.headerDescriptionContainer}>
+                  <Typography>Registrar Addresses:</Typography>
+                  <GovernanceChip
+                    className={classes.addressChip}
+                    label={registry?.registrarAddresses.join("-")}
+                    color="gray"
+                  />
+                </Box>
+                <Box className={classes.headerDescriptionContainer}>
+                  <Typography>Registrar Admin Addresses:</Typography>
+                  <GovernanceChip
+                    className={classes.addressChip}
+                    label={registry?.registrarAdminAddresses.join("-")}
+                    color="gray"
+                  />
+                </Box>
               </Box>
             }
             navigationLink={{
@@ -134,6 +164,47 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 onRegistryListNavigate?.();
               },
             }}
+            rightContent={
+              <Box display="flex" flexDirection="row">
+                <GovernanceButton
+                  color="secondary"
+                  size="medium"
+                  onClick={() => {
+                    setRevokeRoleModalOpen(true);
+                  }}
+                  variant="outlined"
+                  disabled={!isRegistrar}
+                >
+                  Revoke Registrar
+                </GovernanceButton>
+                <Box marginLeft="10px">
+                  <GovernanceButton
+                    color="primary"
+                    size="medium"
+                    onClick={() => {
+                      setRenounceRoleModalOpen(true);
+                    }}
+                    variant="outlined"
+                    disabled={!isRegistrar}
+                  >
+                    Renounce Registrar
+                  </GovernanceButton>
+                </Box>
+                <Box marginLeft="10px">
+                  <GovernanceButton
+                    color="primary"
+                    size="medium"
+                    onClick={() => {
+                      setGrantRoleModalOpen(true);
+                    }}
+                    variant="contained"
+                    disabled={!isRegistrar}
+                  >
+                    Grant Registrar
+                  </GovernanceButton>
+                </Box>
+              </Box>
+            }
           />
 
           <Formik
@@ -146,7 +217,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 primaryRegistry: registry.primaryRegistry,
                 registrationToken: registry.registrationToken,
                 burnAddress: registry.burnAddress,
-                burnFee: registry.burnFee,
+                burnFee: (registry.burnFee / 100).toString(),
                 allowStorageUpdate: registry.allowStorageUpdate,
                 allowLabelChange: registry.allowLabelChange,
                 allowTransfers: registry.allowTransfers,
@@ -292,6 +363,34 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
               );
             }}
           </Formik>
+
+          {grantRoleModalOpen && (
+            <GrantRoleWidget
+              onCloseCallback={() => {
+                getRegistryDetails();
+                setGrantRoleModalOpen(false);
+              }}
+              registrarName={registryName}
+            />
+          )}
+          {revokeRoleModalOpen && (
+            <RevokeRoleWidget
+              onCloseCallback={() => {
+                getRegistryDetails();
+                setRevokeRoleModalOpen(false);
+              }}
+              registrarName={registryName}
+            />
+          )}
+          {renounceRoleModalOpen && (
+            <RenounceRoleWidget
+              onCloseCallback={() => {
+                getRegistryDetails();
+                setRenounceRoleModalOpen(false);
+              }}
+              registrarName={registryName}
+            />
+          )}
         </>
       )}
     </>

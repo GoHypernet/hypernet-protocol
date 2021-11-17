@@ -4,6 +4,7 @@ import {
   GatewayRegistrationInfo,
   GatewayUrl,
   PersistenceError,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -16,7 +17,7 @@ export interface IGatewayRegistrationRepository {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    BlockchainUnavailableError
+    BlockchainUnavailableError | VectorError
   >;
 
   getFilteredGatewayRegistrationInfo(

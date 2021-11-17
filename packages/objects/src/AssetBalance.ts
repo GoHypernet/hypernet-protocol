@@ -1,5 +1,5 @@
 import { BigNumberString } from "@objects/BigNumberString";
-import { EthereumAddress } from "@objects/EthereumAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 
 /**
  * Represents the current balance of a specific asset in the channel.
@@ -11,8 +11,8 @@ import { EthereumAddress } from "@objects/EthereumAddress";
 
 export class AssetBalance {
   constructor(
-    public channelAddress: EthereumAddress,
-    public assetAddress: EthereumAddress,
+    public channelAddress: EthereumContractAddress,
+    public assetAddress: EthereumContractAddress,
     public name: string,
     public symbol: string,
     public decimals: number,

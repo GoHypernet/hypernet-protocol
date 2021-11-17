@@ -1,5 +1,4 @@
 import {
-  EthereumAddress,
   Payment,
   PublicIdentifier,
   PullPayment,
@@ -20,6 +19,9 @@ import {
   UnixTimestamp,
   Signature,
   ChainId,
+  InvalidPaymentIdError,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -36,6 +38,7 @@ export interface IPaymentRepository {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -50,10 +53,17 @@ export interface IPaymentRepository {
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError>;
+  ): ResultAsync<
+    PushPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 
   createPullPayment(
     routerPublicIdentifier: PublicIdentifier,
@@ -64,10 +74,17 @@ export interface IPaymentRepository {
     deltaAmount: BigNumberString, // TODO: amounts should be consistently use BigNumber
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString, // TODO: amounts should be consistently use BigNumber
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError>;
+  ): ResultAsync<
+    PullPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 
   createPullRecord(
     paymentId: PaymentId,
@@ -90,6 +107,7 @@ export interface IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -99,7 +117,7 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: PaymentId,
-    gatewayAddress: EthereumAddress,
+    gatewayAddress: EthereumAccountAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError
@@ -109,6 +127,7 @@ export interface IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | InvalidPaymentIdError
   >;
 
   /**
@@ -124,10 +143,11 @@ export interface IPaymentRepository {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | PaymentFinalizeError
-    | TransferResolutionError
     | InvalidPaymentError
     | InvalidParametersError
+    | TransferResolutionError
+    | PaymentFinalizeError
+    | InvalidPaymentIdError
   >;
 
   resolveInsurance(
@@ -141,7 +161,21 @@ export interface IPaymentRepository {
    * This method will resolve the offer transfer for a payment
    * @param payment the payment to finalize
    */
-  finalizePayment(payment: Payment): ResultAsync<void, TransferResolutionError>;
+  finalizePayment(
+    payment: Payment,
+  ): ResultAsync<
+    void,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  >;
+
+  addReservedPaymentId(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, never>;
+
+  getReservedPaymentIdByRequestId(
+    requestId: string,
+  ): ResultAsync<PaymentId | null, never>;
 }
 
 export const IPaymentRepositoryType = Symbol.for("IPaymentRepository");

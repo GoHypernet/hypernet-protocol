@@ -4,8 +4,8 @@ import {
   PersistenceError,
   GatewayRegistrationInfo,
   GatewayRegistrationFilter,
-  EthereumAddress,
   Signature,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -15,10 +15,6 @@ import {
   ILogUtilsType,
 } from "@hypernetlabs/utils";
 import { IGatewayRegistrationRepository } from "@interfaces/data";
-import { injectable, inject } from "inversify";
-import { errAsync, ResultAsync } from "neverthrow";
-
-import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
@@ -31,6 +27,10 @@ import {
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
+import { injectable, inject } from "inversify";
+import { errAsync, ResultAsync } from "neverthrow";
+
+import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IGatewayConnectorProxyFactory,
   IGatewayConnectorProxyFactoryType,
@@ -131,6 +131,6 @@ export class GatewayRegistrationRepository
 }
 
 interface IGatewayRegistryEntry {
-  address: EthereumAddress;
+  address: EthereumAccountAddress;
   signature: Signature;
 }

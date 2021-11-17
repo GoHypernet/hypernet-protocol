@@ -1,10 +1,15 @@
 import {
   BlockchainUnavailableError,
-  EthereumAddress,
   RegistryEntry,
   Registry,
   RegistryParams,
   RegistryPermissionError,
+  ERegistrySortOrder,
+  RegistryFactoryContractError,
+  NonFungibleRegistryContractError,
+  ERC20ContractError,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -12,29 +17,49 @@ export interface IRegistryService {
   getRegistries(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Registry[], BlockchainUnavailableError>;
+    sortOrder: ERegistrySortOrder,
+  ): ResultAsync<
+    Registry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
   getRegistryByName(
     registryNames: string[],
-  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError>;
+  ): ResultAsync<
+    Map<string, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
   getRegistryByAddress(
-    registryAddresses: EthereumAddress[],
-  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError>;
+    registryAddresses: EthereumContractAddress[],
+  ): ResultAsync<
+    Map<EthereumContractAddress, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
   getRegistryEntries(
     registryName: string,
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
+    sortOrder: ERegistrySortOrder,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
   getRegistryEntryDetailByTokenId(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
   updateRegistryEntryTokenURI(
     registryName: string,
     tokenId: number,
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | BlockchainUnavailableError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | RegistryPermissionError
   >;
   updateRegistryEntryLabel(
     registryName: string,
@@ -42,34 +67,98 @@ export interface IRegistryService {
     label: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   >;
   getRegistryEntriesTotalCount(
     registryNames: string[],
-  ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
-  getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
+  ): ResultAsync<
+    Map<string, number>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
+  getNumberOfRegistries(): ResultAsync<
+    number,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
   updateRegistryParams(
     registryParams: RegistryParams,
   ): ResultAsync<
     Registry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   >;
   createRegistryEntry(
     registryName: string,
     label: string,
-    recipientAddress: EthereumAddress,
+    recipientAddress: EthereumAccountAddress,
     data: string,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | ERC20ContractError
+  >;
   transferRegistryEntry(
     registryName: string,
     tokenId: number,
-    transferToAddress: EthereumAddress,
+    transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   >;
   burnRegistryEntry(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
+  createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAccountAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError>;
+  grantRegistrarRole(
+    registryName: string,
+    address: EthereumAccountAddress,
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
+  revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAccountAddress,
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
+  renounceRegistrarRole(
+    registryName: string,
+    address: EthereumAccountAddress,
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
 }

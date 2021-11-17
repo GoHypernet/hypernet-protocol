@@ -16,12 +16,17 @@ export interface IBlockchainProvider {
   /**
    * This initializes the blockchain provider, and makes sure
    */
-  initialize(): ResultAsync<void, BlockchainUnavailableError>;
+  initialize(): ResultAsync<
+    void,
+    BlockchainUnavailableError | InvalidParametersError
+  >;
 
   getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, never>;
   getGovernanceSigner(): ResultAsync<
     ethers.providers.JsonRpcSigner,
-    GovernanceSignerUnavailableError
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
   >;
 
   getProvider(): ResultAsync<ethers.providers.JsonRpcProvider, never>;

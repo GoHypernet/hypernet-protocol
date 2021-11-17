@@ -35,20 +35,15 @@
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
-    "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
-    "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",
     "test": "yarn build && yarn test:ci",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
-    "test:watch": "jest --watch --color --detectOpenHandles",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "test:watch": "jest --watch --color --detectOpenHandles"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.0.1",
+    "@hypernetlabs/objects": "^0.3.7",
     "cors": "^2.8.5",
     "ethers": "^5.4.7",
     "express": "^4.17.1"

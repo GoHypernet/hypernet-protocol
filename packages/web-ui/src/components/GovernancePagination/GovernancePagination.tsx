@@ -6,6 +6,7 @@ interface CustomPageProps {
   itemsPerPage: number;
   totalItems: number;
   currentPageStartIndex?: number;
+  currentPage?: number;
 }
 
 interface GovernancePaginationProps extends PaginationProps {
@@ -85,6 +86,7 @@ export const GovernancePagination: React.FC<GovernancePaginationProps> = (
       shape={shape}
       count={customPageOptions ? customPageCount : count}
       {...rest}
+      page={customPageOptions?.currentPage || defaultPage}
       defaultPage={
         customPageOptions?.currentPageStartIndex
           ? customDefaultPage

@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { VectorError } from "@connext/vector-types";
 import {
   ActiveStateChannel,
-  AuthorizedGatewaysSchema,
   Balances,
   BalancesUnavailableError,
   BigNumberString,
   BlockchainUnavailableError,
   EPaymentState,
+  EthereumAddress,
   GatewayActivationError,
   GatewayConnectorError,
   GatewayRegistrationInfo,
@@ -23,21 +22,24 @@ import {
   Signature,
   SortedTransfers,
   SupportedToken,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import {
   IAccountsRepository,
-  IAuthorizedGatewayEntry,
   IGatewayConnectorRepository,
   IGatewayRegistrationRepository,
   IRouterRepository,
 } from "@interfaces/data";
 import {
+  IBlockchainUtils,
+  IGatewayConnectorProxy,
+} from "@interfaces/utilities";
+import {
   gatewayUrl,
   account,
   account2,
   routerChannelAddress,
-  insuranceTransferId,
   commonPaymentId,
   gatewaySignature,
   gatewayUrl2,
@@ -59,15 +61,11 @@ import {
   activeInsuranceTransfer,
   activeParameterizedTransfer,
 } from "@mock/mocks";
-import { errAsync, ok, okAsync } from "neverthrow";
-import td, { verify } from "testdouble";
+import { errAsync, okAsync } from "neverthrow";
+import td from "testdouble";
 
 import { GatewayConnectorService } from "@implementations/business/GatewayConnectorService";
 import { IGatewayConnectorService } from "@interfaces/business/IGatewayConnectorService";
-import {
-  IBlockchainUtils,
-  IGatewayConnectorProxy,
-} from "@interfaces/utilities";
 import {
   BlockchainProviderMock,
   ConfigProviderMock,
@@ -538,7 +536,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks();
 
-    const err = new PersistenceError();
+    const err = new GatewayActivationError();
     td.when(
       mocks.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
     ).thenReturn(errAsync(err));
@@ -593,7 +591,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks();
 
-    const err = new PersistenceError();
+    const err = new BlockchainUnavailableError();
     td.when(
       mocks.routerRepository.getRouterDetails([routerPublicIdentifier]),
     ).thenReturn(errAsync(err));
@@ -727,7 +725,7 @@ describe("GatewayConnectorService tests", () => {
     const mocks = new GatewayConnectorServiceMocks();
 
     mocks.contextProvider.initializedContext.activeStateChannels = [];
-    const err = new VectorError("");
+    const err = new VectorError();
     td.when(
       mocks.accountRepository.createStateChannel(
         routerPublicIdentifier,

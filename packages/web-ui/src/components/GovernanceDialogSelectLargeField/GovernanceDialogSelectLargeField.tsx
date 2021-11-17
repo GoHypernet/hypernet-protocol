@@ -20,7 +20,8 @@ import {
 import { Field as FormikField, FieldAttributes, FieldProps } from "formik";
 import { useStyles } from "@web-ui/components/GovernanceDialogSelectLargeField/GovernanceDialogSelectLargeField.style";
 
-export interface GovernanceDialogSelectLargeFieldProps extends FieldAttributes<any> {
+export interface GovernanceDialogSelectLargeFieldProps
+  extends FieldAttributes<any> {
   title?: string;
   options?: IGovernanceDialogSelectLargeFieldOption[];
 }

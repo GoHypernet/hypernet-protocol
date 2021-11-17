@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
+import {
+  GatewayUrl,
+  GatewayTokenInfo,
+  BigNumberString,
+  EthereumContractAddress,
+} from "@hypernetlabs/objects";
 import { Box, Tooltip, IconButton, Typography, Grid } from "@material-ui/core";
-import { IRenderParams } from "@web-ui/interfaces";
 import {
   Add as AddIcon,
   LocalGasStation as LocalGasStationIcon,
   Check as CheckIcon,
 } from "@material-ui/icons";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IRenderParams } from "@web-ui/interfaces";
+import React, { useEffect, useState } from "react";
 import { useAlert } from "react-alert";
 
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { GovernanceDialog, List, ListItem } from "@web-integration/components";
-import {
-  GatewayUrl,
-  GatewayTokenInfo,
-  EthereumAddress,
-  BigNumberString,
-} from "@hypernetlabs/objects";
 import { useStyles } from "@web-ui/widgets/GatewayInfoModalWidget/GatewayInfoModalWidget.style";
 
 interface IGatewayInfoModalWidget extends IRenderParams {
@@ -41,7 +41,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
     [],
   );
   const [tokensStateChannelsMap, setTokensStateChannelsMap] = useState<
-    Map<EthereumAddress, ETokenState>
+    Map<EthereumContractAddress, ETokenState>
   >(new Map());
 
   useEffect(() => {
@@ -140,7 +140,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
         <List style={{ margin: 0 }}>
           {gatewayTokenInfo.map((gatewayToken) => (
             <ListItem
-                      title={`Token:${gatewayToken.tokenAddress}`}
+              title={`Token:${gatewayToken.tokenAddress}`}
               disableDivider
               rightContent={
                 <>

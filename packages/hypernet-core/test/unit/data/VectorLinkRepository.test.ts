@@ -8,18 +8,8 @@ import {
   UnixTimestamp,
   SortedTransfers,
 } from "@hypernetlabs/objects";
+import { ITimeUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
-import { okAsync, errAsync } from "neverthrow";
-import td from "testdouble";
-
-import { LinkRepository } from "@implementations/data/LinkRepository";
-import {
-  IVectorUtils,
-  IBrowserNodeProvider,
-  IPaymentUtils,
-  ILinkUtils,
-  IBlockchainTimeUtils,
-} from "@interfaces/utilities";
 import {
   commonAmount,
   publicIdentifier,
@@ -30,13 +20,20 @@ import {
   erc20AssetAddress,
   gatewayUrl,
   publicIdentifier3,
-  offerTransferId,
-  insuranceTransferId,
-  parameterizedTransferId,
   routerChannelAddress,
   chainId,
   routerPublicIdentifier,
 } from "@mock/mocks";
+import { okAsync, errAsync } from "neverthrow";
+import td from "testdouble";
+
+import { LinkRepository } from "@implementations/data/LinkRepository";
+import {
+  IBrowserNodeProvider,
+  IPaymentUtils,
+  ILinkUtils,
+  IBlockchainTimeUtils,
+} from "@interfaces/utilities";
 import {
   BlockchainProviderMock,
   BrowserNodeProviderMock,
@@ -45,7 +42,6 @@ import {
   PaymentUtilsMockFactory,
   VectorUtilsMockFactory,
 } from "@mock/utils";
-import { ITimeUtils } from "@hypernetlabs/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);

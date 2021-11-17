@@ -26,7 +26,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
       title={!noLabel ? "Your Balances" : undefined}
       description={
         !noLabel
-          ? "Available token balances in this Hypernet Protocol account."
+          ? "Available token balances in this Hypernet account."
           : undefined
       }
       className={!includeBoxWrapper ? classes.balancesWrapper : ""}

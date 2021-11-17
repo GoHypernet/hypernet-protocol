@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+
 import { ITagConfig } from "@web-ui/components/GovernanceTag";
 
 export const useStyles = makeStyles((theme) => ({

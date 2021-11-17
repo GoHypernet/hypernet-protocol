@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import { EthereumAccountAddress } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
+import React, { useState } from "react";
 import { useAlert } from "react-alert";
 
 import {
@@ -8,8 +10,6 @@ import {
   GovernanceButton,
   GovernanceField,
 } from "@web-ui/components";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress } from "@hypernetlabs/objects";
 import { useStyles } from "@web-ui/widgets/TransferIdentityWidget/TransferIdentityWidget.style";
 
 interface ITransferIdentityWidget {
@@ -29,8 +29,8 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
   const classes = useStyles();
   const { coreProxy, UIData } = useStoreContext();
   const { setLoading } = useLayoutContext();
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
+  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
+    EthereumAccountAddress(""),
   );
 
   const transferIdentity = (values: { address: string }) => {
@@ -39,7 +39,7 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
       .transferRegistryEntry(
         registryName,
         tokenId,
-        EthereumAddress(values.address),
+        EthereumAccountAddress(values.address),
       )
       .map(() => {
         setLoading(false);
@@ -48,13 +48,13 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
       .mapErr(handleError);
   };
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };
 
   const handleAddressFieldChange = (value: string) => {
-    setAccountAddress(EthereumAddress(value));
+    setAccountAddress(EthereumAccountAddress(value));
   };
 
   return (

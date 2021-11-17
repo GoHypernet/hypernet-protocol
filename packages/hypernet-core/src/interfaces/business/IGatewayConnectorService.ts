@@ -14,7 +14,10 @@ import {
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
   InvalidParametersError,
+  BalancesUnavailableError,
+  GatewayActivationError,
   ActiveStateChannel,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -22,20 +25,35 @@ export interface IGatewayConnectorService {
   initialize(): ResultAsync<void, never>;
   authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayValidationError>;
+  ): ResultAsync<
+    void,
+    | PersistenceError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayAuthorizationDeniedError
+    | GatewayActivationError
+    | VectorError
+  >;
   deauthorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   >;
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError | BlockchainUnavailableError
   >;
   getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError | BlockchainUnavailableError
   >;
   activateAuthorizedGateways(): ResultAsync<
     void,
@@ -59,14 +77,25 @@ export interface IGatewayConnectorService {
     routerPublicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
     ActiveStateChannel,
-    PersistenceError | RouterUnauthorizedError | InvalidParametersError
+    | PersistenceError
+    | RouterUnauthorizedError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
   >;
 
   getGatewayTokenInfo(
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayTokenInfo[]>,
-    ProxyError | PersistenceError | GatewayAuthorizationDeniedError
+    | ProxyError
+    | PersistenceError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   >;
 
   getGatewayRegistrationInfo(
@@ -75,10 +104,32 @@ export interface IGatewayConnectorService {
 
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+  >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+  >;
 }
 
 export const IGatewayConnectorServiceType = Symbol.for(

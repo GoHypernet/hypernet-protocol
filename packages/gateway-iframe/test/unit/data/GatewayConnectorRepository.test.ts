@@ -1,8 +1,8 @@
 import { GatewayUrl } from "@hypernetlabs/objects";
+import { IAjaxUtils } from "@hypernetlabs/utils";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
-import { IAjaxUtils } from "@hypernetlabs/utils";
 import { GatewayConnectorRepository } from "@gateway-iframe/implementations/data";
 import { IGatewayConnectorRepository } from "@gateway-iframe/interfaces/data";
 import { gatewayUrl } from "@mock/mocks";

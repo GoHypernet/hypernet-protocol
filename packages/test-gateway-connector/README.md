@@ -8,7 +8,7 @@ This package demonstrates how to create a Gateway Connector, and is used for tes
 
 ## Development
 
-This package includes a webpack configuration, which is considered its proper deliverable. 
+This package includes a webpack configuration, which is considered its proper deliverable.
 
 `yarn compile`
 

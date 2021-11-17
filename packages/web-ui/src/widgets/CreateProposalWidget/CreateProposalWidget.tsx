@@ -1,17 +1,17 @@
+import { EthereumAccountAddress } from "@hypernetlabs/objects";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IProposalCreateWidgetParams } from "@web-ui/interfaces";
+import { Form, Formik, FormikHelpers } from "formik";
 import React, { useEffect, useState, useMemo } from "react";
 import { useAlert } from "react-alert";
-import { Form, Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
 
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress } from "@hypernetlabs/objects";
 import {
   GovernanceButton,
   GovernanceDialogSelectLargeField,
   GovernanceLargeField,
   GovernanceWidgetHeader,
 } from "@web-integration/components";
-import { IProposalCreateWidgetParams } from "@web-ui/interfaces";
 
 enum ERegistryAction {
   ADD_REGISTRY = 0,
@@ -22,7 +22,7 @@ interface IValues {
   name: string;
   symbol: string;
   enumerable: boolean;
-  owner: EthereumAddress;
+  owner: EthereumAccountAddress;
 }
 
 const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
@@ -31,8 +31,8 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   const alert = useAlert();
   const { coreProxy, UIData } = useStoreContext();
   const { setLoading } = useLayoutContext();
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
+  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
+    EthereumAccountAddress(""),
   );
   const [proposalThreshold, setProposalThreshold] = useState<number>();
   const [votingPower, setVotingPower] = useState<number>();
@@ -60,7 +60,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
       .mapErr(handleError);
   }, []);
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };
@@ -74,7 +74,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
       .createProposal(
         values.name,
         values.symbol,
-        EthereumAddress(values.owner),
+        EthereumAccountAddress(values.owner),
         values.enumerable,
       )
       .map((proposal) => {

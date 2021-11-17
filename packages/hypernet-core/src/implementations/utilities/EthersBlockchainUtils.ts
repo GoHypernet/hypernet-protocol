@@ -10,11 +10,10 @@ import {
   BigNumberString,
   BlockchainUnavailableError,
   Signature,
-  EthereumAddress,
-  GatewayRegistrationInfo,
-  GatewayUrl,
   HexString,
   ChainId,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { Contract, ethers } from "ethers";
@@ -42,21 +41,24 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
     types: Record<string, Array<TypedDataField>>,
     value: Record<string, unknown>,
     signature: Signature,
-  ): EthereumAddress {
-    return EthereumAddress(
+  ): EthereumAccountAddress {
+    return EthereumAccountAddress(
       ethers.utils.verifyTypedData(domain, types, value, signature),
     );
   }
 
   public erc20Transfer(
-    assetAddress: EthereumAddress,
+    assetAddress: EthereumContractAddress,
     channelAddress: string,
     amount: BigNumberString,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
       return ResultAsync.fromPromise(
-        tokenContract.transfer(channelAddress, amount),
+        tokenContract.transfer(
+          channelAddress,
+          amount,
+        ) as Promise<TransactionResponse>,
         (err) => {
           return new BlockchainUnavailableError(
             "Unable to complete an ERC20 token transfer",
@@ -69,7 +71,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
 
   public mintToken(
     amount: BigNumberString,
-    to: EthereumAddress,
+    to: EthereumAccountAddress,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const testTokenContract = new Contract(
@@ -220,7 +222,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   }
 
   public getERC721Entry<T>(
-    contractAddress: EthereumAddress,
+    contractAddress: EthereumContractAddress,
     key: string,
   ): ResultAsync<T, BlockchainUnavailableError> {
     return this.blockchainProvider

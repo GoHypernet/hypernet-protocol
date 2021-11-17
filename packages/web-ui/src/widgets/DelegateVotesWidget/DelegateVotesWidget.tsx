@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
+import { EthereumAccountAddress } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
-import { useAlert } from "react-alert";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+import { useAlert } from "react-alert";
 
 import {
   GovernanceDialog,
   GovernanceButton,
   GovernanceField,
 } from "@web-ui/components";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress } from "@hypernetlabs/objects";
 import { useStyles } from "@web-ui/widgets/DelegateVotesWidget/DelegateVotesWidget.style";
 
 interface IValues {
-  accountAddress: EthereumAddress;
+  accountAddress: EthereumAccountAddress;
 }
 interface IDelegateVotesWidget {
   onCloseCallback: () => void;
@@ -26,8 +26,8 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
   const classes = useStyles();
   const { coreProxy, UIData } = useStoreContext();
   const { setLoading } = useLayoutContext();
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
+  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
+    EthereumAccountAddress(""),
   );
 
   useEffect(() => {
@@ -48,7 +48,7 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
       .mapErr(handleError);
   };
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };
@@ -79,7 +79,9 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
                     fullWidth
                     variant="outlined"
                     onChange={(event) =>
-                      setAccountAddress(EthereumAddress(event.target.value))
+                      setAccountAddress(
+                        EthereumAccountAddress(event.target.value),
+                      )
                     }
                   />
                   <GovernanceButton

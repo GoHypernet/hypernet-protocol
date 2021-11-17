@@ -37,10 +37,7 @@
     "test": "yarn build && yarn test:ci",
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
-    "test:watch": "jest --watch --color --detectOpenHandles",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "test:watch": "jest --watch --color --detectOpenHandles"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
@@ -53,9 +50,10 @@
     "@connext/vector-contracts": "^0.2.5-beta.6",
     "@connext/vector-types": "^0.2.5-beta.6",
     "@connext/vector-utils": "^0.2.5-beta.6",
-    "@hypernetlabs/gateway-connector": "^0.0.1",
-    "@hypernetlabs/objects": "^0.0.1",
-    "@hypernetlabs/utils": "^0.0.1",
+    "@hypernetlabs/gateway-connector": "^0.0.10",
+    "@hypernetlabs/objects": "^0.3.7",
+    "@hypernetlabs/utils": "^0.4.6",
+    "@hypernetlabs/contracts": "^0.0.1",
     "@walletconnect/web3-provider": "^1.5.2",
     "class-transformer": "^0.3.2",
     "crypto-browserify": "^3.12.0",

@@ -3,8 +3,8 @@ import {
   GatewayUrl,
   PublicIdentifier,
   EthereumAddress,
+  RenderError,
 } from "@hypernetlabs/objects";
-import { RenderError } from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
 import React from "react";
 

@@ -5,28 +5,28 @@
 # The Hypernet Protocol
 
 The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based payments with a privacy-preserving,  
-"non-fungible" identity registry. The combination of these two elements enables merchants to accept cyptocurrency 
-payments in their traditional online platforms with minimal code intrusion and without specialized knowledge of web3 
-technology while also complying with various regulations regarding electronic funds transfer. The authors of the 
-Hypernet Protocol believe that a decentralized, blockchain-secured, community-driven payment/identity solution will 
-revolutionize the cyber-infrastructure landscape and that it is broadly generalizable to various decentralized marketplaces 
-and subscription-based services. 
+"non-fungible" identity registry. The combination of these two elements enables merchants to accept cyptocurrency
+payments in their traditional online platforms with minimal code intrusion and without specialized knowledge of web3
+technology while also complying with various regulations regarding electronic funds transfer. The authors of the
+Hypernet Protocol believe that a decentralized, blockchain-secured, community-driven payment/identity solution will
+revolutionize the cyber-infrastructure landscape and that it is broadly generalizable to various decentralized marketplaces
+and subscription-based services.
 
-A successful payment protocol must solve problems on both sides of the market. On the consumer side, users expect a 
-payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol 
-integrates Connext's [Vector](https://github.com/connext/vector) library to enable fast, secure, microtransactions, 
-with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The 
-Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements 
-of their particular business, and tools to streamline software integration. Meeting these needs has led to the development 
-light-weight developer abstraction layer. Developer's are isolated from the particulars of Layer 2 scaling protocols and 
-are presented with a small set of function calls bundled together in an npm package that looks familiar to those who 
+A successful payment protocol must solve problems on both sides of the market. On the consumer side, users expect a
+payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol
+integrates Connext's [Vector](https://github.com/connext/vector) library to enable fast, secure, microtransactions,
+with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The
+Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements
+of their particular business, and tools to streamline software integration. Meeting these needs has led to the development
+light-weight developer abstraction layer. Developer's are isolated from the particulars of Layer 2 scaling protocols and
+are presented with a small set of function calls bundled together in an npm package that looks familiar to those who
 have used a traditional payment service provider SDK.
 
 This monorepo contains several packages:
 
 - [hypernet-core](packages/hypernet-core): The core of the protocol. HNP is encapsulated into the HypernetCore class, which can be instantiated in a variety of ways.
 - [developer-ui](packages/developer-ui): An example package demonstrating how to consume the Hypernet Core SDK. It is also used for integration testing.
-- [contracts](packages/contracts): A package containing solidity contracts for Hypernet Protocol Governance, Hypertoken, and Non-Fungible Registy. 
+- [contracts](packages/contracts): A package containing solidity contracts for Hypernet Protocol Governance, Hypertoken, and Non-Fungible Registy.
 - [iframe](packages/iframe): HypernetCore is designed to run in a browser, but that is a hostile environment. The iframe package is designed to host the running instance of HNC inside an iframe and expose an interface for cross-frame communication. The host window will communicate with the HNC via a proxy.
 - [gateway-connector](packages/gateway-connector): This package is designed for gateways that want to support the Hypernet Protocol. Gateways will need to publish an API and "connector" code that HNP clients will run. Payments sent via HNP are each moderated by a gateway, the connector allows the gateway to keep up to date with the payments the client is actually sending and recieving so that, should any disputes arrive, they can properly moderate the dispute. This package includes the OpenApi specification for the required API, as well as the typescript interface that their published connector must implement.
 - [gateway-iframe](packages/gateway-iframe): Gateway connectors are not allowed to run directly in the same window as HNC for security reasons, to prevent a rogue connector causing issues. gateway-iframe is the source for the iframe that will host the gateway connector. It is responsible for checking the signature of the connector and providing a cross-frame proxy interface to HNC. In production, this pacakge would be published somewhere like IPFS.
@@ -94,6 +94,7 @@ Similar to a _Hypernet Link_, but at a lower level of abstraction; a _payment ch
 **Important** - **Note the difference between a Hypernet Link and a Payment Channel, and at what layers they each live. It can be very easy to confuse the two if one isn't careful**
 
 # Development
+
 Using VSCode is recommended; all workflows and setup have been setup with this environment in mind. You should install and use the ESLint extention, details on that are [here](https://code.visualstudio.com/api/advanced-topics/tslint-eslint-migration). On the windows platform, development within the WSL2 environment is also highly recommended.
 
 ## Prerequisites
@@ -108,7 +109,8 @@ Using VSCode is recommended; all workflows and setup have been setup with this e
   enable WSL integration when you install Docker-Desktop.
 
 ## Installing
-All commands should be run at the root of the repository. Most of them use Lerna to run subcommands inside the different packages. Most of these commands can be run on an 
+
+All commands should be run at the root of the repository. Most of them use Lerna to run subcommands inside the different packages. Most of these commands can be run on an
 individual package from the packages directory if necessary.
 
 1. Switch to correct version of Node:
@@ -121,26 +123,19 @@ individual package from the packages directory if necessary.
 
 3. Compile the whole repository to make sure everything is working
 
-  `yarn compile`
+`yarn compile`
 
 4. Create all the development docker images
 
-  `yarn dockerize`
+`yarn dockerize`
 
 5. Start the docker world
 
-  `yarn start`
+`yarn start`
 
-  This will start a LOT of docker images:
-    1. A hardhat based ethereum development node. The node will have all the necessary contracts deployed, and the various development accounts funded. It is available at http://localhost:8545
-    2. All the servers needed for the Vector protocol. These consist of a server node for the router, a router, a host for the Vector iframe, and the messaging stack.
-    3. The core iframe server, which delivers the webpacked Hypernet Protocol Core Iframe. This is just an NGINX host, and is available at http://localhost:5020
-    4. The gateway iframe server. Similar to the core iframe server, it just delivers the webpacked Hypernet Protocol Gateway Iframe. It is available at http://localhost:5005
-    5. The user dashboard server. Another NGINX host, it is available at http://localhost:5016
-    6. A test gateway server. This is a Node and Express based server that simulates the function of a gateway. It is available at http://localhost:5010
+This will start a LOT of docker images: 1. A hardhat based ethereum development node. The node will have all the necessary contracts deployed, and the various development accounts funded. It is available at http://localhost:8545 2. All the servers needed for the Vector protocol. These consist of a server node for the router, a router, a host for the Vector iframe, and the messaging stack. 3. The core iframe server, which delivers the webpacked Hypernet Protocol Core Iframe. This is just an NGINX host, and is available at http://localhost:5020 4. The gateway iframe server. Similar to the core iframe server, it just delivers the webpacked Hypernet Protocol Gateway Iframe. It is available at http://localhost:5005 5. The user dashboard server. Another NGINX host, it is available at http://localhost:5016 6. A test gateway server. This is a Node and Express based server that simulates the function of a gateway. It is available at http://localhost:5010
 
 6. Open the user dashboard in your browser: http://localhost:5016. You can add the test gateway using the URL http://localhost:5010.
-
 
 ## Structure
 

@@ -1,9 +1,9 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-web3");
 require("@nomiclabs/hardhat-solhint");
-require('@nomiclabs/hardhat-ethers');
+require("@nomiclabs/hardhat-ethers");
 require("@atixlabs/hardhat-time-n-mine");
-require('@openzeppelin/hardhat-upgrades');
+require("@openzeppelin/hardhat-upgrades");
 
 require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");

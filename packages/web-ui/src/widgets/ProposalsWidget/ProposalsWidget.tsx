@@ -7,6 +7,7 @@ import {
   GovernanceProposalListItem,
   GovernanceWidgetHeader,
   GovernanceEmptyState,
+  GovernanceButton,
 } from "@web-ui/components";
 import { IProposalsWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -51,7 +52,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
       .mapErr(handleError);
   }, [page]);
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
@@ -61,21 +62,32 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
     <Box>
       <GovernanceWidgetHeader
         label="Proposals"
-        headerActions={[
-          {
-            label: "Create Proposal",
-            onClick: () => {
-              onProposalCreationNavigate && onProposalCreationNavigate();
-            },
-            variant: "outlined",
-          },
-          {
-            label: "Delegate Voting",
-            onClick: () => setDelegateVotesModalOpen(true),
-            variant: "contained",
-            color: "primary",
-          },
-        ]}
+        rightContent={
+          <Box display="flex" flexDirection="row">
+            <Box marginRight="10px">
+              <GovernanceButton
+                color="primary"
+                size="medium"
+                onClick={() => {
+                  onProposalCreationNavigate && onProposalCreationNavigate();
+                }}
+                variant="outlined"
+              >
+                Create Proposal
+              </GovernanceButton>
+            </Box>
+            <GovernanceButton
+              color="primary"
+              size="medium"
+              onClick={() => {
+                setDelegateVotesModalOpen(true);
+              }}
+              variant="contained"
+            >
+              Delegate Voting
+            </GovernanceButton>
+          </Box>
+        }
       />
 
       {hasEmptyState && (

@@ -1,10 +1,10 @@
 import {
-  BlockchainUnavailableError,
   Proposal,
-  EthereumAddress,
   EProposalVoteSupport,
   ProposalVoteReceipt,
-  Registry,
+  HypernetGovernorContractError,
+  ERC20ContractError,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -12,49 +12,43 @@ export interface IGovernanceService {
   getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], BlockchainUnavailableError>;
-  getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal[], HypernetGovernorContractError>;
+  getProposalsCount(): ResultAsync<number, HypernetGovernorContractError>;
   createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
   delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
-  ): ResultAsync<void, BlockchainUnavailableError>;
+  ): ResultAsync<void, ERC20ContractError>;
   getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
   castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
   getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
-  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError>;
-  proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+    voterAddress: EthereumAccountAddress,
+  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError>;
   queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
   cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
   executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
-  getProposalThreshold(): ResultAsync<number, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  getProposalThreshold(): ResultAsync<number, HypernetGovernorContractError>;
   getVotingPower(
-    account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError>;
+    account: EthereumAccountAddress,
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError>;
   getHyperTokenBalance(
-    account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError>;
+    account: EthereumAccountAddress,
+  ): ResultAsync<number, ERC20ContractError>;
 }

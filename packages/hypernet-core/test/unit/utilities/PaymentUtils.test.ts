@@ -9,24 +9,12 @@ import {
   PullPayment,
   UUID,
   ETransferState,
-  EthereumAddress,
+  EthereumContractAddress,
   BigNumberString,
 } from "@hypernetlabs/objects";
-import td from "testdouble";
-import { ok, okAsync } from "neverthrow";
-
-import { PaymentUtils } from "@implementations/utilities";
-import {
-  IPaymentIdUtils,
-  IPaymentUtils,
-} from "@interfaces/utilities";
 import { ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
-import {
-  BlockchainProviderMock,
-  ConfigProviderMock,
-  VectorUtilsMockFactory,
-  BrowserNodeProviderMock,
-} from "@mock/utils";
+import { PaymentUtils } from "@implementations/utilities";
+import { IPaymentIdUtils, IPaymentUtils } from "@interfaces/utilities";
 import {
   commonPaymentId,
   defaultExpirationLength,
@@ -40,6 +28,15 @@ import {
   offerDetails,
   offerTransferId,
 } from "@mock/mocks";
+import { ok, okAsync } from "neverthrow";
+import td from "testdouble";
+
+import {
+  BlockchainProviderMock,
+  ConfigProviderMock,
+  VectorUtilsMockFactory,
+  BrowserNodeProviderMock,
+} from "@mock/utils";
 
 const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const sortedTransfers = new SortedTransfers(
@@ -631,7 +628,7 @@ describe("PaymentUtils tests", () => {
     const mocks = new PaymentUtilsMocks();
     const utils = mocks.factoryProvider();
     // Invalid the payment
-    transfers[2].assetId = EthereumAddress("invalid address");
+    transfers[2].assetId = EthereumContractAddress("invalid address");
 
     // Act
     const result = await utils.transfersToPayment(commonPaymentId, transfers);

@@ -1,5 +1,12 @@
+import {
+  EthereumAccountAddress,
+  Registry,
+  ERegistrySortOrder,
+} from "@hypernetlabs/objects";
+import { Box, Typography } from "@material-ui/core";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IRegistryListWidgetParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, useMemo } from "react";
-import { Box } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
 import {
@@ -7,16 +14,10 @@ import {
   IRegistryListItemAction,
   GovernanceWidgetHeader,
   GovernanceEmptyState,
-  getPageItemIndexList,
   GovernancePagination,
+  GovernanceSwitch,
 } from "@web-ui/components";
-import { IRegistryListWidgetParams } from "@web-ui/interfaces";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import {
-  EthereumAddress,
-  Registry,
-  RegistryParams,
-} from "@hypernetlabs/objects";
+import CreateRegistryWidget from "@web-ui/widgets/CreateRegistryWidget";
 
 const REGISTIRES_PER_PAGE = 3;
 
@@ -31,15 +32,18 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [registriesCount, setRegistriesCount] = useState<number>(0);
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
+  const [reversedSortingEnabled, setReversedSortingEnabled] =
+    useState<boolean>(false);
+  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
+    EthereumAccountAddress(""),
   );
+  const [createRegistryModalOpen, setCreateRegistryModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     coreProxy
       .getNumberOfRegistries()
       .map((numberOfRegistries) => {
-        console.log("numberOfRegistries: ", numberOfRegistries);
         setRegistriesCount(numberOfRegistries);
         if (!numberOfRegistries) {
           setHasEmptyState(true);
@@ -55,18 +59,36 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   }, []);
 
   useEffect(() => {
+    getRegistries(page);
+  }, [page, registriesCount]);
+
+  useEffect(() => {
+    getRegistries(1);
+  }, [reversedSortingEnabled]);
+
+  const getRegistries = (pageNumber: number) => {
     coreProxy
-      .getRegistries(page, REGISTIRES_PER_PAGE)
+      .getRegistries(
+        pageNumber,
+        REGISTIRES_PER_PAGE,
+        reversedSortingEnabled
+          ? ERegistrySortOrder.REVERSED_ORDER
+          : ERegistrySortOrder.DEFAULT,
+      )
       .map((registries) => {
-        setRegistries(registries);
+        setPage(pageNumber);
         if (!registries.length) {
+          setRegistries([]);
           setHasEmptyState(true);
+        } else {
+          setRegistries(registries);
+          setHasEmptyState(false);
         }
       })
       .mapErr(handleError);
-  }, [page, registriesCount]);
+  };
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
@@ -88,7 +110,28 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   return (
     <Box>
-      <GovernanceWidgetHeader label="Registries" />
+      <GovernanceWidgetHeader
+        label="Registries"
+        headerActions={[
+          {
+            label: "Create New Registry",
+            onClick: () => setCreateRegistryModalOpen(true),
+            variant: "contained",
+            color: "primary",
+          },
+        ]}
+        rightContent={
+          <Box display="flex" alignItems="center" marginTop={3}>
+            <Typography style={{ paddingRight: 5 }}>Reverse sorting</Typography>
+            <GovernanceSwitch
+              initialValue={reversedSortingEnabled}
+              onChange={(reversedSorting) =>
+                setReversedSortingEnabled(reversedSorting)
+              }
+            />
+          </Box>
+        }
+      />
 
       {hasEmptyState && (
         <GovernanceEmptyState
@@ -118,23 +161,19 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.numberOfEntries.toString(),
             },
             {
-              fieldTitle: "Registrar Addresses",
+              fieldTitle: "First Registrar Addresses",
               fieldValue: registry.registrarAddresses.join("-"),
             },
           ]}
           actionButtonList={
             [
-              ...(getIsRegistrar(registry)
-                ? [
-                    {
-                      label: "Detail",
-                      variant: "text",
-                      onClick: () =>
-                        onRegistryDetailNavigate &&
-                        onRegistryDetailNavigate(registry.name),
-                    },
-                  ]
-                : []),
+              {
+                label: "Detail",
+                variant: "text",
+                onClick: () =>
+                  onRegistryDetailNavigate &&
+                  onRegistryDetailNavigate(registry.name),
+              },
               {
                 label: "View Registry Entries",
                 onClick: () =>
@@ -151,10 +190,22 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
           customPageOptions={{
             itemsPerPage: REGISTIRES_PER_PAGE,
             totalItems: registriesCount,
+            currentPage: page,
           }}
           onChange={(_, page) => {
             setPage(page);
           }}
+        />
+      )}
+
+      {createRegistryModalOpen && (
+        <CreateRegistryWidget
+          onCloseCallback={() => {
+            setReversedSortingEnabled(true);
+            getRegistries(1);
+            setCreateRegistryModalOpen(false);
+          }}
+          currentAccountAddress={accountAddress}
         />
       )}
     </Box>

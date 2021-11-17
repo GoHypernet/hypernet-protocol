@@ -4,7 +4,7 @@ import {
   PublicIdentifier,
   Signature,
   GatewayUrl,
-  EthereumAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import Postmate from "postmate";
@@ -13,7 +13,7 @@ import { Subject } from "rxjs";
 export class GatewayContext {
   constructor(
     public gatewayUrl: GatewayUrl,
-    public gatewayAddress: EthereumAddress,
+    public gatewayAddress: EthereumAccountAddress,
     public gatewaySignature: Signature,
     public onGatewayConnectorActivated: Subject<IGatewayConnector>,
     public onHypernetCoreProxyActivated: Subject<Postmate.ChildAPI>,

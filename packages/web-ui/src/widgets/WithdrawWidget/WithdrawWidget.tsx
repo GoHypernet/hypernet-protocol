@@ -1,4 +1,6 @@
+import { EthereumContractAddress } from "@hypernetlabs/objects";
 import { IRenderParams } from "@web-ui/interfaces";
+import { Form, Formik } from "formik";
 import React from "react";
 
 import {
@@ -9,13 +11,11 @@ import {
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
-import { Form, Formik } from "formik";
-import { EthereumAddress } from "@hypernetlabs/objects";
 
 interface IValues {
   amount: string;
-  tokenAddress: EthereumAddress;
-  stateChannelAddress: EthereumAddress;
+  tokenAddress: EthereumContractAddress;
+  stateChannelAddress: EthereumContractAddress;
 }
 
 interface IWithdrawWidget extends IRenderParams {}
@@ -46,7 +46,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
       title={!noLabel ? "Withdraw Funds" : undefined}
       description={
         !noLabel
-          ? "Move tokens from your Hypernet Protocol account into your Ethereum wallet."
+          ? "Move tokens from your Hypernet account into your Ethereum wallet."
           : undefined
       }
     >
@@ -68,7 +68,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
             <Form onSubmit={handleSubmit}>
               <GovernanceDialogSelectField
                 required
-                title="State Channel"
+                title="Hypernet Account"
                 name="stateChannelAddress"
                 options={activeStateChannels.map((option) => ({
                   primaryText: option.channelAddress,

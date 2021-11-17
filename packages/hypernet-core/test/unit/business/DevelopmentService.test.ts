@@ -1,21 +1,18 @@
 import { BigNumberString } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
+import { DevelopmentService } from "@implementations/business";
+import { IDevelopmentService } from "@interfaces/business";
+import { IAccountsRepository } from "@interfaces/data";
+import { account } from "@tests/mock/mocks";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
-import { DevelopmentService } from "@implementations/business/DevelopmentService";
-import { IDevelopmentService } from "@interfaces/business/IDevelopmentService";
-import { IAccountsRepository } from "@interfaces/data";
-import { mockUtils } from "@mock/mocks";
-
 const amount = BigNumberString("42");
-const to = mockUtils.generateRandomEtherAdress();
 
 class DevelopmentServiceMocks {
   public accountRepository = td.object<IAccountsRepository>();
 
   constructor() {
-    td.when(this.accountRepository.mintTestToken(amount, to)).thenReturn(
+    td.when(this.accountRepository.mintTestToken(amount, account)).thenReturn(
       okAsync(undefined),
     );
   }
@@ -34,7 +31,7 @@ describe("DevelopmentService tests", () => {
       developmentServiceMock.factoryDevelopmentService();
 
     // Act
-    const response = await developmentService.mintTestToken(amount, to);
+    const response = await developmentService.mintTestToken(amount, account);
 
     // Assert
     expect(response).toBeDefined();

@@ -23,6 +23,10 @@ import {
   InsuranceState,
   ParameterizedState,
   MessageState,
+  PaymentCreationError,
+  EPaymentType,
+  paymentSigningDomain,
+  pushPaymentSigningTypes,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { PaymentService } from "@implementations/business/PaymentService";
@@ -39,7 +43,6 @@ import {
   gatewayUrl,
   hyperTokenAddress,
   insuranceTransferId,
-  mockUtils,
   publicIdentifier,
   publicIdentifier2,
   unixNow,
@@ -65,11 +68,19 @@ import {
   parameterizedTransferId,
   parameterizedTransferId2,
   routerPublicIdentifier,
+  requestIdentifier1,
+  gatewayAccount,
+  errorAccount,
+  validPaymentId,
 } from "@mock/mocks";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
-import { IGatewayConnectorProxy, IPaymentUtils } from "@interfaces/utilities";
+import {
+  IBlockchainUtils,
+  IGatewayConnectorProxy,
+  IPaymentUtils,
+} from "@interfaces/utilities";
 import {
   ConfigProviderMock,
   ContextProviderMock,
@@ -89,6 +100,7 @@ class PaymentServiceMocks {
   public vectorUtils =
     VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public paymentUtils = td.object<IPaymentUtils>();
+  public blockchainUtils = td.object<IBlockchainUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
   public gatewayRegistrationRepository =
@@ -158,7 +170,7 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(new Map<PaymentId, Payment>()));
 
     td.when(
-      this.paymentRepository.provideStake(commonPaymentId, account),
+      this.paymentRepository.provideStake(commonPaymentId, gatewayAccount),
     ).thenReturn(okAsync(this.stakedPushPayment));
 
     td.when(
@@ -172,10 +184,6 @@ class PaymentServiceMocks {
       okAsync(new Balances([this.assetBalance])),
     );
 
-    td.when(
-      this.paymentRepository.provideStake(commonPaymentId, account),
-    ).thenReturn(okAsync(this.stakedPushPayment));
-
     td.when(this.paymentRepository.provideAsset(commonPaymentId)).thenReturn(
       okAsync(this.approvedPushPayment),
     );
@@ -184,9 +192,22 @@ class PaymentServiceMocks {
       this.paymentRepository.acceptPayment(commonPaymentId, commonAmount),
     ).thenReturn(okAsync(this.finalizedPushPayment));
 
+    td.when(
+      this.paymentRepository.getReservedPaymentIdByRequestId(
+        requestIdentifier1,
+      ),
+    ).thenReturn(okAsync(commonPaymentId));
+
+    td.when(
+      this.paymentRepository.addReservedPaymentId(
+        requestIdentifier1,
+        commonPaymentId,
+      ),
+    ).thenReturn(okAsync(undefined));
+
     this.gatewayRegistrationInfo = new GatewayRegistrationInfo(
       gatewayUrl,
-      account,
+      gatewayAccount,
       gatewaySignature,
     );
     const gatewayRegistrationInfoMap = new Map<
@@ -342,6 +363,29 @@ class PaymentServiceMocks {
         }),
       ),
     ).thenReturn(activeParameterizedTransfer);
+
+    td.when(this.paymentUtils.createPaymentId(EPaymentType.Push)).thenReturn(
+      okAsync(commonPaymentId),
+    );
+
+    td.when(
+      this.blockchainUtils.verifyTypedData(
+        paymentSigningDomain,
+        pushPaymentSigningTypes,
+        td.matchers.contains({
+          requestIdentifier: requestIdentifier1,
+          paymentId: commonPaymentId,
+          channelAddress: routerChannelAddress,
+          recipientPublicIdentifier: publicIdentifier,
+          amount: commonAmount,
+          expirationDate: expirationDate,
+          requiredStake: commonAmount,
+          paymentToken: hyperTokenAddress,
+          metadata: null,
+        }),
+        gatewaySignature,
+      ),
+    ).thenReturn(gatewayAccount as never);
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -355,6 +399,7 @@ class PaymentServiceMocks {
       this.gatewayRegistrationRepository,
       this.vectorUtils,
       this.paymentUtils,
+      this.blockchainUtils,
       this.logUtils,
     );
   }
@@ -555,6 +600,66 @@ class PaymentServiceMocks {
 }
 
 describe("PaymentService tests", () => {
+  test("initiateSendFunds returns a paymentId", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const response = await paymentService.initiateSendFunds(
+      gatewayUrl,
+      requestIdentifier1,
+      routerChannelAddress,
+      publicIdentifier,
+      commonAmount,
+      expirationDate,
+      commonAmount,
+      hyperTokenAddress,
+      null,
+    );
+
+    // Assert
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeFalsy();
+    const initiationResponse = response._unsafeUnwrap();
+    expect(initiationResponse.paymentId).toBe(commonPaymentId);
+    expect(initiationResponse.requestIdentifier).toBe(requestIdentifier1);
+    paymentServiceMock.contextProvider.assertEventCounts({});
+  });
+
+  // test("initiateSendFunds returns an error", async () => {
+  //   // Arrange
+  //   const paymentServiceMock = new PaymentServiceMocks();
+
+  //   td.when(this.paymentUtils.createPaymentId(EPaymentType.Push)).thenReturn(
+  //     okAsync(commonPaymentId),
+  //   );
+
+  //   const paymentService = paymentServiceMock.factoryPaymentService();
+
+  //   // Act
+  //   const response = await paymentService.initiateSendFunds(
+  //     gatewayUrl,
+  //     requestIdentifier1,
+  //     routerChannelAddress,
+  //     publicIdentifier,
+  //     commonAmount,
+  //     expirationDate,
+  //     commonAmount,
+  //     hyperTokenAddress,
+  //     null,
+  //   );
+
+  //   // Assert
+  //   expect(response).toBeDefined();
+  //   expect(response.isErr()).toBeFalsy();
+  //   const initiationResponse = response._unsafeUnwrap();
+  //   expect(initiationResponse.paymentId).toBe(commonPaymentId);
+  //   expect(initiationResponse.requestIdentifier).toBe(requestIdentifier1);
+  //   paymentServiceMock.contextProvider.assertEventCounts({});
+  // });
+
   test("sendFunds returns payment", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
@@ -563,6 +668,8 @@ describe("PaymentService tests", () => {
 
     // Act
     const response = await paymentService.sendFunds(
+      requestIdentifier1,
+      commonPaymentId,
       routerChannelAddress,
       publicIdentifier,
       commonAmount,
@@ -570,6 +677,7 @@ describe("PaymentService tests", () => {
       commonAmount,
       hyperTokenAddress,
       gatewayUrl,
+      gatewaySignature,
       null,
     );
 
@@ -581,6 +689,163 @@ describe("PaymentService tests", () => {
     );
     paymentServiceMock.contextProvider.assertEventCounts({
       onPushPaymentSent: 1,
+    });
+  });
+
+  test("sendFunds returns error if gateway is invalid", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    td.when(
+      paymentServiceMock.gatewayRegistrationRepository.getGatewayRegistrationInfo(
+        td.matchers.contains(gatewayUrl),
+      ),
+    ).thenReturn(okAsync(new Map()));
+
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const response = await paymentService.sendFunds(
+      requestIdentifier1,
+      commonPaymentId,
+      routerChannelAddress,
+      publicIdentifier,
+      commonAmount,
+      expirationDate,
+      commonAmount,
+      hyperTokenAddress,
+      gatewayUrl,
+      gatewaySignature,
+      null,
+    );
+
+    // Assert
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeTruthy();
+    expect(response._unsafeUnwrapErr()).toBeInstanceOf(PaymentCreationError);
+    paymentServiceMock.contextProvider.assertEventCounts({
+      onPushPaymentSent: 0,
+    });
+  });
+
+  test("sendFunds returns error if request ID was not reserved", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    td.when(
+      paymentServiceMock.paymentRepository.getReservedPaymentIdByRequestId(
+        requestIdentifier1,
+      ),
+    ).thenReturn(okAsync(null));
+
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const response = await paymentService.sendFunds(
+      requestIdentifier1,
+      commonPaymentId,
+      routerChannelAddress,
+      publicIdentifier,
+      commonAmount,
+      expirationDate,
+      commonAmount,
+      hyperTokenAddress,
+      gatewayUrl,
+      gatewaySignature,
+      null,
+    );
+
+    // Assert
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeTruthy();
+    expect(response._unsafeUnwrapErr()).toBeInstanceOf(PaymentCreationError);
+    paymentServiceMock.contextProvider.assertEventCounts({
+      onPushPaymentSent: 0,
+    });
+  });
+
+  test("sendFunds returns error if request was for a different payment Id", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    td.when(
+      paymentServiceMock.paymentRepository.getReservedPaymentIdByRequestId(
+        requestIdentifier1,
+      ),
+    ).thenReturn(okAsync(validPaymentId));
+
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const response = await paymentService.sendFunds(
+      requestIdentifier1,
+      commonPaymentId,
+      routerChannelAddress,
+      publicIdentifier,
+      commonAmount,
+      expirationDate,
+      commonAmount,
+      hyperTokenAddress,
+      gatewayUrl,
+      gatewaySignature,
+      null,
+    );
+
+    // Assert
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeTruthy();
+    expect(response._unsafeUnwrapErr()).toBeInstanceOf(PaymentCreationError);
+    paymentServiceMock.contextProvider.assertEventCounts({
+      onPushPaymentSent: 0,
+    });
+  });
+
+  test("sendFunds returns error if signature does not verify", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    td.when(
+      paymentServiceMock.blockchainUtils.verifyTypedData(
+        paymentSigningDomain,
+        pushPaymentSigningTypes,
+        td.matchers.contains({
+          requestIdentifier: requestIdentifier1,
+          paymentId: commonPaymentId,
+          channelAddress: routerChannelAddress,
+          recipientPublicIdentifier: publicIdentifier,
+          amount: commonAmount,
+          expirationDate: expirationDate,
+          requiredStake: commonAmount,
+          paymentToken: hyperTokenAddress,
+          metadata: null,
+        }),
+        gatewaySignature,
+      ),
+    ).thenReturn(errorAccount as never);
+
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const response = await paymentService.sendFunds(
+      requestIdentifier1,
+      commonPaymentId,
+      routerChannelAddress,
+      publicIdentifier,
+      commonAmount,
+      expirationDate,
+      commonAmount,
+      hyperTokenAddress,
+      gatewayUrl,
+      gatewaySignature,
+      null,
+    );
+
+    // Assert
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeTruthy();
+    expect(response._unsafeUnwrapErr()).toBeInstanceOf(PaymentCreationError);
+    paymentServiceMock.contextProvider.assertEventCounts({
+      onPushPaymentSent: 0,
     });
   });
 
@@ -702,9 +967,9 @@ describe("PaymentService tests", () => {
     td.when(
       paymentServiceMock.paymentRepository.provideStake(
         commonPaymentId,
-        account,
+        gatewayAccount,
       ),
-    ).thenReturn(errAsync(new Error("test error")));
+    ).thenReturn(errAsync(new InvalidPaymentError("test error")));
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 

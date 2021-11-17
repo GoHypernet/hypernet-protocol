@@ -1,7 +1,7 @@
 import {
-  IAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   Balances,
@@ -19,6 +19,9 @@ import {
   GatewayTokenInfo,
   ActiveStateChannel,
   UtilityMessageSignature,
+  PaymentId,
+  SendFundsRequestData,
+  AuthorizeFundsRequestData,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -109,6 +112,16 @@ export interface IGatewayConnectorProxy extends ParentProxy {
     signature: UtilityMessageSignature,
   ): ResultAsync<void, ProxyError>;
 
+  sendFundsInitiated(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, ProxyError>;
+
+  authorizeFundsInitiated(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, ProxyError>;
+
   returnStateChannel(
     id: UUID,
     stateChannel: ActiveStateChannel,
@@ -116,8 +129,13 @@ export interface IGatewayConnectorProxy extends ParentProxy {
 
   // Signals to the outside world
   signMessageRequested: Observable<string>;
-  sendFundsRequested: Observable<ISendFundsRequest>;
-  authorizeFundsRequested: Observable<IAuthorizeFundsRequest>;
+
+  initiateSendFundsRequested: Observable<SendFundsRequestData>;
+  sendFundsRequested: Observable<ISignedSendFundsRequest>;
+
+  initiateAuthorizeFundsRequested: Observable<AuthorizeFundsRequestData>;
+  authorizeFundsRequested: Observable<ISignedAuthorizeFundsRequest>;
+
   resolveInsuranceRequested: Observable<IResolveInsuranceRequest>;
   stateChannelRequested: Observable<IStateChannelRequest>;
 }

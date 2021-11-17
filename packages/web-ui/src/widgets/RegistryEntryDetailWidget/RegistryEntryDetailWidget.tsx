@@ -1,7 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import {
+  EthereumAccountAddress,
+  Registry,
+  RegistryEntry,
+} from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
-
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { IRegistryEntryDetailWidgetParams } from "@web-ui/interfaces";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAlert } from "react-alert";
+
+import BurnEntryWidget from "../BurnEntryWidget";
+import TransferIdentityWidget from "../TransferIdentityWidget";
 
 import {
   GovernanceCard,
@@ -9,16 +18,7 @@ import {
   GovernanceValueWithTitle,
   GovernanceWidgetHeader,
 } from "@web-ui/components";
-import { IRegistryEntryDetailWidgetParams } from "@web-ui/interfaces";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import {
-  EthereumAddress,
-  Registry,
-  RegistryEntry,
-} from "@hypernetlabs/objects";
 import { GovernanceTag, ETagColor } from "@web-ui/components/GovernanceTag";
-import BurnEntryWidget from "../BurnEntryWidget";
-import TransferIdentityWidget from "../TransferIdentityWidget";
 import { colors } from "@web-ui/theme";
 
 const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
@@ -31,8 +31,8 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   const { setLoading } = useLayoutContext();
   const [registryEntry, setRegistryEntry] = useState<RegistryEntry>();
   const [registry, setRegistry] = useState<Registry>();
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
+  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
+    EthereumAccountAddress(""),
   );
   const [burnEntryModalOpen, setBurnEntryModalOpen] = useState<boolean>(false);
   const [transferIdentityModalOpen, setTransferIdentityModalOpen] =
@@ -108,7 +108,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

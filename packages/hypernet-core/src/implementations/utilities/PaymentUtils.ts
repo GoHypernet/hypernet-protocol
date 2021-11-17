@@ -1,5 +1,4 @@
 import {
-  EthereumAddress,
   IHypernetOfferDetails,
   Payment,
   PullAmount,
@@ -29,6 +28,7 @@ import {
   MessageResolver,
   InsuranceResolver,
   ParameterizedResolver,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -148,7 +148,7 @@ export class PaymentUtils implements IPaymentUtils {
       parameterizedTransferId = TransferId(
         sortedTransfers.parameterizedTransfers[0].transferId,
       );
-      paymentToken = EthereumAddress(
+      paymentToken = EthereumContractAddress(
         sortedTransfers.parameterizedTransfers[0].assetId,
       );
     }
@@ -266,7 +266,9 @@ export class PaymentUtils implements IPaymentUtils {
 
     const paymentToken =
       sortedTransfers.parameterizedTransfers.length > 0
-        ? EthereumAddress(sortedTransfers.parameterizedTransfers[0].assetId)
+        ? EthereumContractAddress(
+            sortedTransfers.parameterizedTransfers[0].assetId,
+          )
         : offerDetails.paymentToken;
 
     return okAsync(
@@ -308,7 +310,14 @@ export class PaymentUtils implements IPaymentUtils {
   public transfersToPayment(
     paymentId: PaymentId,
     transfers: IFullTransferState[],
-  ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError> {
+  ): ResultAsync<
+    Payment,
+    | InvalidPaymentError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentIdError
+  > {
     let paymentType: EPaymentType;
     return this.configProvider
       .getConfig()
@@ -319,14 +328,26 @@ export class PaymentUtils implements IPaymentUtils {
         const idRes = this.paymentIdUtils.getUUID(paymentId);
 
         if (domainRes.isErr()) {
-          return errAsync<SortedTransfers, InvalidPaymentIdError>(
-            domainRes.error,
-          );
+          return errAsync<
+            SortedTransfers,
+            | InvalidPaymentError
+            | InvalidParametersError
+            | VectorError
+            | BlockchainUnavailableError
+            | InvalidPaymentIdError
+          >(domainRes.error);
         }
 
         // TODO: This should probably be encapsulated down lower; getDomain() is probably unnecessary and and invalid domain should just result in an InvalidPaymentIdError from getType and getUUID.
         if (domainRes.value !== config.hypernetProtocolDomain) {
-          return errAsync<SortedTransfers, InvalidParametersError>(
+          return errAsync<
+            SortedTransfers,
+            | InvalidPaymentError
+            | InvalidParametersError
+            | VectorError
+            | BlockchainUnavailableError
+            | InvalidPaymentIdError
+          >(
             new InvalidParametersError(
               `Invalid payment domain: '${domainRes.value}'`,
             ),
@@ -334,15 +355,27 @@ export class PaymentUtils implements IPaymentUtils {
         }
 
         if (paymentTypeRes.isErr()) {
-          return errAsync<SortedTransfers, InvalidPaymentIdError>(
-            paymentTypeRes.error,
-          );
+          return errAsync<
+            SortedTransfers,
+            | InvalidPaymentError
+            | InvalidParametersError
+            | VectorError
+            | BlockchainUnavailableError
+            | InvalidPaymentIdError
+          >(paymentTypeRes.error);
         } else {
           paymentType = paymentTypeRes.value;
         }
 
         if (idRes.isErr()) {
-          return errAsync<SortedTransfers, InvalidPaymentIdError>(idRes.error);
+          return errAsync<
+            SortedTransfers,
+            | InvalidPaymentError
+            | InvalidParametersError
+            | VectorError
+            | BlockchainUnavailableError
+            | InvalidPaymentIdError
+          >(idRes.error);
         }
 
         return this.sortTransfers(paymentId, transfers);
@@ -383,7 +416,7 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public getPaymentState(
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<EPaymentState, BlockchainUnavailableError> {
+  ): ResultAsync<EPaymentState, VectorError | BlockchainUnavailableError> {
     // We are going to remove all canceled transfers from consideration.
     // Canceled transfers are irrelevant; artifacts of things gone wonky.
     return ResultUtils.combine([
@@ -632,13 +665,20 @@ export class PaymentUtils implements IPaymentUtils {
     transfers: IFullTransferState[],
   ): ResultAsync<
     Payment[],
-    VectorError | InvalidPaymentError | InvalidParametersError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentIdError
   > {
     // First step, get the transfer types for all the transfers
     const transferTypeResults = new Array<
       ResultAsync<
         { transferType: ETransferType; transfer: IFullTransferState },
-        VectorError | Error
+        | VectorError
+        | InvalidPaymentError
+        | InvalidParametersError
+        | BlockchainUnavailableError
       >
     >();
     for (const transfer of transfers) {
@@ -690,7 +730,14 @@ export class PaymentUtils implements IPaymentUtils {
         // Loop over them and convert them to proper payments.
         // This is all async, so we can do the whole thing in parallel.
         const paymentResults = new Array<
-          ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>
+          ResultAsync<
+            Payment,
+            | InvalidPaymentError
+            | InvalidParametersError
+            | VectorError
+            | BlockchainUnavailableError
+            | InvalidPaymentIdError
+          >
         >();
         transfersByPaymentId.forEach((transferArray, paymentId) => {
           const paymentResult = this.transfersToPayment(
@@ -716,7 +763,10 @@ export class PaymentUtils implements IPaymentUtils {
   public sortTransfers(
     _paymentId: string,
     transfers: IFullTransferState[],
-  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError> {
+  ): ResultAsync<
+    SortedTransfers,
+    InvalidPaymentError | VectorError | BlockchainUnavailableError
+  > {
     const offerTransfers: IFullTransferState<MessageState, MessageResolver>[] =
       [];
     const insuranceTransfers: IFullTransferState<
@@ -730,7 +780,12 @@ export class PaymentUtils implements IPaymentUtils {
     const pullTransfers: IFullTransferState<MessageState, MessageResolver>[] =
       [];
     const unrecognizedTransfers: IFullTransferState[] = [];
-    const transferTypeResults = new Array<ResultAsync<void, VectorError>>();
+    const transferTypeResults = new Array<
+      ResultAsync<
+        void,
+        InvalidPaymentError | VectorError | BlockchainUnavailableError
+      >
+    >();
 
     for (const transfer of transfers) {
       transferTypeResults.push(

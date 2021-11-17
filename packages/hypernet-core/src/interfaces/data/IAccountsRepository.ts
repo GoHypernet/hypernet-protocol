@@ -1,9 +1,7 @@
 import {
-  EthereumAddress,
   Balances,
   AssetBalance,
   PublicIdentifier,
-  Signature,
   BalancesUnavailableError,
   BlockchainUnavailableError,
   VectorError,
@@ -12,6 +10,8 @@ import {
   PersistenceError,
   ChainId,
   UtilityMessageSignature,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -23,7 +23,10 @@ export interface IAccountsRepository {
    * Returns an array of public identifiers of routers we have a connection with
    * ActiveRouters are held in HNP persistence, but can be recovered via evaluation of the blockchain and subgraphs.
    */
-  getActiveRouters(): ResultAsync<PublicIdentifier[], PersistenceError>;
+  getActiveRouters(): ResultAsync<
+    PublicIdentifier[],
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Stores an active router into the hypernet core persistence layer
@@ -31,7 +34,10 @@ export interface IAccountsRepository {
    */
   addActiveRouter(
     routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, PersistenceError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Returns an array of ActiveStateChannel objects.
@@ -52,28 +58,40 @@ export interface IAccountsRepository {
   createStateChannel(
     routerPublicIdentifier: PublicIdentifier,
     chainId: ChainId,
-  ): ResultAsync<EthereumAddress, PersistenceError | VectorError>;
+  ): ResultAsync<
+    EthereumContractAddress,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   getPublicIdentifier(): ResultAsync<
     PublicIdentifier,
     BlockchainUnavailableError | VectorError
   >;
-  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
+  getAccounts(): ResultAsync<
+    EthereumAccountAddress[],
+    BlockchainUnavailableError
+  >;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
+  >;
   getBalanceByAsset(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
-  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError>;
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
+  >;
   depositFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
   ): ResultAsync<null, VectorError | BlockchainUnavailableError>;
   withdrawFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
-    destinationAddress: EthereumAddress,
+    destinationAddress: EthereumAccountAddress,
   ): ResultAsync<void, VectorError | BlockchainUnavailableError>;
   signMessage(
     message: string,
@@ -84,7 +102,7 @@ export interface IAccountsRepository {
 
   mintTestToken(
     amount: BigNumberString,
-    to: EthereumAddress,
+    to: EthereumAccountAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
 }
 

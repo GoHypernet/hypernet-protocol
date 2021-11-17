@@ -11,7 +11,6 @@ import {
   GatewayAuthorizationDeniedError,
   GatewayUrl,
   Signature,
-  EthereumAddress,
   ChainId,
   PublicIdentifier,
   RouterUnauthorizedError,
@@ -23,6 +22,7 @@ import {
   GatewayActivationError,
   BalancesUnavailableError,
   InvalidParametersError,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGatewayConnectorService } from "@interfaces/business";
@@ -69,6 +69,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       | GatewayValidationError
       | GatewayAuthorizationDeniedError
       | ProxyError
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | VectorError
+      | PersistenceError
     >
   >;
   protected domain: TypedDataDomain;
@@ -82,6 +86,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       | BlockchainUnavailableError
       | GatewayAuthorizationDeniedError
       | GatewayActivationError
+      | VectorError
     >
   >();
 
@@ -179,7 +184,20 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
       context.onBalancesChanged.subscribe((balances) => {
-        const results = new Array<ResultAsync<void, GatewayConnectorError>>();
+        const results = new Array<
+          ResultAsync<
+            void,
+            | GatewayConnectorError
+            | ProxyError
+            | PersistenceError
+            | GatewayAuthorizationDeniedError
+            | BalancesUnavailableError
+            | BlockchainUnavailableError
+            | GatewayActivationError
+            | VectorError
+            | GatewayValidationError
+          >
+        >();
         return this.gatewayConnectorRepository
           .getAuthorizedGateways()
           .andThen((authorizedGateways) => {
@@ -205,6 +223,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | BlockchainUnavailableError
     | GatewayAuthorizationDeniedError
     | GatewayActivationError
+    | VectorError
   > {
     const inProgress = this.authorizationsInProgress.get(gatewayUrl);
 
@@ -229,6 +248,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
             | BlockchainUnavailableError
             | GatewayAuthorizationDeniedError
             | GatewayActivationError
+            | VectorError
           >(undefined);
         }
 
@@ -268,7 +288,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
                     return ResultAsync.fromPromise<
                       string,
-                      GatewayValidationError
+                      | GatewayValidationError
+                      | ProxyError
+                      | GatewayAuthorizationDeniedError
+                      | BalancesUnavailableError
                     >(
                       signerPromise,
                       (e) =>
@@ -337,7 +360,11 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     routerPublicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
     ActiveStateChannel,
-    PersistenceError | RouterUnauthorizedError | InvalidParametersError
+    | PersistenceError
+    | RouterUnauthorizedError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
   > {
     if (routerPublicIdentifiers.length < 1) {
       return errAsync(
@@ -416,7 +443,14 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayTokenInfo[]>,
-    ProxyError | PersistenceError | GatewayAuthorizationDeniedError
+    | ProxyError
+    | PersistenceError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   > {
     const retMap = new Map<GatewayUrl, GatewayTokenInfo[]>();
     return ResultUtils.combine(
@@ -446,7 +480,14 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   > {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
@@ -459,14 +500,14 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.gatewayConnectorRepository.getAuthorizedGateways();
   }
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     if (this.activateAuthorizedGatewaysResult == null) {
       throw new Error("You must call activateAuthorizedGateways first!");
@@ -603,7 +644,18 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+  > {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.closeGatewayIFrame();
     });
@@ -611,7 +663,18 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<
+    void,
+    | GatewayConnectorError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | GatewayActivationError
+    | GatewayValidationError
+  > {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.displayGatewayIFrame();
     });
@@ -621,7 +684,14 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     IGatewayConnectorProxy,
-    ProxyError | GatewayAuthorizationDeniedError | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
+    | GatewayValidationError
   > {
     // The goal of this method is to return an activated gateway proxy,
     // and not resolve unless all hope is lost.
@@ -709,7 +779,17 @@ export class GatewayConnectorService implements IGatewayConnectorService {
         }
 
         // Backoff
-        return errAsync(e);
+        return errAsync<
+          IGatewayConnectorProxy,
+          | ProxyError
+          | GatewayAuthorizationDeniedError
+          | PersistenceError
+          | BalancesUnavailableError
+          | BlockchainUnavailableError
+          | GatewayActivationError
+          | VectorError
+          | GatewayValidationError
+        >(e);
       });
   }
 
@@ -735,6 +815,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayValidationError
     | GatewayAuthorizationDeniedError
     | ProxyError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | VectorError
+    | PersistenceError
   > {
     // Do some initial cleanup, so that this can be called repeatedly.
     const existingProxyResult = this.authorizedGatewayProxies.get(
@@ -801,6 +885,8 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayValidationError
     | ProxyError
     | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
   > {
     this.logUtils.debug(`Validating code signature for ${gatewayUrl}`);
     return proxy.getValidatedSignature().andThen((validatedSignature) => {
@@ -887,7 +973,11 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     proxy: IGatewayConnectorProxy,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | VectorError
+    | BlockchainUnavailableError
   > {
     context.onGatewayDeauthorizationStarted.next(gatewayUrl);
     return proxy
@@ -909,7 +999,13 @@ export class GatewayConnectorService implements IGatewayConnectorService {
   protected assureGatewayAuthorizedByRouter(
     gatewayUrl: GatewayUrl,
     routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, RouterUnauthorizedError | PersistenceError> {
+  ): ResultAsync<
+    void,
+    | RouterUnauthorizedError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+  > {
     return this.routerRepository
       .getRouterDetails([routerPublicIdentifier])
       .andThen((routerDetailsMap) => {

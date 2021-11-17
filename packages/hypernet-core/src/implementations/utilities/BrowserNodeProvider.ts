@@ -1,7 +1,7 @@
 import { NonEIP712Message } from "@connext/vector-browser-node";
 import {
   BlockchainUnavailableError,
-  EthereumAddress,
+  EthereumAccountAddress,
   Signature,
   VectorError,
 } from "@hypernetlabs/objects";
@@ -92,7 +92,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           );
           return this.browserNode.init(
             Signature(signature),
-            EthereumAddress(account),
+            EthereumAccountAddress(account),
           );
         })
         .map(() => {

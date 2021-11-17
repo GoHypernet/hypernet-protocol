@@ -1,10 +1,10 @@
-import { EthereumAddress } from "@hypernetlabs/objects";
+import { EthereumAccountAddress } from "@hypernetlabs/objects";
 import sjcl from "sjcl";
 
 export class ChannelUtils {
   public static getChannelId(
-    consumerAddress: EthereumAddress,
-    providerAddress: EthereumAddress,
+    consumerAddress: EthereumAccountAddress,
+    providerAddress: EthereumAccountAddress,
   ): string {
     const combinedAddress = `${consumerAddress} ${providerAddress}`;
 

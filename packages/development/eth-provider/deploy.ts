@@ -22,8 +22,10 @@ const hyperKYCAddress = "0x821aEa9a577a9b44299B9c15c88cf3087F3b5544";
 const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
 const HypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 const EnumerableRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
-const NonEnumerableRegistryAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
-const RegistryFactoryContractAddress = "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
+const NonEnumerableRegistryAddress =
+  "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
+const RegistryFactoryContractAddress =
+  "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
 const GovernanceContractAddress = "0xdDA6327139485221633A1FcD65f4aC932E60A2e1";
 const TimelockContractAddress = "0xeec918d74c746167564401103096D45BbD494B74";
 
@@ -111,7 +113,7 @@ const func: DeployFunction = async () => {
     ["Insurance", []],
     ["Message", []],
     ["Hypertoken", []],
-	["NonFungibleRegistryEnumerableUpgradeable", []],
+    ["NonFungibleRegistryEnumerableUpgradeable", []],
     ["NonFungibleRegistryUpgradeable", []],
     [
       "UpgradeableRegistryFactory",
@@ -122,7 +124,7 @@ const func: DeployFunction = async () => {
         [registryAccountAddress, registryAccountAddress, hyperKYCAddress],
         EnumerableRegistryAddress,
         NonEnumerableRegistryAddress,
-        HypertokenContractAddress
+        HypertokenContractAddress,
       ],
     ],
     ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
@@ -305,6 +307,7 @@ const func: DeployFunction = async () => {
     ],
     allowedGateways: [
       "https://localhost:3000/users/v0",
+      "http://localhost:3000/users/v0",
       "http://localhost:5010",
       "https://hyperpay-dev.hypernetlabs.io/users/v0",
     ],
@@ -349,6 +352,12 @@ const func: DeployFunction = async () => {
     JSON.stringify(hyperpayGatewayRegistrationEntry),
   );
 
+  const hyperpayLocalGatewayRegistry2Tx = await gatewayRegistryContract.register(
+    hyperpayAddress,
+    "http://localhost:3000/users/v0",
+    JSON.stringify(hyperpayGatewayRegistrationEntry),
+  );
+
   const hyperpayDevGatewayRegistryTx = await gatewayRegistryContract.register(
     hyperpayAddress,
     "https://hyperpay-dev.hypernetlabs.io/users/v0",
@@ -357,6 +366,7 @@ const func: DeployFunction = async () => {
 
   await testGatewayRegistryTx.wait();
   await hyperpayLocalGatewayRegistryTx.wait();
+  await hyperpayLocalGatewayRegistry2Tx.wait();
   await hyperpayDevGatewayRegistryTx.wait();
 
   console.info(

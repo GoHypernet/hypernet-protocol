@@ -8,9 +8,8 @@ import {
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { HypernetChainAddresses, HypernetConfig } from "@interfaces/objects";
-import { ResultAsync, okAsync } from "neverthrow";
-
 import { IConfigProvider } from "@interfaces/utilities";
+import { ResultAsync, okAsync } from "neverthrow";
 
 declare const __IFRAME_SOURCE__: string;
 declare const __CHAIN_PROVIDERS__: string;
@@ -74,6 +73,7 @@ export class ConfigProvider implements IConfigProvider {
       ]), // storageAliases
       5 * 1000,
       "HypernetProtocolControlClaims",
+      true, // requireOnline
       __DEBUG__, // debug
     );
 

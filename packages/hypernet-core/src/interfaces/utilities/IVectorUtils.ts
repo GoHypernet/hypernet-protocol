@@ -19,6 +19,8 @@ import {
   ETransferType,
   BlockchainUnavailableError,
   ChainId,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -34,7 +36,10 @@ export interface IVectorUtils {
   resolveMessageTransfer(
     transferId: TransferId,
     message?: string,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    *
@@ -60,7 +65,10 @@ export interface IVectorUtils {
     transferId: TransferId,
     paymentId: PaymentId,
     amount: BigNumberString,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Cancels a Message transfer.
@@ -93,13 +101,16 @@ export interface IVectorUtils {
    *
    */
   createOfferTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  >;
 
   createPullNotificationTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
@@ -119,10 +130,10 @@ export interface IVectorUtils {
    * @param UUID
    */
   createInsuranceTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
-    mediatorAddress: EthereumAddress,
+    mediatorAddress: EthereumAccountAddress,
     amount: BigNumberString,
     expiration: UnixTimestamp,
     paymentId: PaymentId,
@@ -145,11 +156,11 @@ export interface IVectorUtils {
    * @param deltaAmount
    */
   createParameterizedTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,
-    assetAddress: EthereumAddress,
+    assetAddress: EthereumContractAddress,
     paymentId: PaymentId,
     start: UnixTimestamp,
     expiration: UnixTimestamp,
@@ -157,7 +168,10 @@ export interface IVectorUtils {
     deltaAmount?: BigNumberString,
   ): ResultAsync<
     IBasicTransferResponse,
-    TransferCreationError | InvalidParametersError
+    | TransferCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
   >;
 
   getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp;
@@ -171,7 +185,7 @@ export interface IVectorUtils {
    */
   getTransferStateFromTransfer(
     transfer: IFullTransferState,
-  ): ResultAsync<ETransferState, BlockchainUnavailableError>;
+  ): ResultAsync<ETransferState, VectorError | BlockchainUnavailableError>;
 
   /**
    *
@@ -179,16 +193,19 @@ export interface IVectorUtils {
    */
   getTransferType(
     transfer: IFullTransferState,
-  ): ResultAsync<ETransferType, VectorError>;
+  ): ResultAsync<ETransferType, VectorError | BlockchainUnavailableError>;
 
   getTransferTypeWithTransfer(
     transfer: IFullTransferState,
   ): ResultAsync<
     { transferType: ETransferType; transfer: IFullTransferState },
-    VectorError
+    VectorError | BlockchainUnavailableError
   >;
 
-  getAllActiveTransfers(): ResultAsync<IFullTransferState[], VectorError>;
+  getAllActiveTransfers(): ResultAsync<
+    IFullTransferState[],
+    VectorError | BlockchainUnavailableError
+  >;
 }
 
 export const IVectorUtilsType = Symbol.for("IVectorUtils");

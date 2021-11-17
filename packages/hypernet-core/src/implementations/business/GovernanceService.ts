@@ -1,18 +1,18 @@
 import {
   Proposal,
-  BlockchainUnavailableError,
-  EthereumAddress,
   EProposalVoteSupport,
   ProposalVoteReceipt,
+  HypernetGovernorContractError,
+  ERC20ContractError,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
-import { inject } from "inversify";
-
 import { IGovernanceService } from "@interfaces/business";
 import {
   IGovernanceRepository,
   IGovernanceRepositoryType,
 } from "@interfaces/data";
+import { inject } from "inversify";
+import { ResultAsync } from "neverthrow";
 
 export class GovernanceService implements IGovernanceService {
   constructor(
@@ -23,20 +23,23 @@ export class GovernanceService implements IGovernanceService {
   public getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], BlockchainUnavailableError> {
+  ): ResultAsync<Proposal[], HypernetGovernorContractError> {
     return this.governanceRepository.getProposals(pageNumber, pageSize);
   }
 
-  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
+  public getProposalsCount(): ResultAsync<
+    number,
+    HypernetGovernorContractError
+  > {
     return this.governanceRepository.getProposalsCount();
   }
 
   public createProposal(
     name: string,
     symbol: string,
-    owner: EthereumAddress,
+    owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.createProposal(
       name,
       symbol,
@@ -46,83 +49,69 @@ export class GovernanceService implements IGovernanceService {
   }
 
   public delegateVote(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
     amount: number | null,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, ERC20ContractError> {
     return this.governanceRepository.delegateVote(delegateAddress, amount);
   }
 
   public getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.getProposalDetails(proposalId);
   }
 
   public castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.castVote(proposalId, support);
   }
 
   public getProposalVotesReceipt(
     proposalId: string,
-    voterAddress: EthereumAddress,
-  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
+    voterAddress: EthereumAccountAddress,
+  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
     return this.governanceRepository.getProposalVotesReceipt(
       proposalId,
       voterAddress,
     );
   }
 
-  public proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.governanceRepository.proposeRegistryEntry(
-      registryName,
-      label,
-      data,
-      recipient,
-    );
-  }
-
   public queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.queueProposal(proposalId);
   }
 
   public cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.cancelProposal(proposalId);
   }
 
   public executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.executeProposal(proposalId);
   }
 
   public getProposalThreshold(): ResultAsync<
     number,
-    BlockchainUnavailableError
+    HypernetGovernorContractError
   > {
     return this.governanceRepository.getProposalThreshold();
   }
 
   public getVotingPower(
-    account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError> {
+    account: EthereumAccountAddress,
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
     return this.governanceRepository.getVotingPower(account);
   }
 
   public getHyperTokenBalance(
-    account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError> {
+    account: EthereumAccountAddress,
+  ): ResultAsync<number, ERC20ContractError> {
     return this.governanceRepository.getHyperTokenBalance(account);
   }
 }

@@ -1,5 +1,16 @@
 {
-  "name": "hardhat-project",
+  "name": "@hypernetlabs/contracts",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "alias": "tsc-alias",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
   "devDependencies": {
     "@atixlabs/hardhat-time-n-mine": "0.0.5",
     "@nomiclabs/hardhat-ethers": "^2.0.2",

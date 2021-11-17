@@ -1,6 +1,6 @@
 import { Log, TransactionReceipt } from "@ethersproject/abstract-provider";
-import { BigNumber } from "ethers";
 import { account, account2, ethereumAddress } from "@mock/mocks";
+import { BigNumber } from "ethers";
 
 export class TransactionReceiptMock implements TransactionReceipt {
   public to: string;
