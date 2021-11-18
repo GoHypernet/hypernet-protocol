@@ -1,4 +1,3 @@
-import { Box } from "@material-ui/core";
 import { useLayoutContext } from "@web-ui/contexts";
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -61,14 +60,12 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     //     {children}
     //   </Box>
     // </Box>
-    <Box textAlign="center">
-      <GovernanceDialog
-        isOpen={true}
-        content={children}
-        onClose={closeModal}
-        title={<ModalHeader />}
-      />
-    </Box>,
+    <GovernanceDialog
+      isOpen={true}
+      content={children}
+      onClose={closeModal}
+      title={<ModalHeader />}
+    />,
     elementRef.current,
   );
 };
