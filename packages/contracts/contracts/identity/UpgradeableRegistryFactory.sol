@@ -121,9 +121,15 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _index index module contract to remove from module list
     function removeModule(uint _index) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to add module");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to remove module");
         require(_index < modules.length, "RegistryFactory: index must be less than module list length");
-        delete modules[_index];
+
+        uint256 lastModuleIndex = modules.length - 1;
+        address lastModuleAddress = modules[lastModuleIndex];
+
+        // Move the last module to the slot of the to-delete token
+        modules[_index] = lastModuleAddress; 
+        modules.pop();
     }
 
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
@@ -139,7 +145,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @param _registrationFee burn fee amount
     function setRegistrationFee(uint256 _registrationFee) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
-        require(registrationFee >= 0, "RegsitryFactory: Registration fee must be nonnegative.");
+        require(registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
         registrationFee = _registrationFee;
     }
 

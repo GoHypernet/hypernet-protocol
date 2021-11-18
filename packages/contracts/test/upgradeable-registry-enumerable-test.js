@@ -194,7 +194,6 @@ describe("Enumerated Registry", function () {
     tx.wait();
 
     expect(await registry.balanceOf(addr1.address)).to.equal(1);
-
   });
 
   it("Check burn fee bounds", async function () {

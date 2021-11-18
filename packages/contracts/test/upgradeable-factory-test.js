@@ -5,7 +5,6 @@ const { ethers } = require("hardhat");
 const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
 
 describe("Registry Factory Unit Tests", function () {
-  const burnAddress = "0x000000000000000000000000000000000000dEaD";
   let hypertoken;
   let registryfactory;
   let owner;
@@ -44,8 +43,8 @@ describe("Registry Factory Unit Tests", function () {
     );
     registryfactory = await RegistryFactory.deploy(
       owner.address,
-      ["Test"],
-      ["t"],
+      ["Hypernet Profiles"],
+      ["HPs"],
       [owner.address],
       enumerableregistry.address,
       registry.address,
@@ -55,23 +54,25 @@ describe("Registry Factory Unit Tests", function () {
   });
 
   it("Check the constructor-deployed registries.", async function () {
-    const testRegAddress = await registryfactory.nameToAddress("Test");
-    const testReg = new ethers.Contract(testRegAddress, NFR.abi, owner);
+    const profileRegAddress = await registryfactory.nameToAddress("Hypernet Profiles");
+    const profileReg = new ethers.Contract(profileRegAddress, NFR.abi, owner);
 
-    let tx = await testReg.register(addr1.address, "dummy", "dummy", 1);
+    let tx = await profileReg.register(addr1.address, "dummy", "dummy", 1);
     let txrcpt = tx.wait();
 
-    tx = await testReg.register(addr1.address, "", "dummy", 2);
+    tx = await profileReg.register(addr1.address, "", "dummy", 2);
     txrcpt = tx.wait();
 
-    expect(await testReg.name()).to.equal("Test");
-    expect(await testReg.symbol()).to.equal("t");
-    expect(await testReg.totalSupply()).to.equal(2);
+    expect(await profileReg.name()).to.equal("Hypernet Profiles");
+    expect(await profileReg.symbol()).to.equal("HPs");
+    expect(await profileReg.totalSupply()).to.equal(2);
+    expect(await registryfactory.hypernetProfileRegistry()).to.equal(profileReg.address);
   });
 
-  it("Test createRegistry.", async function () {
-    const registryName = "GatewaysEnumerable";
-    const registrySymbol = "HNG";
+  it("Test createRegistry with enumeration.", async function () {
+    const registryName = "Test";
+    const registrySymbol = "T";
+    const profileRegAddress = await registryfactory.nameToAddress("Hypernet Profiles");
 
     let tx = await registryfactory.createRegistry(
       registryName,
@@ -81,8 +82,25 @@ describe("Registry Factory Unit Tests", function () {
     );
     txrcpt = await tx.wait();
 
-    tx = await registryfactory.createRegistry(
-      "Gateways",
+    const registryAddress = await registryfactory.nameToAddress(registryName);
+
+    const registryHandle = new ethers.Contract(registryAddress, NFR.abi, owner);
+
+    expect(await registryHandle.name()).to.equal(registryName);
+    expect(await registryHandle.symbol()).to.equal(registrySymbol);
+    expect(await registryHandle.totalSupply()).to.equal(0);
+    expect(await registryHandle.primaryRegistry()).to.equal(profileRegAddress);
+    expect(await registryfactory.getNumberOfEnumerableRegistries()).to.equal(2);
+    expect(await registryfactory.getNumberOfRegistries()).to.equal(0);
+  });
+
+  it("Test createRegistry without enumeration.", async function () {
+    const registryName = "Test";
+    const registrySymbol = "T";
+    const profileRegAddress = await registryfactory.nameToAddress("Hypernet Profiles");
+
+    let tx = await registryfactory.createRegistry(
+      registryName,
       registrySymbol,
       owner.address,
       false,
@@ -95,13 +113,15 @@ describe("Registry Factory Unit Tests", function () {
 
     expect(await registryHandle.name()).to.equal(registryName);
     expect(await registryHandle.symbol()).to.equal(registrySymbol);
-    expect(await registryHandle.totalSupply()).to.equal(0);
+    expect(await registryHandle.primaryRegistry()).to.equal(profileRegAddress);
+    expect(await registryfactory.getNumberOfEnumerableRegistries()).to.equal(1);
+    expect(await registryfactory.getNumberOfRegistries()).to.equal(1);
   });
 
   it("Prevent duplicate names.", async function () {
     // can't create two registries with the same name
     await expectRevert(
-      registryfactory.createRegistry("Test", "t", owner.address, true),
+      registryfactory.createRegistry("Hypernet Profiles", "HPs", owner.address, true),
       "RegistryFactory: Registry by that name exists.",
     );
   });
@@ -119,7 +139,7 @@ describe("Registry Factory Unit Tests", function () {
     );
   });
 
-  it("Register By token is disabled when registrationToken is 0 address.", async function () {
+  it("Register by token is disabled when registrationToken is 0 address.", async function () {
     let tx = await registryfactory.setRegistrationToken(
       "0x0000000000000000000000000000000000000000",
     );
@@ -133,20 +153,52 @@ describe("Registry Factory Unit Tests", function () {
   });
 
   it("Only admin can enable token-based registry creation.", async function () {
-    // can't create two registries with the same name
+    // can't set registration token with admin role
     await expectRevert(
       registryfactory.connect(addr1).setRegistrationToken(hypertoken.address),
       "RegistryFactory: must have admin role to create a registry",
     );
+
     let tx = await registryfactory.setRegistrationToken(hypertoken.address);
     tx.wait();
+
     expect(await registryfactory.registrationToken()).to.equal(
       hypertoken.address,
     );
   });
 
+  it("Only admin can add or remove a module to the module list.", async function () {
+    // first deploy a module contract
+    const BatchModule = await ethers.getContractFactory("BatchModule");
+    batchmodule = await BatchModule.deploy("Batch Minting");
+    await batchmodule.deployTransaction.wait();
+
+    // can't add a module without admin role
+    await expectRevert(
+      registryfactory.connect(addr1).addModule(batchmodule.address),
+      "RegistryFactory: must have admin role to add module",
+    );
+
+    let tx = await registryfactory.addModule(batchmodule.address);
+    tx.wait();
+
+    expect(await registryfactory.getNumberOfModules()).to.equal(1);
+    expect(await registryfactory.modules(0)).to.equal(batchmodule.address);
+
+    // can't remove a module with admin role
+    await expectRevert(
+        registryfactory.connect(addr1).removeModule(0),
+        "RegistryFactory: must have admin role to remove module",
+    );
+
+    tx = await registryfactory.removeModule(0);
+    tx.wait();
+
+    expect(await registryfactory.getNumberOfModules()).to.equal(0);
+  });
+
   it("Only admin can set burn address.", async function () {
-    // can't create two registries with the same name
+    // can't set burn address without the admin role
     await expectRevert(
       registryfactory.connect(addr1).setBurnAddress(registryfactory.address),
       "RegistryFactory: must have admin role to create a registry",
@@ -160,7 +212,7 @@ describe("Registry Factory Unit Tests", function () {
   });
 
   it("Only admin can set registration fee.", async function () {
-    // can't create two registries with the same name
+    // can't set fee amount with admin role
     await expectRevert(
       registryfactory
         .connect(addr1)
