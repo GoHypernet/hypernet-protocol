@@ -1,9 +1,9 @@
 # Contents
 
-## access
+## [access](/access)
 
-Contains an fork of OpenZeppelin's AccessControl library but specialized for NFT-based
-accounts.
+Contains an experimental fork of OpenZeppelin's AccessControl library but specialized 
+for NFT-based accounts.
 
 ## governance
 

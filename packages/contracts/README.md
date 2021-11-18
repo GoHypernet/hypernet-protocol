@@ -108,6 +108,8 @@ Once the node is running, deploy the full Solidity contract stack to the Hardhat
 npx hardhat run scripts/hardhat-full-stack.js --network dev
 ```
 
+## Hardhat tasks
+
 Use the help tasks defined in `hardhat.config.js` to interact with the deployed contracts.
 
 Get Governance contract parameters:
@@ -207,12 +209,4 @@ create a new registry by burning hypertoken:
 
 ```shell
 npx hardhat createRegistryByToken --network dev --name Gateways --symbol GTW --registrar 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --enumerable true
-```
-
-## Hardhat network - registry testing deployment
-
-To simply deploy two registies for registering gateways and liquidity providers, run:
-
-```shell
-npx hardhat run scripts/hardhat-registies-only.js --network hardhat
 ```
