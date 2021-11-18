@@ -112,8 +112,8 @@ async function main() {
   );
   const factoryregistry = await FactoryRegistry.deploy(
     timelock.address,
-    ["Hypernet Profiles", "Gateways", "Liquidity Providers"],
-    ["HPs", "Gs", "LPs"],
+    ["Hypernet Profiles", "Gateways", "Liquidity Providers", "Payment Tokens"],
+    ["HPs", "Gs", "LPs", "PTs"],
     [timelock.address, timelock.address, timelock.address],
     enumerableregistry.address,
     registry.address,
