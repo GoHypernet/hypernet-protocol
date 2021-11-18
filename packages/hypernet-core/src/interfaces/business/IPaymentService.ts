@@ -24,6 +24,7 @@ import {
   PushPayment,
   PullPayment,
   EPaymentType,
+  NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import { PaymentInitiationResponse } from "@interfaces/objects";
 import { ResultAsync } from "neverthrow";
@@ -140,6 +141,7 @@ export interface IPaymentService {
     | VectorError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | NonFungibleRegistryContractError
   >;
 
   /**
@@ -161,6 +163,8 @@ export interface IPaymentService {
     | AcceptPaymentError
     | InsufficientBalanceError
     | InvalidPaymentIdError
+    | PaymentCreationError
+    | NonFungibleRegistryContractError
   >;
 
   /**

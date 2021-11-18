@@ -1,7 +1,10 @@
 import {
   AuthorizedGatewaysSchema,
+  ChainId,
+  ChainInformation,
   DefinitionName,
   EthereumAddress,
+  GovernanceChainInformation,
   ProviderUrl,
   SchemaUrl,
 } from "@hypernetlabs/objects";
@@ -19,6 +22,9 @@ import {
   transferRegistryAddress,
   hypernetGovernorAddress,
   registryFactoryAddress,
+  tokenRegistryAddress,
+  chainRegistryAddress,
+  governanceChainInformation,
 } from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";
 
@@ -32,28 +38,13 @@ export class ConfigProviderMock implements IConfigProvider {
       config ??
       new HypernetConfig(
         "iframeSource",
-        "infuraId",
         chainId,
-        [ProviderUrl("governanceProviderUrl")],
+        new Map<ChainId, ChainInformation>([
+          [chainId, governanceChainInformation],
+        ]),
+        governanceChainInformation,
         "hypernetProtocolDomain",
         defaultExpirationLength,
-        {
-          [chainId]: "http://localhost:8545",
-        },
-        {
-          [chainId]: {
-            channelFactoryAddress,
-            transferRegistryAddress,
-            hypertokenAddress: hyperTokenAddress,
-            messageTransferAddress,
-            insuranceTransferAddress,
-            parameterizedTransferAddress,
-            gatewayRegistryAddress,
-            liquidityRegistryAddress,
-            hypernetGovernorAddress,
-            registryFactoryAddress,
-          },
-        },
         "natsUrl",
         "authUrl",
         "gatewayIframeUrl",

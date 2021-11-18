@@ -33,6 +33,7 @@ import {
   TransferCreationError,
   PaymentStakeError,
   PaymentFinalizeError,
+  PaymentCreationError,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -50,6 +51,7 @@ import { PushPayment } from "@objects/PushPayment";
 import { Registry } from "@objects/Registry";
 import { RegistryEntry } from "@objects/RegistryEntry";
 import { RegistryParams } from "@objects/RegistryParams";
+import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
 import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 
@@ -190,13 +192,6 @@ export interface IHypernetCore {
   getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error>;
 
   /**
-   * Returns the Hypernet Ledger for the user with the specified counterparty
-   */
-  getLinkByCounterparty(
-    counterPartyAccount: PublicIdentifier,
-  ): Promise<HypernetLink>;
-
-  /**
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
@@ -216,6 +211,8 @@ export interface IHypernetCore {
     | InsufficientBalanceError
     | ProxyError
     | InvalidPaymentIdError
+    | PaymentCreationError
+    | NonFungibleRegistryContractError
   >;
 
   /**
@@ -258,6 +255,7 @@ export interface IHypernetCore {
     | VectorError
     | ProxyError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   >;
 
   deauthorizeGateway(
@@ -272,6 +270,7 @@ export interface IHypernetCore {
     | GatewayActivationError
     | VectorError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   >;
 
   getAuthorizedGateways(): ResultAsync<
@@ -301,6 +300,7 @@ export interface IHypernetCore {
     | GatewayActivationError
     | VectorError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   >;
 
   /**
@@ -329,6 +329,7 @@ export interface IHypernetCore {
     | GatewayActivationError
     | GatewayValidationError
     | ProxyError
+    | NonFungibleRegistryContractError
   >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
@@ -344,6 +345,7 @@ export interface IHypernetCore {
     | GatewayActivationError
     | GatewayValidationError
     | ProxyError
+    | NonFungibleRegistryContractError
   >;
 
   providePrivateCredentials(
@@ -420,7 +422,7 @@ export interface IHypernetCore {
 
   getRegistryEntryDetailByTokenId(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
@@ -440,7 +442,7 @@ export interface IHypernetCore {
 
   updateRegistryEntryTokenURI(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
@@ -453,7 +455,7 @@ export interface IHypernetCore {
 
   updateRegistryEntryLabel(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
     RegistryEntry,
@@ -525,7 +527,7 @@ export interface IHypernetCore {
 
   transferRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
@@ -538,7 +540,7 @@ export interface IHypernetCore {
 
   burnRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError

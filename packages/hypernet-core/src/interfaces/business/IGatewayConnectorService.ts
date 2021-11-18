@@ -18,6 +18,7 @@ import {
   GatewayActivationError,
   ActiveStateChannel,
   VectorError,
+  NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -33,6 +34,7 @@ export interface IGatewayConnectorService {
     | GatewayAuthorizationDeniedError
     | GatewayActivationError
     | VectorError
+    | NonFungibleRegistryContractError
   >;
   deauthorizeGateway(
     gatewayUrl: GatewayUrl,
@@ -46,6 +48,7 @@ export interface IGatewayConnectorService {
     | GatewayActivationError
     | VectorError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   >;
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
@@ -82,6 +85,7 @@ export interface IGatewayConnectorService {
     | InvalidParametersError
     | VectorError
     | BlockchainUnavailableError
+    | NonFungibleRegistryContractError
   >;
 
   getGatewayTokenInfo(
@@ -96,6 +100,7 @@ export interface IGatewayConnectorService {
     | GatewayActivationError
     | VectorError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   >;
 
   getGatewayRegistrationInfo(
@@ -115,6 +120,7 @@ export interface IGatewayConnectorService {
     | BalancesUnavailableError
     | GatewayActivationError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
@@ -129,6 +135,7 @@ export interface IGatewayConnectorService {
     | BalancesUnavailableError
     | GatewayActivationError
     | GatewayValidationError
+    | NonFungibleRegistryContractError
   >;
 }
 

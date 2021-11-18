@@ -8,7 +8,7 @@ import { IInternalProvider } from "@interfaces/utilities";
 
 export interface IInternalProviderFactory {
   factoryInternalProvider(
-    privateCredentials: PrivateCredentials,
+    privateCredentials: PrivateCredentials
   ): ResultAsync<IInternalProvider, InvalidParametersError>;
 }
 

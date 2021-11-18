@@ -12,6 +12,7 @@ import {
   RegistryFactoryContractError,
   RegistryParams,
   RegistryPermissionError,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -47,14 +48,14 @@ export interface IRegistryRepository {
   >;
   getRegistryEntryDetailByTokenId(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   updateRegistryEntryTokenURI(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
@@ -65,7 +66,7 @@ export interface IRegistryRepository {
   >;
   updateRegistryEntryLabel(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
     RegistryEntry,
@@ -108,7 +109,7 @@ export interface IRegistryRepository {
   >;
   transferRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
@@ -119,7 +120,7 @@ export interface IRegistryRepository {
   >;
   burnRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError

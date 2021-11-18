@@ -11,9 +11,9 @@ import {
   BlockchainUnavailableError,
   Signature,
   HexString,
-  ChainId,
   EthereumAccountAddress,
   EthereumContractAddress,
+  ChainInformation,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { Contract, ethers } from "ethers";
@@ -90,26 +90,11 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   }
 
   public getMessageTransferEncodedCancelData(
-    chainId: ChainId,
+    chainInfo: ChainInformation,
   ): ResultAsync<[string, HexString], BlockchainUnavailableError> {
-    return ResultUtils.combine([
-      this.blockchainProvider.getProvider(),
-      this.configProvider.getConfig(),
-    ]).andThen((vals) => {
-      const [provider, config] = vals;
-
-      const messageTransferAddress =
-        config.chainAddresses[chainId]?.messageTransferAddress;
-      if (messageTransferAddress == null) {
-        return errAsync<[string, HexString], BlockchainUnavailableError>(
-          new BlockchainUnavailableError(
-            `Unable to getGatewayRegistrationInfo for chain ${chainId}. No configuration info for that chain is available`,
-          ),
-        );
-      }
-
+    return this.blockchainProvider.getProvider().andThen((provider) => {
       const messageTransferContract = new Contract(
-        messageTransferAddress,
+        chainInfo.messageTransferAddress,
         TransferAbis.MessageTransfer.abi,
         provider,
       );
@@ -136,26 +121,11 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   }
 
   public getInsuranceTransferEncodedCancelData(
-    chainId: ChainId,
+    chainInfo: ChainInformation,
   ): ResultAsync<[string, HexString], BlockchainUnavailableError> {
-    return ResultUtils.combine([
-      this.blockchainProvider.getProvider(),
-      this.configProvider.getConfig(),
-    ]).andThen((vals) => {
-      const [provider, config] = vals;
-
-      const insuranceTransferAddress =
-        config.chainAddresses[chainId]?.insuranceTransferAddress;
-      if (insuranceTransferAddress == null) {
-        return errAsync<[string, HexString], BlockchainUnavailableError>(
-          new BlockchainUnavailableError(
-            `Unable to getInsuranceTransferEncodedCancelData for chain ${chainId}. No configuration info for that chain is available`,
-          ),
-        );
-      }
-
+    return this.blockchainProvider.getProvider().andThen((provider) => {
       const insuranceTransferContract = new Contract(
-        insuranceTransferAddress,
+        chainInfo.insuranceTransferAddress,
         TransferAbis.Insurance.abi,
         provider,
       );
@@ -179,26 +149,11 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   }
 
   public getParameterizedTransferEncodedCancelData(
-    chainId: ChainId,
+    chainInfo: ChainInformation,
   ): ResultAsync<[string, HexString], BlockchainUnavailableError> {
-    return ResultUtils.combine([
-      this.blockchainProvider.getProvider(),
-      this.configProvider.getConfig(),
-    ]).andThen((vals) => {
-      const [provider, config] = vals;
-
-      const parameterizedTransferAddress =
-        config.chainAddresses[chainId]?.parameterizedTransferAddress;
-      if (parameterizedTransferAddress == null) {
-        return errAsync<[string, HexString], BlockchainUnavailableError>(
-          new BlockchainUnavailableError(
-            `Unable to getParameterizedTransferEncodedCancelData for chain ${chainId}. No configuration info for that chain is available`,
-          ),
-        );
-      }
-
+    return this.blockchainProvider.getProvider().andThen((provider) => {
       const parameterizedTransferContract = new Contract(
-        parameterizedTransferAddress,
+        chainInfo.parameterizedTransferAddress,
         TransferAbis.Parameterized.abi,
         provider,
       );
@@ -219,43 +174,5 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
         ),
       ]);
     });
-  }
-
-  public getERC721Entry<T>(
-    contractAddress: EthereumContractAddress,
-    key: string,
-  ): ResultAsync<T, BlockchainUnavailableError> {
-    return this.blockchainProvider
-      .getGovernanceProvider()
-      .andThen((provider) => {
-        const erc721Contract = new Contract(
-          contractAddress,
-          TransferAbis.ERC721.abi,
-          provider,
-        );
-
-        return ResultAsync.fromPromise(
-          erc721Contract.registryMap(key) as Promise<number>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              `Cannot get index of token with key ${key} for contract at ${contractAddress}`,
-              e,
-            );
-          },
-        ).andThen((registryIndex) => {
-          return ResultAsync.fromPromise(
-            erc721Contract.tokenURI(registryIndex) as Promise<string>,
-            (e) => {
-              return new BlockchainUnavailableError(
-                `Cannot retrieve token at index ${registryIndex} with key ${key} for contract at ${contractAddress}`,
-                e,
-              );
-            },
-          );
-        });
-      })
-      .map((registryString) => {
-        return JSON.parse(registryString) as T;
-      });
   }
 }

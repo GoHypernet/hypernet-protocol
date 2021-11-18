@@ -9,12 +9,13 @@ import {
   GovernanceSignerUnavailableError,
   EthereumContractAddress,
 } from "@hypernetlabs/objects";
-import { CeramicEIP1193Bridge } from "@implementations/utilities";
-import { IBlockchainProvider } from "@interfaces/utilities";
 import { routerChannelAddress, commonAmount, mockUtils } from "@mock/mocks";
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 import td from "testdouble";
+
+import { CeramicEIP1193Bridge } from "@implementations/utilities";
+import { IBlockchainProvider } from "@interfaces/utilities";
 
 interface ISendTransactionVals {
   to: EthereumContractAddress;
@@ -83,5 +84,10 @@ export class BlockchainProviderMock implements IBlockchainProvider {
 
   public getCeramicEIP1193Provider(): ResultAsync<CeramicEIP1193Bridge, never> {
     return okAsync(new CeramicEIP1193Bridge(this.signer, this.provider));
+  }
+
+  public isMetamaskVal = true;
+  public isMetamask(): boolean {
+    return this.isMetamaskVal;
   }
 }

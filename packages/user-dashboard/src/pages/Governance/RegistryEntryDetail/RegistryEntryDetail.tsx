@@ -1,3 +1,4 @@
+import { RegistryTokenId } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import React, { useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -20,7 +21,7 @@ const RegistryEntryDetail: React.FC = () => {
           history.push(`/registries/${registryName}/entries`);
         },
         registryName,
-        entryTokenId: Number(entryTokenId),
+        entryTokenId: RegistryTokenId(parseInt(entryTokenId)),
       })
       .mapErr(handleError);
   }, []);

@@ -7,7 +7,7 @@ import {
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
-import { IRegistryFactoryContract } from "@contracts/interfaces/utilities";
+import { IRegistryFactoryContract } from "@contracts/IRegistryFactoryContract";
 
 export class RegistryFactoryContract implements IRegistryFactoryContract {
   protected contract: ethers.Contract | null = null;

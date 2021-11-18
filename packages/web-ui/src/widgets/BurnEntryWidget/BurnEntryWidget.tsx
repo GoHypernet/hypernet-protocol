@@ -1,21 +1,17 @@
-import React, { useState } from "react";
+import { RegistryTokenId } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import React, { useState } from "react";
 import { useAlert } from "react-alert";
 
-import {
-  GovernanceDialog,
-  GovernanceButton,
-  GovernanceField,
-} from "@web-ui/components";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress } from "@hypernetlabs/objects";
+import { GovernanceDialog, GovernanceButton } from "@web-ui/components";
 import { useStyles } from "@web-ui/widgets/BurnEntryWidget/BurnEntryWidget.style";
 
 interface IBurnEntryWidget {
   onCloseCallback: () => void;
   onSuccessCallback: () => void;
   registryName: string;
-  tokenId: number;
+  tokenId: RegistryTokenId;
 }
 
 const BurnEntryWidget: React.FC<IBurnEntryWidget> = ({

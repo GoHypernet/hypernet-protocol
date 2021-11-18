@@ -36,6 +36,7 @@ import {
   ChainId,
   EthereumContractAddress,
   EthereumAccountAddress,
+  ChainInformation,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -297,7 +298,7 @@ export class VectorUtils implements IVectorUtils {
    */
   public createPullNotificationTransfer(
     channelAddress: EthereumContractAddress,
-    chainId: ChainId,
+    chainInfo: ChainInformation,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
   ): ResultAsync<
@@ -323,27 +324,9 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    return ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.browserNodeProvider.getBrowserNode(),
-    ])
-      .andThen((vals) => {
-        const [config, browserNode] = vals;
-
-        const hypertokenAddress =
-          config.chainAddresses[chainId]?.hypertokenAddress;
-        if (hypertokenAddress == null) {
-          return errAsync<
-            IBasicTransferResponse,
-            TransferCreationError | InvalidParametersError | VectorError
-          >(
-            new TransferCreationError(
-              undefined,
-              `Unable to create insurance transfer on chain ${chainId}. No configuration info for that chain is available`,
-            ),
-          );
-        }
-
+    return this.browserNodeProvider
+      .getBrowserNode()
+      .andThen((browserNode) => {
         const initialState: MessageState = {
           message: JSON.stringify(message),
         };
@@ -351,7 +334,7 @@ export class VectorUtils implements IVectorUtils {
         return browserNode.conditionalTransfer(
           channelAddress,
           BigNumberString("0"),
-          hypertokenAddress,
+          chainInfo.hypertokenAddress,
           this.messageTransferTypeName,
           initialState,
           toAddress,
@@ -429,7 +412,7 @@ export class VectorUtils implements IVectorUtils {
    */
   public createInsuranceTransfer(
     channelAddress: EthereumContractAddress,
-    chainId: ChainId,
+    chainInfo: ChainInformation,
     toAddress: PublicIdentifier,
     mediatorAddress: EthereumAccountAddress,
     amount: BigNumberString,
@@ -460,20 +443,6 @@ export class VectorUtils implements IVectorUtils {
       .andThen((vals) => {
         const [config, browserNode] = vals;
 
-        const hypertokenAddress =
-          config.chainAddresses[chainId]?.hypertokenAddress;
-        if (hypertokenAddress == null) {
-          return errAsync<
-            IBasicTransferResponse,
-            TransferCreationError | VectorError
-          >(
-            new TransferCreationError(
-              undefined,
-              `Unable to create insurance transfer on chain ${chainId}. No configuration info for that chain is available`,
-            ),
-          );
-        }
-
         const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
         const initialState: InsuranceState = {
@@ -487,7 +456,7 @@ export class VectorUtils implements IVectorUtils {
         return browserNode.conditionalTransfer(
           channelAddress,
           amount,
-          hypertokenAddress,
+          chainInfo.hypertokenAddress,
           this.insuranceTransferTypeName,
           initialState,
           toAddress,

@@ -1,9 +1,9 @@
 import {
   ChainId,
+  ChainInformation,
   EthereumAccountAddress,
   PrivateCredentials,
 } from "@hypernetlabs/objects";
-import { HypernetConfig } from "@interfaces/objects";
 import { ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 
@@ -16,8 +16,7 @@ export class InternalProvider implements IInternalProvider {
   private _wallet: ethers.Wallet | null = null;
 
   constructor(
-    protected chainId: ChainId,
-    protected config: HypernetConfig,
+    protected chainInfo: ChainInformation,
     protected privateCredentials: PrivateCredentials,
   ) {
     this.providerInitializedPromiseResolve = () => null;
@@ -26,7 +25,7 @@ export class InternalProvider implements IInternalProvider {
     });
 
     this._provider = new ethers.providers.JsonRpcProvider(
-      config.chainProviders[chainId],
+      chainInfo.providerUrls[0],
     );
     if (this.privateCredentials.mnemonic) {
       this._wallet = ethers.Wallet.fromMnemonic(
