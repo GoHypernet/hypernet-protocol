@@ -112,9 +112,19 @@ async function main() {
   );
   const factoryregistry = await FactoryRegistry.deploy(
     timelock.address,
-    ["Hypernet Profiles", "Gateways", "Liquidity Providers", "Payment Tokens"],
-    ["HPs", "Gs", "LPs", "PTs"],
-    [timelock.address, timelock.address, timelock.address],
+    [
+        "Hypernet Profiles", 
+        "Gateways", 
+        "Liquidity Providers", 
+        "Payment Tokens"
+    ],
+    [
+        "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
+        "Payment gateway signatures for the Hypernet Protocol payment network.", 
+        "Liquidity provider metadata for the Hypernet Protocol payment network.", 
+        "Officially supported payment tokens for the Hypernet Protocol payment network."
+    ],
+    [timelock.address, timelock.address, timelock.address, timelock.address],
     enumerableregistry.address,
     registry.address,
     hypertoken.address,

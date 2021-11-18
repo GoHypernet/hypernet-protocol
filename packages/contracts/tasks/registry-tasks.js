@@ -80,7 +80,7 @@ task("registryParameters", "Prints NFR  parameters.")
     console.log("Primary Registry:", primaryRegistry);
   });
 
-task("setRegistryParameters", "Prints NFR  parameters.")
+task("setRegistryParameters", "Set the parameters of a registry if you have the REGISTRAR_ROLE.")
   .addParam("name", "name of the Registry to update.")
   .addParam("regtoken", "address of token to use for registration by token")
   .addParam("primaryreg", "NFR for checking preregistration")
