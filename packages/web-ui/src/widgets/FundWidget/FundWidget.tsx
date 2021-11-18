@@ -20,7 +20,10 @@ interface IValues {
 
 interface IFundWidget extends IRenderParams {}
 
-const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
+const FundWidget: React.FC<IFundWidget> = ({
+  noLabel,
+  excludeCardWrapper,
+}: IFundWidget) => {
   const {
     tokenSelectorOptions,
     error,
@@ -53,8 +56,9 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
 
   return (
     <GovernanceCard
-      className={classes.wrapper}
+      {...(excludeCardWrapper && { className: classes.cardWithoutBorder })}
       title={!noLabel ? "Deposit Funds" : undefined}
+      hideDivider={excludeCardWrapper}
       description={
         !noLabel
           ? "Move tokens from your Ethereum wallet into your Hypernet account."

@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 
 import { WEB_UI_MODAL_ID_SELECTOR } from "@web-ui/constants";
 import { useStyles } from "@web-ui/containers/Modal/Modal.style";
+import { GovernanceDialog } from "@web-ui/components";
+import { ModalHeader } from "@web-ui/containers/Modal/ModalHeader";
 
 interface IModal {
   children: React.ReactNode;
@@ -48,16 +50,24 @@ const Modal: React.FC<IModal> = (props: IModal) => {
   };
 
   return createPortal(
-    <Box className={classes.container}>
-      <Box className={classes.wrapper} style={modalStyle}>
-        <Box className={classes.closeIcon} onClick={closeModal}>
-          <img
-            src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png"
-            width="20"
-          />
-        </Box>
-        {children}
-      </Box>
+    // <Box className={classes.container}>
+    //   <Box className={classes.wrapper} style={modalStyle}>
+    //     <Box className={classes.closeIcon} onClick={closeModal}>
+    //       <img
+    //         src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png"
+    //         width="20"
+    //       />
+    //     </Box>
+    //     {children}
+    //   </Box>
+    // </Box>
+    <Box textAlign="center">
+      <GovernanceDialog
+        isOpen={true}
+        content={children}
+        onClose={closeModal}
+        title={<ModalHeader />}
+      />
     </Box>,
     elementRef.current,
   );

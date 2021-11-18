@@ -40,7 +40,7 @@ interface ISideFilter {
 
 const LinksWidget: React.FC<ILinksWidget> = ({
   noLabel,
-  includeBoxWrapper,
+  excludeCardWrapper,
   bodyStyle,
 }: ILinksWidget) => {
   const classes = useStyles();

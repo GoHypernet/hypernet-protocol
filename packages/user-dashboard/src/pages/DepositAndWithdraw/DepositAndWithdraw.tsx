@@ -12,15 +12,14 @@ const DepositAndWithdraw: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderFundWidget({
         selector: "fund-wrapper",
-        includeBoxWrapper: true,
         bodyStyle: { padding: "0 25% 30px 25%" },
+
       })
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
       .renderWithdrawWidget({
         selector: "withdraw-wrapper",
-        includeBoxWrapper: true,
         bodyStyle: { padding: "0 25% 30px 25%" },
       })
       .mapErr(handleError);
@@ -28,7 +27,6 @@ const DepositAndWithdraw: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderBalancesWidget({
         selector: "balances-wrapper",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
   }, []);

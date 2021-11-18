@@ -4,12 +4,7 @@ import { IOnboardingFlowParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, ReactNode } from "react";
 import { useAlert } from "react-alert";
 
-import {
-  ModalHeader,
-  SucessContent,
-  Button,
-  ModalFooter,
-} from "@web-ui/components";
+import { SucessContent, Button, ModalFooter } from "@web-ui/components";
 import { useStyles } from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import { EButtonStatus } from "@web-ui/theme";
@@ -42,6 +37,8 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     finalSuccessContent = "You are good to go and purchase using your payment token",
     closeCallback = () => {},
     gatewayName,
+    showInModal,
+    excludeCardWrapper,
   } = props;
   const alert = useAlert();
   const { balances } = useBalances();
@@ -195,7 +192,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               className={classes.authenticationSuccessImg}
               src={AUTHENTICATION_SUCCESS_IMAGE_URL}
             />
-            <Box mb={2}>
+            <Box mb={2} width="100%">
               <GovernanceButton
                 fullWidth
                 color="primary"
@@ -204,7 +201,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               >
                 Fund My Wallet
               </GovernanceButton>
-              </Box>
+            </Box>
 
             <GovernanceButton
               fullWidth
@@ -222,21 +219,23 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
           </>
         );
       case EOnboardingScreens.FUND_WIDGET:
-        return <FundWidget />;
+        return <FundWidget excludeCardWrapper={excludeCardWrapper} />;
       case EOnboardingScreens.BALANCES:
         return (
           <>
-            {balances?.length && <BalancesWidget />}
+            {balances?.length && (
+              <BalancesWidget excludeCardWrapper={excludeCardWrapper} />
+            )}
 
-            <Box mb={2}>
-            <GovernanceButton
-              fullWidth
-              color="primary"
-              variant="contained"
-              onClick={goToSuccessScreen}
-            >
-              Done
-            </GovernanceButton>
+            <Box mb={2} width="100%">
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={goToSuccessScreen}
+              >
+                Done
+              </GovernanceButton>
             </Box>
 
             <GovernanceButton
@@ -272,8 +271,9 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   return (
     <Box className={classes.container}>
-      <ModalHeader />
-      {renderScreen()}
+      <Box width={480} margin="auto">
+        {renderScreen()}
+      </Box>
       <ModalFooter />
     </Box>
   );

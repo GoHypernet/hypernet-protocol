@@ -440,11 +440,13 @@ export default class HypernetWebUI implements IHypernetWebUI {
             gatewayLogoUrl={config.gatewayLogoUrl}
             finalSuccessContent={config.finalSuccessContent}
             closeCallback={config.closeCallback}
+            excludeCardWrapper={config.excludeCardWrapper}
           />,
           config.showInModal,
           config.closeCallback,
           undefined,
           true,
+          
         ),
         this._generateDomElement(
           config?.selector || ONBOARDING_FLOW_ID_SELECTOR,

@@ -35,6 +35,7 @@ client
         finalSuccessContent:
           'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',
         showInModal: true,
+        excludeCardWrapper: true,
       })
       .map(() => {
         Spinner.hide();

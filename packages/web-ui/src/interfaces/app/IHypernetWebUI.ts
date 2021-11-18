@@ -12,7 +12,7 @@ export interface IRenderParams {
   selector?: string;
   showInModal?: boolean;
   noLabel?: boolean;
-  includeBoxWrapper?: boolean;
+  excludeCardWrapper?: boolean;
   bodyStyle?: React.CSSProperties;
   closeCallback?: () => void;
 }

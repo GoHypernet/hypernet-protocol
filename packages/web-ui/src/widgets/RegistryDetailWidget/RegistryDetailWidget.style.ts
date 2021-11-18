@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 
-import { EFontSize, EFontWeight, colors } from "@web-integration/theme";
+import { EFontSize, EFontWeight, colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles({
   form: {

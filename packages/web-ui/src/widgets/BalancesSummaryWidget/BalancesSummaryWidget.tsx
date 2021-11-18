@@ -15,7 +15,7 @@ interface IBalancesSummaryWidget extends IRenderParams {}
 
 const BalancesSummaryWidget: React.FC<IBalancesSummaryWidget> = ({
   noLabel,
-  includeBoxWrapper,
+  excludeCardWrapper,
 }: IBalancesSummaryWidget) => {
   const { loading, balancesByChannelAddresses } = useBalances();
   const { viewUtils } = useStoreContext();
@@ -50,7 +50,6 @@ const BalancesSummaryWidget: React.FC<IBalancesSummaryWidget> = ({
                   ? "The current balance of your Hypernet Account."
                   : undefined
               }
-              className={!includeBoxWrapper ? classes.balancesWrapper : ""}
             >
               {balancesByChannelAddresses.get(channelAddress) ? (
                 <GovernanceBalanceList

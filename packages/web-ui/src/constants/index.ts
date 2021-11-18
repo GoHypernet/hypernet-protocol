@@ -21,10 +21,14 @@ export const HYPER_TOKEN_LOGO_URL =
   "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png";
 export const HYPER_TOKEN_LOGO_PURPLE_URL =
   "https://res.cloudinary.com/dqueufbs7/image/upload/v1632909339/images/Screen_Shot_2021-09-29_at_12.52.03.png";
+export const HYPERNET_LOGO_DARK =
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/hypernet-logo-dark.svg";
+export const HYPERNET_LOGO_LIGHT =
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/hypernet-logo-light.svg";
 export const AUTHENTICATION_IMAGE_URL =
   "https://res.cloudinary.com/dqueufbs7/image/upload/v1624393360/images/authentication.svg";
 export const AUTHENTICATION_SUCCESS_IMAGE_URL =
-  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624402693/images/success.svg";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/success-with-flag-and-planet.png";
 export const WARNING_ALERT_SELECTOR = "hypernet-protocol-warning-alert";
 export const METAMASK_IMAGE_URL =
   "https://res.cloudinary.com/dqueufbs7/image/upload/v1624475379/images/Screen_Shot_2021-06-23_at_22.09.16.png";

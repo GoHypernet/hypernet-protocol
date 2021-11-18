@@ -1,7 +1,9 @@
 import { makeStyles } from "@material-ui/core";
 
 export const useStyles = makeStyles({
-  wrapper: {},
+  cardWithoutBorder: {
+    border: "unset",
+  },
   balancesWrapper: {
     // margin: "24px 0",
   },

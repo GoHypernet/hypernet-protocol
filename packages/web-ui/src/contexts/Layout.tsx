@@ -22,7 +22,7 @@ interface ILayoutProps {
 const LayoutContext = createContext<ILayout>({} as ILayout);
 
 export function LayoutProvider({ children }: ILayoutProps) {
-  const [modalWidth, setModalWidth] = useState<number>(500);
+  const [modalWidth, setModalWidth] = useState<number>(900);
   const [loading, setLoading] = useState<boolean>(false);
   const [modalStatus, setModalStatus] = useState<EStatusColor>(
     EStatusColor.IDLE,

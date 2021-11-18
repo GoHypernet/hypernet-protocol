@@ -5,6 +5,7 @@ import { colors, EFontSize } from "@web-ui/theme";
 export const useStyles = makeStyles((theme) => ({
   wrapper: (props: any) => ({
     marginBottom: 24,
+    textAlign: "left",
   }),
   title: {
     marginBottom: 8,

@@ -14,7 +14,7 @@ interface IBalancesWidget extends IRenderParams {}
 
 const BalancesWidget: React.FC<IBalancesWidget> = ({
   noLabel,
-  includeBoxWrapper,
+  excludeCardWrapper,
 }: IBalancesWidget) => {
   const { loading, balancesByChannelAddress } = useBalances();
   const { viewUtils } = useStoreContext();
@@ -23,13 +23,14 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
 
   return (
     <GovernanceCard
+      {...(excludeCardWrapper && { className: classes.cardWithoutBorder })}
+      hideDivider={excludeCardWrapper}
       title={!noLabel ? "Your Balances" : undefined}
       description={
         !noLabel
           ? "Available token balances in this Hypernet account."
           : undefined
       }
-      className={!includeBoxWrapper ? classes.balancesWrapper : ""}
     >
       {balancesByChannelAddress.length === 0 && !loading ? (
         <Box display="flex" justifyContent="center">
