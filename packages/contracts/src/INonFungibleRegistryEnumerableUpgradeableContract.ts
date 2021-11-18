@@ -3,6 +3,8 @@ import {
   EthereumContractAddress,
   EthereumAccountAddress,
   BigNumberString,
+  RegistryTokenId,
+  RegistryEntry,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -49,30 +51,35 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   >;
   tokenByIndex(
     index: number,
-  ): ResultAsync<number, NonFungibleRegistryContractError>;
+  ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError>;
+  registryMap(
+    label: string,
+  ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError>;
   reverseRegistryMap(
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<string, NonFungibleRegistryContractError>;
   ownerOf(
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError>;
   tokenURI(
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<string, NonFungibleRegistryContractError>;
   updateRegistration(
-    tokenId: number,
+    tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   updateLabel(
-    tokenId: number,
+    tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   transferFrom(
-    tokenId: number,
+    tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     toAddress: EthereumAccountAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
-  burn(tokenId: number): ResultAsync<void, NonFungibleRegistryContractError>;
+  burn(
+    tokenId: RegistryTokenId,
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   setRegistryParameters(
     params: string,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
@@ -95,6 +102,12 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   renounceRole(
     address: EthereumAccountAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
+  getRegistryEntryByTokenId(
+    tokenId: RegistryTokenId,
+  ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError>;
+  getRegistryEntryByLabel(
+    label: string,
+  ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError>;
 }
 
 export const INonFungibleRegistryEnumerableUpgradeableContractType = Symbol.for(

@@ -7,6 +7,7 @@ import {
   EthereumContractAddress,
   GatewayRegistrationInfo,
   GatewayUrl,
+  GovernanceChainInformation,
   HexString,
   IFullChannelState,
   IFullTransferState,
@@ -18,7 +19,10 @@ import {
   ParameterizedResolver,
   ParameterizedState,
   PaymentId,
+  ProviderUrl,
   PublicIdentifier,
+  RegistryEntry,
+  RegistryTokenId,
   Signature,
   TransferId,
   UnixTimestamp,
@@ -41,7 +45,7 @@ export const ethereumAddress = EthereumContractAddress(
   "0x0000000000000000000000000000000000000000",
 );
 export const chainId = ChainId(1337);
-export const hyperTokenAddress = EthereumContractAddress(constants.AddressZero);
+export const hyperTokenAddress = EthereumContractAddress("0xhyperTokenAddress");
 export const commonAmount = BigNumberString("1");
 export const uncommonAmount = BigNumberString("2");
 export const destinationAddress = EthereumAccountAddress(
@@ -120,12 +124,74 @@ export const gatewayRegistryAddress = EthereumContractAddress(
 export const liquidityRegistryAddress = EthereumContractAddress(
   "liquidityRegistryAddress",
 );
+export const tokenRegistryAddress = EthereumContractAddress(
+  "tokenRegistryAddress",
+);
+export const chainRegistryAddress = EthereumContractAddress(
+  "chainRegistryAddress",
+);
 export const hypernetGovernorAddress = EthereumContractAddress(
   "hypernetGovernorAddress",
 );
 
 export const registryFactoryAddress = EthereumContractAddress(
   "registryFactoryAddress",
+);
+
+export const governanceChainInformation = new GovernanceChainInformation(
+  "Mock Chain",
+  chainId,
+  true,
+  channelFactoryAddress,
+  transferRegistryAddress,
+  hyperTokenAddress,
+  messageTransferAddress,
+  insuranceTransferAddress,
+  parameterizedTransferAddress,
+  hypernetGovernorAddress,
+  registryFactoryAddress,
+  gatewayRegistryAddress,
+  liquidityRegistryAddress,
+  tokenRegistryAddress,
+  chainRegistryAddress,
+  [ProviderUrl("http://localhost:8545")],
+);
+
+export const tokenRegistryId1 = RegistryTokenId(70916);
+export const tokenRegistryId2 = RegistryTokenId(103182);
+
+export const tokenRegistryEntry1 = new RegistryEntry(
+  "TokenRegistryEntry1",
+  tokenRegistryId1,
+  account,
+  JSON.stringify({
+    name: "Hypertoken",
+    symbol: "HYP",
+    chainId: chainId,
+    address: hyperTokenAddress,
+    nativeToken: false,
+    erc20: true,
+    decimals: 18,
+    logoUrl: "",
+  }),
+  1,
+);
+
+export const tokenRegistryEntry2 = new RegistryEntry(
+  "TokenRegistryEntry2",
+  tokenRegistryId2,
+  account,
+  JSON.stringify({
+    name: "Ethereum",
+    symbol: "ETH",
+    chainId: chainId,
+    address: ethereumAddress,
+    nativeToken: true,
+    erc20: false,
+    decimals: 18,
+    logoUrl: "",
+  }),
+  2,
 );
 
 export const validDomain = "hypernetProtocolDomain";

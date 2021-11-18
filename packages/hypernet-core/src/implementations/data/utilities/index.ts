@@ -1,1 +1,1 @@
-export * from "./StorageUtils";
+export * from "@implementations/data/utilities/StorageUtils";

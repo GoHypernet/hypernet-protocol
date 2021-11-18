@@ -4,6 +4,7 @@ import {
   PublicIdentifier,
   EthereumAddress,
   RenderError,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
 import React from "react";
@@ -72,7 +73,7 @@ export interface IRegistryEntryListWidgetParams extends IRenderParams {
 export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
   onRegistryEntryListNavigate?: (registryName: string) => void;
   registryName: string;
-  entryTokenId: number;
+  entryTokenId: RegistryTokenId;
 }
 
 export interface IRegistryDetailWidgetParams extends IRenderParams {

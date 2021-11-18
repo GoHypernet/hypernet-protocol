@@ -398,12 +398,6 @@ export default class HypernetIFrameProxy
     return this._createCall("getActiveLinks", null);
   }
 
-  public getLinkByCounterparty(
-    _counterPartyAccount: PublicIdentifier,
-  ): Promise<HypernetLink> {
-    throw new Error("Unimplemented");
-  }
-
   public acceptOffer(
     paymentId: PaymentId,
   ): ResultAsync<
