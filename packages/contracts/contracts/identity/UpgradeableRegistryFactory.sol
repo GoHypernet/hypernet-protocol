@@ -170,7 +170,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         } else {
             _createRegistry(_name, _symbol, _registrar);
         }
-        
     }
 
     /// @notice createRegistryByToken called by any user with sufficient registration token
@@ -179,6 +178,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @param _symbol symbol to associate with the registry
     /// @param _registrar address that will recieve the REGISTRAR_ROLE
     function createRegistryByToken(string memory _name, string memory _symbol, address _registrar, bool _enumerable) external {
+        require(_preRegistered(_msgSender()), "RegistryFactory: caller must have a Hypernet Profile.");
         require(registrationToken != address(0), "RegistryFactory: registration by token not enabled.");
 
         // user must call approve first
@@ -188,7 +188,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         } else {
             _createRegistry(_name, _symbol, _registrar);
         }
-        
     }
 
     function _createEnumerableRegistry(string memory _name, string memory _symbol, address _registrar) private {
@@ -216,5 +215,11 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     function _registryExists(string memory _name) internal view virtual returns (bool) {
         // registry name must have non-zero length and must not exist already
         return !((bytes(_name).length > 0) && nameToAddress[_name] == address(0));
+    }
+
+    function _preRegistered(address owner) internal view virtual returns (bool) {
+        // check if there if a profile is required and if so 
+        // does the recipient have a non-zero balance. 
+        return ((hypernetProfileRegistry == address(0)) || (IERC721Upgradeable(hypernetProfileRegistry).balanceOf(owner) > 0));
     }
 }

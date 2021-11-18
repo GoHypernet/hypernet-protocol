@@ -7,6 +7,7 @@ const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryEnumerab
 describe("Registry Factory Unit Tests", function () {
   let hypertoken;
   let registryfactory;
+  let profileReg;
   let owner;
   let addr1;
 
@@ -51,21 +52,19 @@ describe("Registry Factory Unit Tests", function () {
       hypertoken.address,
     );
     await registryfactory.deployTransaction.wait();
+
+    const profileRegAddress = await registryfactory.nameToAddress("Hypernet Profiles");
+    profileReg = new ethers.Contract(profileRegAddress, NFR.abi, owner);
+
+    // create a profile NFI for the deployer account
+    tx = await profileReg.register(owner.address, "owner", "myprofile", 1);
+    tx.wait();
   });
 
   it("Check the constructor-deployed registries.", async function () {
-    const profileRegAddress = await registryfactory.nameToAddress("Hypernet Profiles");
-    const profileReg = new ethers.Contract(profileRegAddress, NFR.abi, owner);
-
-    let tx = await profileReg.register(addr1.address, "dummy", "dummy", 1);
-    let txrcpt = tx.wait();
-
-    tx = await profileReg.register(addr1.address, "", "dummy", 2);
-    txrcpt = tx.wait();
-
     expect(await profileReg.name()).to.equal("Hypernet Profiles");
     expect(await profileReg.symbol()).to.equal("HPs");
-    expect(await profileReg.totalSupply()).to.equal(2);
+    expect(await profileReg.totalSupply()).to.equal(1);
     expect(await registryfactory.hypernetProfileRegistry()).to.equal(profileReg.address);
   });
 
@@ -231,21 +230,36 @@ describe("Registry Factory Unit Tests", function () {
     let tx = await registryfactory.setRegistrationToken(hypertoken.address);
     tx.wait();
 
+    // ensure that the the user has a hypernet profile first
     await expectRevert(
       registryfactory
         .connect(addr1)
         .createRegistryByToken("dummy", "dmy", addr1.address, true),
-      "ERC20: transfer amount exceeds allowance",
+      "RegistryFactory: caller must have a Hypernet Profile.",
     );
 
+    tx = await profileReg.register(addr1.address, "addr1", "myprofile", 42069);
+    tx.wait();
+
+    // be sure you have hypertoken
+    await expectRevert(
+        registryfactory
+          .connect(addr1)
+          .createRegistryByToken("dummy", "dmy", addr1.address, true),
+        "ERC20: transfer amount exceeds allowance",
+    );
+
+    // get the registry deployment fee amount and fee burn address
     let fee = await registryfactory.registrationFee();
     let burnAddress = await registryfactory.burnAddress();
 
+    // must approve the registry factory to pull the fee amount
     tx = await hypertoken.connect(addr1).approve(registryfactory.address, fee);
     tx.wait();
 
     const previousBalance = await hypertoken.balanceOf(burnAddress);
 
+    // create a test registry
     tx = await registryfactory
       .connect(addr1)
       .createRegistryByToken("enumerabledummy", "edmy", addr1.address, true);
@@ -256,6 +270,7 @@ describe("Registry Factory Unit Tests", function () {
     );
     const dummyReg = new ethers.Contract(registryAddress, NFR.abi, addr1);
 
+    // check the token balances of the creator and burn address
     expect(await registryfactory.getNumberOfEnumerableRegistries()).to.equal(2);
     expect(await hypertoken.balanceOf(addr1.address)).to.equal(fee);
     expect(await hypertoken.balanceOf(burnAddress)).to.equal(
