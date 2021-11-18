@@ -132,6 +132,14 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         modules.pop();
     }
 
+    /// @notice setProfileRegistryAddress change the address of the profile registry contract
+    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
+    /// @param _hypernetProfileRegistry address of ERC721 token to use as profile contract
+    function setProfileRegistryAddress(address _hypernetProfileRegistry) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        hypernetProfileRegistry = _hypernetProfileRegistry;
+    }
+
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationToken address of ERC20 token burned during registration

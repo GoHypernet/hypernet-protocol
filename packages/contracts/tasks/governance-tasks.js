@@ -135,6 +135,40 @@ task("cancelProposal", "Cancel a proposal if it is your or if proposer is below 
     const tx_rcp = tx.wait();
 });
 
+task("proposeDAOProfileRegistry", "Propose a registry to serve as profile accounts for the DAO.")
+  .addParam("address", "Address of the proposed profile registry.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const address = taskArgs.address;
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+
+    const proposalDescription = `DAO Profile Registry: ${address}`;
+    console.log("Proposal Description:", proposalDescription);
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = govHandle.interface.encodeFunctionData(
+      "setProfileRegistry",
+      [address],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [govHandle.address],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [govHandle.address],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    const tx_reciept = await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+});
+
 task("proposeVotingPeriod", "Propose a new voting period (in blocks) for the DAO.")
   .addParam("blocks", "Number of blocks a proposal should stand for.")
   .setAction(async (taskArgs) => {

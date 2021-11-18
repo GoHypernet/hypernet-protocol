@@ -23,6 +23,20 @@ task("sendhypertoken", "Send hypertoken to another account")
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
+task("hypertokenBalance", "Get the hypertoken balance of an address.")
+  .addParam("address", "ethereum address of interest.")
+  .setAction(async (taskArgs) => {
+    const [owner] = await hre.ethers.getSigners();
+
+  const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, owner);
+  const address = taskArgs.address;
+
+  const balance = await hypertoken.balanceOf(address);
+  console.log("Balance of", address, "is", hre.ethers.utils.formatEther(balance));
+});
+
+// This is a sample Hardhat task. To learn how to create your own go to
+// https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
 
