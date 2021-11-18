@@ -20,7 +20,7 @@
     "postCompile": "webpack --config webpack.config.js"
   },
   "dependencies": {
-    "@hypernetlabs/gateway-connector": "^0.0.10",
+    "@hypernetlabs/gateway-connector": "^0.0.11",
     "@hypernetlabs/objects": "^0.3.7",
     "ethers": "^5.4.7",
     "neverthrow": "^4.1.1",

@@ -6,6 +6,8 @@ export * from "@objects/Balances";
 export * from "@objects/BigNumberString";
 export * from "@objects/ChainId";
 export * from "@objects/ControlClaim";
+export * from "@objects/CryptoTokenSymbol";
+export * from "@objects/CurrencyAlphabeticCode";
 export * from "@objects/DefinitionName";
 export * from "@objects/EmailAddressString";
 export * from "@objects/EthereumAccountAddress";

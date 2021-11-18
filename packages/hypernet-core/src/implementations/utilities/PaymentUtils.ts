@@ -1,6 +1,5 @@
 import {
   IHypernetOfferDetails,
-  Payment,
   PullAmount,
   PullPayment,
   PushPayment,
@@ -31,10 +30,6 @@ import {
   EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import { v4 as uuidv4 } from "uuid";
-
 import {
   IBrowserNodeProvider,
   IConfigProvider,
@@ -42,6 +37,9 @@ import {
   IPaymentUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
+import { BigNumber } from "ethers";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * A class for creating Hypernet-Payment objects from Vector transfers, verifying information
@@ -311,7 +309,7 @@ export class PaymentUtils implements IPaymentUtils {
     paymentId: PaymentId,
     transfers: IFullTransferState[],
   ): ResultAsync<
-    Payment,
+    PushPayment | PullPayment,
     | InvalidPaymentError
     | InvalidParametersError
     | VectorError
@@ -664,7 +662,7 @@ export class PaymentUtils implements IPaymentUtils {
   public transfersToPayments(
     transfers: IFullTransferState[],
   ): ResultAsync<
-    Payment[],
+    (PushPayment | PullPayment)[],
     | InvalidPaymentError
     | InvalidParametersError
     | VectorError
@@ -672,20 +670,9 @@ export class PaymentUtils implements IPaymentUtils {
     | InvalidPaymentIdError
   > {
     // First step, get the transfer types for all the transfers
-    const transferTypeResults = new Array<
-      ResultAsync<
-        { transferType: ETransferType; transfer: IFullTransferState },
-        | VectorError
-        | InvalidPaymentError
-        | InvalidParametersError
-        | BlockchainUnavailableError
-      >
-    >();
-    for (const transfer of transfers) {
-      transferTypeResults.push(
-        this.vectorUtils.getTransferTypeWithTransfer(transfer),
-      );
-    }
+    const transferTypeResults = transfers.map((transfer) => {
+      return this.vectorUtils.getTransferTypeWithTransfer(transfer);
+    });
 
     return ResultUtils.combine(transferTypeResults).andThen(
       (transferTypesWithTransfers) => {
@@ -729,25 +716,13 @@ export class PaymentUtils implements IPaymentUtils {
         // Now we have the transfers sorted by their payment ID.
         // Loop over them and convert them to proper payments.
         // This is all async, so we can do the whole thing in parallel.
-        const paymentResults = new Array<
-          ResultAsync<
-            Payment,
-            | InvalidPaymentError
-            | InvalidParametersError
-            | VectorError
-            | BlockchainUnavailableError
-            | InvalidPaymentIdError
-          >
-        >();
-        transfersByPaymentId.forEach((transferArray, paymentId) => {
-          const paymentResult = this.transfersToPayment(
-            paymentId,
-            transferArray,
-          );
-          paymentResults.push(paymentResult);
-        });
-
-        return ResultUtils.combine(paymentResults);
+        return ResultUtils.combine(
+          Array.from(transfersByPaymentId.entries()).map(
+            ([paymentId, transferArray]) => {
+              return this.transfersToPayment(paymentId, transferArray);
+            },
+          ),
+        );
       },
     );
   }
@@ -780,56 +755,38 @@ export class PaymentUtils implements IPaymentUtils {
     const pullTransfers: IFullTransferState<MessageState, MessageResolver>[] =
       [];
     const unrecognizedTransfers: IFullTransferState[] = [];
-    const transferTypeResults = new Array<
-      ResultAsync<
-        void,
-        InvalidPaymentError | VectorError | BlockchainUnavailableError
-      >
-    >();
 
-    for (const transfer of transfers) {
-      transferTypeResults.push(
-        this.vectorUtils.getTransferType(transfer).map((transferType) => {
-          if (transferType === ETransferType.Offer) {
-            offerTransfers.push(
-              transfer as IFullTransferState<MessageState, MessageResolver>,
-            );
-          } else if (transferType === ETransferType.Insurance) {
-            insuranceTransfers.push(
-              transfer as IFullTransferState<InsuranceState, InsuranceResolver>,
-            );
-          } else if (transferType === ETransferType.Parameterized) {
-            parameterizedTransfers.push(
-              transfer as IFullTransferState<
-                ParameterizedState,
-                ParameterizedResolver
-              >,
-            );
-          } else if (transferType === ETransferType.PullRecord) {
-            pullTransfers.push(
-              transfer as IFullTransferState<MessageState, MessageResolver>,
-            );
-          } else if (transferType === ETransferType.Unrecognized) {
-            unrecognizedTransfers.push(transfer);
-          } else {
-            this.logUtils.log("Unreachable code reached!");
-            unrecognizedTransfers.push(transfer);
-          }
-        }),
-      );
-    }
+    const transferTypeResults = transfers.map((transfer) => {
+      return this.vectorUtils.getTransferType(transfer).map((transferType) => {
+        if (transferType === ETransferType.Offer) {
+          offerTransfers.push(
+            transfer as IFullTransferState<MessageState, MessageResolver>,
+          );
+        } else if (transferType === ETransferType.Insurance) {
+          insuranceTransfers.push(
+            transfer as IFullTransferState<InsuranceState, InsuranceResolver>,
+          );
+        } else if (transferType === ETransferType.Parameterized) {
+          parameterizedTransfers.push(
+            transfer as IFullTransferState<
+              ParameterizedState,
+              ParameterizedResolver
+            >,
+          );
+        } else if (transferType === ETransferType.PullRecord) {
+          pullTransfers.push(
+            transfer as IFullTransferState<MessageState, MessageResolver>,
+          );
+        } else if (transferType === ETransferType.Unrecognized) {
+          unrecognizedTransfers.push(transfer);
+        } else {
+          this.logUtils.log("Unreachable code reached!");
+          unrecognizedTransfers.push(transfer);
+        }
+      });
+    });
 
     return ResultUtils.combine(transferTypeResults).map(() => {
-      this.logUtils.debug(`
-        PaymentUtils:sortTransfers
-  
-        offerTransfers: ${offerTransfers.length}
-        insuranceTransfers: ${insuranceTransfers.length}
-        parameterizedTransfers: ${parameterizedTransfers.length}
-        pullTransfers: ${pullTransfers.length}
-        unrecognizedTransfers: ${unrecognizedTransfers.length}
-      `);
-
       return new SortedTransfers(
         offerTransfers,
         insuranceTransfers,

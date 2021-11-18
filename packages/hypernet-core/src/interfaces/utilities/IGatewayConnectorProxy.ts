@@ -22,6 +22,7 @@ import {
   PaymentId,
   SendFundsRequestData,
   AuthorizeFundsRequestData,
+  EPaymentType,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -127,6 +128,12 @@ export interface IGatewayConnectorProxy extends ParentProxy {
     stateChannel: ActiveStateChannel,
   ): ResultAsync<void, ProxyError>;
 
+  returnPayment(
+    paymentId: PaymentId,
+    payment: PushPayment | PullPayment | null,
+    paymentType: EPaymentType,
+  ): ResultAsync<void, ProxyError>;
+
   // Signals to the outside world
   signMessageRequested: Observable<string>;
 
@@ -138,4 +145,6 @@ export interface IGatewayConnectorProxy extends ParentProxy {
 
   resolveInsuranceRequested: Observable<IResolveInsuranceRequest>;
   stateChannelRequested: Observable<IStateChannelRequest>;
+
+  getPaymentRequested: Observable<PaymentId>;
 }

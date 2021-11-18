@@ -5,7 +5,12 @@ import {
   IInitiateAuthorizeFundsRequest,
   IInitiateSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
-import { PaymentId } from "@hypernetlabs/objects";
+import {
+  EPaymentType,
+  PaymentId,
+  PullPayment,
+  PushPayment,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentService {
@@ -30,6 +35,18 @@ export interface IPaymentService {
   ): ResultAsync<void, never>;
 
   resolveInsurance(request: IResolveInsuranceRequest): ResultAsync<void, Error>;
+  getPayment(
+    paymentId: PaymentId,
+    callback: (
+      payment: PushPayment | PullPayment | null,
+      paymentType: EPaymentType,
+    ) => void,
+  );
+  paymentReceived(
+    paymentId: PaymentId,
+    payment: PushPayment | PullPayment | null,
+    paymentType: EPaymentType,
+  ): ResultAsync<void, never>;
 }
 
 export const IPaymentServiceType = Symbol.for("IPaymentService");

@@ -9,6 +9,7 @@ import {
   PublicIdentifier,
   AuthorizeFundsRequestData,
   SendFundsRequestData,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -42,6 +43,8 @@ export interface IHypernetCoreRepository {
     chainId: ChainId,
     routerPublicIdentifiers: PublicIdentifier[],
   ): ResultAsync<void, never>;
+
+  emitGetPayment(paymentId: PaymentId): ResultAsync<void, never>;
 }
 
 export const IHypernetCoreRepositoryType = Symbol.for(

@@ -22,6 +22,7 @@ import {
   PaymentId,
   AuthorizeFundsRequestData,
   SendFundsRequestData,
+  EPaymentType,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { HypernetContext } from "@interfaces/objects";
@@ -61,6 +62,7 @@ export class GatewayConnectorProxy
 
     this.resolveInsuranceRequested = new Subject();
     this.stateChannelRequested = new Subject();
+    this.getPaymentRequested = new Subject();
   }
 
   public signMessageRequested: Subject<string>;
@@ -70,6 +72,7 @@ export class GatewayConnectorProxy
   public authorizeFundsRequested: Subject<ISignedAuthorizeFundsRequest>;
   public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
   public stateChannelRequested: Subject<IStateChannelRequest>;
+  public getPaymentRequested: Subject<PaymentId>;
 
   public activateConnector(
     publicIdentifier: PublicIdentifier,
@@ -90,7 +93,7 @@ export class GatewayConnectorProxy
       publicIdentifier,
       balances: { assets: assets },
     };
-    return this._createCall<void, GatewayActivationError | ProxyError>(
+    return this._createCall<unknown, GatewayActivationError | ProxyError, void>(
       "activateConnector",
       activateData,
     )
@@ -139,9 +142,7 @@ export class GatewayConnectorProxy
     return ResultUtils.combine([
       this.contextProvider.getContext(),
       this.activate(),
-    ]).map((vals) => {
-      const [context] = vals;
-
+    ]).map(([context]) => {
       // Events coming from gateway connector iframe
       this.child?.on("displayRequested", () => {
         this._pushOpenedGatewayIFrame(this.gatewayUrl);
@@ -207,6 +208,10 @@ export class GatewayConnectorProxy
           this.stateChannelRequested.next(request);
         },
       );
+
+      this.child?.on("getPaymentRequested", (paymentId: PaymentId) => {
+        this.getPaymentRequested.next(paymentId);
+      });
     });
   }
 
@@ -219,10 +224,11 @@ export class GatewayConnectorProxy
       this._pushOpenedGatewayIFrame(this.gatewayUrl);
       this._showGatewayIFrame(context);
 
-      return this._createCall<void, GatewayConnectorError | ProxyError>(
-        "gatewayIFrameDisplayed",
-        this.gatewayUrl,
-      );
+      return this._createCall<
+        GatewayUrl,
+        GatewayConnectorError | ProxyError,
+        void
+      >("gatewayIFrameDisplayed", this.gatewayUrl);
     });
   }
 
@@ -239,10 +245,11 @@ export class GatewayConnectorProxy
       }
 
       // notify the child in gateway connector to tell him that the gateway iframe is going to close up.
-      return this._createCall<void, GatewayConnectorError | ProxyError>(
-        "gatewayIFrameClosed",
-        this.gatewayUrl,
-      );
+      return this._createCall<
+        GatewayUrl,
+        GatewayConnectorError | ProxyError,
+        void
+      >("gatewayIFrameClosed", this.gatewayUrl);
     });
   }
 
@@ -332,6 +339,18 @@ export class GatewayConnectorProxy
     return this._createCall("returnStateChannel", {
       id,
       stateChannel,
+    });
+  }
+
+  public returnPayment(
+    paymentId: PaymentId,
+    payment: PushPayment | PullPayment | null,
+    paymentType: EPaymentType,
+  ): ResultAsync<void, ProxyError> {
+    return this._createCall("returnPayment", {
+      paymentId,
+      payment,
+      paymentType,
     });
   }
 

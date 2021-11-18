@@ -7,6 +7,7 @@ import {
 } from "@hypernetlabs/objects";
 import { Observable } from "rxjs";
 
+import { IGetPaymentRequest } from "@gateway-connector/IGetPaymentRequest";
 import { IInitiateAuthorizeFundsRequest } from "@gateway-connector/IInitiateAuthorizeFundsRequest";
 import { IInitiateSendFundsRequest } from "@gateway-connector/IInitiateSendFundsRequest";
 import { IResolveInsuranceRequest } from "@gateway-connector/IResolveInsuranceRequest";
@@ -76,6 +77,11 @@ export interface IGatewayConnector {
    * called with the channel address of a compatible state channel.
    */
   stateChannelRequested: Observable<IStateChannelRequest>;
+
+  /**
+   * Requests the current status of a payment.
+   */
+  getPaymentRequested: Observable<IGetPaymentRequest>;
 
   /**
    * This observable should emit when the connector wants to be displayed.
