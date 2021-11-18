@@ -139,6 +139,20 @@ async function main() {
   const batchmodule_reciept = await batchmodule.deployTransaction.wait();
   console.log("Batch Module Address:", batchmodule.address);
   console.log("Batch Module Gas Fee:", batchmodule_reciept.gasUsed.toString());
+
+  // deploy the lazy minting module
+  const LazyMintModule = await ethers.getContractFactory("LazyMintModule");
+  const lazymintmodule = await LazyMintModule.deploy("Lazy Minting");
+  const lazymintmodule_reciept = await lazymintmodule.deployTransaction.wait();
+  console.log("Lazy Mint Module Address:", lazymintmodule.address);
+  console.log("Lazy Mint Module Gas Fee:", lazymintmodule_reciept.gasUsed.toString());
+
+  // deploy the Merkle Drop module
+  const MerkleModule = await ethers.getContractFactory("MerkleModule");
+  const merklemodule = await MerkleModule.deploy("Merkle Drop");
+  const merklemodule_reciept = await merklemodule.deployTransaction.wait();
+  console.log("Merkle Module Address:", merklemodule.address);
+  console.log("Merkle Module Gas Fee:", merklemodule_reciept.gasUsed.toString());
 }
 
 // We recommend this pattern to be able to use async/await everywhere
