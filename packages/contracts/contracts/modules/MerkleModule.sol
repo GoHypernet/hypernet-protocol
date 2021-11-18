@@ -13,7 +13,7 @@ contract MerkleModule {
         name = _name; 
     }
 
-    /// @notice redeem offload gas cost of minting to recieveres
+    /// @notice redeem offload gas cost of minting to receivers
     /// @dev scalable distribution of NFIs
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token

@@ -9,7 +9,7 @@ task("delegateVote", "Delegate your voting power")
     const delegate = taskArgs.delegate;
     const amount = taskArgs.amount;
     const tx = await hypertoken.delegate(delegate);
-    const tx_rcpt = await tx.wait();
+    tx.wait();
     const votePowerDelegate = await hypertoken.getVotes(delegate)
     const votePowerOwner = await hypertoken.getVotes(owner.address)
 
@@ -157,7 +157,7 @@ task("proposeVotingPeriod", "Propose a new voting period (in blocks) for the DAO
       [transferCalldata],
       descriptionHash,
     );
-    // propose a new registry
+
     const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
       [govHandle.address],
       [0],
@@ -191,9 +191,48 @@ task("proposeVotingThreshold", "Propose a new voting threshold (in tokens) for t
       [transferCalldata],
       descriptionHash,
     );
-    // propose a new registry
+
     const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
       [govHandle.address],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    const tx_reciept = await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+});
+
+task("proposeModule", "Propose a new module for use with Hypernet Registries.")
+  .addParam("address", "Address of the module contract.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const address = taskArgs.address;
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(
+        factoryAddress(),
+        RF.abi,
+        accounts[0],
+      );
+
+    const proposalDescription = `New Registry Module: ${address}`;
+    console.log("Proposal Description:", proposalDescription);
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = factoryHandle.interface.encodeFunctionData(
+      "addModule",
+      [address],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [factoryHandle.address],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [factoryHandle.address],
       [0],
       [transferCalldata],
       proposalDescription,
@@ -232,7 +271,7 @@ task("proposeRegistry", "Propose a new NonFungibleRegistry via the DAO.")
       [transferCalldata],
       descriptionHash,
     );
-    // propose a new registry
+
     const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
       [factoryAddress()],
       [0],
@@ -358,7 +397,7 @@ task("proposeRegistryParameterUpdate", "Propose updates to a registries paramete
       [transferCalldata],
       descriptionHash,
     );
-    // propose a new registry
+
     const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
       [registryAddress],
       [0],

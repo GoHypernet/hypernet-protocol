@@ -132,6 +132,13 @@ async function main() {
   const factory_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);
   console.log("Factory Gas Fee:", factory_reciept.gasUsed.toString());
+
+  // deploy the batch minting module
+  const BatchModule = await ethers.getContractFactory("BatchModule");
+  batchmodule = await BatchModule.deploy("Batch Minting");
+  const batchmodule_reciept = await batchmodule.deployTransaction.wait();
+  console.log("Batch Module Address:", batchmodule.address);
+  console.log("Batch Module Gas Fee:", batchmodule_reciept.gasUsed.toString());
 }
 
 // We recommend this pattern to be able to use async/await everywhere
