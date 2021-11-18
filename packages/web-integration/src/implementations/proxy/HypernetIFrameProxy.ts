@@ -500,7 +500,7 @@ export default class HypernetIFrameProxy
         if (gatewaysMap.get(gatewayUrl) == true) {
           this._displayCoreIFrame();
 
-          return this._createCall<void, GatewayConnectorError>(
+          return this._createCall<GatewayUrl, GatewayConnectorError, void>(
             "displayGatewayIFrame",
             gatewayUrl,
           );

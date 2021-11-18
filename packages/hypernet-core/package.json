@@ -50,7 +50,7 @@
     "@connext/vector-contracts": "^0.2.5-beta.6",
     "@connext/vector-types": "^0.2.5-beta.6",
     "@connext/vector-utils": "^0.2.5-beta.6",
-    "@hypernetlabs/gateway-connector": "^0.0.10",
+    "@hypernetlabs/gateway-connector": "^0.0.11",
     "@hypernetlabs/objects": "^0.3.7",
     "@hypernetlabs/utils": "^0.4.6",
     "@hypernetlabs/contracts": "^0.0.1",

@@ -36,7 +36,7 @@ import {
   pushPaymentSigningTypes,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
-import { IPaymentService } from "@interfaces/business";
+import { GetPaymentResponse, IPaymentService } from "@interfaces/business";
 import {
   IAccountsRepository,
   IAccountsRepositoryType,
@@ -1174,6 +1174,36 @@ export class PaymentService implements IPaymentService {
       });
   }
 
+  public getPayment(
+    paymentId: PaymentId,
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<
+    GetPaymentResponse,
+    | BlockchainUnavailableError
+    | VectorError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | InvalidPaymentIdError
+  > {
+    return this.paymentRepository
+      .getPaymentsByIds([paymentId])
+      .map((paymentsById) => {
+        const payment = paymentsById.get(paymentId);
+
+        if (payment == null || payment.gatewayUrl !== gatewayUrl) {
+          return new GetPaymentResponse(null, EPaymentType.Push);
+        }
+
+        if (payment instanceof PullPayment) {
+          return new GetPaymentResponse(payment, EPaymentType.Pull);
+        }
+        if (payment instanceof PushPayment) {
+          return new GetPaymentResponse(payment, EPaymentType.Push);
+        }
+        throw new Error(`Unknown payment type!`);
+      });
+  }
+
   protected _recoverPayment(
     payment: Payment,
     context: HypernetContext,
@@ -1398,7 +1428,7 @@ export class PaymentService implements IPaymentService {
   }
 
   protected _advancePayment(
-    payment: Payment,
+    payment: PushPayment | PullPayment,
     context: HypernetContext,
   ): ResultAsync<
     void,
@@ -1450,7 +1480,7 @@ export class PaymentService implements IPaymentService {
   }
 
   protected _advancePaymentForActivatedGateway(
-    payment: Payment,
+    payment: PushPayment | PullPayment,
     context: HypernetContext,
   ): ResultAsync<
     Payment,

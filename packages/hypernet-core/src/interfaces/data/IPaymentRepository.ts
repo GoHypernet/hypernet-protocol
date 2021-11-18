@@ -1,5 +1,4 @@
 import {
-  Payment,
   PublicIdentifier,
   PullPayment,
   PushPayment,
@@ -33,7 +32,7 @@ export interface IPaymentRepository {
   getPaymentsByIds(
     paymentIds: PaymentId[],
   ): ResultAsync<
-    Map<PaymentId, Payment>,
+    Map<PaymentId, PushPayment | PullPayment>,
     | VectorError
     | BlockchainUnavailableError
     | InvalidPaymentError
@@ -89,7 +88,7 @@ export interface IPaymentRepository {
   createPullRecord(
     paymentId: PaymentId,
     amount: BigNumberString,
-  ): ResultAsync<Payment, PaymentCreationError>;
+  ): ResultAsync<PullPayment, PaymentCreationError>;
 
   /**
    * Provides assets for a given list of payment ids.
@@ -99,7 +98,7 @@ export interface IPaymentRepository {
   provideAsset(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    PushPayment | PullPayment,
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
@@ -119,7 +118,7 @@ export interface IPaymentRepository {
     paymentId: PaymentId,
     gatewayAddress: EthereumAccountAddress,
   ): ResultAsync<
-    Payment,
+    PushPayment | PullPayment,
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
@@ -140,7 +139,7 @@ export interface IPaymentRepository {
     paymentId: PaymentId,
     amount: BigNumberString,
   ): ResultAsync<
-    Payment,
+    PushPayment | PullPayment,
     | VectorError
     | BlockchainUnavailableError
     | InvalidPaymentError
@@ -162,7 +161,7 @@ export interface IPaymentRepository {
    * @param payment the payment to finalize
    */
   finalizePayment(
-    payment: Payment,
+    payment: PushPayment | PullPayment,
   ): ResultAsync<
     void,
     TransferResolutionError | VectorError | BlockchainUnavailableError
