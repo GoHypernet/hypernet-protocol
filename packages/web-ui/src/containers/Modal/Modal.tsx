@@ -64,6 +64,7 @@ const Modal: React.FC<IModal> = (props: IModal) => {
       isOpen={true}
       content={children}
       onClose={closeModal}
+      maxWidth="md"
       title={<ModalHeader />}
     />,
     elementRef.current,

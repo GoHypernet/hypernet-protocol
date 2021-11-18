@@ -6,6 +6,7 @@ import {
   DialogContent,
   IconButton,
   Divider,
+  DialogProps,
 } from "@material-ui/core";
 import { Close as CloseIcon } from "@material-ui/icons";
 
@@ -17,12 +18,20 @@ export interface GovernanceDialogProps {
   description?: string;
   content?: React.ReactNode;
   onClose?: () => void;
+  maxWidth?: DialogProps["maxWidth"];
 }
 
 export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
   props: GovernanceDialogProps,
 ) => {
-  const { title, description, content, isOpen, onClose } = props;
+  const {
+    title,
+    description,
+    content,
+    isOpen,
+    onClose,
+    maxWidth = "sm",
+  } = props;
   const classes = useStyles();
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
 
@@ -39,7 +48,7 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
         onClose && onClose();
       }}
       fullWidth
-      maxWidth="sm"
+      maxWidth={maxWidth}
       onClick={(e) => {
         e.stopPropagation();
       }}

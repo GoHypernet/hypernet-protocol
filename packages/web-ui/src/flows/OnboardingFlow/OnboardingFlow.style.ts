@@ -3,7 +3,6 @@ import { makeStyles } from "@material-ui/core";
 export const useStyles = makeStyles({
   container: {
     width: "100%",
-    padding: "30px 0",
     textAlign: "center",
   },
   emptyBalanceScreenWrapper: {},
