@@ -169,6 +169,40 @@ task("proposeVotingPeriod", "Propose a new voting period (in blocks) for the DAO
     console.log("Description Hash:", descriptionHash.toString());
 });
 
+task("proposeVotingThreshold", "Propose a new voting threshold (in tokens) for the DAO.")
+  .addParam("threshold", "Minimum number of tokens needed to make a proposal.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const threshold = ethers.utils.parseEther(taskArgs.threshold);
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+
+    const proposalDescription = `New threshold: ${threshold} tokens`;
+    console.log("Proposal Description:", proposalDescription);
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = govHandle.interface.encodeFunctionData(
+      "setProposalThreshold",
+      [threshold],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [govHandle.address],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+    // propose a new registry
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [govHandle.address],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    const tx_reciept = await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+});
+
 task("proposeRegistry", "Propose a new NonFungibleRegistry via the DAO.")
   .addParam("name", "Name for proposed registry.")
   .addParam("symbol", "Symbol for proposed registry.")
