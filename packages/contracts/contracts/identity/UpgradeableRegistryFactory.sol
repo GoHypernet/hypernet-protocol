@@ -17,6 +17,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     // address of our upgradable registry proxy beacon
     address public registryBeacon;
 
+    // address of registry that serves os the Hypernet User Profile registry
+    address public hypernetProfileRegistry = address(0);
+
     // extra array storage fascilitates paginated UI
     address[] public enumerableRegistries;
 
@@ -80,6 +83,11 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         // deploy initial enumerable registries 
         for (uint256 i = 0; i < _names.length; ++i) {
             _createEnumerableRegistry(_names[i], _symbols[i], _registrars[i]);
+
+            // use the first enumerable registry as the hypernet profile registry
+            if (i == 0) {
+                hypernetProfileRegistry = enumerableRegistries[0]; 
+            }
         }
     }
 
@@ -182,7 +190,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
         // cloning the beacon implementation reduced gas by ~80% over naive approach 
-        BeaconProxy proxy = new BeaconProxy(enumerableRegistryBeacon, abi.encodeWithSelector(NonFungibleRegistryEnumerableUpgradeable.initialize.selector, _name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
+        BeaconProxy proxy = new BeaconProxy(enumerableRegistryBeacon, abi.encodeWithSelector(NonFungibleRegistryEnumerableUpgradeable.initialize.selector, _name, _symbol, hypernetProfileRegistry, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
         enumerableRegistries.push(address(proxy));
         nameToAddress[_name] = address(proxy);
         emit RegistryCreated(address(proxy));
@@ -193,7 +201,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
         // cloning the beacon implementation reduced gas by ~80% over naive approach 
-        BeaconProxy proxy = new BeaconProxy(registryBeacon, abi.encodeWithSelector(NonFungibleRegistryUpgradeable.initialize.selector, _name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
+        BeaconProxy proxy = new BeaconProxy(registryBeacon, abi.encodeWithSelector(NonFungibleRegistryUpgradeable.initialize.selector, _name, _symbol, hypernetProfileRegistry, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
         registries.push(address(proxy));
         nameToAddress[_name] = address(proxy);
         emit RegistryCreated(address(proxy));

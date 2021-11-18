@@ -10,6 +10,7 @@ function hashToken(tokenId, account, label, registrationData) {
 }
 
 describe("Enumerated Registry", function () {
+  let UpgradableRegistry; 
   let hypertoken;
   let registry;
   let owner;
@@ -23,12 +24,13 @@ describe("Enumerated Registry", function () {
     await hypertoken.deployTransaction.wait();
 
     // deploy registry contract
-    const UpgradableRegistry = await ethers.getContractFactory(
+    UpgradableRegistry = await ethers.getContractFactory(
       "NonFungibleRegistryEnumerableUpgradeable",
     );
     registry = await upgrades.deployProxy(UpgradableRegistry, [
-      "Gateways",
-      "G",
+      "Hypernet Profiles",
+      "HPs",
+      "0x0000000000000000000000000000000000000000",
       owner.address,
       owner.address,
     ]);
@@ -169,6 +171,30 @@ describe("Enumerated Registry", function () {
 
     let tx = await registry.setPrimaryRegistry(disableprimaryregistry);
     tx.wait();
+
+    // now deploy a new registry with registry.address set as primary registry
+    gatedregistry = await upgrades.deployProxy(UpgradableRegistry, [
+        "Hypernet.ID",
+        "HID",
+        registry.address,
+        owner.address,
+        owner.address,
+      ]);
+    await registry.deployed();
+
+    await expectRevert(
+        gatedregistry.register(addr1.address, "dummy", "stuff", 4),
+        "NonFungibleRegistry: recipient must have non-zero balance in primary registry."
+    )
+
+    tx = await registry.register(addr1.address, "galileo", "", 4);
+    tx.wait();
+    
+    tx = await gatedregistry.register(addr1.address, "dummy", "stuff", 4);
+    tx.wait();
+
+    expect(await registry.balanceOf(addr1.address)).to.equal(1);
+
   });
 
   it("Check burn fee bounds", async function () {
@@ -514,65 +540,7 @@ describe("Enumerated Registry", function () {
           registry.address,
         ),
       "ERC721: token already minted",
-    ).toString("hex");
-
-    let sig = await owner.signMessage(ethers.utils.arrayify(hash));
-    let fakesig = await addr2.signMessage(ethers.utils.arrayify(hash));
-
-    await expectRevert(
-      registry
-        .connect(addr1)
-        .lazyRegister(addr1.address, label, registrationData, sig),
-      "NonFungibleRegistry: Lazy registration is disabled.",
-    );
-
-    const abiCoder = ethers.utils.defaultAbiCoder;
-
-    // construct call data via ABI encoding
-    let params = abiCoder.encode(
-      [
-        "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])",
-      ],
-      [[[], [true], [], [], [], [], [], [], [], []]],
-    );
-
-    // registrar now sets the registration token to enable token-based registration
-    tx = await registry.setRegistryParameters(params);
-    tx.wait();
-
-    await expectRevert(
-      registry
-        .connect(addr1)
-        .lazyRegister(addr1.address, "", registrationData, fakesig),
-      "NonFungibleRegistry: label field must not be blank.",
-    );
-
-    await expectRevert(
-      registry
-        .connect(addr1)
-        .lazyRegister(addr1.address, label, registrationData, fakesig),
-      "NonFungibleRegistry: signature failure.",
-    );
-
-    await expectRevert(
-      registry
-        .connect(addr2)
-        .lazyRegister(addr1.address, label, registrationData, sig),
-      "NonFungibleRegistry: Caller is not recipient.",
-    );
-
-    tx = await registry
-      .connect(addr1)
-      .lazyRegister(addr1.address, label, registrationData, sig);
-    tx.wait();
-    expect(await registry.totalSupply()).to.equal(1);
-
-    await expectRevert(
-      registry
-        .connect(addr1)
-        .lazyRegister(addr1.address, label, registrationData, sig),
-      "NonFungibleRegistry: Registration label already exists.",
-    );
+    )
   });
 
   it("Test merkle drop.", async function () {

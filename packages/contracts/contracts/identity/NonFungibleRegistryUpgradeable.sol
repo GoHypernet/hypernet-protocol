@@ -101,9 +101,17 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev can only be called once due to the initializer modifier
     /// @param name_ name to be given to the Non Fungible Registry
     /// @param symbol_ shorthand symbol to be given to the Non Fungible Registry
+    /// @param _primaryRegistry address of ERC721-compatible contract to use as primary user profile (address(0) deactivates this feature)
     /// @param _registrar address to be given to the REGISTRAR_ROLE
     /// @param _admin address that will have the DEFAULT_ADMIN_ROLE
-    function initialize(string memory name_, string memory symbol_, address _registrar, address _admin) public initializer {
+    function initialize(
+        string memory name_, 
+        string memory symbol_,
+        address _primaryRegistry, 
+        address _registrar, 
+        address _admin
+        ) 
+        public initializer {
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721URIStorage_init();
@@ -122,7 +130,7 @@ contract NonFungibleRegistryUpgradeable is
         registrationFee = 1e18; // assume there are 18 decimal places in the token
         burnAddress = _admin;
         burnFee = 500; // basis points
-        primaryRegistry = address(0);
+        primaryRegistry = _primaryRegistry;
         frozen = false;
     }
 

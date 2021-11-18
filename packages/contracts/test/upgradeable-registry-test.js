@@ -18,6 +18,7 @@ function hashToken(tokenId, account, label, registrationData) {
 }
 
 describe("Registry with No Enumeration", function () {
+  let UpgradableRegistry; 
   let hypertoken;
   let registry;
   let owner;
@@ -31,12 +32,13 @@ describe("Registry with No Enumeration", function () {
     await hypertoken.deployTransaction.wait();
 
     // deploy registry contract
-    const UpgradableRegistry = await ethers.getContractFactory(
+    UpgradableRegistry = await ethers.getContractFactory(
       "NonFungibleRegistryUpgradeable",
     );
     registry = await upgrades.deployProxy(UpgradableRegistry, [
-      "Gateways",
-      "G",
+      "Hypernet Profiles",
+      "HPs",
+      "0x0000000000000000000000000000000000000000",
       owner.address,
       owner.address,
     ]);
@@ -152,7 +154,9 @@ describe("Registry with No Enumeration", function () {
     // construct call data via ABI encoding
     let nofunctiondefintion = hypertoken.address;
 
-    let noncontractaddress = hypertoken.address;
+    let noncontractaddress = owner.address;
+
+    let disableprimaryregistry = "0x0000000000000000000000000000000000000000";
 
     // primary registry must implement the ERC721 interface
     await expectRevert(
@@ -162,13 +166,39 @@ describe("Registry with No Enumeration", function () {
 
     await expectRevert(
       registry.setPrimaryRegistry(noncontractaddress),
-      "Transaction reverted: function selector was not recognized and there's no fallback function",
+      "Transaction reverted: function call to a non-contract account",
     );
 
     await expectRevert(
       registry.connect(addr1).setPrimaryRegistry(noncontractaddress),
       "NonFungibleRegistry: must be admin.",
     );
+
+    let tx = await registry.setPrimaryRegistry(disableprimaryregistry);
+    tx.wait();
+
+    // now deploy a new registry with registry.address set as primary registry
+    gatedregistry = await upgrades.deployProxy(UpgradableRegistry, [
+        "Hypernet.ID",
+        "HID",
+        registry.address,
+        owner.address,
+        owner.address,
+      ]);
+    await registry.deployed();
+
+    await expectRevert(
+        gatedregistry.register(addr1.address, "dummy", "stuff", 4),
+        "NonFungibleRegistry: recipient must have non-zero balance in primary registry."
+    )
+
+    tx = await registry.register(addr1.address, "galileo", "", 4);
+    tx.wait();
+    
+    tx = await gatedregistry.register(addr1.address, "dummy", "stuff", 4);
+    tx.wait();
+
+    expect(await registry.balanceOf(addr1.address)).to.equal(1);
   });
 
   it("Check burn fee bounds", async function () {
