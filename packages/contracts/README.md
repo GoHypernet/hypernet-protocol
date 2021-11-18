@@ -26,11 +26,11 @@ beacon implementation. Since the reference implementation deployments are not in
 upon the creation of a new NFR. 
 
 Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token standard and have 
-several customizable functionalities. An NFR is can be deployed with or withou the enumeration property and every entry is an ownable 
-token that has a corresponding `label` (seperate from the `tokenURI`) that is unique within that specific NFR. That is, two entries can 
-have the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate lookups more easily for applications in which the 
-registry is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is (for 
-instance when label is a URL). Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
+several customizable functionalities. An NFR is can be deployed with or without the enumeration property and every entry is an ownable 
+token that has a corresponding `label` (seperate from the `tokenURI` or `tokenId`) that is unique within that specific NFR. That is, two 
+entries can have the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate lookups more easily for applications in 
+which the registry is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is 
+(for instance when label is a URL). Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
 
 Each NFR has a `REGISTRAR_ROLE`, which can register new identities, a `REGISTRAR_ROLE_ADMIN` which can add and remove addresses from the 
 `REGISTRAR_ROLE` as well as update NFR parameters, and a `DEFAULT_ADMIN_ROLE` which can make modifications to which addresses have the 

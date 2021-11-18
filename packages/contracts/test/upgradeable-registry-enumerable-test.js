@@ -370,11 +370,15 @@ describe("Enumerated Registry", function () {
       ethers.utils.parseEther("1"),
     );
 
+    expect(await hypertoken.balanceOf(registry.address)).to.equal(ethers.utils.parseEther("0.95"));
+
     tx = await registry.connect(addr2).burn(stakeTokenId);
     tx.wait();
     expect(await hypertoken.balanceOf(addr2.address)).to.equal(
       ethers.utils.parseEther("1.95"),
     );
+
+    expect(await hypertoken.balanceOf(registry.address)).to.equal(0);
 
     // approve the registry to pull hypertoken from the users wallet
     tx = await hypertoken.connect(addr2).approve(registry.address, regFee);
