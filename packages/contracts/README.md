@@ -179,6 +179,12 @@ Set the registration token address for an NFR:
 npx hardhat setRegistryParameters --network dev --name Gateways --regtoken 0x5FbDB2315678afecb367f032d93F642f64180aa3
 ```
 
+If the registry is owned by the DAO, update the parameters with a proposal:
+
+```shell
+npx hardhat proposeRegistryParameterUpdate --network dev --name "Hypernet Profiles" --schema "" --storageupdate "" --labelchange "" --allowtransfers "" --registrationtoken "0x5FbDB2315678afecb367f032d93F642f64180aa3"  --registrationfee "" --burnaddress "" --burnfee ""
+```
+
 Add a new NFI by staking tokens:
 
 ```shell

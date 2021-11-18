@@ -61,7 +61,8 @@ task("proposalState", "Check the state of an existing proposal")
     console.log("Proposal ETA:", proposal[2].toString());
     console.log("Proposal Votes For:", proposal[5].toString());
     console.log("Proposal Votes Against:", proposal[6].toString());
-    console.log("Proposal Executed:", proposal[8]);
+    console.log("Proposal Canceled:", proposal[8]);
+    console.log("Proposal Executed:", proposal[9]);
 });
 
 task("castVote", "Cast a vote for an existing proposal")
@@ -202,6 +203,85 @@ task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance
     const transferCalldata = registryHandle.interface.encodeFunctionData(
       "register",
       [NFIRecipient, NFILabel, NFIData, tokenid],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [registryAddress],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+    // propose a new registry
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [registryAddress],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    const tx_reciept = await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+});
+
+task("proposeRegistryParameterUpdate", "Propose updates to a registries parameters.")
+  .addParam("name", "Name of target Registry to update.")
+  .addParam("schema", "New schema field.")
+  .addParam("storageupdate", "Boolean flag to all updating storage.")
+  .addParam("labelchange", "Boolean flag to udpate NFI labels")
+  .addParam("allowtransfers", "Boolean flag to allow NFI transfers")
+  .addParam("registrationtoken", "Address of ERC20 token to use for token-based registration")
+  .addParam("registrationfee", "Amount of registration token needed to create an NFI")
+  .addParam("burnaddress","Address where burned tokens will be sent")
+  .addParam("burnfee", "percentage of registration token to burn (<=10000)")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const registryName = taskArgs.name;
+    const schema = (taskArgs.schema.length ? [taskArgs.schema]: []);
+    const storageupdate = (taskArgs.storageupdate.length ? [taskArgs.storageupdate]: []);
+    const labelchange = (taskArgs.labelchange.length ? [taskArgs.labelchange]: []);
+    const allowtransfers = (taskArgs.allowtransfers.length ? [taskArgs.allowtransfers]: []);
+    const registrationtoken = (taskArgs.registrationtoken.length ? [taskArgs.registrationtoken] : []);
+    const registrationfee = (taskArgs.registrationfee.length ? [taskArgs.registrationfee]: []);
+    const burnaddress = (taskArgs.burnaddress.length ? [taskArgs.burnaddress]: []);
+    const burnfee = (taskArgs.burnfee.length ? [taskArgs.burnfee]: []);
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
+
+    // lookup address for target registry
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    // construct proposal
+    const proposalDescription = `Registry: ${registryName}, schema: ${schema}, storage: ${storageupdate}, label: ${labelchange}, transfers: ${allowtransfers}, regToken: ${registrationtoken}, regFee: ${registrationfee}, burnAdr: ${burnaddress}, burnfee: ${burnfee}`; 
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    console.log("Description:", proposalDescription);
+    console.log("Description Hash:", descriptionHash);
+
+    const abiCoder = ethers.utils.defaultAbiCoder;
+
+    // construct call data via ABI encoding
+    let params = abiCoder.encode(
+        [
+          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+        ],
+        [
+            [
+            schema, 
+            storageupdate, 
+            labelchange, 
+            allowtransfers, 
+            registrationtoken, 
+            registrationfee, 
+            burnaddress, 
+            burnfee
+            ]
+        ],
+      );
+
+    const transferCalldata = registryHandle.interface.encodeFunctionData(
+      "setRegistryParameters",
+      [params],
     );
 
     const proposalID = await govHandle.hashProposal(
