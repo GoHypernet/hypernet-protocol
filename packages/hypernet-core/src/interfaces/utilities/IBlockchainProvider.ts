@@ -44,6 +44,8 @@ export interface IBlockchainProvider {
   supplyPrivateCredentials(
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError>;
+
+  isMetamask(): boolean;
 }
 
 export const IBlockchainProviderType = Symbol.for("IBlockchainProvider");

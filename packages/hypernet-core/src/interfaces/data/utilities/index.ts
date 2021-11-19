@@ -1,1 +1,1 @@
-export * from "./IStorageUtils";
+export * from "@interfaces/data/utilities/IStorageUtils";

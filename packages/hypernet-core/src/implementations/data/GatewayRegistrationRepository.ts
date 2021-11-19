@@ -1,3 +1,4 @@
+import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/contracts";
 import {
   BlockchainUnavailableError,
   GatewayUrl,
@@ -6,6 +7,7 @@ import {
   GatewayRegistrationFilter,
   Signature,
   EthereumAccountAddress,
+  NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -15,11 +17,13 @@ import {
   ILogUtilsType,
 } from "@hypernetlabs/utils";
 import { IGatewayRegistrationRepository } from "@interfaces/data";
+import { injectable, inject } from "inversify";
+import { ResultAsync } from "neverthrow";
+
+import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
-  IBlockchainUtils,
-  IBlockchainUtilsType,
   IConfigProvider,
   IConfigProviderType,
   IContextProvider,
@@ -27,10 +31,6 @@ import {
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
-import { injectable, inject } from "inversify";
-import { errAsync, ResultAsync } from "neverthrow";
-
-import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IGatewayConnectorProxyFactory,
   IGatewayConnectorProxyFactoryType,
@@ -55,7 +55,6 @@ export class GatewayRegistrationRepository
     @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
     @inject(IGatewayConnectorProxyFactoryType)
     protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory,
-    @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
     this.gatewayRegistrationInfoMap = new Map();
@@ -65,23 +64,22 @@ export class GatewayRegistrationRepository
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    BlockchainUnavailableError
+    NonFungibleRegistryContractError
   > {
-    return this.configProvider.getConfig().andThen((config) => {
-      const gatewayRegistryAddress =
-        config.chainAddresses[config.governanceChainId]?.gatewayRegistryAddress;
-      if (gatewayRegistryAddress == null) {
-        return errAsync(
-          new BlockchainUnavailableError(
-            `Unable to getGatewayRegistrationInfo for chain ${config.governanceChainId}. No configuration info for that chain is available`,
-          ),
-        );
-      }
-
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getGovernanceProvider(),
+    ]).andThen(([config, provider]) => {
       const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
       const newGatewayResults = new Array<
-        ResultAsync<void, BlockchainUnavailableError>
+        ResultAsync<void, NonFungibleRegistryContractError>
       >();
+
+      const gatewayRegistryContract =
+        new NonFungibleRegistryEnumerableUpgradeableContract(
+          provider,
+          config.governanceChainInformation.gatewayRegistryAddress,
+        );
 
       // Check for entries that are already cached.
       for (const gatewayUrl of gatewayUrls) {
@@ -92,17 +90,24 @@ export class GatewayRegistrationRepository
         } else {
           // We need to get the registration info that's not in the cache
           newGatewayResults.push(
-            this.blockchainUtils
-              .getERC721Entry<IGatewayRegistryEntry>(
-                gatewayRegistryAddress,
-                gatewayUrl,
-              )
+            gatewayRegistryContract
+              .getRegistryEntryByLabel(gatewayUrl)
               .map((registryEntry) => {
                 // Convert the registry entry
+                if (registryEntry.tokenURI == null) {
+                  throw new Error(
+                    `Gateway registry entry for ${gatewayUrl} is invalid, it does not have a tokenURI`,
+                  );
+                }
+
+                const parsedEntry = JSON.parse(
+                  registryEntry.tokenURI,
+                ) as IGatewayRegistryEntry;
+
                 const registrationInfo = new GatewayRegistrationInfo(
                   gatewayUrl,
-                  registryEntry.address,
-                  registryEntry.signature,
+                  parsedEntry.address,
+                  parsedEntry.signature,
                 );
 
                 // Set it into the return info

@@ -3,14 +3,10 @@ import {
   BlockchainUnavailableError,
   Signature,
   TransferAbis,
-  ChainId,
   EthereumAccountAddress,
 } from "@hypernetlabs/objects";
-import { EthersBlockchainUtils } from "@implementations/utilities";
-import { IBlockchainUtils } from "@interfaces/utilities";
 import {
   gatewayUrl,
-  gatewayUrlError,
   messageTransferEncodedCancel,
   erc20AssetAddress,
   routerChannelAddress,
@@ -20,12 +16,13 @@ import {
   account,
   errorAccount,
   TransactionResponseMock,
-  chainId,
-  gatewayRegistryAddress,
+  governanceChainInformation,
 } from "@mock/mocks";
 import { ethers } from "ethers";
 import td from "testdouble";
 
+import { EthersBlockchainUtils } from "@implementations/utilities";
+import { IBlockchainUtils } from "@interfaces/utilities";
 import { BlockchainProviderMock, ConfigProviderMock } from "@tests/mock/utils";
 
 const gatewayRegistryTokenIndex = 1;
@@ -278,7 +275,7 @@ describe("EthersBlockchainUtils tests", () => {
       messageTransferEncodedCancel,
     );
     const result = await utils.getMessageTransferEncodedCancelData(
-      ChainId(chainId),
+      governanceChainInformation,
     );
 
     // Assert
@@ -299,7 +296,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     // Act
     const result = await utils.getInsuranceTransferEncodedCancelData(
-      ChainId(chainId),
+      governanceChainInformation,
     );
 
     // Assert
@@ -315,47 +312,12 @@ describe("EthersBlockchainUtils tests", () => {
 
     // Act
     const result = await utils.getParameterizedTransferEncodedCancelData(
-      ChainId(chainId),
+      governanceChainInformation,
     );
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toStrictEqual([hexString, hexString]);
-  });
-
-  test("getERC721Entry() should return ", async () => {
-    // Arrange
-    const mocks = new EthersBlockchainUtilsMocks();
-    const utils = mocks.factoryUtils();
-
-    // Act
-    const result = await utils.getERC721Entry<{ foo: string }>(
-      gatewayRegistryAddress,
-      gatewayUrl,
-    );
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toMatchObject({ foo: "bar" });
-  });
-
-  test("getERC721Entry returns error if url not found ", async () => {
-    // Arrange
-    const mocks = new EthersBlockchainUtilsMocks();
-    const utils = mocks.factoryUtils();
-
-    // Act
-    const result = await utils.getERC721Entry(
-      gatewayRegistryAddress,
-      gatewayUrlError,
-    );
-    const wrappedResponse = result._unsafeUnwrapErr();
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(wrappedResponse).toBeInstanceOf(BlockchainUnavailableError);
   });
 });

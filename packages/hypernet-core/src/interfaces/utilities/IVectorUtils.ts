@@ -21,6 +21,7 @@ import {
   ChainId,
   EthereumAccountAddress,
   EthereumContractAddress,
+  ChainInformation,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -111,7 +112,7 @@ export interface IVectorUtils {
 
   createPullNotificationTransfer(
     channelAddress: EthereumContractAddress,
-    chainId: ChainId,
+    chainInfo: ChainInformation,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
   ): ResultAsync<
@@ -131,7 +132,7 @@ export interface IVectorUtils {
    */
   createInsuranceTransfer(
     channelAddress: EthereumContractAddress,
-    chainId: ChainId,
+    chainInfo: ChainInformation,
     toAddress: PublicIdentifier,
     mediatorAddress: EthereumAccountAddress,
     amount: BigNumberString,
