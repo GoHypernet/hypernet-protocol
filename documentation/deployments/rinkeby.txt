@@ -1,0 +1,29 @@
+Deployment Wallet Address: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+RPC URL: https://rinkeby.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931
+Hypertoken Address: 0x6D4eE7f794103672490830e15308A99eB7a89024
+Hypertoken Supply: 100000000000000000000000000
+Hypertoken Gas Fee: 1800456
+Hypertoken recipient: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+Recipient Balance: 100000000000000000000000000
+Timelock Address: 0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a
+Timelock Gas Fee: 1634305
+Governor address: 0x3353da0f24fCACd83832b09e9371a937195D2640
+Governor Gas Fee: 3942212
+Enumerable Registry Beacon Address: 0x38F848B380882BBb2e6bbDAcCdF00e1c13F98d1C
+Factory Gas Fee: 4039178
+Registry Beacon Address: 0xdF66F75Fbd80939966e5312A43Dd24Cea9DE7F26
+Registry Gas Fee: 3803376
+Factory Address: 0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB
+Factory Gas Fee: 6417172
+Batch Module Address: 0x5B72838Fc364Ef73301E4ac32d2050B095666244
+Batch Module Gas Fee: 607047
+Lazy Mint Module Address: 0x66643a91fD95a8B41Ae673f1861589fb454DEe55
+Lazy Mint Module Gas Fee: 699397
+Merkle Module Address: 0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450
+Merkle Module Gas Fee: 452789
+
+Profile Registry Address: 0x6c355Ad248477eeDcadf1d6724154C6152C0edca
+Gateway Registry Address: 0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB
+Liquidity Registry Address: 0xc616c67f9c680E662103b26cEfFcC70a121CD5d5
+Token Registry Address: 0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D
+
