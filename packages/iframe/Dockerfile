@@ -33,54 +33,8 @@ ENV __BUILD_ENV__ $BUILD_ENV
 ARG IFRAME_SOURCE=http://localhost:5000
 ENV __IFRAME_SOURCE__ $IFRAME_SOURCE
 
-ARG CHAIN_PROVIDERS='{"1337": "http://localhost:8545", "31337": "http://localhost:8545"}'
-ENV __CHAIN_PROVIDERS__ $CHAIN_PROVIDERS
-
-ARG CHAIN_ADDRESSES='{ \
-      "1337": { \
-        "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
-        "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
-        "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
-        "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
-        "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "hypernetGovernorAddress": "0xdDA6327139485221633A1FcD65f4aC932E60A2e1", \
-        "registryFactoryAddress": "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254", \
-        "gatewayRegistryAddress": "0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c", \
-        "liquidityRegistryAddress": "0x6408D38D12F97C33e31D3D7C698FfDb6870e8217" \
-      }, \
-      "31337": { \
-        "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
-        "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
-        "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
-        "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
-        "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "hypernetGovernorAddress": "0xdDA6327139485221633A1FcD65f4aC932E60A2e1", \
-        "registryFactoryAddress": "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254", \
-        "gatewayRegistryAddress": "0xba6f657Fe14Be5697B6A5A836f5C2550F24e6cD5", \
-        "liquidityRegistryAddress": "0x71a31DaF37f1b4b91da1b82148545e5B1Dc4440B" \
-      }, \
-      "1369": { \
-        "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
-        "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
-        "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
-        "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
-        "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "hypernetGovernorAddress": "0xdDA6327139485221633A1FcD65f4aC932E60A2e1", \
-        "registryFactoryAddress": "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254", \
-        "gatewayRegistryAddress": "0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c", \
-        "liquidityRegistryAddress": "0x6408D38D12F97C33e31D3D7C698FfDb6870e8217" \
-      } \
-    }'
-ENV __CHAIN_ADDRESSES__ $CHAIN_ADDRESSES
-
 ARG GOVERNANCE_CHAIN_ID=1337
 ENV __GOVERNANCE_CHAIN_ID__ $GOVERNANCE_CHAIN_ID
-
-ARG GOVERNANCE_PROVIDER_URLS='["http://localhost:8545"]'
-ENV __GOVERNANCE_PROVIDER_URLS__ $GOVERNANCE_PROVIDER_URLS
 
 ARG NATS_URL=ws://localhost:4221
 ENV __NATS_URL__ $NATS_URL
@@ -93,9 +47,6 @@ ENV __VALIDATOR_IFRAME_URL__ $VALIDATOR_IFRAME_URL
 
 ARG CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com
 ENV __CERAMIC_NODE_URL__ $CERAMIC_NODE_URL
-
-ARG INFURA_ID=72827ccd538446f2a20e35a632664c52
-ENV __INFURA_ID__ $INFURA_ID
 
 ARG DEBUG=true
 ENV __DEBUG__ $DEBUG

@@ -1,0 +1,1 @@
+This is a placeholder, to make sure this directory exists. When your local ethereum node starts up, it takes a long time to sync data. That data will be stored here.

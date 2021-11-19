@@ -25,7 +25,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"),
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"),
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"),
-      [ProviderUrl("http://blockchain:8545")],
+      [ProviderUrl("http://localhost:8545")],
     ),
   ],
   [
@@ -67,7 +67,12 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0xc616c67f9c680E662103b26cEfFcC70a121CD5d5"), // liquidityRegistry
       EthereumContractAddress("TODO"), // tokenRegistry
       EthereumContractAddress("TODO"), // chainRegistry
-      [ProviderUrl("https://rinkeby.hypernet.foundation")],
+      //[ProviderUrl("https://rinkeby.hypernet.foundation")],
+      [
+        ProviderUrl(
+          "https://rinkeby.infura.io/v3/72827ccd538446f2a20e35a632664c52",
+        ),
+      ],
     ),
   ],
   [
