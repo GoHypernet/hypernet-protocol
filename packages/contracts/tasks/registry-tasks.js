@@ -202,10 +202,12 @@ task("registryEntryByLabel", "Prints NunFungible Identity Data.")
     const tokenId = await registryHandle.registryMap(label);
     const tokenURI = await registryHandle.tokenURI(tokenId);
     const tokenOwner = await registryHandle.ownerOf(tokenId);
+    const tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
 
     console.log("Owner of NFI:", tokenOwner);
     console.log("Token ID:", tokenId.toString());
     console.log("NFI Data:", tokenURI);
+    console.log("NFI label:", tokenLabel);
   });
 
 task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
@@ -231,10 +233,12 @@ task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
 
     const tokenURI = await registryHandle.tokenURI(tokenId);
     const tokenOwner = await registryHandle.ownerOf(tokenId);
+    const tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
 
     console.log("Owner of NFI:", tokenOwner);
     console.log("Token ID:", tokenId.toString());
     console.log("NFI Data:", tokenURI);
+    console.log("NFI label:", tokenLabel);
   });
 
 task("transferEntryByTokenID", "Transfers a token to a specified participant.")
