@@ -7,3 +7,4 @@ export * from "@interfaces/business/IGatewayConnectorService";
 export * from "@interfaces/business/IGovernanceService";
 export * from "@interfaces/business/IRegistryService";
 export * from "@interfaces/business/IPaymentService";
+export * from "@interfaces/business/ITokenInformationService";

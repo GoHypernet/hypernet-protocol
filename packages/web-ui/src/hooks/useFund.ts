@@ -4,6 +4,7 @@ import {
   BigNumberString,
   EthereumAccountAddress,
   EthereumContractAddress,
+  TokenInformation,
 } from "@hypernetlabs/objects";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
@@ -27,7 +28,7 @@ enum EActionTypes {
 
 interface IReducerStateReducer {
   error: any;
-  tokenSelectorOptions: ITokenSelectorOption[];
+  tokenSelectorOptions: TokenInformation[];
   selectedPaymentToken?: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
   amount: string;
@@ -51,7 +52,7 @@ interface IReducerStateReducer {
 
 interface IReducerState {
   error: any;
-  tokenSelectorOptions: ITokenSelectorOption[];
+  tokenSelectorOptions: TokenInformation[];
   amount: string;
   destinationAddress: EthereumAccountAddress;
   selectedPaymentToken?: ITokenSelectorOption;
@@ -60,7 +61,7 @@ interface IReducerState {
 }
 
 type Action =
-  | { type: EActionTypes.FETCHED; payload: PaymentTokenOptionViewModel[] }
+  | { type: EActionTypes.FETCHED; payload: TokenInformation[] }
   | { type: EActionTypes.AMOUNT_CHANGED; payload: string }
   | { type: EActionTypes.FETCHED_STATE_CHANNELS; payload: ActiveStateChannel[] }
   | {
@@ -153,14 +154,18 @@ export function useFund(): IReducerStateReducer {
       try {
         if (cancelRequest) return;
         // get data from coreProxy
-        coreProxy?.getBalances().map((balance: Balances) => {
-          // prepare balances
-          setLoading(false);
-          dispatch({
-            type: EActionTypes.FETCHED,
-            payload: prepareTokenSelector(balance),
+        coreProxy
+          ?.getTokenInformation()
+          .map((tokenInformation: TokenInformation[]) => {
+            coreProxy?.getBalances().map((balance: Balances) => {
+              // prepare balances
+              setLoading(false);
+              dispatch({
+                type: EActionTypes.FETCHED,
+                payload: tokenInformation,
+              });
+            });
           });
-        });
 
         coreProxy.getEthereumAccounts().match(
           (accounts) => {
@@ -199,60 +204,10 @@ export function useFund(): IReducerStateReducer {
 
     fetchData();
 
-    coreProxy?.onBalancesChanged.subscribe({
-      next: (balance) => {
-        if (cancelRequest) return;
-        dispatch({
-          type: EActionTypes.FETCHED,
-          payload: prepareTokenSelector(balance),
-        });
-      },
-    });
-
     return function cleanup() {
       cancelRequest = true;
     };
   }, []);
-
-  const prepareTokenSelector = (
-    balance: Balances,
-  ): PaymentTokenOptionViewModel[] => {
-    // TODO: this should be pulled from metamask available balances not the channel balances
-    //if (balance.assets.length) {
-    if (false) {
-      return balance.assets.reduce(
-        (acc: PaymentTokenOptionViewModel[], assetBalance) => {
-          const tokenName =
-            assetBalance.assetAddress === ETHER_HEX_ADDRESS
-              ? "ETH"
-              : "HypernetToken";
-          acc.push(
-            new PaymentTokenOptionViewModel(
-              tokenName,
-              assetBalance.assetAddress,
-            ),
-          );
-          return acc;
-        },
-        new Array<PaymentTokenOptionViewModel>(),
-      );
-    } else {
-      return [
-        new PaymentTokenOptionViewModel(
-          "Hypertoken",
-          EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"),
-        ),
-        new PaymentTokenOptionViewModel(
-          "Test Token",
-          EthereumContractAddress("0x9FBDa871d559710256a2502A2517b794B482Db40"),
-        ),
-        new PaymentTokenOptionViewModel(
-          "ETH",
-          EthereumContractAddress("0x0000000000000000000000000000000000000000"),
-        ),
-      ];
-    }
-  };
 
   const setSelectedPaymentToken = (selectedOption?: ITokenSelectorOption) => {
     dispatch({

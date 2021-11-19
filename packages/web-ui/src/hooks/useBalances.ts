@@ -26,7 +26,6 @@ interface IState {
   balances: AssetBalance[];
   balancesByChannelAddress: AssetBalance[];
   balancesByChannelAddresses: Map<EthereumContractAddress, AssetBalance[]>;
-  channelTokenSelectorOptions: ITokenSelectorOption[];
   preferredPaymentToken?: ITokenSelectorOption;
 }
 
@@ -60,7 +59,6 @@ export function useBalances() {
     balances: [],
     balancesByChannelAddress: [],
     balancesByChannelAddresses: new Map(),
-    channelTokenSelectorOptions: [],
     preferredPaymentToken: undefined,
   };
 
@@ -79,9 +77,6 @@ export function useBalances() {
           loading: false,
           balances: prepareBalances(action.payload),
           balancesByChannelAddresses: prepareBalancesByChannelAddresses(
-            action.payload,
-          ),
-          channelTokenSelectorOptions: prepareChannelTokenSelectorOptions(
             action.payload,
           ),
         };
@@ -243,24 +238,6 @@ export function useBalances() {
       (assetBalance) =>
         assetBalance.channelAddress ===
         balancesWithStateChannel.activeStateChannel.channelAddress,
-    );
-  }
-
-  function prepareChannelTokenSelectorOptions(
-    balance: Balances,
-  ): ITokenSelectorOption[] {
-    return balance.assets.reduce(
-      (acc: ITokenSelectorOption[], assetBalance) => {
-        const tokenName =
-          assetBalance.assetAddress === ETHER_HEX_ADDRESS
-            ? "ETH"
-            : "HyperToken";
-        acc.push(
-          new PaymentTokenOptionViewModel(tokenName, assetBalance.assetAddress),
-        );
-        return acc;
-      },
-      [],
     );
   }
 

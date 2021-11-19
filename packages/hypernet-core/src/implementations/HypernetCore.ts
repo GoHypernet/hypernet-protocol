@@ -54,6 +54,7 @@ import {
   EthereumContractAddress,
   RegistryTokenId,
   PaymentCreationError,
+  TokenInformation,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -83,6 +84,7 @@ import {
   PaymentService,
   GovernanceService,
   RegistryService,
+  TokenInformationService,
 } from "@implementations/business";
 import {
   AccountsRepository,
@@ -94,6 +96,7 @@ import {
   GovernanceRepository,
   RegistryRepository,
   GatewayRegistrationRepository,
+  TokenInformationRepository,
 } from "@implementations/data";
 import {
   IBlockchainListener,
@@ -110,6 +113,7 @@ import {
   IPaymentService,
   IGovernanceService,
   IRegistryService,
+  ITokenInformationService,
 } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -121,6 +125,7 @@ import {
   IGatewayRegistrationRepository,
   IGovernanceRepository,
   IRegistryRepository,
+  ITokenInformationRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
@@ -145,6 +150,7 @@ import {
   GatewayConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
+  ContractFactory,
 } from "@implementations/utilities/factory";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
@@ -165,6 +171,7 @@ import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
   IGatewayConnectorProxyFactory,
+  IContractFactory,
 } from "@interfaces/utilities/factory";
 
 /**
@@ -232,6 +239,7 @@ export class HypernetCore implements IHypernetCore {
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
+  protected contractFactory: IContractFactory;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -242,6 +250,7 @@ export class HypernetCore implements IHypernetCore {
   protected messagingRepository: IMessagingRepository;
   protected routerRepository: IRouterRepository;
   protected governanceRepository: IGovernanceRepository;
+  protected tokenInformationRepository: ITokenInformationRepository;
   protected registryRepository: IRegistryRepository;
 
   // Business Layer Stuff
@@ -253,6 +262,7 @@ export class HypernetCore implements IHypernetCore {
   protected gatewayConnectorService: IGatewayConnectorService;
   protected governanceService: IGovernanceService;
   protected registryService: IRegistryService;
+  protected tokenInformationService: ITokenInformationService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -278,6 +288,7 @@ export class HypernetCore implements IHypernetCore {
     | TransferCreationError
     | PaymentStakeError
     | PaymentFinalizeError
+    | NonFungibleRegistryContractError
   > | null;
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
@@ -397,6 +408,8 @@ export class HypernetCore implements IHypernetCore {
       this.internalProviderFactory,
       this.logUtils,
     );
+
+    this.contractFactory = new ContractFactory(this.blockchainProvider);
 
     this.browserNodeFactory = new BrowserNodeFactory(
       this.configProvider,
@@ -530,6 +543,12 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
+    this.tokenInformationRepository = new TokenInformationRepository(
+      this.contractFactory,
+      this.configProvider,
+      this.logUtils,
+    );
+
     this.paymentService = new PaymentService(
       this.linkRepository,
       this.accountRepository,
@@ -570,6 +589,9 @@ export class HypernetCore implements IHypernetCore {
     );
     this.governanceService = new GovernanceService(this.governanceRepository);
     this.registryService = new RegistryService(this.registryRepository);
+    this.tokenInformationService = new TokenInformationService(
+      this.tokenInformationRepository,
+    );
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -837,6 +859,7 @@ export class HypernetCore implements IHypernetCore {
     | TransferCreationError
     | PaymentStakeError
     | PaymentFinalizeError
+    | NonFungibleRegistryContractError
   > {
     if (this._initializeResult != null) {
       return this._initializeResult;
@@ -872,6 +895,7 @@ export class HypernetCore implements IHypernetCore {
           this.registryRepository.initializeForWrite(),
           this.governanceRepository.initializeReadOnly(),
           this.governanceRepository.initializeForWrite(),
+          this.tokenInformationRepository.initialize(),
         ]);
       })
       .andThen((vals) => {
@@ -1421,5 +1445,23 @@ export class HypernetCore implements IHypernetCore {
     | RegistryPermissionError
   > {
     return this.registryService.renounceRegistrarRole(registryName, address);
+  }
+
+  public getTokenInformation(): ResultAsync<TokenInformation[], never> {
+    return this.tokenInformationService.getTokenInformation();
+  }
+
+  public getTokenInformationForChain(
+    chainId: ChainId,
+  ): ResultAsync<TokenInformation[], never> {
+    return this.tokenInformationService.getTokenInformationForChain(chainId);
+  }
+
+  public getTokenInformationByAddress(
+    tokenAddress: EthereumContractAddress,
+  ): ResultAsync<TokenInformation | null, never> {
+    return this.tokenInformationService.getTokenInformationByAddress(
+      tokenAddress,
+    );
   }
 }
