@@ -17,6 +17,7 @@ import {
   ERegistrySortOrder,
   EthereumContractAddress,
   EthereumAccountAddress,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import {
   IIFrameCallData,
@@ -318,7 +319,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getRegistryEntryDetailByTokenId: (
         data: IIFrameCallData<{
           registryName: string;
-          tokenId: number;
+          tokenId: RegistryTokenId;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -346,7 +347,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       updateRegistryEntryTokenURI: (
         data: IIFrameCallData<{
           registryName: string;
-          tokenId: number;
+          tokenId: RegistryTokenId;
           registrationData: string;
         }>,
       ) => {
@@ -361,7 +362,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       updateRegistryEntryLabel: (
         data: IIFrameCallData<{
           registryName: string;
-          tokenId: number;
+          tokenId: RegistryTokenId;
           label: string;
         }>,
       ) => {
@@ -423,7 +424,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       transferRegistryEntry: (
         data: IIFrameCallData<{
           registryName: string;
-          tokenId: number;
+          tokenId: RegistryTokenId;
           transferToAddress: EthereumAccountAddress;
         }>,
       ) => {
@@ -438,7 +439,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       burnRegistryEntry: (
         data: IIFrameCallData<{
           registryName: string;
-          tokenId: number;
+          tokenId: RegistryTokenId;
         }>,
       ) => {
         this.returnForModel(() => {

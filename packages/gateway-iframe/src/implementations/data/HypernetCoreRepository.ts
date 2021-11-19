@@ -8,6 +8,7 @@ import {
   AuthorizeFundsRequestData,
   ChainId,
   IStateChannelRequest,
+  PaymentId,
   PublicIdentifier,
   SendFundsRequestData,
   UUID,
@@ -123,6 +124,12 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
       chainId,
       routerPublicIdentifiers,
     } as IStateChannelRequest);
+
+    return okAsync(undefined);
+  }
+
+  public emitGetPayment(paymentId: PaymentId): ResultAsync<void, never> {
+    this.childApi?.emit("getPaymentRequested", paymentId);
 
     return okAsync(undefined);
   }

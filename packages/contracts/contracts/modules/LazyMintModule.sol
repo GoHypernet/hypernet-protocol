@@ -11,7 +11,7 @@ contract LazyMintModule is Context {
 
     constructor(string memory _name)
     {
-        name = name; 
+        name = _name; 
     }
 
     /// @notice lazyRegister REGISTRAR_ROLE to offload gas cost of minting to reciever 

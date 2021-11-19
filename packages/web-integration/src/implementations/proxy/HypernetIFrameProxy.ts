@@ -398,12 +398,6 @@ export default class HypernetIFrameProxy
     return this._createCall("getActiveLinks", null);
   }
 
-  public getLinkByCounterparty(
-    _counterPartyAccount: PublicIdentifier,
-  ): Promise<HypernetLink> {
-    throw new Error("Unimplemented");
-  }
-
   public acceptOffer(
     paymentId: PaymentId,
   ): ResultAsync<
@@ -500,7 +494,7 @@ export default class HypernetIFrameProxy
         if (gatewaysMap.get(gatewayUrl) == true) {
           this._displayCoreIFrame();
 
-          return this._createCall<void, GatewayConnectorError>(
+          return this._createCall<GatewayUrl, GatewayConnectorError, void>(
             "displayGatewayIFrame",
             gatewayUrl,
           );

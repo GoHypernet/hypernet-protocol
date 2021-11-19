@@ -1,6 +1,5 @@
 import {
   PushPayment,
-  Payment,
   AssetBalance,
   PullPayment,
   PublicIdentifier,
@@ -39,6 +38,11 @@ import {
   IGatewayRegistrationRepository,
 } from "@interfaces/data";
 import {
+  IBlockchainUtils,
+  IGatewayConnectorProxy,
+  IPaymentUtils,
+} from "@interfaces/utilities";
+import {
   defaultExpirationLength,
   gatewayUrl,
   hyperTokenAddress,
@@ -46,7 +50,6 @@ import {
   publicIdentifier,
   publicIdentifier2,
   unixNow,
-  account,
   gatewaySignature,
   activeInsuranceTransfer,
   activeOfferTransfer,
@@ -76,11 +79,6 @@ import {
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
-import {
-  IBlockchainUtils,
-  IGatewayConnectorProxy,
-  IPaymentUtils,
-} from "@interfaces/utilities";
 import {
   ConfigProviderMock,
   ContextProviderMock,
@@ -167,7 +165,7 @@ class PaymentServiceMocks {
       this.paymentRepository.getPaymentsByIds(
         td.matchers.contains(nonExistentPaymentId),
       ),
-    ).thenReturn(okAsync(new Map<PaymentId, Payment>()));
+    ).thenReturn(okAsync(new Map<PaymentId, PushPayment | PullPayment>()));
 
     td.when(
       this.paymentRepository.provideStake(commonPaymentId, gatewayAccount),
@@ -405,7 +403,7 @@ class PaymentServiceMocks {
   }
 
   public setExistingPayments(payments: (PushPayment | PullPayment)[]) {
-    const returnedPaymentsMap = new Map<PaymentId, Payment>();
+    const returnedPaymentsMap = new Map<PaymentId, PushPayment | PullPayment>();
     const paymentIds = new Array<string>();
 
     for (const payment of payments) {

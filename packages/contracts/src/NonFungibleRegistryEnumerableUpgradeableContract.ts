@@ -4,11 +4,14 @@ import {
   EthereumContractAddress,
   GovernanceAbis,
   NonFungibleRegistryContractError,
+  RegistryEntry,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
+import { ResultUtils } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
-import { ResultAsync } from "neverthrow";
+import { ResultAsync, okAsync } from "neverthrow";
 
-import { INonFungibleRegistryEnumerableUpgradeableContract } from "@contracts/interfaces/utilities";
+import { INonFungibleRegistryEnumerableUpgradeableContract } from "@contracts/INonFungibleRegistryEnumerableUpgradeableContract";
 
 export class NonFungibleRegistryEnumerableUpgradeableContract
   implements INonFungibleRegistryEnumerableUpgradeableContract
@@ -271,7 +274,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public tokenByIndex(
     index: number,
-  ): ResultAsync<number, NonFungibleRegistryContractError> {
+  ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.tokenByIndex(index) as Promise<BigNumber>,
       (e) => {
@@ -280,11 +283,25 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           e,
         );
       },
-    ).map((tokenId) => tokenId.toNumber());
+    ).map((tokenId) => RegistryTokenId(tokenId.toNumber()));
+  }
+
+  public registryMap(
+    label: string,
+  ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.registryMap(label) as Promise<RegistryTokenId>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call registryMap()",
+          e,
+        );
+      },
+    );
   }
 
   public reverseRegistryMap(
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.reverseRegistryMap(tokenId) as Promise<string>,
@@ -298,7 +315,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public ownerOf(
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.ownerOf(tokenId) as Promise<EthereumAccountAddress>,
@@ -312,7 +329,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public tokenURI(
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.tokenURI(tokenId) as Promise<string>,
@@ -326,7 +343,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public updateRegistration(
-    tokenId: number,
+    tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
@@ -353,7 +370,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public updateLabel(
-    tokenId: number,
+    tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
@@ -380,7 +397,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public transferFrom(
-    tokenId: number,
+    tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     toAddress: EthereumAccountAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
@@ -409,7 +426,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public burn(
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.burn(
@@ -613,5 +630,33 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         });
       })
       .map(() => {});
+  }
+
+  public getRegistryEntryByTokenId(
+    tokenId: RegistryTokenId,
+  ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
+    return ResultUtils.combine([
+      this.reverseRegistryMap(tokenId),
+      this.ownerOf(tokenId),
+      this.tokenURI(tokenId),
+    ]).andThen((vals) => {
+      const [label, owner, tokenURI] = vals;
+      return okAsync(new RegistryEntry(label, tokenId, owner, tokenURI, null));
+    });
+  }
+
+  public getRegistryEntryByLabel(
+    label: string,
+  ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
+    return this.registryMap(label).andThen((tokenId) => {
+      return ResultUtils.combine([
+        this.ownerOf(tokenId),
+        this.tokenURI(tokenId),
+      ]).andThen(([owner, tokenURI]) => {
+        return okAsync(
+          new RegistryEntry(label, tokenId, owner, tokenURI, null),
+        );
+      });
+    });
   }
 }

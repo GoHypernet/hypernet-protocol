@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/governance/Governor.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
@@ -22,7 +23,8 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
 
     Counters.Counter public _proposalIdTracker; // track number of proposals in governance
 
-    mapping(uint256 => string) public proposalDescriptions; // description for each proposal
+    // description for each proposal so we don't have to rely on off-chain indexing
+    mapping(uint256 => string) public proposalDescriptions; 
 
     // be sure to set these to reasonable values for Mainnet
     uint256 private _votingDelay = 1; // blocks (1 block is about 13 seconds)
@@ -30,6 +32,9 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
     uint256 private _votingPeriod = 20; // blocks
 
     uint256 private _proposalThreshold = 1_000_000e18; // number of votes required to in order to submit a successful proposal
+
+    // address of registry that serves os the Hypernet User Profile registry
+    address public hypernetProfileRegistry = address(0);
 
     function votingDelay() public view override returns (uint256) {
         return _votingDelay; 
@@ -62,6 +67,13 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         onlyGovernance()
     {
       _proposalThreshold = newProposalThreshold;
+    }
+
+    function setProfileRegistry(address _hypernetProfileRegistry) 
+        public 
+        onlyGovernance()
+    {
+      hypernetProfileRegistry = _hypernetProfileRegistry;
     }
 
     // The functions below are overrides required by Solidity.
@@ -98,6 +110,7 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         override(Governor, GovernorCompatibilityBravo, IGovernor)
         returns (uint256)
     {
+        require(_preRegistered(_msgSender()), "Governance: caller must have a Hypernet Profile.");
         uint256 proposalId =  super.propose(targets, values, calldatas, description);
 
         // proposals start at 1
@@ -113,6 +126,7 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         internal
         override(Governor, GovernorTimelockControl)
     {
+        require(_preRegistered(_msgSender()), "Governance: caller must have a Hypernet Profile.");
         super._execute(proposalId, targets, values, calldatas, descriptionHash);
     }
 
@@ -121,6 +135,7 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         override(Governor, GovernorTimelockControl)
         returns (uint256)
     {
+        require(_preRegistered(_msgSender()), "Governance: caller must have a Hypernet Profile.");
         return super._cancel(targets, values, calldatas, descriptionHash);
     }
 
@@ -131,6 +146,12 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         returns (address)
     {
         return super._executor();
+    }
+
+    function _preRegistered(address owner) internal view virtual returns (bool) {
+        // check if there if a profile is required and if so 
+        // does the recipient have a non-zero balance. 
+        return ((hypernetProfileRegistry == address(0)) || (IERC721(hypernetProfileRegistry).balanceOf(owner) > 0));
     }
 
     function supportsInterface(bytes4 interfaceId)

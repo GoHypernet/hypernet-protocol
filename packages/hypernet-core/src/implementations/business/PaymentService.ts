@@ -34,9 +34,10 @@ import {
   EPaymentType,
   paymentSigningDomain,
   pushPaymentSigningTypes,
+  NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
-import { IPaymentService } from "@interfaces/business";
+import { GetPaymentResponse, IPaymentService } from "@interfaces/business";
 import {
   IAccountsRepository,
   IAccountsRepositoryType,
@@ -53,6 +54,10 @@ import {
   HypernetContext,
   PaymentInitiationResponse,
 } from "@interfaces/objects";
+import { BigNumber } from "ethers";
+import { injectable, inject } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import {
   IBlockchainUtils,
   IBlockchainUtilsType,
@@ -65,9 +70,6 @@ import {
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
-import { BigNumber } from "ethers";
-import { injectable, inject } from "inversify";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
@@ -398,6 +400,7 @@ export class PaymentService implements IPaymentService {
     | VectorError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | NonFungibleRegistryContractError
   > {
     // TODO: Sanity checking on the values
     return ResultUtils.combine([
@@ -580,13 +583,14 @@ export class PaymentService implements IPaymentService {
     | AcceptPaymentError
     | InsufficientBalanceError
     | InvalidPaymentIdError
+    | PaymentCreationError
+    | NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
       this.paymentRepository.getPaymentsByIds([paymentId]),
-    ]).andThen((vals) => {
-      const [config, context, payments] = vals;
+    ]).andThen(([config, context, payments]) => {
       const payment = payments.get(paymentId);
 
       if (payment == null) {
@@ -652,10 +656,9 @@ export class PaymentService implements IPaymentService {
           }
 
           // Get the address of HyperToken for this particular chain
-          const hypertokenAddress =
-            config.chainAddresses[payment.chainId]?.hypertokenAddress;
+          const chainInformation = config.chainInformation.get(payment.chainId);
 
-          if (hypertokenAddress == null) {
+          if (chainInformation == null) {
             return errAsync<
               Payment,
               | TransferCreationError
@@ -675,7 +678,10 @@ export class PaymentService implements IPaymentService {
           }
 
           return this.accountRepository
-            .getBalanceByAsset(stateChannel.channelAddress, hypertokenAddress)
+            .getBalanceByAsset(
+              stateChannel.channelAddress,
+              chainInformation.hypertokenAddress,
+            )
             .andThen((hypertokenBalance) => {
               // Check the balance and make sure you have enough HyperToken to cover it
               if (
@@ -684,7 +690,7 @@ export class PaymentService implements IPaymentService {
                 )
               ) {
                 return errAsync<
-                  Payment,
+                  PushPayment | PullPayment,
                   | TransferCreationError
                   | VectorError
                   | BalancesUnavailableError
@@ -1174,6 +1180,36 @@ export class PaymentService implements IPaymentService {
       });
   }
 
+  public getPayment(
+    paymentId: PaymentId,
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<
+    GetPaymentResponse,
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidPaymentIdError
+  > {
+    return this.paymentRepository
+      .getPaymentsByIds([paymentId])
+      .map((paymentsById) => {
+        const payment = paymentsById.get(paymentId);
+
+        if (payment == null || payment.gatewayUrl !== gatewayUrl) {
+          return new GetPaymentResponse(null, EPaymentType.Push);
+        }
+
+        if (payment instanceof PullPayment) {
+          return new GetPaymentResponse(payment, EPaymentType.Pull);
+        }
+        if (payment instanceof PushPayment) {
+          return new GetPaymentResponse(payment, EPaymentType.Push);
+        }
+        throw new Error(`Unknown payment type!`);
+      });
+  }
+
   protected _recoverPayment(
     payment: Payment,
     context: HypernetContext,
@@ -1398,7 +1434,7 @@ export class PaymentService implements IPaymentService {
   }
 
   protected _advancePayment(
-    payment: Payment,
+    payment: PushPayment | PullPayment,
     context: HypernetContext,
   ): ResultAsync<
     void,
@@ -1450,7 +1486,7 @@ export class PaymentService implements IPaymentService {
   }
 
   protected _advancePaymentForActivatedGateway(
-    payment: Payment,
+    payment: PushPayment | PullPayment,
     context: HypernetContext,
   ): ResultAsync<
     Payment,

@@ -9,7 +9,14 @@ require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 require("hardhat-tracer");
 
-require("./tasks/hypernet-tasks.js");
+require("./tasks/general-tasks.js");
+require("./tasks/governance-tasks.js");
+require("./tasks/registry-tasks.js");
+
+const urlOverride = process.env.ETH_PROVIDER_URL;
+const mnemonic =
+  process.env.MNEMONIC ||
+  "test test test test test test test test test test test junk";
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -29,16 +36,34 @@ module.exports = {
   },
   networks: {
     hardhat: {
+      accounts: {
+        accountsBalance: "10000000000000000000000",
+        mnemonic,
+      },
       mining: {
         auto: true,
         interval: [3000, 6000],
       },
+      chainId: 31337,
     },
     dev: {
-      url: "http://127.0.0.1:8545",
+      accounts: {
+        accountsBalance: "10000000000000000000000",
+        mnemonic,
+      },
+      chainId: 31337,
+      url: 'http://127.0.0.1:8569'
     },
     DevNet: {
+      accounts: {
+        mnemonic,
+      },
       url: "https://eth-provider-dev.hypernetlabs.io",
+    },
+    rinkeby: {
+      accounts: { mnemonic },
+      chainId: 4,
+      url: urlOverride || "http://localhost:8545",
     },
   },
   gasReporter: {

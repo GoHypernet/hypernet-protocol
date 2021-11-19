@@ -2,21 +2,21 @@ import { ProxyError } from "@hypernetlabs/objects";
 import { errAsync, ResultAsync } from "neverthrow";
 import Postmate from "postmate";
 
-interface IIFrameCallData<T> {
+interface IIFrameCallData<CallDataType> {
   callId: number;
-  data: T;
+  data: CallDataType;
 }
 
-class IFrameCallData<T> implements IIFrameCallData<T> {
-  constructor(public callId: number, public data: T) {}
+class IFrameCallData<CallDataType> implements IIFrameCallData<CallDataType> {
+  constructor(public callId: number, public data: CallDataType) {}
 }
 
-class IFrameCall<T, E> {
-  protected promise: Promise<T>;
-  protected resolveFunc: ((result: T) => void) | null;
-  protected rejectFunc: ((error: E) => void) | null;
+class IFrameCall<CallDataType, ResultType, ErrorType> {
+  protected promise: Promise<ResultType>;
+  protected resolveFunc: ((result: ResultType) => void) | null;
+  protected rejectFunc: ((error: ErrorType) => void) | null;
 
-  constructor(public callData: IIFrameCallData<any>) {
+  constructor(public callData: IIFrameCallData<CallDataType>) {
     this.resolveFunc = null;
     this.rejectFunc = null;
 
@@ -26,21 +26,21 @@ class IFrameCall<T, E> {
     });
   }
 
-  public resolve(result: T): void {
+  public resolve(result: ResultType): void {
     if (this.resolveFunc != null) {
       this.resolveFunc(result);
     }
   }
 
-  public reject(error: E): void {
+  public reject(error: ErrorType): void {
     if (this.rejectFunc != null) {
       this.rejectFunc(error);
     }
   }
 
-  public getResult(): ResultAsync<T, E> {
+  public getResult(): ResultAsync<ResultType, ErrorType> {
     return ResultAsync.fromPromise(this.promise, (e) => {
-      return e as E;
+      return e as ErrorType;
     });
   }
 }
@@ -49,7 +49,8 @@ export abstract class ParentProxy {
   protected handshake: Postmate;
   protected child: Postmate.ParentAPI | null;
   protected callId = 0;
-  protected calls: IFrameCall<any, any>[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected calls: IFrameCall<any, any, any>[] = [];
   protected active: boolean;
 
   constructor(
@@ -87,7 +88,7 @@ export abstract class ParentProxy {
       // Stash the API for future calls
       this.child = child;
 
-      child.on("callSuccess", (data: IIFrameCallData<any>) => {
+      child.on("callSuccess", (data: IIFrameCallData<unknown>) => {
         // Get the matching calls
         const matchingCalls = this.calls.filter((val) => {
           return val.callData.callId == data.callId;
@@ -104,7 +105,7 @@ export abstract class ParentProxy {
         }
       });
 
-      child.on("callError", (data: IIFrameCallData<any>) => {
+      child.on("callError", (data: IIFrameCallData<unknown>) => {
         // Get the matching calls
         const matchingCalls = this.calls.filter((val) => {
           return val.callData.callId == data.callId;
@@ -127,15 +128,15 @@ export abstract class ParentProxy {
     return this.activateResult;
   }
 
-  public destroy() {
+  public destroy(): void {
     this.child?.destroy();
     this.active = false;
   }
 
-  protected _createCall<T, E>(
+  protected _createCall<CallDataType, ErrorType, ResultType>(
     callName: string,
-    data: any,
-  ): ResultAsync<T, E | ProxyError> {
+    data: CallDataType,
+  ): ResultAsync<ResultType, ErrorType | ProxyError> {
     if (!this.active) {
       return errAsync(
         new ProxyError(
@@ -146,7 +147,7 @@ export abstract class ParentProxy {
     const callId = this.callId++;
     const callData = new IFrameCallData(callId, data);
 
-    const call = new IFrameCall<T, E>(callData);
+    const call = new IFrameCall<CallDataType, ResultType, ErrorType>(callData);
     this.calls.push(call);
 
     this.child?.call(callName, callData);

@@ -6,7 +6,6 @@ import {
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
-  GatewayValidationError,
   PaymentFinalizeError,
   VectorError,
   BlockchainUnavailableError,
@@ -22,6 +21,10 @@ import {
   ProxyError,
   InvalidPaymentIdError,
   EthereumContractAddress,
+  PushPayment,
+  PullPayment,
+  EPaymentType,
+  NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import { PaymentInitiationResponse } from "@interfaces/objects";
 import { ResultAsync } from "neverthrow";
@@ -138,6 +141,7 @@ export interface IPaymentService {
     | VectorError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | NonFungibleRegistryContractError
   >;
 
   /**
@@ -159,6 +163,8 @@ export interface IPaymentService {
     | AcceptPaymentError
     | InsufficientBalanceError
     | InvalidPaymentIdError
+    | PaymentCreationError
+    | NonFungibleRegistryContractError
   >;
 
   /**
@@ -364,6 +370,28 @@ export interface IPaymentService {
     | TransferResolutionError
     | InvalidPaymentIdError
   >;
+
+  /**
+   * getPayment() will return information about the requested payment ID, but only if it's a payment for the gateway
+   */
+  getPayment(
+    paymentId: PaymentId,
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<
+    GetPaymentResponse,
+    | BlockchainUnavailableError
+    | VectorError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | InvalidPaymentIdError
+  >;
+}
+
+export class GetPaymentResponse {
+  public constructor(
+    public payment: PushPayment | PullPayment | null,
+    public paymentType: EPaymentType,
+  ) {}
 }
 
 export const IPaymentServiceType = Symbol.for("IPaymentService");

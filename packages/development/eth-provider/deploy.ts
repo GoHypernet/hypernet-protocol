@@ -20,14 +20,14 @@ import { registerTransfer } from "../src.ts/utils";
 const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
 const hyperKYCAddress = "0x821aEa9a577a9b44299B9c15c88cf3087F3b5544";
 const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
-const HypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
-const EnumerableRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
-const NonEnumerableRegistryAddress =
+const hypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+const enumerableRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
+const nonenumerableRegistryAddress =
   "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
-const RegistryFactoryContractAddress =
+const registryFactoryContractAddress =
   "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
-const GovernanceContractAddress = "0xdDA6327139485221633A1FcD65f4aC932E60A2e1";
-const TimelockContractAddress = "0xeec918d74c746167564401103096D45BbD494B74";
+const governanceContractAddress = "0xdDA6327139485221633A1FcD65f4aC932E60A2e1";
+const timelockContractAddress = "0xeec918d74c746167564401103096D45BbD494B74";
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
@@ -118,19 +118,25 @@ const func: DeployFunction = async () => {
     [
       "UpgradeableRegistryFactory",
       [
-        TimelockContractAddress,
-        ["Gateways", "Liquidity Providers", "HyperID"],
-        ["G", "LPs", "HID"],
-        [registryAccountAddress, registryAccountAddress, hyperKYCAddress],
-        EnumerableRegistryAddress,
-        NonEnumerableRegistryAddress,
-        HypertokenContractAddress,
+        timelockContractAddress,
+        ["Gateways", "Liquidity Providers", "HyperID", "Tokens", "Chains"],
+        ["G", "LPs", "HID", "Tokens", "Chains"],
+        [
+          registryAccountAddress,
+          registryAccountAddress,
+          hyperKYCAddress,
+          registryAccountAddress,
+          registryAccountAddress,
+        ],
+        enumerableRegistryAddress,
+        nonenumerableRegistryAddress,
+        hypertokenContractAddress,
       ],
     ],
-    ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
+    ["HypernetGovernor", [hypertokenContractAddress, timelockContractAddress]],
     [
       "TimelockController",
-      [1, [GovernanceContractAddress], [GovernanceContractAddress]],
+      [1, [governanceContractAddress], [governanceContractAddress]],
     ],
   ];
 
@@ -207,7 +213,7 @@ const func: DeployFunction = async () => {
     signer,
   );
   const registryFactoryContract = new ethers.Contract(
-    RegistryFactoryContractAddress,
+    registryFactoryContractAddress,
     registryFactoryAbi,
     signer,
   );
@@ -269,16 +275,27 @@ const func: DeployFunction = async () => {
   const hyperidRegistryAddress = await registryFactoryContract.nameToAddress(
     "HyperID",
   );
+  const tokenRegistryAddress = await registryFactoryContract.nameToAddress(
+    "Tokens",
+  );
+  const chainRegistryAddress = await registryFactoryContract.nameToAddress(
+    "Chains",
+  );
 
   log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
   log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
   log.info(`HyperID Registry Address: ${hyperidRegistryAddress}`);
+  log.info(`Token Registry Address: ${tokenRegistryAddress}`);
+  log.info(`Chain Registry Address: ${chainRegistryAddress}`);
 
   const routerPublicIdentifier =
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
 
   const registryAccountPrivateKey =
     "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
+
+  ////////////////////////////////////////
+  log.info("Deploying liquidity registration");
 
   const liquidityRegistryContract = new ethers.Contract(
     liquidityRegistryAddress,
@@ -321,7 +338,10 @@ const func: DeployFunction = async () => {
   );
 
   await liquidityRegistryTx.wait();
-  log.info("Deployed liquidity registration. Deploying Gateway registration");
+  log.info("Deployed liquidity registration.");
+
+  ////////////////////////////////////////
+  log.info("Deploying gateway registration");
 
   const gatewayRegistryContract = new ethers.Contract(
     gatewayRegistryAddress,
@@ -352,11 +372,12 @@ const func: DeployFunction = async () => {
     JSON.stringify(hyperpayGatewayRegistrationEntry),
   );
 
-  const hyperpayLocalGatewayRegistry2Tx = await gatewayRegistryContract.register(
-    hyperpayAddress,
-    "http://localhost:3000/users/v0",
-    JSON.stringify(hyperpayGatewayRegistrationEntry),
-  );
+  const hyperpayLocalGatewayRegistry2Tx =
+    await gatewayRegistryContract.register(
+      hyperpayAddress,
+      "http://localhost:3000/users/v0",
+      JSON.stringify(hyperpayGatewayRegistrationEntry),
+    );
 
   const hyperpayDevGatewayRegistryTx = await gatewayRegistryContract.register(
     hyperpayAddress,
@@ -372,6 +393,214 @@ const func: DeployFunction = async () => {
   console.info(
     "Deployed registration tokens for test gateway and Hyperpay (local and dev)",
   );
+
+  ////////////////////////////////////////
+  log.info("Deploying Token Registry entries");
+  const tokenRegistryContract = new ethers.Contract(
+    tokenRegistryAddress,
+    ERC721Abi,
+    registrySigner,
+  );
+
+  // Mint tokens for some different tokens
+  const tokenTxs = [
+    await tokenRegistryContract.register(
+      registryAccountAddress,
+      "1:0x0000000000000000000000000000000000000000",
+      JSON.stringify({
+        name: "Ethereum",
+        symbol: "ETH",
+        chainId: 1,
+        address: "0x0000000000000000000000000000000000000000",
+        nativeToken: true,
+        erc20: false,
+        decimals: 18,
+        logoUrl: "",
+      }),
+    ),
+    await tokenRegistryContract.register(
+      registryAccountAddress,
+      "1337:0x0000000000000000000000000000000000000000",
+      JSON.stringify({
+        name: "Ethereum",
+        symbol: "ETH",
+        chainId: 1337,
+        address: "0x0000000000000000000000000000000000000000",
+        nativeToken: true,
+        erc20: false,
+        decimals: 18,
+        logoUrl: "",
+      }),
+    ),
+    await tokenRegistryContract.register(
+      registryAccountAddress,
+      "1369:0x0000000000000000000000000000000000000000",
+      JSON.stringify({
+        name: "Ethereum",
+        symbol: "ETH",
+        chainId: 1369,
+        address: "0x0000000000000000000000000000000000000000",
+        nativeToken: true,
+        erc20: false,
+        decimals: 18,
+        logoUrl: "",
+      }),
+    ),
+    await tokenRegistryContract.register(
+      registryAccountAddress,
+      `1337:${hyperTokenAddress}`,
+      JSON.stringify({
+        name: "Hypertoken",
+        symbol: "HYP",
+        chainId: 1337,
+        address: hyperTokenAddress,
+        nativeToken: false,
+        erc20: true,
+        decimals: 18,
+        logoUrl: "",
+      }),
+    ),
+    await tokenRegistryContract.register(
+      registryAccountAddress,
+      `1369:${hyperTokenAddress}`,
+      JSON.stringify({
+        name: "Hypertoken",
+        symbol: "HYP",
+        chainId: 1369,
+        address: hyperTokenAddress,
+        nativeToken: false,
+        erc20: true,
+        decimals: 18,
+        logoUrl: "",
+      }),
+    ),
+    await tokenRegistryContract.register(
+      registryAccountAddress,
+      "1:0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      JSON.stringify({
+        name: "Wrapped Eth",
+        symbol: "WETH",
+        chainId: 1,
+        address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        nativeToken: false,
+        erc20: true,
+        decimals: 18,
+        logoUrl: "",
+      }),
+    ),
+  ];
+
+  for (const tokenTx of tokenTxs) {
+    console.log("Adding token registration");
+    await tokenTx.wait();
+  }
+
+  log.info("Deployed entries to Token registry");
+
+  ////////////////////////////////////////
+  log.info("Deploying Chain Registry entries");
+  const chainRegistryContract = new ethers.Contract(
+    chainRegistryAddress,
+    ERC721Abi,
+    registrySigner,
+  );
+
+  // Mint tokens for some different tokens
+  const chainTxs = [
+    await chainRegistryContract.register(
+      registryAccountAddress,
+      "1337",
+      JSON.stringify({
+        name: "Local Development Chain",
+        chainId: 1337,
+        channelFactoryAddress: "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+        transferRegistryAddress: "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
+        hypertokenAddress: hypertokenContractAddress,
+        messageTransferAddress: "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6",
+        insuranceTransferAddress: "0x30753E4A8aad7F8597332E813735Def5dD395028",
+        parameterizedTransferAddress:
+          "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4",
+        hypernetGovernorAddress: governanceContractAddress,
+        registryFactoryAddress: registryFactoryContractAddress,
+        gatewayRegistryAddress: gatewayRegistryAddress,
+        liquidityRegistryAddress: liquidityRegistryAddress,
+        tokenRegistryAddress: tokenRegistryAddress,
+        chainRegistryAddress: chainRegistryAddress,
+        providerUrls: ["http://blockchain:8545"],
+      }),
+    ),
+    await chainRegistryContract.register(
+      registryAccountAddress,
+      "1369",
+      JSON.stringify({
+        name: "Dev Environment Chain",
+        chainId: 1369,
+        channelFactoryAddress: "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+        transferRegistryAddress: "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
+        hypertokenAddress: hypertokenContractAddress,
+        messageTransferAddress: "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6",
+        insuranceTransferAddress: "0x30753E4A8aad7F8597332E813735Def5dD395028",
+        parameterizedTransferAddress:
+          "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4",
+        hypernetGovernorAddress: governanceContractAddress,
+        registryFactoryAddress: registryFactoryContractAddress,
+        gatewayRegistryAddress: gatewayRegistryAddress,
+        liquidityRegistryAddress: liquidityRegistryAddress,
+        tokenRegistryAddress: tokenRegistryAddress,
+        chainRegistryAddress: chainRegistryAddress,
+        providerUrls: ["https://eth-provider-dev.hypernetlabs.io"],
+      }),
+    ),
+    await chainRegistryContract.register(
+      registryAccountAddress,
+      "4",
+      JSON.stringify({
+        name: "Rinkeby",
+        chainId: 4,
+        channelFactoryAddress: "TODO",
+        transferRegistryAddress: "TODO",
+        hypertokenAddress: "TODO",
+        messageTransferAddress: "TODO",
+        insuranceTransferAddress: "TODO",
+        parameterizedTransferAddress: "TODO",
+        hypernetGovernorAddress: "TODO",
+        registryFactoryAddress: "TODO",
+        gatewayRegistryAddress: "TODO",
+        liquidityRegistryAddress: "TODO",
+        tokenRegistryAddress: "TODO",
+        chainRegistryAddress: "TODO",
+        providerUrls: ["TODO"],
+      }),
+    ),
+    await chainRegistryContract.register(
+      registryAccountAddress,
+      "1",
+      JSON.stringify({
+        name: "MainNet",
+        chainId: 1,
+        channelFactoryAddress: "TODO",
+        transferRegistryAddress: "TODO",
+        hypertokenAddress: "TODO",
+        messageTransferAddress: "TODO",
+        insuranceTransferAddress: "TODO",
+        parameterizedTransferAddress: "TODO",
+        hypernetGovernorAddress: "TODO",
+        registryFactoryAddress: "TODO",
+        gatewayRegistryAddress: "TODO",
+        liquidityRegistryAddress: "TODO",
+        tokenRegistryAddress: "TODO",
+        chainRegistryAddress: "TODO",
+        providerUrls: ["TODO"],
+      }),
+    ),
+  ];
+
+  for (const chainTx of chainTxs) {
+    console.log("Adding chain registration");
+    await chainTx.wait();
+  }
+
+  log.info("Deployed entries to Chain registry");
 
   ////////////////////////////////////////
   // Print summary

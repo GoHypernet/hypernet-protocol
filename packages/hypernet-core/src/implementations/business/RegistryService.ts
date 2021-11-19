@@ -11,6 +11,7 @@ import {
   GovernanceSignerUnavailableError,
   ERC20ContractError,
   EthereumContractAddress,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import { IRegistryService } from "@interfaces/business";
 import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
@@ -84,7 +85,7 @@ export class RegistryService implements IRegistryService {
 
   public getRegistryEntryDetailByTokenId(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
     RegistryFactoryContractError | NonFungibleRegistryContractError
@@ -97,7 +98,7 @@ export class RegistryService implements IRegistryService {
 
   public updateRegistryEntryTokenURI(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
@@ -115,7 +116,7 @@ export class RegistryService implements IRegistryService {
 
   public updateRegistryEntryLabel(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
     RegistryEntry,
@@ -173,7 +174,7 @@ export class RegistryService implements IRegistryService {
 
   public transferRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry,
@@ -191,7 +192,7 @@ export class RegistryService implements IRegistryService {
 
   public burnRegistryEntry(
     registryName: string,
-    tokenId: number,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError

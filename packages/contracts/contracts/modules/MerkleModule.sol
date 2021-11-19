@@ -8,13 +8,12 @@ contract MerkleModule {
 
     string public name; 
 
-    constructor(bytes32 merkleroot, string memory _name)
+    constructor(string memory _name)
     {
-
         name = _name; 
     }
 
-    /// @notice redeem offload gas cost of minting to recieveres
+    /// @notice redeem offload gas cost of minting to receivers
     /// @dev scalable distribution of NFIs
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token
@@ -37,7 +36,7 @@ contract MerkleModule {
     }
 
     function _verify(bytes32 leaf, bytes32[] memory proof, bytes32 root)
-    internal view returns (bool)
+    internal pure returns (bool)
     {
         return MerkleProof.verify(proof, root, leaf);
     }
