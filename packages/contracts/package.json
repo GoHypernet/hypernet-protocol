@@ -27,6 +27,8 @@
     "hardhat": "^2.6.0",
     "hardhat-gas-reporter": "^1.0.4",
     "hardhat-tracer": "^1.0.0-alpha.6",
+    "keccak256": "^1.0.3",
+    "merkletreejs": "^0.2.24",
     "neverthrow": "^4.1.0",
     "web3": "^1.5.2"
   },

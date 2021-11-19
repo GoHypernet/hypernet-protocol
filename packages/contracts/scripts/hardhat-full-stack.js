@@ -14,6 +14,8 @@ async function main() {
   // await hre.run('compile');
 
   const [owner] = await hre.ethers.getSigners();
+  console.log("Deployment Wallet Address:", owner.address);
+  console.log("RPC URL:", hre.network.config.url);
 
   // deploy hypertoken contract
   const Hypertoken = await ethers.getContractFactory("Hypertoken");
@@ -58,12 +60,16 @@ async function main() {
   );
   const tx1_reciept = await tx1.wait();
 
+  console.log("DAO has proposer role")
+
   // give the governor contract the Executor role in the timelock contract
   const tx2 = await timelock.grantRole(
     timelock.EXECUTOR_ROLE(),
     hypernetgovernor.address,
   );
   const tx2_reciept = await tx2.wait();
+
+  console.log("DAO has executor role");
 
   // give the governor contract the admin role of the timelock contract
   const tx3 = await timelock.grantRole(
@@ -72,12 +78,16 @@ async function main() {
   );
   const tx3_reciept = await tx3.wait();
 
+  console.log("DAO is timelock admin");
+
   // deployer address should now renounce admin role for security
   const tx4 = await timelock.renounceRole(
     timelock.TIMELOCK_ADMIN_ROLE(),
     owner.address,
   );
   const tx4_reciept = await tx4.wait();
+
+  console.log("Deploy wallet renounced role.");
 
   // deploy enumerable registry contract
   const EnumerableRegistry = await ethers.getContractFactory(
@@ -102,7 +112,7 @@ async function main() {
   const registry = await Registry.deploy();
   const registry_reciept = await registry.deployTransaction.wait();
   console.log("Registry Beacon Address:", registry.address);
-  console.log("Factory Gas Fee:", registry_reciept.gasUsed.toString());
+  console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString());
 
   // deploy factory contract
   const FactoryRegistry = await ethers.getContractFactory(
@@ -110,9 +120,19 @@ async function main() {
   );
   const factoryregistry = await FactoryRegistry.deploy(
     timelock.address,
-    ["HyperId"],
-    ["HID"],
-    [timelock.address],
+    [
+        "Hypernet Profiles", 
+        "Gateways", 
+        "Liquidity Providers", 
+        "Payment Tokens"
+    ],
+    [
+        "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
+        "Payment gateway signatures for the Hypernet Protocol payment network.", 
+        "Liquidity provider metadata for the Hypernet Protocol payment network.", 
+        "Officially supported payment tokens for the Hypernet Protocol payment network."
+    ],
+    [timelock.address, timelock.address, timelock.address, timelock.address],
     enumerableregistry.address,
     registry.address,
     hypertoken.address,
@@ -120,6 +140,27 @@ async function main() {
   const factory_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);
   console.log("Factory Gas Fee:", factory_reciept.gasUsed.toString());
+
+  // deploy the batch minting module
+  const BatchModule = await ethers.getContractFactory("BatchModule");
+  batchmodule = await BatchModule.deploy("Batch Minting");
+  const batchmodule_reciept = await batchmodule.deployTransaction.wait();
+  console.log("Batch Module Address:", batchmodule.address);
+  console.log("Batch Module Gas Fee:", batchmodule_reciept.gasUsed.toString());
+
+  // deploy the lazy minting module
+  const LazyMintModule = await ethers.getContractFactory("LazyMintModule");
+  const lazymintmodule = await LazyMintModule.deploy("Lazy Minting");
+  const lazymintmodule_reciept = await lazymintmodule.deployTransaction.wait();
+  console.log("Lazy Mint Module Address:", lazymintmodule.address);
+  console.log("Lazy Mint Module Gas Fee:", lazymintmodule_reciept.gasUsed.toString());
+
+  // deploy the Merkle Drop module
+  const MerkleModule = await ethers.getContractFactory("MerkleModule");
+  const merklemodule = await MerkleModule.deploy("Merkle Drop");
+  const merklemodule_reciept = await merklemodule.deployTransaction.wait();
+  console.log("Merkle Module Address:", merklemodule.address);
+  console.log("Merkle Module Gas Fee:", merklemodule_reciept.gasUsed.toString());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

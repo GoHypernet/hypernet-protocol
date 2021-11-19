@@ -1,8 +1,16 @@
 const { BN, expectRevert } = require("@openzeppelin/test-helpers");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
+const { MerkleTree } = require('merkletreejs');
+const keccak256 = require('keccak256');
+const tokens = require('./tokens.json');
+
+function hashToken(tokenId, account, label, registrationData) {
+    return Buffer.from(ethers.utils.solidityKeccak256(['address', 'string', 'string', 'uint256'], [account, label, registrationData, tokenId]).slice(2), 'hex')
+}
 
 describe("Enumerated Registry", function () {
+  let UpgradableRegistry; 
   let hypertoken;
   let registry;
   let owner;
@@ -16,12 +24,13 @@ describe("Enumerated Registry", function () {
     await hypertoken.deployTransaction.wait();
 
     // deploy registry contract
-    const UpgradableRegistry = await ethers.getContractFactory(
+    UpgradableRegistry = await ethers.getContractFactory(
       "NonFungibleRegistryEnumerableUpgradeable",
     );
     registry = await upgrades.deployProxy(UpgradableRegistry, [
-      "Gateways",
-      "G",
+      "Hypernet Profiles",
+      "HPs",
+      "0x0000000000000000000000000000000000000000",
       owner.address,
       owner.address,
     ]);
@@ -162,6 +171,29 @@ describe("Enumerated Registry", function () {
 
     let tx = await registry.setPrimaryRegistry(disableprimaryregistry);
     tx.wait();
+
+    // now deploy a new registry with registry.address set as primary registry
+    gatedregistry = await upgrades.deployProxy(UpgradableRegistry, [
+        "Hypernet.ID",
+        "HID",
+        registry.address,
+        owner.address,
+        owner.address,
+      ]);
+    await registry.deployed();
+
+    await expectRevert(
+        gatedregistry.register(addr1.address, "dummy", "stuff", 4),
+        "NonFungibleRegistry: recipient must have non-zero balance in primary registry."
+    )
+
+    tx = await registry.register(addr1.address, "galileo", "", 4);
+    tx.wait();
+    
+    tx = await gatedregistry.register(addr1.address, "dummy", "stuff", 4);
+    tx.wait();
+
+    expect(await registry.balanceOf(addr1.address)).to.equal(1);
   });
 
   it("Check burn fee bounds", async function () {
@@ -338,11 +370,15 @@ describe("Enumerated Registry", function () {
       ethers.utils.parseEther("1"),
     );
 
+    expect(await hypertoken.balanceOf(registry.address)).to.equal(ethers.utils.parseEther("0.95"));
+
     tx = await registry.connect(addr2).burn(stakeTokenId);
     tx.wait();
     expect(await hypertoken.balanceOf(addr2.address)).to.equal(
       ethers.utils.parseEther("1.95"),
     );
+
+    expect(await hypertoken.balanceOf(registry.address)).to.equal(0);
 
     // approve the registry to pull hypertoken from the users wallet
     tx = await hypertoken.connect(addr2).approve(registry.address, regFee);
@@ -507,64 +543,76 @@ describe("Enumerated Registry", function () {
           registry.address,
         ),
       "ERC721: token already minted",
-    ).toString("hex");
+    )
+  });
 
-    let sig = await owner.signMessage(ethers.utils.arrayify(hash));
-    let fakesig = await addr2.signMessage(ethers.utils.arrayify(hash));
+  it("Test merkle drop.", async function () {
+    // first deploy the LazyMintModule
+    const MerkleModule = await ethers.getContractFactory("MerkleModule");
+    merklemodule = await MerkleModule.deploy("Merkle Drop");
+    await merklemodule.deployTransaction.wait();
 
+    // then get the merkle tree
+    merkleTree = new MerkleTree(Object.entries(tokens).map(([tokenId, tokenData]) => hashToken(tokenId, tokenData.account, tokenData.label, tokenData.registrationData)), keccak256, { sortPairs: true });
+
+    // update the merkle root in the registry and freeze it
+    let tx = await registry.setMerkleRoot(merkleTree.getHexRoot(), true);
+    tx.wait(); 
+    
+    // once froze, merkle Root cannot be updated
     await expectRevert(
-      registry
-        .connect(addr1)
-        .lazyRegister(addr1.address, label, registrationData, sig),
-      "NonFungibleRegistry: Lazy registration is disabled.",
-    );
+        registry.setMerkleRoot(merkleTree.getHexRoot(), true),
+        "NonFungibleRegistry: merkleRoot has been frozen.",
+    )
 
-    const abiCoder = ethers.utils.defaultAbiCoder;
-
-    // construct call data via ABI encoding
-    let params = abiCoder.encode(
-      [
-        "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])",
-      ],
-      [[[], [true], [], [], [], [], [], [], [], []]],
-    );
-
-    // registrar now sets the registration token to enable token-based registration
-    tx = await registry.setRegistryParameters(params);
+    // then add the merkle module as a REGISTRAR
+    const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+    tx = await registry.grantRole(REGISTRAR_ROLE, merklemodule.address);
     tx.wait();
 
-    await expectRevert(
-      registry
-        .connect(addr1)
-        .lazyRegister(addr1.address, "", registrationData, fakesig),
-      "NonFungibleRegistry: label field must not be blank.",
-    );
+    // mint the tokens from the tokens.json file
+    for (const [tokenId, tokenData] of Object.entries(tokens)) {
+        /**
+         * Create merkle proof (anyone with knowledge of the merkle tree)
+         */
+        const proof = merkleTree.getHexProof(hashToken(tokenId, tokenData.account, tokenData.label, tokenData.registrationData));
+        /**
+         * Redeems token using merkle proof (anyone with the proof can call)
+         */
+        await expect(merklemodule.redeem(tokenData.account, tokenData.label, tokenData.registrationData, tokenId, proof, registry.address))
+          .to.emit(registry, 'Transfer')
+          .withArgs(ethers.constants.AddressZero, tokenData.account, tokenId);
+    }
 
-    await expectRevert(
-      registry
-        .connect(addr1)
-        .lazyRegister(addr1.address, label, registrationData, fakesig),
-      "NonFungibleRegistry: signature failure.",
-    );
+    // replay attack is prevented by tokenId uniqueness 
+    for (const [tokenId, tokenData] of Object.entries(tokens)) {
+        /**
+         * Create merkle proof (anyone with knowledge of the merkle tree)
+         */
+        const proof = merkleTree.getHexProof(hashToken(tokenId, tokenData.account, tokenData.label, tokenData.registrationData));
+        /**
+         * Redeems token using merkle proof (anyone with the proof can call)
+         */
+        await expectRevert(
+            merklemodule.redeem(tokenData.account, tokenData.label, tokenData.registrationData, tokenId, proof, registry.address),
+            "ERC721: token already minted"
+            )
+    }
 
-    await expectRevert(
-      registry
-        .connect(addr2)
-        .lazyRegister(addr1.address, label, registrationData, sig),
-      "NonFungibleRegistry: Caller is not recipient.",
-    );
+    // frontrun/mint manipulation attack is prevented 
+    for (const [tokenId, tokenData] of Object.entries(tokens)) {
+        /**
+         * Create merkle proof (anyone with knowledge of the merkle tree)
+         */
+        const proof = merkleTree.getHexProof(hashToken(tokenId, tokenData.account, tokenData.label, tokenData.registrationData));
+        /**
+         * Redeems token using merkle proof (anyone with the proof can call)
+         */
+        await expectRevert(
+            merklemodule.redeem(tokenData.account, "dummy", tokenData.registrationData, tokenId, proof, registry.address),
+            "MerkleModule: Invalid merkle proof"
+            )
+    }
 
-    tx = await registry
-      .connect(addr1)
-      .lazyRegister(addr1.address, label, registrationData, sig);
-    tx.wait();
-    expect(await registry.totalSupply()).to.equal(1);
-
-    await expectRevert(
-      registry
-        .connect(addr1)
-        .lazyRegister(addr1.address, label, registrationData, sig),
-      "NonFungibleRegistry: Registration label already exists.",
-    );
   });
 });

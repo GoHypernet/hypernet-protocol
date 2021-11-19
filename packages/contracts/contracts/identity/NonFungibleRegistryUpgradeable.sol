@@ -75,6 +75,13 @@ contract NonFungibleRegistryUpgradeable is
     // an NFI
     address public primaryRegistry;
 
+    // optional merkle proof that can be used with the external merkle drop module
+    bytes32 public merkleRoot; 
+
+    // flag used in conjunction with merkleRoot, if true then the merkleRoot can no 
+    // longer be updated by the REGISTRAR_ROLE
+    bool public frozen;
+
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
@@ -85,6 +92,8 @@ contract NonFungibleRegistryUpgradeable is
 
     event StorageUpdated(uint256 tokenId, bytes32 registrationData);
 
+    event MerkleRootUpdated(bytes32 merkleRoot, bool frozen); 
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -92,9 +101,17 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev can only be called once due to the initializer modifier
     /// @param name_ name to be given to the Non Fungible Registry
     /// @param symbol_ shorthand symbol to be given to the Non Fungible Registry
+    /// @param _primaryRegistry address of ERC721-compatible contract to use as primary user profile (address(0) deactivates this feature)
     /// @param _registrar address to be given to the REGISTRAR_ROLE
     /// @param _admin address that will have the DEFAULT_ADMIN_ROLE
-    function initialize(string memory name_, string memory symbol_, address _registrar, address _admin) public initializer {
+    function initialize(
+        string memory name_, 
+        string memory symbol_,
+        address _primaryRegistry, 
+        address _registrar, 
+        address _admin
+        ) 
+        public initializer {
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721URIStorage_init();
@@ -113,7 +130,8 @@ contract NonFungibleRegistryUpgradeable is
         registrationFee = 1e18; // assume there are 18 decimal places in the token
         burnAddress = _admin;
         burnFee = 500; // basis points
-        primaryRegistry = address(0);
+        primaryRegistry = _primaryRegistry;
+        frozen = false;
     }
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
@@ -139,6 +157,18 @@ contract NonFungibleRegistryUpgradeable is
             "NonFungibleRegistry: burnFee must be le 10000.");
             burnFee = params._burnFee[0]; 
         }
+    }
+
+    /// @notice setMerkleRoot enable or disable requirement for pre-registration
+    /// @dev only callable by the DEFAULT_ADMIN_ROLE
+    /// @param _merkleRoot address to set as the primary registry
+    function setMerkleRoot(bytes32 _merkleRoot, bool freeze) external {
+        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
+        require(!frozen, "NonFungibleRegistry: merkleRoot has been frozen."); 
+
+        merkleRoot = _merkleRoot;
+        frozen = freeze; 
+        emit MerkleRootUpdated(merkleRoot, frozen);
     }
 
     /// @notice setPrimaryRegistry enable or disable requirement for pre-registration
@@ -289,7 +319,7 @@ contract NonFungibleRegistryUpgradeable is
 
         // when burning, check if there is a registration fee tied to the token identity 
         if (identityStakes[tokenId].amount != 0) {
-            // send the registration fee to the token burner
+            // send the registration fee to the token burner, not the token owner
             IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount);
             delete identityStakes[tokenId];
         }

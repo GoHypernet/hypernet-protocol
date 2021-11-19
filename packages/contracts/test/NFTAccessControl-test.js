@@ -25,6 +25,7 @@ describe("NFT Access Control Testing", function () {
     registry = await upgrades.deployProxy(UpgradableRegistry, [
       "Gateways",
       "G",
+      "0x0000000000000000000000000000000000000000",
       owner.address,
       owner.address,
     ]);

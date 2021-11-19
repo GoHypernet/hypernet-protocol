@@ -17,6 +17,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     // address of our upgradable registry proxy beacon
     address public registryBeacon;
 
+    // address of registry that serves os the Hypernet User Profile registry
+    address public hypernetProfileRegistry = address(0);
+
     // extra array storage fascilitates paginated UI
     address[] public enumerableRegistries;
 
@@ -80,6 +83,11 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         // deploy initial enumerable registries 
         for (uint256 i = 0; i < _names.length; ++i) {
             _createEnumerableRegistry(_names[i], _symbols[i], _registrars[i]);
+
+            // use the first enumerable registry as the hypernet profile registry
+            if (i == 0) {
+                hypernetProfileRegistry = enumerableRegistries[0]; 
+            }
         }
     }
 
@@ -101,12 +109,35 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         numModules = modules.length;
     }
 
-    /// @notice addModule setter function for configuring which ERC20 token is burned when adding new apps
+    /// @notice addModule setter function for adding an approved module to the protocol
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _module address of goverance approved module contract
     function addModule(address _module) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to add module");
         modules.push(_module);
+    }
+
+    /// @notice removeModule function for removing a module from the protocol's supported list
+    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
+    /// @param _index index module contract to remove from module list
+    function removeModule(uint _index) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to remove module");
+        require(_index < modules.length, "RegistryFactory: index must be less than module list length");
+
+        uint256 lastModuleIndex = modules.length - 1;
+        address lastModuleAddress = modules[lastModuleIndex];
+
+        // Move the last module to the slot of the to-delete token
+        modules[_index] = lastModuleAddress; 
+        modules.pop();
+    }
+
+    /// @notice setProfileRegistryAddress change the address of the profile registry contract
+    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
+    /// @param _hypernetProfileRegistry address of ERC721 token to use as profile contract
+    function setProfileRegistryAddress(address _hypernetProfileRegistry) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        hypernetProfileRegistry = _hypernetProfileRegistry;
     }
 
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
@@ -122,7 +153,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @param _registrationFee burn fee amount
     function setRegistrationFee(uint256 _registrationFee) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
-        require(registrationFee >= 0, "RegsitryFactory: Registration fee must be nonnegative.");
+        require(registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
         registrationFee = _registrationFee;
     }
 
@@ -147,7 +178,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         } else {
             _createRegistry(_name, _symbol, _registrar);
         }
-        
     }
 
     /// @notice createRegistryByToken called by any user with sufficient registration token
@@ -156,6 +186,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @param _symbol symbol to associate with the registry
     /// @param _registrar address that will recieve the REGISTRAR_ROLE
     function createRegistryByToken(string memory _name, string memory _symbol, address _registrar, bool _enumerable) external {
+        require(_preRegistered(_msgSender()), "RegistryFactory: caller must have a Hypernet Profile.");
         require(registrationToken != address(0), "RegistryFactory: registration by token not enabled.");
 
         // user must call approve first
@@ -165,7 +196,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         } else {
             _createRegistry(_name, _symbol, _registrar);
         }
-        
     }
 
     function _createEnumerableRegistry(string memory _name, string memory _symbol, address _registrar) private {
@@ -173,7 +203,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
         // cloning the beacon implementation reduced gas by ~80% over naive approach 
-        BeaconProxy proxy = new BeaconProxy(enumerableRegistryBeacon, abi.encodeWithSelector(NonFungibleRegistryEnumerableUpgradeable.initialize.selector, _name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
+        BeaconProxy proxy = new BeaconProxy(enumerableRegistryBeacon, abi.encodeWithSelector(NonFungibleRegistryEnumerableUpgradeable.initialize.selector, _name, _symbol, hypernetProfileRegistry, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
         enumerableRegistries.push(address(proxy));
         nameToAddress[_name] = address(proxy);
         emit RegistryCreated(address(proxy));
@@ -184,7 +214,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
         // cloning the beacon implementation reduced gas by ~80% over naive approach 
-        BeaconProxy proxy = new BeaconProxy(registryBeacon, abi.encodeWithSelector(NonFungibleRegistryUpgradeable.initialize.selector, _name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
+        BeaconProxy proxy = new BeaconProxy(registryBeacon, abi.encodeWithSelector(NonFungibleRegistryUpgradeable.initialize.selector, _name, _symbol, hypernetProfileRegistry, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
         registries.push(address(proxy));
         nameToAddress[_name] = address(proxy);
         emit RegistryCreated(address(proxy));
@@ -193,5 +223,11 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     function _registryExists(string memory _name) internal view virtual returns (bool) {
         // registry name must have non-zero length and must not exist already
         return !((bytes(_name).length > 0) && nameToAddress[_name] == address(0));
+    }
+
+    function _preRegistered(address owner) internal view virtual returns (bool) {
+        // check if there if a profile is required and if so 
+        // does the recipient have a non-zero balance. 
+        return ((hypernetProfileRegistry == address(0)) || (IERC721Upgradeable(hypernetProfileRegistry).balanceOf(owner) > 0));
     }
 }

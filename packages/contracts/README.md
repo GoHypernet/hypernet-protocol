@@ -26,11 +26,11 @@ beacon implementation. Since the reference implementation deployments are not in
 upon the creation of a new NFR. 
 
 Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token standard and have 
-several customizable functionalities. An NFR is can be deployed with or withou the enumeration property and every entry is an ownable 
-token that has a corresponding `label` (seperate from the `tokenURI`) that is unique within that specific NFR. That is, two entries can 
-have the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate lookups more easily for applications in which the 
-registry is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is (for 
-instance when label is a URL). Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
+several customizable functionalities. An NFR is can be deployed with or without the enumeration property and every entry is an ownable 
+token that has a corresponding `label` (seperate from the `tokenURI` or `tokenId`) that is unique within that specific NFR. That is, two 
+entries can have the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate lookups more easily for applications in 
+which the registry is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is 
+(for instance when label is a URL). Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
 
 Each NFR has a `REGISTRAR_ROLE`, which can register new identities, a `REGISTRAR_ROLE_ADMIN` which can add and remove addresses from the 
 `REGISTRAR_ROLE` as well as update NFR parameters, and a `DEFAULT_ADMIN_ROLE` which can make modifications to which addresses have the 
@@ -60,6 +60,32 @@ SECURITY NOTES:
 * [Known Timelock.sol contract vulnerability](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
 * [Initialization vulnerability](https://forum.openzeppelin.com/t/security-advisory-initialize-uups-implementation-contracts/15301)
 
+## Addresses
+
+### Rinkeby
+
+Hypertoken: `0x6D4eE7f794103672490830e15308A99eB7a89024`
+
+Timelock: `0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`
+
+DAO: `0x3353da0f24fCACd83832b09e9371a937195D2640`
+
+Registry Factory: `0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB`
+
+Hypernet Profiles: `0x6c355Ad248477eeDcadf1d6724154C6152C0edca`
+
+Gateways: `0x507D5F4E81db1c7fa078CBf1e59B37cC91640258`
+
+Liquidity Providers: `0xc616c67f9c680E662103b26cEfFcC70a121CD5d5`
+
+Payment Tokens: `0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D`
+
+Batch Module: `0x5B72838Fc364Ef73301E4ac32d2050B095666244`
+
+Lazy Mint Module: `0x5B72838Fc364Ef73301E4ac32d2050B095666244`
+
+Merkle Module: `0x5B72838Fc364Ef73301E4ac32d2050B095666244`
+
 ## Install dependencies
 
 ```shell
@@ -79,6 +105,13 @@ npx hardhat test --logs
 ```shell
 npx hardhat compile
 ```
+
+## Environment Variables
+
+`ETH_PROVIDER_URL`: URL that hardhat will use for its RPC provider, if blank then localhost is assumed. 
+
+`MNEMONIC`: Mnemonic phrase that hardhat will use to generate accounts for use in scripts and tasks. If blank the 
+default is `test test test test test test test test test test test junk`.  
 
 ## Hardhat network - full contract deployment
 
@@ -100,6 +133,8 @@ Once the node is running, deploy the full Solidity contract stack to the Hardhat
 ```shell
 npx hardhat run scripts/hardhat-full-stack.js --network dev
 ```
+
+## Hardhat tasks
 
 Use the help tasks defined in `hardhat.config.js` to interact with the deployed contracts.
 
@@ -172,6 +207,12 @@ Set the registration token address for an NFR:
 npx hardhat setRegistryParameters --network dev --name Gateways --regtoken 0x5FbDB2315678afecb367f032d93F642f64180aa3
 ```
 
+If the registry is owned by the DAO, update the parameters with a proposal:
+
+```shell
+npx hardhat proposeRegistryParameterUpdate --network dev --name "Hypernet Profiles" --schema "" --storageupdate "" --labelchange "" --allowtransfers "" --registrationtoken "0x5FbDB2315678afecb367f032d93F642f64180aa3"  --registrationfee "" --burnaddress "" --burnfee ""
+```
+
 Add a new NFI by staking tokens:
 
 ```shell
@@ -194,12 +235,4 @@ create a new registry by burning hypertoken:
 
 ```shell
 npx hardhat createRegistryByToken --network dev --name Gateways --symbol GTW --registrar 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --enumerable true
-```
-
-## Hardhat network - registry testing deployment
-
-To simply deploy two registies for registering gateways and liquidity providers, run:
-
-```shell
-npx hardhat run scripts/hardhat-registies-only.js --network hardhat
 ```

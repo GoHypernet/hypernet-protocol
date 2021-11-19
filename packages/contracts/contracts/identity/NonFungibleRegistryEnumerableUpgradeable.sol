@@ -71,7 +71,18 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     uint256 public burnFee;
 
     // address of primary NFR registry required for participation
+    // if the primaryRegistry is address(0), then this variable is ignored
+    // if the primaryRegistry is an ERC721, then the recipient of an NFI must 
+    // have a non-zero balance in that ERC721 contract in order to recieve 
+    // an NFI
     address public primaryRegistry;
+
+    // optional merkle proof that can be used with the external merkle drop module
+    bytes32 public merkleRoot; 
+
+    // flag used in conjunction with merkleRoot, if true then the merkleRoot can no 
+    // longer be updated by the REGISTRAR_ROLE
+    bool public frozen;
 
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
@@ -83,6 +94,8 @@ contract NonFungibleRegistryEnumerableUpgradeable is
 
     event StorageUpdated(uint256 tokenId, bytes32 registrationData);
 
+    event MerkleRootUpdated(bytes32 merkleRoot, bool frozen); 
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -90,9 +103,17 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @dev can only be called once due to the initializer modifier
     /// @param name_ name to be given to the Non Fungible Registry
     /// @param symbol_ shorthand symbol to be given to the Non Fungible Registry
+    /// @param _primaryRegistry address of ERC721-compatible contract to use as primary user profile (address(0) deactivates this feature)
     /// @param _registrar address to be given to the REGISTRAR_ROLE
     /// @param _admin address that will have the DEFAULT_ADMIN_ROLE
-    function initialize(string memory name_, string memory symbol_, address _registrar, address _admin) public initializer {
+    function initialize(
+        string memory name_, 
+        string memory symbol_, 
+        address _primaryRegistry,
+        address _registrar, 
+        address _admin
+        ) 
+        public initializer {
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721Enumerable_init();
@@ -112,7 +133,8 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         registrationFee = 1e18; // assume there are 18 decimal places in the token
         burnAddress = _admin;
         burnFee = 500; // basis points, 500 bp = 5%
-        primaryRegistry = address(0);
+        primaryRegistry = _primaryRegistry;
+        frozen = false;
     }
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
@@ -140,12 +162,24 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         }
     }
 
+    /// @notice setMerkleRoot enable or disable requirement for pre-registration
+    /// @dev only callable by the DEFAULT_ADMIN_ROLE
+    /// @param _merkleRoot address to set as the primary registry
+    function setMerkleRoot(bytes32 _merkleRoot, bool freeze) external {
+        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
+        require(!frozen, "NonFungibleRegistry: merkleRoot has been frozen."); 
+
+        merkleRoot = _merkleRoot;
+        frozen = freeze; 
+        emit MerkleRootUpdated(merkleRoot, frozen);
+    }
+
     /// @notice setPrimaryRegistry enable or disable requirement for pre-registration
     /// @dev only callable by the DEFAULT_ADMIN_ROLE
     /// @param _primaryRegistry address to set as the primary registry
     function setPrimaryRegistry(address _primaryRegistry) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
-        // allow this feature to be disablled by setting to 0 address
+        // allow this feature to be disabled by setting to 0 address
         if (address(_primaryRegistry) == address(0)) {
             primaryRegistry = address(0); 
         } else {
