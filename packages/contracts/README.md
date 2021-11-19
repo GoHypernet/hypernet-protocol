@@ -60,6 +60,19 @@ SECURITY NOTES:
 * [Known Timelock.sol contract vulnerability](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
 * [Initialization vulnerability](https://forum.openzeppelin.com/t/security-advisory-initialize-uups-implementation-contracts/15301)
 
+## Addresses
+
+### Rinkeby
+
+Hypertoken: `0x6D4eE7f794103672490830e15308A99eB7a89024`
+Timelock: `0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`
+DAO: `0x3353da0f24fCACd83832b09e9371a937195D2640`
+Registry Factory: `0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB`
+Hypernet Profiles: `0x6c355Ad248477eeDcadf1d6724154C6152C0edca`
+Gateways: `0x507D5F4E81db1c7fa078CBf1e59B37cC91640258`
+Liquidity Providers: `0xc616c67f9c680E662103b26cEfFcC70a121CD5d5`
+Payment Tokens: `0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D`
+
 ## Install dependencies
 
 ```shell

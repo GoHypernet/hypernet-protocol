@@ -60,12 +60,16 @@ async function main() {
   );
   const tx1_reciept = await tx1.wait();
 
+  console.log("DAO has proposer role")
+
   // give the governor contract the Executor role in the timelock contract
   const tx2 = await timelock.grantRole(
     timelock.EXECUTOR_ROLE(),
     hypernetgovernor.address,
   );
   const tx2_reciept = await tx2.wait();
+
+  console.log("DAO has executor role");
 
   // give the governor contract the admin role of the timelock contract
   const tx3 = await timelock.grantRole(
@@ -74,12 +78,16 @@ async function main() {
   );
   const tx3_reciept = await tx3.wait();
 
+  console.log("DAO is timelock admin");
+
   // deployer address should now renounce admin role for security
   const tx4 = await timelock.renounceRole(
     timelock.TIMELOCK_ADMIN_ROLE(),
     owner.address,
   );
   const tx4_reciept = await tx4.wait();
+
+  console.log("Deploy wallet renounced role.");
 
   // deploy enumerable registry contract
   const EnumerableRegistry = await ethers.getContractFactory(
