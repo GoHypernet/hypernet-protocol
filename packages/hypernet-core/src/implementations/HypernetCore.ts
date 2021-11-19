@@ -123,7 +123,7 @@ import {
   IRegistryRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
-import { ok, Result, ResultAsync } from "neverthrow";
+import { ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
 import { StorageUtils } from "@implementations/data/utilities";
@@ -912,6 +912,27 @@ export class HypernetCore implements IHypernetCore {
       //   // Claim control
       //   return this.controlService.claimControl();
       // })
+      .andThen(() => {
+        // Get the config
+        return this.configProvider.getConfig();
+      })
+      .andThen((config) => {
+        // If we are in debug mode, we'll print the registered transfers out.
+        if (config.debug) {
+          return this.browserNodeProvider
+            .getBrowserNode()
+            .andThen((browserNode) => {
+              return browserNode.getRegisteredTransfers(
+                config.governanceChainId,
+              );
+            })
+            .map((registeredTransfers) => {
+              this.logUtils.debug("Registered Transfers");
+              this.logUtils.debug(registeredTransfers);
+            });
+        }
+        return okAsync(undefined);
+      })
       .map(() => {
         if (this._initializePromiseResolve != null) {
           this._initializePromiseResolve();

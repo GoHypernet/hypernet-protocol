@@ -54,7 +54,7 @@ services:
         "awsAccessId": "", 
         "awsAccessKey": "", 
         "domainName": "", 
-        "production": false         
+        "production": false
       }'
       VECTOR_ENV: "dev"
       VECTOR_PROD: "true"
@@ -289,3 +289,9 @@ services:
     depends_on:
       - core-iframe
       - gateway-iframe
+
+  rinkeby-node:
+    image: ethereum/client-go:stable
+    volumes:
+      - ./ethereum-node-data:/root/.ethereum:rw
+    command: --datadir=/root/.ethereum/devchain --syncmode light --http.vhosts '*' --cache 2048 --http --http.api eth,net,web3
