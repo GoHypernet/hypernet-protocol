@@ -12,7 +12,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { logger } from "../src.ts/constants";
 import ERC20Abi from "../src.ts/erc20abi";
-import NFRAbi from "../NonFungibleRegistryEnumerableUpgradeable/NonFungibleRegistryEnumerableUpgradeable";
+import NFRAbi from "../src.ts/erc721abi";
 import registryFactoryAbi from "../src.ts/registryFactoryAbi";
 import { registerTransfer } from "../src.ts/utils";
 
@@ -308,7 +308,7 @@ const func: DeployFunction = async () => {
   // make needed profile accounts
   log.inf("Creating account profiles")
   const profileRegistryContract = new ethers.Contract(
-    profileRegistryAddress,
+    profilesRegistryAddress,
     NFRAbi.abi,
     registrySigner,
   );
