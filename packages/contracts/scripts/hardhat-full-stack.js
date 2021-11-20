@@ -132,7 +132,12 @@ async function main() {
         "Liquidity provider metadata for the Hypernet Protocol payment network.", 
         "Officially supported payment tokens for the Hypernet Protocol payment network."
     ],
-    [timelock.address, timelock.address, timelock.address, timelock.address],
+    [
+        timelock.address, 
+        timelock.address, 
+        timelock.address, 
+        timelock.address
+    ],
     enumerableregistry.address,
     registry.address,
     hypertoken.address,
