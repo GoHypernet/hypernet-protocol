@@ -12,7 +12,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { logger } from "../src.ts/constants";
 import ERC20Abi from "../src.ts/erc20abi";
-import ERC721Abi from "../src.ts/erc721abi";
+import NFRAbi from "../NonFungibleRegistryEnumerableUpgradeable/NonFungibleRegistryEnumerableUpgradeable";
 import registryFactoryAbi from "../src.ts/registryFactoryAbi";
 import { registerTransfer } from "../src.ts/utils";
 
@@ -299,7 +299,7 @@ const func: DeployFunction = async () => {
 
   const liquidityRegistryContract = new ethers.Contract(
     liquidityRegistryAddress,
-    ERC721Abi,
+    NFRAbi.abi,
     registrySigner,
   );
 
@@ -346,7 +346,7 @@ const func: DeployFunction = async () => {
 
   const gatewayRegistryContract = new ethers.Contract(
     gatewayRegistryAddress,
-    ERC721Abi,
+    NFRAbi.abi,
     registrySigner,
   );
 
@@ -403,7 +403,7 @@ const func: DeployFunction = async () => {
   log.info("Deploying Token Registry entries");
   const tokenRegistryContract = new ethers.Contract(
     tokenRegistryAddress,
-    ERC721Abi,
+    NFRAbi.abi,
     registrySigner,
   );
 
@@ -512,7 +512,7 @@ const func: DeployFunction = async () => {
   log.info("Deploying Chain Registry entries");
   const chainRegistryContract = new ethers.Contract(
     chainRegistryAddress,
-    ERC721Abi,
+    NFRAbi.abi,
     registrySigner,
   );
 
