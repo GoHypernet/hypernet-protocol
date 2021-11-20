@@ -78,7 +78,7 @@ import RegistryEntryListWidget from "@web-ui/widgets/RegistryEntryListWidget";
 import HypertokenBalanceWidget from "@web-ui/widgets/HypertokenBalanceWidget";
 import VotingPowerWidget from "@web-ui/widgets/VotingPowerWidget";
 import ConnectedAccountWidget from "@web-ui/widgets/ConnectedAccountWidget";
-import WalletConnectWidget from "@web-integration/widgets/WalletConnectWidget";
+import WalletConnectWidget from "@web-ui/widgets/WalletConnectWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -223,7 +223,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
           <WalletConnectWidget />,
           config.showInModal,
           config.closeCallback,
-          undefined,
+          {
+            zIndex: 99999,
+          },
           true,
         ),
         this._generateDomElement(

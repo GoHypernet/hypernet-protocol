@@ -29,8 +29,6 @@ const gatewayUrl = GatewayUrl("http://localhost:3000/users/v0");
 client
   .getReady()
   .map((coreProxy) => {
-    client.webUIClient.renderWalletConnectWidget({ showInModal: true });
-    /*
     client.webUIClient
       .startOnboardingFlow({
         gatewayUrl: gatewayUrl,
@@ -45,8 +43,6 @@ client
       .mapErr((err) => {
         console.log("startOnboardingFlow errerrerr", err);
       });
-
-      */
   })
   .mapErr((err) => {
     console.log("getReady errerrerr", err);

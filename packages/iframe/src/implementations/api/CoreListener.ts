@@ -621,6 +621,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     });
 
     this.core.onWalletConnectOptionsDisplayRequested.subscribe(() => {
+      console.log("in CoreListener, emiting onWalletConnectOptionsDisplayRequested");
       parent.emit("onWalletConnectOptionsDisplayRequested");
     });
 

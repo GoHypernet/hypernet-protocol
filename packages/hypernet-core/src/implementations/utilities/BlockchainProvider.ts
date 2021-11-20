@@ -264,19 +264,23 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
             providerOptions,
           });
 
+          let providerIdPromise: Promise<ProviderId>;
+
           // Open the core iframe if we don't have a cached provider
           if (web3Modal.cachedProvider != "injected") {
-            context.onCoreIFrameDisplayRequested.next();
-
             // Emit an event for showing wallet connect options
             context.onWalletConnectOptionsDisplayRequested.next();
+          } else {
+            // Resolve providerIdPromise with metamask
+            // didn't work as expected.
+            providerIdPromise = new Promise((resolve) => {
+              resolve(ProviderId("injected"));
+            });
           }
 
-          const providerIdPromise: Promise<ProviderId> = new Promise(
-            (resolve) => {
-              this.walletConnectProviderIdPromiseResolve = resolve;
-            },
-          );
+          providerIdPromise = new Promise((resolve) => {
+            this.walletConnectProviderIdPromiseResolve = resolve;
+          });
 
           // Display the modal
           return ResultAsync.fromPromise(providerIdPromise, (e) => {
@@ -302,9 +306,6 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
             .map((modalProvider) => {
               this.logUtils.debug("Web3Modal initialized");
               const provider = new providers.Web3Provider(modalProvider);
-
-              // Hide the iframe
-              context.onCoreIFrameCloseRequested.next();
 
               // Return the values for use
               this.provider = provider;
