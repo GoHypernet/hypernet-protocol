@@ -335,6 +335,7 @@ const func: DeployFunction = async () => {
     routerAddress,
     routerPublicIdentifier,
     JSON.stringify(routerRegistryEntry),
+    1,
   );
 
   await liquidityRegistryTx.wait();
@@ -364,12 +365,14 @@ const func: DeployFunction = async () => {
     hyperpayAddress,
     "http://localhost:5010",
     JSON.stringify(testGatewayRegistrationEntry),
+    1,
   );
 
   const hyperpayLocalGatewayRegistryTx = await gatewayRegistryContract.register(
     hyperpayAddress,
     "https://localhost:3000/users/v0",
     JSON.stringify(hyperpayGatewayRegistrationEntry),
+    2,
   );
 
   const hyperpayLocalGatewayRegistry2Tx =
@@ -377,12 +380,14 @@ const func: DeployFunction = async () => {
       hyperpayAddress,
       "http://localhost:3000/users/v0",
       JSON.stringify(hyperpayGatewayRegistrationEntry),
+      3,
     );
 
   const hyperpayDevGatewayRegistryTx = await gatewayRegistryContract.register(
     hyperpayAddress,
     "https://hyperpay-dev.hypernetlabs.io/users/v0",
     JSON.stringify(hyperpayGatewayRegistrationEntry),
+    4,
   );
 
   await testGatewayRegistryTx.wait();
@@ -417,6 +422,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      1,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -431,6 +437,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      2,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -445,6 +452,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      3,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -459,6 +467,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      4,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -473,6 +482,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      5,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -487,6 +497,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      6,
     ),
   ];
 
@@ -528,6 +539,7 @@ const func: DeployFunction = async () => {
         chainRegistryAddress: chainRegistryAddress,
         providerUrls: ["http://blockchain:8545"],
       }),
+      1,
     ),
     await chainRegistryContract.register(
       registryAccountAddress,
@@ -550,6 +562,7 @@ const func: DeployFunction = async () => {
         chainRegistryAddress: chainRegistryAddress,
         providerUrls: ["https://eth-provider-dev.hypernetlabs.io"],
       }),
+      2,
     ),
     await chainRegistryContract.register(
       registryAccountAddress,
@@ -571,6 +584,7 @@ const func: DeployFunction = async () => {
         chainRegistryAddress: "TODO",
         providerUrls: ["TODO"],
       }),
+      3,
     ),
     await chainRegistryContract.register(
       registryAccountAddress,
@@ -592,6 +606,7 @@ const func: DeployFunction = async () => {
         chainRegistryAddress: "TODO",
         providerUrls: ["TODO"],
       }),
+      4,
     ),
   ];
 

@@ -6,19 +6,14 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract NonFungibleRegistryUpgradeable is
     Initializable,
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
-    ERC721URIStorageUpgradeable,
-    UUPSUpgradeable
+    ERC721URIStorageUpgradeable
 {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     // since the registration token could be changed by the registrar
@@ -31,7 +26,6 @@ contract NonFungibleRegistryUpgradeable is
 
     struct RegistryParams {
         string[] _schema;
-        bool[] _allowLazyRegister;
         bool[] _allowStorageUpdate;
         bool[] _allowLabelChange;
         bool[] _allowTransfers;
@@ -39,7 +33,6 @@ contract NonFungibleRegistryUpgradeable is
         uint256[]  _registrationFee;
         address[] _burnAddress;
         uint256[] _burnFee;
-        address[] _primaryRegistry;
     }
 
     // DFDL schema definition for metadata stored in tokenURI
@@ -53,11 +46,6 @@ contract NonFungibleRegistryUpgradeable is
 
     // registration fee belonging to each token which is refunded on burning
     mapping(uint256 => Fee) public identityStakes; 
-
-    // allow lazy minting in this registry
-    // Warning: ensure allowLabelChange is false before enabling
-    // since the label is used as a nonce
-    bool public allowLazyRegister;
 
     // allow for tokenURI to be updated
     bool public allowStorageUpdate;
@@ -81,7 +69,18 @@ contract NonFungibleRegistryUpgradeable is
     uint256 public burnFee;
 
     // address of primary NFR registry required for participation
+    // if the primaryRegistry is address(0), then this variable is ignored
+    // if the primaryRegistry is an ERC721, then the recipient of an NFI must 
+    // have a non-zero balance in that ERC721 contract in order to recieve 
+    // an NFI
     address public primaryRegistry;
+
+    // optional merkle proof that can be used with the external merkle drop module
+    bytes32 public merkleRoot; 
+
+    // flag used in conjunction with merkleRoot, if true then the merkleRoot can no 
+    // longer be updated by the REGISTRAR_ROLE
+    bool public frozen;
 
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
@@ -89,11 +88,11 @@ contract NonFungibleRegistryUpgradeable is
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE_ADMIN = keccak256("REGISTRAR_ROLE_ADMIN");
 
-    CountersUpgradeable.Counter private _tokenIdTracker;
-
     event LabelUpdated(uint256 tokenId, string label);
 
     event StorageUpdated(uint256 tokenId, bytes32 registrationData);
+
+    event MerkleRootUpdated(bytes32 merkleRoot, bool frozen); 
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -102,13 +101,20 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev can only be called once due to the initializer modifier
     /// @param name_ name to be given to the Non Fungible Registry
     /// @param symbol_ shorthand symbol to be given to the Non Fungible Registry
+    /// @param _primaryRegistry address of ERC721-compatible contract to use as primary user profile (address(0) deactivates this feature)
     /// @param _registrar address to be given to the REGISTRAR_ROLE
     /// @param _admin address that will have the DEFAULT_ADMIN_ROLE
-    function initialize(string memory name_, string memory symbol_, address _registrar, address _admin) public initializer {
+    function initialize(
+        string memory name_, 
+        string memory symbol_,
+        address _primaryRegistry, 
+        address _registrar, 
+        address _admin
+        ) 
+        public initializer {
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721URIStorage_init();
-        __UUPSUpgradeable_init();
         __ERC721_init(name_, symbol_);
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -117,7 +123,6 @@ contract NonFungibleRegistryUpgradeable is
         _setRoleAdmin (REGISTRAR_ROLE, REGISTRAR_ROLE_ADMIN);
         _setupRole(REGISTRAR_ROLE_ADMIN, _registrar);
 
-        allowLazyRegister = false;
         allowStorageUpdate = true;
         allowLabelChange = false;
         allowTransfers = true;
@@ -125,11 +130,9 @@ contract NonFungibleRegistryUpgradeable is
         registrationFee = 1e18; // assume there are 18 decimal places in the token
         burnAddress = _admin;
         burnFee = 500; // basis points
-        primaryRegistry = address(0);
+        primaryRegistry = _primaryRegistry;
+        frozen = false;
     }
-
-    // we must implement this function at top level contract definition for the upgradable proxy pattern
-    function _authorizeUpgrade(address newImplementation) internal onlyRole(REGISTRAR_ROLE) override {}
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
     /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
@@ -142,8 +145,7 @@ contract NonFungibleRegistryUpgradeable is
 
         RegistryParams memory params = abi.decode(encodedParameters, (RegistryParams));
 
-        if (params._schema.length > 0) { schema = params._schema[0];}
-        if (params._allowLazyRegister.length > 0) { allowLazyRegister = params._allowLazyRegister[0]; }
+        if (params._schema.length > 0) { schema = params._schema[0]; }
         if (params._allowStorageUpdate.length > 0) { allowStorageUpdate = params._allowStorageUpdate[0]; }
         if (params._allowLabelChange.length > 0) { allowLabelChange = params._allowLabelChange[0]; }
         if (params._allowTransfers.length > 0) { allowTransfers = params._allowTransfers[0]; }
@@ -151,19 +153,37 @@ contract NonFungibleRegistryUpgradeable is
         if (params._registrationFee.length > 0) { registrationFee = params._registrationFee[0]; }
         if (params._burnAddress.length > 0) { burnAddress = params._burnAddress[0]; }
         if (params._burnFee.length > 0) { 
-            require(params._burnFee[0] <= 10000 && params._burnFee[0] >= 0, 
-            "NonFungibleRegistry: burnFee must be ge than 0 and le than 10000.");
+            require(params._burnFee[0] <= 10000, 
+            "NonFungibleRegistry: burnFee must be le 10000.");
             burnFee = params._burnFee[0]; 
         }
-        if (params._primaryRegistry.length > 0) { 
-            // allow this feature to be disablled by setting to 0 address
-            if (address(params._primaryRegistry[0]) == address(0)) {
-                primaryRegistry = address(0); 
-            } else {
-                require(IERC721Upgradeable(params._primaryRegistry[0]).supportsInterface(type(IERC721Upgradeable).interfaceId), 
-                        "NonFungibleRegistry: Address does not support ERC721 interface.");
-                primaryRegistry = params._primaryRegistry[0]; 
-            }
+    }
+
+    /// @notice setMerkleRoot enable or disable requirement for pre-registration
+    /// @dev only callable by the DEFAULT_ADMIN_ROLE
+    /// @param _merkleRoot address to set as the primary registry
+    function setMerkleRoot(bytes32 _merkleRoot, bool freeze) external {
+        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
+        require(!frozen, "NonFungibleRegistry: merkleRoot has been frozen."); 
+
+        merkleRoot = _merkleRoot;
+        frozen = freeze; 
+        emit MerkleRootUpdated(merkleRoot, frozen);
+    }
+
+    /// @notice setPrimaryRegistry enable or disable requirement for pre-registration
+    /// @dev only callable by the DEFAULT_ADMIN_ROLE
+    /// @param _primaryRegistry address to set as the primary registry
+    function setPrimaryRegistry(address _primaryRegistry) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
+        // allow this feature to be disablled by setting to 0 address
+        if (address(_primaryRegistry) == address(0)) {
+            primaryRegistry = address(0); 
+        } else {
+            // if not disabling, make sure the address is an ERC721 token contract
+            require(IERC721Upgradeable(_primaryRegistry).supportsInterface(type(IERC721Upgradeable).interfaceId), 
+                    "NonFungibleRegistry: Address does not support ERC721 interface.");
+            primaryRegistry = _primaryRegistry; 
         }
     }
 
@@ -184,24 +204,10 @@ contract NonFungibleRegistryUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token, can pass an empty string to skip labeling
     /// @param registrationData data to store in the tokenURI
-    function register(address to, string calldata label, string calldata registrationData) external virtual {
+    /// @param tokenId unique uint256 identifier for the newly created token
+    function register(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
-        _createLabeledToken(to, label, registrationData);
-    }
-
-    /// @notice batchRegister batch mints a sequence of Non-Fungible Identity tokens in one transaction
-    /// @dev only callable by the REGISTRAR_ROLE
-    /// @param recipients address array of the recipients of the tokens
-    /// @param labels an array of unique labels to attach to the tokens
-    /// @param registrationDatas data to store in the tokenURI
-    function batchRegister(address[] memory recipients, string[] memory labels, string[] memory registrationDatas) external virtual {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
-        require(recipients.length == labels.length, "NonFungibleRegistry: recipients array must be same length as labels array.");
-        require(registrationDatas.length == labels.length, "NonFungibleRegistry: registrationDatas array must be same length as labels array.");
-
-        for (uint256 i = 0; i < recipients.length; ++i) {
-            _createLabeledToken(recipients[i], labels[i], registrationDatas[i]);
-        }
+        _createLabeledToken(to, label, registrationData, tokenId);
     }
 
     /// @notice registerByToken mints a new Non-Fungible Identity token by staking an ERC20 registration token
@@ -209,13 +215,14 @@ contract NonFungibleRegistryUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
-    function registerByToken(address to, string calldata label, string calldata registrationData) external virtual {
+    /// @param tokenId unique uint256 identifier for the newly created token
+    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
         // user must approve the registry to collect the registration fee from their wallet
         IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee);
-        uint256 tokenId = _createLabeledToken(to, label, registrationData);
+        _createLabeledToken(to, label, registrationData, tokenId);
 
         uint256 burnAmount = registrationFee * burnFee / 10000;
         IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
@@ -223,29 +230,24 @@ contract NonFungibleRegistryUpgradeable is
         identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
     }
 
-    function _createLabeledToken(address to, string memory label, string memory registrationData) private returns (uint256 tokenId) {
+    function _createLabeledToken(address to, string memory label, string memory registrationData, uint256 tokenId) private {
         if (bytes(label).length > 0) {
             require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
-            tokenId = _createToken(to, registrationData);
+            _createToken(to, registrationData, tokenId);
             // extend the registry mapping for lookup via token label
             registryMap[label] = tokenId;
             reverseRegistryMap[tokenId] = label;
         } else {
             // if label is empty, save some gas
-            tokenId = _createToken(to, registrationData);
+            _createToken(to, registrationData, tokenId);
         }
     }
 
-    function _createToken(address to, string memory registrationData) private returns (uint256 tokenId) {
+    function _createToken(address to, string memory registrationData, uint256 tokenId) private {
         require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
+        require(tokenId != 0, "NonFungibleRegistry: tokenId cannot be 0");
 
-        // We cannot just use balanceOf to create the new tokenId because tokens
-        // can be burned (destroyed), so we need a separate counter.
-        // Enforce that the counter start at 1 (not 0) so that we can check 
-        // if a name exists
-        tokenId = _tokenIdTracker.current() + 1;
         _mint(to, tokenId);
-        _tokenIdTracker.increment();
         _setTokenURI(tokenId, registrationData);
     }
 
@@ -317,7 +319,7 @@ contract NonFungibleRegistryUpgradeable is
 
         // when burning, check if there is a registration fee tied to the token identity 
         if (identityStakes[tokenId].amount != 0) {
-            // send the registration fee to the token burner
+            // send the registration fee to the token burner, not the token owner
             IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount);
             delete identityStakes[tokenId];
         }
@@ -388,53 +390,5 @@ contract NonFungibleRegistryUpgradeable is
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
-    }
-
-    /// @notice lazyRegister REGISTRAR_ROLE to offload gas cost of minting to reciever 
-    /// @dev REGISTRAR_ROLE must provide a signature and allowLabelChange must be false to prevent replay
-    /// @param to address of the recipient of the token
-    /// @param label a unique label to attach to the token
-    /// @param registrationData data to store in the tokenURI 
-    /// @param signature signature from REGISTRAR_ROLE 
-    function lazyRegister(address to, 
-                          string calldata label, 
-                          string calldata registrationData, 
-                          bytes calldata signature)
-        external {
-        // check if lazy registration is allowed for this NFI
-        require(allowLazyRegister, "NonFungibleRegistry: Lazy registration is disabled.");
-        
-        // check for any required supporting accounts
-        require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
-
-        // ensure that label changing is disabled since the label is used at the token's nonce
-        require(!allowLabelChange, "NonFungibleRegistry: label changes must be disabled for lazy registration.");
-
-        // ensure the label field has not been left blank
-        require((bytes(label).length > 0), "NonFungibleRegistry: label field must not be blank.");
-
-        // the token label is the nonce to prevent replay attack
-        require(!_mappingExists(label), "NonFungibleRegistry: Registration label already exists.");
-        
-        // transaction caller must be recipient
-        require(_msgSender() == to, "NonFungibleRegistry: Caller is not recipient.");
-        
-        // require a valid signature from a member of REGISTRAR_ROLE
-        require(_isValidSignature(to, label, registrationData, signature), "NonFungibleRegistry: signature failure.");
-        
-        // issue new token here
-        _createLabeledToken(to, label, registrationData);
-    }
-    
-    function _isValidSignature(address to, string memory label, string memory registrationData, bytes memory signature)
-        internal
-        view
-        returns (bool)
-    {
-        // convert the payload to a 32 byte hash
-        bytes32 hash = ECDSAUpgradeable.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData)));
-        
-        // check that the signature is from REGISTRAR_ROLE
-        return hasRole(REGISTRAR_ROLE, ECDSAUpgradeable.recover(hash, signature));
     }
 }
