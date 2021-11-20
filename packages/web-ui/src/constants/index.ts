@@ -51,3 +51,4 @@ export const REGISTRY_ENTRY_DETAIL_WIDGET_ID_SELECTOR =
 export const HYPERTOKEN_BALANCE_WIDGET = "hypertoken-balance-widget";
 export const VOTING_POWER_WIDGET = "voting-power-widget";
 export const CONNECTED_ACCOUNT_WIDGET = "connected-account-widget";
+export const CONNECT_WALLET_WIDGET_SELECTOR = "connect-wallet-widget";

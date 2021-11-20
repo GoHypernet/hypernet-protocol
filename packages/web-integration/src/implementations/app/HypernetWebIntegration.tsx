@@ -54,10 +54,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       this.currentGatewayUrl = gatewayUrl;
     });
 
-    this.core.onWalletConnectOptionsDisplayRequested.subscribe(() => {
-      this.webUIClient.renderWalletConnectWidget();
-    });
-
     this.core.onPrivateCredentialsRequested.subscribe(() => {
       //this.webUIClient.renderPrivateKeysModal();
       this.webUIClient.renderMetamaskWarningModal();

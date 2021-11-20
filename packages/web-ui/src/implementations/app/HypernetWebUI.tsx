@@ -53,6 +53,7 @@ import {
   HYPERTOKEN_BALANCE_WIDGET,
   VOTING_POWER_WIDGET,
   CONNECTED_ACCOUNT_WIDGET,
+  CONNECT_WALLET_WIDGET_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -77,6 +78,8 @@ import RegistryEntryListWidget from "@web-ui/widgets/RegistryEntryListWidget";
 import HypertokenBalanceWidget from "@web-ui/widgets/HypertokenBalanceWidget";
 import VotingPowerWidget from "@web-ui/widgets/VotingPowerWidget";
 import ConnectedAccountWidget from "@web-ui/widgets/ConnectedAccountWidget";
+import WalletConnectWidget from "@web-integration/widgets/WalletConnectWidget";
+
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
@@ -211,13 +214,21 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return this._getThrowableRender(renderReact);
   }
 
-  public renderWalletConnectWidget(): Result<void, RenderError> {
+  public renderWalletConnectWidget(
+    config: IRenderParams,
+  ): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<PrivateKeysFlow />, true, undefined, {
-          zIndex: 99999,
-        }),
-        this._generateDomElement(PRIVATE_KEYS_FLOW_ID_SELECTOR),
+        this._bootstrapComponent(
+          <WalletConnectWidget />,
+          config.showInModal,
+          config.closeCallback,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || CONNECT_WALLET_WIDGET_SELECTOR,
+        ),
       );
     };
     return this._getThrowableRender(renderReact);

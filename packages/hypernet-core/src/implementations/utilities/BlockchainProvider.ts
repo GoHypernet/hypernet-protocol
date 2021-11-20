@@ -32,7 +32,6 @@ import {
   IInternalProviderFactoryType,
 } from "@interfaces/utilities/factory";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
-import { resolve } from "postmate";
 
 // This is just a code of avoiding errors in mobile app.
 // An actuall non metamask provider set up should be implemented in this class.
