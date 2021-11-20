@@ -1,6 +1,5 @@
 import { useLayoutContext } from "@web-ui/contexts";
 import React, { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 
 import { WEB_UI_MODAL_ID_SELECTOR } from "@web-ui/constants";
 import { useStyles } from "@web-ui/containers/Modal/Modal.style";
@@ -48,7 +47,7 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     modalRootRef.current.removeChild(elementRef.current);
   };
 
-  return createPortal(
+  return (
     // <Box className={classes.container}>
     //   <Box className={classes.wrapper} style={modalStyle}>
     //     <Box className={classes.closeIcon} onClick={closeModal}>
@@ -61,13 +60,13 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     //   </Box>
     // </Box>
     <GovernanceDialog
+      container={elementRef.current}
       isOpen={true}
       content={children}
       onClose={closeModal}
       maxWidth="md"
       title={<ModalHeader />}
-    />,
-    elementRef.current,
+    />
   );
 };
 

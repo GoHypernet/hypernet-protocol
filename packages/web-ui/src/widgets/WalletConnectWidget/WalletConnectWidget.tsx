@@ -1,4 +1,4 @@
-import { useStoreContext } from "@web-ui/contexts";
+import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import React, { useState } from "react";
 
 import { GovernanceButton } from "@web-ui/components";
@@ -46,6 +46,7 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
   props: IWalletConnectWidget,
 ) => {
   const { coreProxy } = useStoreContext();
+  const { closeModal } = useLayoutContext();
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
@@ -54,7 +55,14 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
 
   const handleSubmit = () => {
     const { id } = selectedWalletOption;
-    coreProxy.provideProviderId(ProviderId(id));
+    coreProxy.provideProviderId(ProviderId(id)).match(
+      () => {
+        closeModal();
+      },
+      (err) => {
+        console.error(err.message || "Err while providePrivateCredentials.");
+      },
+    );
   };
 
   const getFilteredProviders = () => {
