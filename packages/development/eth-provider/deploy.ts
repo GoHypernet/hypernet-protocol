@@ -119,9 +119,16 @@ const func: DeployFunction = async () => {
       "UpgradeableRegistryFactory",
       [
         timelockContractAddress,
-        ["Gateways", "Liquidity Providers", "HyperID", "Tokens", "Chains"],
-        ["G", "LPs", "HID", "Tokens", "Chains"],
+        ["Hypernet Profiles", "Gateways", "Liquidity Providers", "HyperID", "Tokens", "Chains"],
         [
+            "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
+            "Payment gateway signatures for the Hypernet Protocol payment network.", 
+            "Liquidity provider metadata for the Hypernet Protocol payment network.", 
+            "Hypernet.ID token registry.", 
+            "Officially supported payment tokens for the Hypernet Protocol payment network.", 
+            "Officially supported layer 1 chains for the Hypernet Protocol payment network."],
+        [
+          registryAccountAddress,
           registryAccountAddress,
           registryAccountAddress,
           hyperKYCAddress,
@@ -266,6 +273,9 @@ const func: DeployFunction = async () => {
 
   ////////////////////////////////////////
   log.info("Registering router info");
+  const profilesRegistryAddress = await registryFactoryContract.nameToAddress(
+    "Hypernet Profiles",
+  );
   const gatewayRegistryAddress = await registryFactoryContract.nameToAddress(
     "Gateways",
   );
@@ -282,6 +292,7 @@ const func: DeployFunction = async () => {
     "Chains",
   );
 
+  log.info(`Profiles Registry Address: ${profilesRegistryAddress}`);
   log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
   log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
   log.info(`HyperID Registry Address: ${hyperidRegistryAddress}`);
@@ -293,6 +304,41 @@ const func: DeployFunction = async () => {
 
   const registryAccountPrivateKey =
     "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
+
+  // make needed profile accounts
+  log.inf("Creating account profiles")
+  const profileRegistryContract = new ethers.Contract(
+    profileRegistryAddress,
+    NFRAbi.abi,
+    registrySigner,
+  );
+
+  // Mint a profile for the router
+  const liquidityProfileTx = await profileRegistryContract.register(
+    routerAddress,
+    "Test Router",
+    "Profile for the liquidity provider router.",
+    1,
+  );
+  liquidityProfileTx.wait();
+
+  // Mint a profile for the gateway
+  const testGatewayProfileTx = await profileRegistryContract.register(
+    hyperpayAddress,
+    "HyperPay",
+    "Profile for the HyperPay Gateway.",
+    2,
+  );
+  testGatewayProfileTx.wait();
+
+  // Mint a profile for the gateway
+  const registryProfileTx = await profileRegistryContract.register(
+    registryAccountAddress,
+    "Registry Owner",
+    "Profile for the Registry Account Owner.",
+    3,
+  );
+  testGatewayProfileTx.wait();
 
   ////////////////////////////////////////
   log.info("Deploying liquidity registration");
