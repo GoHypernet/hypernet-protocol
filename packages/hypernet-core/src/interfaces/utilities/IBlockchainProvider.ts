@@ -3,6 +3,7 @@ import {
   GovernanceSignerUnavailableError,
   InvalidParametersError,
   PrivateCredentials,
+  ProviderId,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -43,6 +44,9 @@ export interface IBlockchainProvider {
   >;
   supplyPrivateCredentials(
     privateCredentials: PrivateCredentials,
+  ): ResultAsync<void, InvalidParametersError>;
+  supplyProviderId(
+    providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError>;
 
   isMetamask(): boolean;

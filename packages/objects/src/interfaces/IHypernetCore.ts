@@ -54,6 +54,7 @@ import { RegistryParams } from "@objects/RegistryParams";
 import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
 import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
+import { ProviderId } from "@web-integration/ProviderId";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -596,6 +597,10 @@ export interface IHypernetCore {
     | ProxyError
   >;
 
+  provideProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError | ProxyError>;
+
   /**
    * Observables for seeing what's going on
    */
@@ -625,6 +630,7 @@ export interface IHypernetCore {
   onCoreIFrameCloseRequested: Subject<void>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
+  onWalletConnectOptionsDisplayRequested: Subject<void>;
   onStateChannelCreated: Subject<ActiveStateChannel>;
   onChainConnected: Subject<ChainId>;
   onGovernanceChainConnected: Subject<ChainId>;

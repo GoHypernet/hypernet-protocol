@@ -4,6 +4,7 @@ import {
   InvalidParametersError,
   PrivateCredentials,
   GovernanceSignerUnavailableError,
+  ProviderId,
 } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
@@ -31,6 +32,7 @@ import {
   IInternalProviderFactoryType,
 } from "@interfaces/utilities/factory";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
+import { resolve } from "postmate";
 
 // This is just a code of avoiding errors in mobile app.
 // An actuall non metamask provider set up should be implemented in this class.
@@ -38,7 +40,10 @@ import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 export class EthersBlockchainProvider implements IBlockchainProvider {
   protected privateCredentialsPromiseResolve: (
     privateCredentials: PrivateCredentials,
-  ) => void;
+  ) => void = () => null;
+  protected walletConnectProviderIdPromiseResolve: (
+    providerId: ProviderId,
+  ) => void = () => null;
   protected initializeResult: ResultAsync<
     void,
     BlockchainUnavailableError | InvalidParametersError
@@ -60,9 +65,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     @inject(IInternalProviderFactoryType)
     protected internalProviderFactory: IInternalProviderFactory,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
-  ) {
-    this.privateCredentialsPromiseResolve = () => null;
-  }
+  ) {}
 
   /**
    * getProvider
@@ -206,6 +209,19 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     return okAsync(undefined);
   }
 
+  public supplyProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError> {
+    if (providerId == null) {
+      return errAsync(
+        new InvalidParametersError("You must provide a providerId"),
+      );
+    }
+    // Once we have provider id, we can resolve the promise
+    this.walletConnectProviderIdPromiseResolve(providerId);
+    return okAsync(undefined);
+  }
+
   private _isMetamask = false;
   public isMetamask(): boolean {
     if (!this.initialized) {
@@ -252,15 +268,38 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
           // Open the core iframe if we don't have a cached provider
           if (web3Modal.cachedProvider != "injected") {
             context.onCoreIFrameDisplayRequested.next();
+
+            // Emit an event for showing wallet connect options
+            context.onWalletConnectOptionsDisplayRequested.next();
           }
 
+          const providerIdPromise: Promise<ProviderId> = new Promise(
+            (resolve) => {
+              this.walletConnectProviderIdPromiseResolve = resolve;
+            },
+          );
+
           // Display the modal
-          return ResultAsync.fromPromise(web3Modal.connect(), (e) => {
+          return ResultAsync.fromPromise(providerIdPromise, (e) => {
             return new BlockchainUnavailableError(
-              "Unable to create Web3Modal",
+              "Unable to get providerId",
               e,
             );
           })
+            .andThen((providerId) => {
+              return ResultAsync.fromPromise(
+                web3Modal.connectTo(providerId) as Promise<
+                  | ethers.providers.ExternalProvider
+                  | ethers.providers.JsonRpcFetchFunc
+                >,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Could not get the network for the main blockchain provider!",
+                    e,
+                  );
+                },
+              );
+            })
             .map((modalProvider) => {
               this.logUtils.debug("Web3Modal initialized");
               const provider = new providers.Web3Provider(modalProvider);

@@ -132,4 +132,5 @@ export interface IHypernetWebUI {
   renderConnectedAccountWidget(
     params?: IRenderParams,
   ): Result<void, RenderError>;
+  renderWalletConnectWidget(): Result<void, RenderError>;
 }

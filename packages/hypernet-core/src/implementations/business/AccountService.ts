@@ -13,6 +13,7 @@ import {
   UtilityMessageSignature,
   EthereumAccountAddress,
   EthereumContractAddress,
+  ProviderId,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountService } from "@interfaces/business";
@@ -203,6 +204,18 @@ export class AccountService implements IAccountService {
     }
 
     return this.blockchainProvider.supplyPrivateCredentials(privateCredentials);
+  }
+
+  public provideProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError> {
+    if (!providerId) {
+      return errAsync(
+        new InvalidParametersError("You must provide a providerId"),
+      );
+    }
+
+    return this.blockchainProvider.supplyProviderId(providerId);
   }
 
   public signMessage(

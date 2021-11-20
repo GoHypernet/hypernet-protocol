@@ -211,6 +211,18 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return this._getThrowableRender(renderReact);
   }
 
+  public renderWalletConnectWidget(): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(<PrivateKeysFlow />, true, undefined, {
+          zIndex: 99999,
+        }),
+        this._generateDomElement(PRIVATE_KEYS_FLOW_ID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
   public renderWarningAlertModal(
     errorMessage?: string,
   ): Result<void, RenderError> {
@@ -446,7 +458,6 @@ export default class HypernetWebUI implements IHypernetWebUI {
           config.closeCallback,
           undefined,
           true,
-          
         ),
         this._generateDomElement(
           config?.selector || ONBOARDING_FLOW_ID_SELECTOR,
