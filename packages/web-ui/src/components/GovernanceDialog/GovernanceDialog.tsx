@@ -12,7 +12,9 @@ import { Close as CloseIcon } from "@material-ui/icons";
 
 import { useStyles } from "@web-ui/components/GovernanceDialog/GovernanceDialog.style";
 
-export interface GovernanceDialogProps {
+type DialogPropsExtracted = Omit<DialogProps, "title" | "open">;
+
+export interface GovernanceDialogProps extends DialogPropsExtracted {
   isOpen: boolean;
   title?: string | React.ReactNode;
   description?: string;
@@ -31,6 +33,7 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
     isOpen,
     onClose,
     maxWidth = "sm",
+    ...rest
   } = props;
   const classes = useStyles();
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
@@ -52,6 +55,7 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
       onClick={(e) => {
         e.stopPropagation();
       }}
+      {...rest}
     >
       <DialogTitle>
         <Box className={classes.dialogTitle}>
