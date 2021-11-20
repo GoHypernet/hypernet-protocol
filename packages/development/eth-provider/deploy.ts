@@ -306,7 +306,7 @@ const func: DeployFunction = async () => {
     "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
 
   // make needed profile accounts
-  log.inf("Creating account profiles")
+  log.info("Creating account profiles")
   const profileRegistryContract = new ethers.Contract(
     profilesRegistryAddress,
     NFRAbi,
