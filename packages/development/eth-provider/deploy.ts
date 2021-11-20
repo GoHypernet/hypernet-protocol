@@ -309,7 +309,7 @@ const func: DeployFunction = async () => {
   log.inf("Creating account profiles")
   const profileRegistryContract = new ethers.Contract(
     profilesRegistryAddress,
-    NFRAbi.abi,
+    NFRAbi,
     registrySigner,
   );
 
@@ -345,7 +345,7 @@ const func: DeployFunction = async () => {
 
   const liquidityRegistryContract = new ethers.Contract(
     liquidityRegistryAddress,
-    NFRAbi.abi,
+    NFRAbi,
     registrySigner,
   );
 
@@ -392,7 +392,7 @@ const func: DeployFunction = async () => {
 
   const gatewayRegistryContract = new ethers.Contract(
     gatewayRegistryAddress,
-    NFRAbi.abi,
+    NFRAbi,
     registrySigner,
   );
 
@@ -449,7 +449,7 @@ const func: DeployFunction = async () => {
   log.info("Deploying Token Registry entries");
   const tokenRegistryContract = new ethers.Contract(
     tokenRegistryAddress,
-    NFRAbi.abi,
+    NFRAbi,
     registrySigner,
   );
 
@@ -558,7 +558,7 @@ const func: DeployFunction = async () => {
   log.info("Deploying Chain Registry entries");
   const chainRegistryContract = new ethers.Contract(
     chainRegistryAddress,
-    NFRAbi.abi,
+    NFRAbi,
     registrySigner,
   );
 
