@@ -56,7 +56,7 @@ const FundWidget: React.FC<IFundWidget> = ({
 
   return (
     <GovernanceCard
-      {...(excludeCardWrapper && { className: classes.cardWithoutBorder })}
+      {...(excludeCardWrapper && { className: classes.nudeCard })}
       title={!noLabel ? "Deposit Funds" : undefined}
       hideDivider={excludeCardWrapper}
       description={
