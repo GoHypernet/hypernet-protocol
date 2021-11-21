@@ -608,6 +608,8 @@ export interface IHypernetCore {
     tokenAddress: EthereumContractAddress,
   ): ResultAsync<TokenInformation | null, ProxyError>;
 
+  getGovernanceChainId(): ResultAsync<ChainId, ProxyError>;
+
   /**
    * Observables for seeing what's going on
    */

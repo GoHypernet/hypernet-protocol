@@ -157,12 +157,15 @@ export function useFund(): IReducerStateReducer {
         coreProxy
           ?.getTokenInformation()
           .map((tokenInformation: TokenInformation[]) => {
-            coreProxy?.getBalances().map((balance: Balances) => {
+            coreProxy.getGovernanceChainId().map((governanceChainId) => {
+              const tokenInformationList = tokenInformation.filter(
+                (tokenInfo) => tokenInfo.chainId === governanceChainId,
+              );
               // prepare balances
               setLoading(false);
               dispatch({
                 type: EActionTypes.FETCHED,
-                payload: tokenInformation,
+                payload: tokenInformationList,
               });
             });
           });

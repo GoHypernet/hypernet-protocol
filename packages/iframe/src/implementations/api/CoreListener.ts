@@ -522,6 +522,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getTokenInformationByAddress(data.data);
         }, data.callId);
       },
+      getGovernanceChainId: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getGovernanceChainId();
+        }, data.callId);
+      },
     });
   }
 

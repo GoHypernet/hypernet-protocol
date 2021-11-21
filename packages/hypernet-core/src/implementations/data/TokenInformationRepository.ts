@@ -43,7 +43,7 @@ export class TokenInformationRepository implements ITokenInformationRepository {
                 RegistryEntry,
                 NonFungibleRegistryContractError
               >[] = [];
-              for (let i = 1; i <= totalCount; i++) {
+              for (let i = 0; i < totalCount; i++) {
                 const registryEntryResult = nonFungibleRegistryContract
                   .tokenByIndex(i)
                   .andThen((tokenId) => {

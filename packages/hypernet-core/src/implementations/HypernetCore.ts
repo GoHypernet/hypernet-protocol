@@ -1464,4 +1464,10 @@ export class HypernetCore implements IHypernetCore {
       tokenAddress,
     );
   }
+
+  public getGovernanceChainId(): ResultAsync<ChainId, never> {
+    return this.configProvider.getConfig().map((config) => {
+      return config.governanceChainId;
+    });
+  }
 }
