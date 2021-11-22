@@ -266,18 +266,15 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
           let providerIdPromise: Promise<ProviderId>;
 
-          // Open the core iframe if we don't have a cached provider
-          if (web3Modal.cachedProvider != "injected") {
+          if (web3Modal.cachedProvider) {
+            providerIdPromise = new Promise((resolve) => {
+              resolve(ProviderId(web3Modal.cachedProvider));
+            });
+          } else {
             // Emit an event for showing wallet connect options
             context.onWalletConnectOptionsDisplayRequested.next();
             providerIdPromise = new Promise((resolve) => {
               this.walletConnectProviderIdPromiseResolve = resolve;
-            });
-          } else {
-            // Resolve providerIdPromise with metamask
-            // didn't work as expected.
-            providerIdPromise = new Promise((resolve) => {
-              resolve(ProviderId("injected"));
             });
           }
 
@@ -289,6 +286,10 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
             );
           })
             .andThen((providerId) => {
+              // Open the core iframe if metamas is not selected as provider
+              if (providerId != "injected") {
+                context.onCoreIFrameDisplayRequested.next();
+              }
               return ResultAsync.fromPromise(
                 web3Modal.connectTo(providerId) as Promise<
                   | ethers.providers.ExternalProvider
@@ -305,6 +306,9 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
             .map((modalProvider) => {
               this.logUtils.debug("Web3Modal initialized");
               const provider = new providers.Web3Provider(modalProvider);
+
+              // Hide the iframe
+              context.onCoreIFrameCloseRequested.next();
 
               // Return the values for use
               this.provider = provider;
