@@ -55,6 +55,7 @@ import {
   RegistryTokenId,
   PaymentCreationError,
   TokenInformation,
+  InactiveGatewayError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -1023,6 +1024,7 @@ export class HypernetCore implements IHypernetCore {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   > {
     return this.gatewayConnectorService
       .deauthorizeGateway(gatewayUrl)
@@ -1057,6 +1059,7 @@ export class HypernetCore implements IHypernetCore {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   > {
     return this.gatewayConnectorService
       .getGatewayTokenInfo(gatewayUrls)
@@ -1101,6 +1104,7 @@ export class HypernetCore implements IHypernetCore {
     | GatewayActivationError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   > {
     return this.gatewayConnectorService
       .closeGatewayIFrame(gatewayUrl)
@@ -1124,6 +1128,7 @@ export class HypernetCore implements IHypernetCore {
     | GatewayActivationError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   > {
     return this.gatewayConnectorService
       .displayGatewayIFrame(gatewayUrl)
