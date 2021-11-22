@@ -274,8 +274,6 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
               this.walletConnectProviderIdPromiseResolve = resolve;
             });
           } else {
-            // Resolve providerIdPromise with metamask
-            // didn't work as expected.
             providerIdPromise = new Promise((resolve) => {
               resolve(ProviderId("injected"));
             });
