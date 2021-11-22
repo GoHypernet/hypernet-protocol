@@ -47,6 +47,7 @@ import {
   TransferResolutionError,
   EthereumAccountAddress,
   EthereumContractAddress,
+  TokenInformation,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -892,6 +893,26 @@ export default class HypernetIFrameProxy
       registryName,
       address,
     });
+  }
+
+  public getTokenInformation(): ResultAsync<TokenInformation[], ProxyError> {
+    return this._createCall("getTokenInformation", null);
+  }
+
+  public getTokenInformationForChain(
+    chainId: ChainId,
+  ): ResultAsync<TokenInformation[], ProxyError> {
+    return this._createCall("getTokenInformationForChain", chainId);
+  }
+
+  public getTokenInformationByAddress(
+    tokenAddress: EthereumContractAddress,
+  ): ResultAsync<TokenInformation | null, ProxyError> {
+    return this._createCall("getTokenInformationByAddress", tokenAddress);
+  }
+
+  public getGovernanceChainId(): ResultAsync<ChainId, ProxyError> {
+    return this._createCall("getGovernanceChainId", null);
   }
 
   private _displayCoreIFrame(): void {

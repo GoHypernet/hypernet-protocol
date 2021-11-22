@@ -7,3 +7,4 @@ export * from "@implementations/business/GatewayConnectorService";
 export * from "@implementations/business/PaymentService";
 export * from "@implementations/business/GovernanceService";
 export * from "@implementations/business/RegistryService";
+export * from "@implementations/business/TokenInformationService";

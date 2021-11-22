@@ -54,6 +54,7 @@ import { RegistryParams } from "@objects/RegistryParams";
 import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
 import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
+import { TokenInformation } from "@web-integration/TokenInformation";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -101,6 +102,7 @@ export interface IHypernetCore {
     | TransferCreationError
     | PaymentStakeError
     | PaymentFinalizeError
+    | NonFungibleRegistryContractError
   >;
 
   /**
@@ -595,6 +597,18 @@ export interface IHypernetCore {
     | RegistryPermissionError
     | ProxyError
   >;
+
+  getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
+
+  getTokenInformationForChain(
+    chainId: ChainId,
+  ): ResultAsync<TokenInformation[], ProxyError>;
+
+  getTokenInformationByAddress(
+    tokenAddress: EthereumContractAddress,
+  ): ResultAsync<TokenInformation | null, ProxyError>;
+
+  getGovernanceChainId(): ResultAsync<ChainId, ProxyError>;
 
   /**
    * Observables for seeing what's going on
