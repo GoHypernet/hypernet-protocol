@@ -33,6 +33,7 @@ const errorCodes = {
   TransferCreationError: "32",
   TransferResolutionError: "33",
   VectorError: "34",
+  InactiveGatewayError: "35",
 };
 
 export default errorCodes;

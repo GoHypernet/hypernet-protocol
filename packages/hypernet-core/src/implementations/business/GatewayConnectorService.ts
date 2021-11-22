@@ -24,6 +24,7 @@ import {
   InvalidParametersError,
   VectorError,
   NonFungibleRegistryContractError,
+  InactiveGatewayError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGatewayConnectorService } from "@interfaces/business";
@@ -200,6 +201,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
             | VectorError
             | GatewayValidationError
             | NonFungibleRegistryContractError
+            | InactiveGatewayError
           >
         >();
         return this.gatewayConnectorRepository
@@ -458,6 +460,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   > {
     const retMap = new Map<GatewayUrl, GatewayTokenInfo[]>();
     return ResultUtils.combine(
@@ -499,9 +502,17 @@ export class GatewayConnectorService implements IGatewayConnectorService {
   > {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
-      this._getActivatedGatewayProxy(gatewayUrl),
-    ]).andThen((vals) => {
-      const [context, proxy] = vals;
+      this._getActivatedGatewayProxy(gatewayUrl)
+        .map((gatewayConnector) => {
+          return gatewayConnector as IGatewayConnectorProxy | null;
+        })
+        .orElse((e) => {
+          if (e instanceof InactiveGatewayError) {
+            return okAsync(null);
+          }
+          return errAsync(e);
+        }),
+    ]).andThen(([context, proxy]) => {
       return this._deauthorizeGateway(gatewayUrl, context, proxy);
     });
   }
@@ -664,6 +675,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayActivationError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   > {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.closeGatewayIFrame();
@@ -684,6 +696,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayActivationError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   > {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.displayGatewayIFrame();
@@ -703,6 +716,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   > {
     // The goal of this method is to return an activated gateway proxy,
     // and not resolve unless all hope is lost.
@@ -736,8 +750,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
         const proxyResult = this.authorizedGatewayProxies.get(gatewayUrl);
         if (proxyResult == null) {
-          throw new Error(
-            `There is not result for gateway ${gatewayUrl}, even though it is authorized. Something strange going on.`,
+          return errAsync(
+            new InactiveGatewayError(
+              `${gatewayUrl} is inactive, no proxy is available.`,
+            ),
           );
         }
 
@@ -801,6 +817,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
           | VectorError
           | GatewayValidationError
           | NonFungibleRegistryContractError
+          | InactiveGatewayError
         >(e);
       });
   }
@@ -882,6 +899,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
     this.authorizedGatewayProxies.set(gatewayRegistrationInfo.url, proxyResult);
+
+    this.logUtils.debug(
+      `Created proxy for gateway ${gatewayRegistrationInfo.url}`,
+    );
 
     return proxyResult;
   }
@@ -983,7 +1004,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
   protected _deauthorizeGateway(
     gatewayUrl: GatewayUrl,
     context: HypernetContext,
-    proxy: IGatewayConnectorProxy,
+    proxy: IGatewayConnectorProxy | null,
   ): ResultAsync<
     void,
     | PersistenceError
@@ -993,8 +1014,13 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | BlockchainUnavailableError
   > {
     context.onGatewayDeauthorizationStarted.next(gatewayUrl);
-    return proxy
-      .deauthorize()
+
+    // If there is a proxy, call the deauthorize method on it.
+    let startResult = okAsync<void, never>(undefined);
+    if (proxy != null) {
+      startResult = proxy.deauthorize();
+    }
+    return startResult
       .andThen(() => {
         return this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl);
       })

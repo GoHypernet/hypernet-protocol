@@ -34,6 +34,7 @@ import {
   PaymentStakeError,
   PaymentFinalizeError,
   PaymentCreationError,
+  InactiveGatewayError,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -273,6 +274,7 @@ export interface IHypernetCore {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
 
   getAuthorizedGateways(): ResultAsync<
@@ -303,6 +305,7 @@ export interface IHypernetCore {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
 
   /**
@@ -332,6 +335,7 @@ export interface IHypernetCore {
     | GatewayValidationError
     | ProxyError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
@@ -348,6 +352,7 @@ export interface IHypernetCore {
     | GatewayValidationError
     | ProxyError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
 
   providePrivateCredentials(
