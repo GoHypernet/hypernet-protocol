@@ -43,7 +43,7 @@ import HypernetGovernorAbi from "./artifacts/HypernetGovernor";
 import HypertokenAbi from "./artifacts/Hypertoken";
 import InsuranceAbi from "./artifacts/Insurance";
 import MessageTransferAbi from "./artifacts/MessageTransfer";
-import NonFungibleRegistryEnumerableUpgradeableAbi from "./artifacts/NonFungibleRegistryEnumerableUpgradeableAbi";
+import NonFungibleRegistryEnumerableUpgradeableAbi from "./artifacts/NonFungibleRegistryEnumerableUpgradeable";
 import ParameterizedAbi from "./artifacts/Parameterized";
 import UpgradeableRegistryFactoryAbi from "./artifacts/UpgradeableRegistryFactory";
 

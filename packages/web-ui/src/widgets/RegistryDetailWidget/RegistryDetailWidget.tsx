@@ -36,7 +36,6 @@ interface IRegistryDetailFormValus {
   allowStorageUpdate: boolean;
   allowLabelChange: boolean;
   allowTransfers: boolean;
-  allowLazyRegister: boolean;
 }
 
 const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
@@ -95,14 +94,12 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
     allowStorageUpdate,
     allowLabelChange,
     allowTransfers,
-    allowLazyRegister,
   }: IRegistryDetailFormValus) => {
     setLoading(true);
     coreProxy
       .updateRegistryParams(
         new RegistryParams(
           registryName,
-          allowLazyRegister,
           allowStorageUpdate,
           allowLabelChange,
           allowTransfers,
@@ -221,7 +218,6 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 allowStorageUpdate: registry.allowStorageUpdate,
                 allowLabelChange: registry.allowLabelChange,
                 allowTransfers: registry.allowTransfers,
-                allowLazyRegister: registry.allowLazyRegister,
               } as IRegistryDetailFormValus
             }
             onSubmit={updateRegistryParams}
@@ -280,18 +276,6 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                   </GovernanceCard>
                   <GovernanceCard className={classes.optionsContainer}>
                     <Box className={classes.optionsRow} mb={3}>
-                      <Box className={classes.switchContainer}>
-                        <Typography className={classes.switchTitle}>
-                          Allow Lazy Register
-                        </Typography>
-                        <GovernanceSwitch
-                          initialValue={registry.allowLazyRegister}
-                          onChange={(value) => {
-                            setFieldValue("allowLazyRegister", value);
-                          }}
-                          disabled={!isEditing}
-                        />
-                      </Box>
                       <Box className={classes.switchContainer}>
                         <Typography className={classes.switchTitle}>
                           Allow Storage Update

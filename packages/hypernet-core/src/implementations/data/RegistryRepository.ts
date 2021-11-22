@@ -119,7 +119,6 @@ export class RegistryRepository implements IRegistryRepository {
               this.getRegistryContractRegistrarRoleAdminAddresses(),
               this.nonFungibleRegistryContract.symbol(),
               this.nonFungibleRegistryContract.totalSupply(),
-              this.nonFungibleRegistryContract.allowLazyRegister(),
               this.nonFungibleRegistryContract.allowStorageUpdate(),
               this.nonFungibleRegistryContract.allowLabelChange(),
               this.nonFungibleRegistryContract.allowTransfers(),
@@ -134,7 +133,6 @@ export class RegistryRepository implements IRegistryRepository {
                 registrarAdminAddresses,
                 registrySymbol,
                 registryNumberOfEntries,
-                allowLazyRegister,
                 allowStorageUpdate,
                 allowLabelChange,
                 allowTransfers,
@@ -154,7 +152,6 @@ export class RegistryRepository implements IRegistryRepository {
                   registryName,
                   registrySymbol,
                   registryNumberOfEntries,
-                  allowLazyRegister,
                   allowStorageUpdate,
                   allowLabelChange,
                   allowTransfers,
@@ -198,7 +195,6 @@ export class RegistryRepository implements IRegistryRepository {
           this.nonFungibleRegistryContract.name(),
           this.nonFungibleRegistryContract.symbol(),
           this.nonFungibleRegistryContract.totalSupply(),
-          this.nonFungibleRegistryContract.allowLazyRegister(),
           this.nonFungibleRegistryContract.allowStorageUpdate(),
           this.nonFungibleRegistryContract.allowLabelChange(),
           this.nonFungibleRegistryContract.allowTransfers(),
@@ -214,7 +210,6 @@ export class RegistryRepository implements IRegistryRepository {
             registryName,
             registrySymbol,
             registryNumberOfEntries,
-            allowLazyRegister,
             allowStorageUpdate,
             allowLabelChange,
             allowTransfers,
@@ -234,7 +229,6 @@ export class RegistryRepository implements IRegistryRepository {
               registryName,
               registrySymbol,
               registryNumberOfEntries,
-              allowLazyRegister,
               allowStorageUpdate,
               allowLabelChange,
               allowTransfers,
@@ -313,14 +307,10 @@ export class RegistryRepository implements IRegistryRepository {
             >[] = [];
             for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
               let index = 0;
-              if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
+              if (sortOrder == ERegistrySortOrder.DEFAULT) {
                 index = totalCount - (pageNumber - 1) * pageSize - i;
               } else {
-                index =
-                  i +
-                  pageNumber * Math.min(totalCount, pageSize) -
-                  pageSize -
-                  1;
+                index = i + pageNumber * pageSize - pageSize - 1;
               }
 
               if (index >= 0) {
@@ -642,14 +632,11 @@ export class RegistryRepository implements IRegistryRepository {
 
       const params = abiCoder.encode(
         [
-          "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])",
+          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])",
         ],
         [
           [
             [],
-            registryParams.allowLazyRegister == null
-              ? []
-              : [registryParams.allowLazyRegister],
             registryParams.allowStorageUpdate == null
               ? []
               : [registryParams.allowStorageUpdate],
@@ -703,6 +690,7 @@ export class RegistryRepository implements IRegistryRepository {
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -721,25 +709,10 @@ export class RegistryRepository implements IRegistryRepository {
         throw new Error("Registry not found!");
       }
 
-      let shouldCallRegisterByToken: boolean;
-
-      if (registry.registrarAddresses.includes(signerAddress) === true) {
-        shouldCallRegisterByToken = false;
-      } else if (
-        BigNumber.from(registry.registrationToken).isZero() === false
-      ) {
-        shouldCallRegisterByToken = true;
-      } else {
-        return errAsync<
-          void,
-          | NonFungibleRegistryContractError
-          | RegistryFactoryContractError
-          | BlockchainUnavailableError
-          | RegistryPermissionError
-          | ERC20ContractError
-        >(
-          new RegistryPermissionError(
-            "you don't have permission to create NFI",
+      if (tokenId == 0) {
+        return errAsync(
+          new NonFungibleRegistryContractError(
+            "Zero number is not allowed as a token ID.",
           ),
         );
       }
@@ -751,21 +724,31 @@ export class RegistryRepository implements IRegistryRepository {
           registry.address,
         );
 
-      if (shouldCallRegisterByToken === true) {
-        return this.hypertokenContract
-          .approve(registry.address, registry.registrationFee)
-          .andThen(() => {
-            return this.nonFungibleRegistryContract.registerByToken(
-              recipientAddress,
-              label,
-              data,
-            );
+      // Means registration token is not a zero address
+      if (BigNumber.from(registry.registrationToken).isZero() === false) {
+        return this.registryFactoryContract
+          .registrationFee()
+          .andThen((registrationFees) => {
+            return this.hypertokenContract
+              .approve(
+                registry.address,
+                BigNumberString(registrationFees.toString()),
+              )
+              .andThen(() => {
+                return this.nonFungibleRegistryContract.registerByToken(
+                  recipientAddress,
+                  label,
+                  data,
+                  tokenId,
+                );
+              });
           });
       } else {
         return this.nonFungibleRegistryContract.register(
           recipientAddress,
           label,
           data,
+          tokenId,
         );
       }
     });
@@ -972,7 +955,6 @@ export class RegistryRepository implements IRegistryRepository {
           this.nonFungibleRegistryContract.name(),
           this.nonFungibleRegistryContract.symbol(),
           this.nonFungibleRegistryContract.totalSupply(),
-          this.nonFungibleRegistryContract.allowLazyRegister(),
           this.nonFungibleRegistryContract.allowStorageUpdate(),
           this.nonFungibleRegistryContract.allowLabelChange(),
           this.nonFungibleRegistryContract.allowTransfers(),
@@ -988,7 +970,6 @@ export class RegistryRepository implements IRegistryRepository {
             registryName,
             registrySymbol,
             registryNumberOfEntries,
-            allowLazyRegister,
             allowStorageUpdate,
             allowLabelChange,
             allowTransfers,
@@ -1006,7 +987,6 @@ export class RegistryRepository implements IRegistryRepository {
               registryName,
               registrySymbol,
               registryNumberOfEntries,
-              allowLazyRegister,
               allowStorageUpdate,
               allowLabelChange,
               allowTransfers,
@@ -1092,12 +1072,19 @@ export class RegistryRepository implements IRegistryRepository {
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
     ]).map(([config, provider]) => {
+      console.log("provider123: ", provider);
+      console.log("config: ", config);
+      console.log(
+        "config.governanceChainInformation.registryFactoryAddress",
+        config.governanceChainInformation.registryFactoryAddress,
+      );
       this.provider = provider;
 
       this.registryFactoryContract = new RegistryFactoryContract(
         provider,
         config.governanceChainInformation.registryFactoryAddress,
       );
+      console.log("this.registryFactoryContract", this.registryFactoryContract);
       this.hypertokenContract = new ERC20Contract(
         provider,
         config.governanceChainInformation.hypertokenAddress,

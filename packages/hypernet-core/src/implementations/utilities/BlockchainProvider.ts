@@ -234,6 +234,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
             },
             {} as IRPCMap,
           );
+          console.log("rpcMap", rpcMap);
 
           const providerOptions: IProviderOptions = {
             walletconnect: {

@@ -48,6 +48,7 @@ import {
   EthereumAccountAddress,
   EthereumContractAddress,
   TokenInformation,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -775,6 +776,7 @@ export default class HypernetIFrameProxy
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -788,6 +790,7 @@ export default class HypernetIFrameProxy
       label,
       recipientAddress,
       data,
+      tokenId,
     });
   }
 
