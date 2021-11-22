@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Box,
   Dialog,
-  DialogTitle,
   DialogContent,
   IconButton,
   Divider,
@@ -42,6 +41,7 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
     setIsDialogOpen((open) => !open);
   };
 
+  console.log("rest", rest);
   return (
     <Dialog
       className={classes.dialog}
@@ -57,20 +57,18 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
       }}
       {...rest}
     >
-      <DialogTitle>
-        <Box className={classes.dialogTitle}>
-          {title}
-          <IconButton
-            aria-label="close"
-            onClick={() => {
-              setIsDialogOpen(false);
-              onClose && onClose();
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
+      <Box className={classes.dialogTitle}>
+        {title}
+        <IconButton
+          aria-label="close"
+          onClick={() => {
+            setIsDialogOpen(false);
+            onClose && onClose();
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
       <Divider />
       <DialogContent className={classes.dialogContent}>{content}</DialogContent>
     </Dialog>

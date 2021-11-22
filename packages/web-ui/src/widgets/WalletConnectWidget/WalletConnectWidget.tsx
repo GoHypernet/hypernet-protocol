@@ -1,21 +1,18 @@
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import React, { useState } from "react";
 
-import { GovernanceButton } from "@web-ui/components";
+import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
+
 import { IRenderParams } from "@web-ui/interfaces";
-
-import { Box, Link, Typography } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import { ProviderId } from "@hypernetlabs/objects";
+import {
+  METAMASK_LOGO_IMAGE_URL,
+  WALLET_CONNECT_LOGO_IMAGE_URL,
+} from "@web-ui/constants";
+import { useStyles } from "@web-ui/widgets/WalletConnectWidget/WalletConnectWidget.style";
+
 import OptionCard from "./OptionCard";
-
-export const METAMASK_DOWNLOAD_URL = "https://metamask.io/download.html";
-export const METAMASK_LOGO_IMAGE_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/metamask.svg";
-export const WALLET_CONNECT_LOGO_IMAGE_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/wallet-connect.svg";
-export const WALLET_CONNECTION_SUCCESS_IMAGE_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/success.png";
-
 export interface IProvider {
   id: string;
   name: string;
@@ -45,6 +42,7 @@ interface IWalletConnectWidget extends IRenderParams {}
 const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
   props: IWalletConnectWidget,
 ) => {
+  const classes = useStyles();
   const { coreProxy } = useStoreContext();
   const { closeModal } = useLayoutContext();
 
@@ -72,24 +70,23 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
     return WALLET_PROVIDERS;
   };
 
-  const openInstallWalletProviderModal = () => {
-    const { name, logo } = selectedWalletOption;
-
-    /*
-		setModalState({
-			selector: EModalSelector.INSTALL_WALLET_PROVIDER_MODAL,
-			customProps: {
-				title: `Install ${name}`,
-				logo,
-				providerName: name,
-			},
-		});
-    */
-  };
-
   return (
-    <Box display="flex" flexDirection="column">
-      <Typography>Provider Options</Typography>
+    <Box className={classes.wrapper}>
+      <Box className={classes.titleWrapper}>
+        <GovernanceTypography variant="h4">
+          Please select a wallet to connect.
+        </GovernanceTypography>
+      </Box>
+      {/* <Box className={classes.titleWrapper}>
+        <GovernanceTypography variant="h4">
+          Wallet options!
+        </GovernanceTypography>
+      </Box>
+      <Box className={classes.subtitleWrapper}>
+        <GovernanceTypography variant="subtitle1">
+          Please select a wallet to connect.
+        </GovernanceTypography>
+      </Box> */}
       {getFilteredProviders().map((provider: IProvider) => (
         <OptionCard
           key={provider.id}
@@ -104,27 +101,19 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
           selected={selectedWalletOption.id === provider.id}
         />
       ))}
-      <GovernanceButton
-        color="primary"
-        variant="contained"
-        onClick={() => {
-          handleSubmit();
-        }}
-      >
-        Login
-      </GovernanceButton>
-      {!isMobile && (
-        <Typography>
-          {`Don't have a wallet? `}
-          <Link
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => openInstallWalletProviderModal()}
-          >
-            Download here
-          </Link>
-        </Typography>
-      )}
+      <Box className={classes.buttonWrapper}>
+        <GovernanceButton
+          color="primary"
+          variant="contained"
+          size="large"
+          fullWidth
+          onClick={() => {
+            handleSubmit();
+          }}
+        >
+          Connect
+        </GovernanceButton>
+      </Box>
     </Box>
   );
 };

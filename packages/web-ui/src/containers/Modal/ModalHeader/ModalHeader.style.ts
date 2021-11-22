@@ -8,14 +8,4 @@ export const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
   },
-  hypernet: {
-    fontSize: 24,
-    paddingLeft: 5,
-  },
-  protocol: {
-    fontSize: 23,
-    paddingLeft: 5,
-    fontWeight: 300,
-    paddingTop: 3,
-  },
 });

@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       display: "flex",
       alignItems: "center",
+      width: "calc(100% - 20px)",
       border: `1px solid ${colors.GRAY200}`,
       cursor: "pointer",
     },

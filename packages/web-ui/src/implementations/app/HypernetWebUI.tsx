@@ -205,9 +205,15 @@ export default class HypernetWebUI implements IHypernetWebUI {
   public renderMetamaskWarningModal(): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<MetamaskWarning />, true, undefined, {
-          zIndex: 99999,
-        }),
+        this._bootstrapComponent(
+          <MetamaskWarning />,
+          true,
+          undefined,
+          {
+            zIndex: 99999,
+          },
+          true,
+        ),
         this._generateDomElement(METAMASK_WARNING_ID_SELECTOR),
       );
     };

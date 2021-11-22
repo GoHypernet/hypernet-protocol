@@ -3,7 +3,7 @@ import React from "react";
 
 import { useStyles } from "./ModalHeader.style";
 
-import { HYPER_TOKEN_LOGO_URL } from "@web-ui/constants";
+import { HYPERNET_PROTOCOL_LOGO_DARK_URL } from "@web-ui/constants";
 
 export const ModalHeader: React.FC = () => {
   const classes = useStyles();
@@ -11,9 +11,7 @@ export const ModalHeader: React.FC = () => {
   return (
     <Box className={classes.container}>
       <Box className={classes.imageContainer}>
-        <img width="41" src={HYPER_TOKEN_LOGO_URL} />
-        <Box className={classes.hypernet}>Hypernet.</Box>
-        <Box className={classes.protocol}>Protocol</Box>
+        <img height={32} src={HYPERNET_PROTOCOL_LOGO_DARK_URL} />
       </Box>
     </Box>
   );

@@ -48,17 +48,6 @@ const Modal: React.FC<IModal> = (props: IModal) => {
   };
 
   return (
-    // <Box className={classes.container}>
-    //   <Box className={classes.wrapper} style={modalStyle}>
-    //     <Box className={classes.closeIcon} onClick={closeModal}>
-    //       <img
-    //         src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png"
-    //         width="20"
-    //       />
-    //     </Box>
-    //     {children}
-    //   </Box>
-    // </Box>
     <GovernanceDialog
       container={elementRef.current}
       isOpen={true}

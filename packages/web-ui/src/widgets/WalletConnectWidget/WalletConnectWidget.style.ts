@@ -11,11 +11,11 @@ export const useStyles = makeStyles({
   titleWrapper: {
     marginBottom: 24,
   },
-  metamaskImgWrapper: {
-    marginTop: 24,
-    marginBottom: 40,
+  subtitleWrapper: {
+    marginBottom: 16,
   },
-  metamaskImg: {
-    maxWidth: 200,
+  buttonWrapper: {
+    marginTop: 16,
+    width: "100%",
   },
 });
