@@ -270,6 +270,9 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
           if (web3Modal.cachedProvider != "injected") {
             // Emit an event for showing wallet connect options
             context.onWalletConnectOptionsDisplayRequested.next();
+            providerIdPromise = new Promise((resolve) => {
+              this.walletConnectProviderIdPromiseResolve = resolve;
+            });
           } else {
             // Resolve providerIdPromise with metamask
             // didn't work as expected.
@@ -277,10 +280,6 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
               resolve(ProviderId("injected"));
             });
           }
-
-          providerIdPromise = new Promise((resolve) => {
-            this.walletConnectProviderIdPromiseResolve = resolve;
-          });
 
           // Display the modal
           return ResultAsync.fromPromise(providerIdPromise, (e) => {
