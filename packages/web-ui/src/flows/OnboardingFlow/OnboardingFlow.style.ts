@@ -31,5 +31,11 @@ export const useStyles = makeStyles({
     maxWidth: 280,
     padding: "40px 0",
   },
+  titleWrapper: {
+    marginBottom: 24,
+  },
+  subtitleWrapper: {
+    marginBottom: 16,
+  },
   doneButtonWrapper: { width: "100%", marginBottom: "16px" },
 });

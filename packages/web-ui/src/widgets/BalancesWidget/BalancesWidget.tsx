@@ -23,8 +23,8 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
 
   return (
     <GovernanceCard
-      {...(excludeCardWrapper && { className: classes.cardWithoutBorder })}
-      hideDivider={excludeCardWrapper}
+    {...(excludeCardWrapper && { className: classes.nudeCard })}
+    hideDivider={excludeCardWrapper}
       title={!noLabel ? "Your Balances" : undefined}
       description={
         !noLabel
