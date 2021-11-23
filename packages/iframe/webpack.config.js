@@ -131,20 +131,14 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       __IFRAME_SOURCE__: JSON.stringify(process.env.__IFRAME_SOURCE__),
-      __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
-      __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),
       __NATS_URL__: JSON.stringify(process.env.__NATS_URL__),
       __AUTH_URL__: JSON.stringify(process.env.__AUTH_URL__),
       __VALIDATOR_IFRAME_URL__: JSON.stringify(
         process.env.__VALIDATOR_IFRAME_URL__,
       ),
       __CERAMIC_NODE_URL__: JSON.stringify(process.env.__CERAMIC_NODE_URL__),
-      __INFURA_ID__: JSON.stringify(process.env.__INFURA_ID__),
       __GOVERNANCE_CHAIN_ID__: JSON.stringify(
         process.env.__GOVERNANCE_CHAIN_ID__,
-      ),
-      __GOVERNANCE_PROVIDER_URLS__: JSON.stringify(
-        process.env.__GOVERNANCE_PROVIDER_URLS__,
       ),
       __BUILD_ENV__: JSON.stringify(process.env.__BUILD_ENV__),
       __DEBUG__: JSON.stringify(process.env.__DEBUG__),

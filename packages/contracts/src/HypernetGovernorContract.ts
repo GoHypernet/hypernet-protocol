@@ -15,7 +15,8 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
   constructor(
     protected providerOrSigner:
       | ethers.providers.Provider
-      | ethers.providers.JsonRpcSigner,
+      | ethers.providers.JsonRpcSigner
+      | ethers.Wallet,
     protected contractAddress: EthereumContractAddress,
   ) {
     this.contract = new ethers.Contract(

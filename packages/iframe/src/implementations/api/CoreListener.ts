@@ -411,6 +411,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           label: string;
           recipientAddress: EthereumAccountAddress;
           data: string;
+          tokenId: RegistryTokenId;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -419,6 +420,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.label,
             data.data.recipientAddress,
             data.data.data,
+            data.data.tokenId,
           );
         }, data.callId);
       },
@@ -509,6 +511,28 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       provideProviderId: (data: IIFrameCallData<ProviderId>) => {
         this.returnForModel(() => {
           return this.core.provideProviderId(data.data);
+        }, data.callId);
+      },
+      getTokenInformation: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getTokenInformation();
+        }, data.callId);
+      },
+      getTokenInformationForChain: (data: IIFrameCallData<ChainId>) => {
+        this.returnForModel(() => {
+          return this.core.getTokenInformationForChain(data.data);
+        }, data.callId);
+      },
+      getTokenInformationByAddress: (
+        data: IIFrameCallData<EthereumContractAddress>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getTokenInformationByAddress(data.data);
+        }, data.callId);
+      },
+      getGovernanceChainId: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getGovernanceChainId();
         }, data.callId);
       },
     });
@@ -621,7 +645,9 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     });
 
     this.core.onWalletConnectOptionsDisplayRequested.subscribe(() => {
-      console.log("in CoreListener, emiting onWalletConnectOptionsDisplayRequested");
+      console.log(
+        "in CoreListener, emiting onWalletConnectOptionsDisplayRequested",
+      );
       parent.emit("onWalletConnectOptionsDisplayRequested");
     });
 

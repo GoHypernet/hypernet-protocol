@@ -34,6 +34,7 @@ import {
   PaymentStakeError,
   PaymentFinalizeError,
   PaymentCreationError,
+  InactiveGatewayError,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -55,6 +56,7 @@ import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
 import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 import { ProviderId } from "@web-integration/ProviderId";
+import { TokenInformation } from "@web-integration/TokenInformation";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -102,6 +104,7 @@ export interface IHypernetCore {
     | TransferCreationError
     | PaymentStakeError
     | PaymentFinalizeError
+    | NonFungibleRegistryContractError
   >;
 
   /**
@@ -272,6 +275,7 @@ export interface IHypernetCore {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
 
   getAuthorizedGateways(): ResultAsync<
@@ -302,6 +306,7 @@ export interface IHypernetCore {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
 
   /**
@@ -331,6 +336,7 @@ export interface IHypernetCore {
     | GatewayValidationError
     | ProxyError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
@@ -347,6 +353,7 @@ export interface IHypernetCore {
     | GatewayValidationError
     | ProxyError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
 
   providePrivateCredentials(
@@ -452,6 +459,7 @@ export interface IHypernetCore {
     | NonFungibleRegistryContractError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   updateRegistryEntryLabel(
@@ -465,6 +473,7 @@ export interface IHypernetCore {
     | NonFungibleRegistryContractError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   getProposalsCount(): ResultAsync<
@@ -509,6 +518,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   createRegistryEntry(
@@ -516,6 +526,7 @@ export interface IHypernetCore {
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -524,6 +535,7 @@ export interface IHypernetCore {
     | RegistryPermissionError
     | ERC20ContractError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   transferRegistryEntry(
@@ -537,6 +549,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   burnRegistryEntry(
@@ -549,6 +562,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   createRegistryByToken(
@@ -571,6 +585,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   revokeRegistrarRole(
@@ -583,6 +598,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   renounceRegistrarRole(
@@ -595,11 +611,23 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   provideProviderId(
     providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError | ProxyError>;
+  getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
+
+  getTokenInformationForChain(
+    chainId: ChainId,
+  ): ResultAsync<TokenInformation[], ProxyError>;
+
+  getTokenInformationByAddress(
+    tokenAddress: EthereumContractAddress,
+  ): ResultAsync<TokenInformation | null, ProxyError>;
+
+  getGovernanceChainId(): ResultAsync<ChainId, ProxyError>;
 
   /**
    * Observables for seeing what's going on

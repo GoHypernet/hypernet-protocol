@@ -19,3 +19,7 @@ export interface ITokenInformationRepository {
     tokenAddress: EthereumContractAddress,
   ): ResultAsync<TokenInformation | null, never>;
 }
+
+export const ITokenInformationRepositoryType = Symbol.for(
+  "ITokenInformationRepository",
+);

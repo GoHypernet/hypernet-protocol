@@ -19,6 +19,7 @@ import {
   ActiveStateChannel,
   VectorError,
   NonFungibleRegistryContractError,
+  InactiveGatewayError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -49,6 +50,7 @@ export interface IGatewayConnectorService {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
@@ -101,6 +103,7 @@ export interface IGatewayConnectorService {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
 
   getGatewayRegistrationInfo(
@@ -121,6 +124,7 @@ export interface IGatewayConnectorService {
     | GatewayActivationError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
@@ -136,6 +140,7 @@ export interface IGatewayConnectorService {
     | GatewayActivationError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | InactiveGatewayError
   >;
 }
 

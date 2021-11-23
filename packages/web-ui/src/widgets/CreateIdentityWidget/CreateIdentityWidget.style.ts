@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+import { EFontSize, EFontWeight, colors } from "@web-integration/theme";
 
 export const useStyles = makeStyles({
   wrapper: {
@@ -14,5 +15,16 @@ export const useStyles = makeStyles({
   },
   button: {
     marginLeft: 16,
+  },
+  switchContainer: {
+    width: 225,
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  switchTitle: {
+    fontSize: EFontSize.BUTTON_SMALL,
+    fontWeight: EFontWeight.MEDIUM,
+    color: colors.GRAY700,
   },
 });

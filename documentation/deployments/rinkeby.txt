@@ -26,4 +26,5 @@ Profile Registry Address: 0x6c355Ad248477eeDcadf1d6724154C6152C0edca
 Gateway Registry Address: 0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB
 Liquidity Registry Address: 0xc616c67f9c680E662103b26cEfFcC70a121CD5d5
 Token Registry Address: 0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D
+Hypernet.ID Registry Address: 0x8E92D1D990E36e00Af533db811Fc5C342823C817
 

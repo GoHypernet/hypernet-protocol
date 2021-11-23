@@ -12,7 +12,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { logger } from "../src.ts/constants";
 import ERC20Abi from "../src.ts/erc20abi";
-import ERC721Abi from "../src.ts/erc721abi";
+import NFRAbi from "../src.ts/erc721abi";
 import registryFactoryAbi from "../src.ts/registryFactoryAbi";
 import { registerTransfer } from "../src.ts/utils";
 
@@ -119,9 +119,16 @@ const func: DeployFunction = async () => {
       "UpgradeableRegistryFactory",
       [
         timelockContractAddress,
-        ["Gateways", "Liquidity Providers", "HyperID", "Tokens", "Chains"],
-        ["G", "LPs", "HID", "Tokens", "Chains"],
+        ["Hypernet Profiles", "Gateways", "Liquidity Providers", "HyperID", "Tokens", "Chains"],
         [
+            "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
+            "Payment gateway signatures for the Hypernet Protocol payment network.", 
+            "Liquidity provider metadata for the Hypernet Protocol payment network.", 
+            "Hypernet.ID token registry.", 
+            "Officially supported payment tokens for the Hypernet Protocol payment network.", 
+            "Officially supported layer 1 chains for the Hypernet Protocol payment network."],
+        [
+          registryAccountAddress,
           registryAccountAddress,
           registryAccountAddress,
           hyperKYCAddress,
@@ -266,6 +273,9 @@ const func: DeployFunction = async () => {
 
   ////////////////////////////////////////
   log.info("Registering router info");
+  const profilesRegistryAddress = await registryFactoryContract.nameToAddress(
+    "Hypernet Profiles",
+  );
   const gatewayRegistryAddress = await registryFactoryContract.nameToAddress(
     "Gateways",
   );
@@ -282,6 +292,7 @@ const func: DeployFunction = async () => {
     "Chains",
   );
 
+  log.info(`Profiles Registry Address: ${profilesRegistryAddress}`);
   log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
   log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
   log.info(`HyperID Registry Address: ${hyperidRegistryAddress}`);
@@ -294,12 +305,47 @@ const func: DeployFunction = async () => {
   const registryAccountPrivateKey =
     "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
 
+  // make needed profile accounts
+  log.info("Creating account profiles")
+  const profileRegistryContract = new ethers.Contract(
+    profilesRegistryAddress,
+    NFRAbi,
+    registrySigner,
+  );
+
+  // Mint a profile for the router
+  const liquidityProfileTx = await profileRegistryContract.register(
+    routerAddress,
+    "Test Router",
+    "Profile for the liquidity provider router.",
+    1,
+  );
+  liquidityProfileTx.wait();
+
+  // Mint a profile for the gateway
+  const testGatewayProfileTx = await profileRegistryContract.register(
+    hyperpayAddress,
+    "HyperPay",
+    "Profile for the HyperPay Gateway.",
+    2,
+  );
+  testGatewayProfileTx.wait();
+
+  // Mint a profile for the gateway
+  const registryProfileTx = await profileRegistryContract.register(
+    registryAccountAddress,
+    "Registry Owner",
+    "Profile for the Registry Account Owner.",
+    3,
+  );
+  testGatewayProfileTx.wait();
+
   ////////////////////////////////////////
   log.info("Deploying liquidity registration");
 
   const liquidityRegistryContract = new ethers.Contract(
     liquidityRegistryAddress,
-    ERC721Abi,
+    NFRAbi,
     registrySigner,
   );
 
@@ -335,6 +381,7 @@ const func: DeployFunction = async () => {
     routerAddress,
     routerPublicIdentifier,
     JSON.stringify(routerRegistryEntry),
+    1,
   );
 
   await liquidityRegistryTx.wait();
@@ -345,7 +392,7 @@ const func: DeployFunction = async () => {
 
   const gatewayRegistryContract = new ethers.Contract(
     gatewayRegistryAddress,
-    ERC721Abi,
+    NFRAbi,
     registrySigner,
   );
 
@@ -364,12 +411,14 @@ const func: DeployFunction = async () => {
     hyperpayAddress,
     "http://localhost:5010",
     JSON.stringify(testGatewayRegistrationEntry),
+    1,
   );
 
   const hyperpayLocalGatewayRegistryTx = await gatewayRegistryContract.register(
     hyperpayAddress,
     "https://localhost:3000/users/v0",
     JSON.stringify(hyperpayGatewayRegistrationEntry),
+    2,
   );
 
   const hyperpayLocalGatewayRegistry2Tx =
@@ -377,12 +426,14 @@ const func: DeployFunction = async () => {
       hyperpayAddress,
       "http://localhost:3000/users/v0",
       JSON.stringify(hyperpayGatewayRegistrationEntry),
+      3,
     );
 
   const hyperpayDevGatewayRegistryTx = await gatewayRegistryContract.register(
     hyperpayAddress,
     "https://hyperpay-dev.hypernetlabs.io/users/v0",
     JSON.stringify(hyperpayGatewayRegistrationEntry),
+    4,
   );
 
   await testGatewayRegistryTx.wait();
@@ -398,7 +449,7 @@ const func: DeployFunction = async () => {
   log.info("Deploying Token Registry entries");
   const tokenRegistryContract = new ethers.Contract(
     tokenRegistryAddress,
-    ERC721Abi,
+    NFRAbi,
     registrySigner,
   );
 
@@ -417,6 +468,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      1,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -431,6 +483,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      2,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -445,6 +498,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      3,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -459,6 +513,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      4,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -473,6 +528,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      5,
     ),
     await tokenRegistryContract.register(
       registryAccountAddress,
@@ -487,6 +543,7 @@ const func: DeployFunction = async () => {
         decimals: 18,
         logoUrl: "",
       }),
+      6,
     ),
   ];
 
@@ -501,7 +558,7 @@ const func: DeployFunction = async () => {
   log.info("Deploying Chain Registry entries");
   const chainRegistryContract = new ethers.Contract(
     chainRegistryAddress,
-    ERC721Abi,
+    NFRAbi,
     registrySigner,
   );
 
@@ -528,6 +585,7 @@ const func: DeployFunction = async () => {
         chainRegistryAddress: chainRegistryAddress,
         providerUrls: ["http://blockchain:8545"],
       }),
+      1,
     ),
     await chainRegistryContract.register(
       registryAccountAddress,
@@ -550,6 +608,7 @@ const func: DeployFunction = async () => {
         chainRegistryAddress: chainRegistryAddress,
         providerUrls: ["https://eth-provider-dev.hypernetlabs.io"],
       }),
+      2,
     ),
     await chainRegistryContract.register(
       registryAccountAddress,
@@ -571,6 +630,7 @@ const func: DeployFunction = async () => {
         chainRegistryAddress: "TODO",
         providerUrls: ["TODO"],
       }),
+      3,
     ),
     await chainRegistryContract.register(
       registryAccountAddress,
@@ -592,6 +652,7 @@ const func: DeployFunction = async () => {
         chainRegistryAddress: "TODO",
         providerUrls: ["TODO"],
       }),
+      4,
     ),
   ];
 

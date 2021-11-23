@@ -63,6 +63,7 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   >;
   updateRegistryEntryLabel(
     registryName: string,
@@ -74,6 +75,7 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   >;
   getRegistryEntriesTotalCount(
     registryNames: string[],
@@ -93,12 +95,14 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   >;
   createRegistryEntry(
     registryName: string,
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -106,6 +110,7 @@ export interface IRegistryRepository {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ERC20ContractError
+    | GovernanceSignerUnavailableError
   >;
   transferRegistryEntry(
     registryName: string,
@@ -117,6 +122,7 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   >;
   burnRegistryEntry(
     registryName: string,
@@ -127,6 +133,7 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   >;
   createRegistryByToken(
     name: string,
@@ -143,6 +150,7 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   >;
   revokeRegistrarRole(
     registryName: string,
@@ -153,6 +161,7 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   >;
   renounceRegistrarRole(
     registryName: string,
@@ -163,6 +172,7 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   >;
   initializeReadOnly(): ResultAsync<void, never>;
   initializeForWrite(): ResultAsync<
