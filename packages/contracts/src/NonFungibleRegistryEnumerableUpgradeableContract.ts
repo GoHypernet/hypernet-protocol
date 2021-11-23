@@ -21,7 +21,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner
-      | undefined,
+      | ethers.Wallet,
     registryAddress: EthereumContractAddress,
   ) {
     this.contract = new ethers.Contract(

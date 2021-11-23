@@ -55,6 +55,8 @@ export class WrappedBrowserNode implements IBrowserNode {
     assetId: EthereumContractAddress,
     channelAddress: EthereumContractAddress,
   ): ResultAsync<EthereumContractAddress, VectorError> {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return ResultAsync.fromPromise(
       this.browserNode.reconcileDeposit({ assetId, channelAddress }),
       this.toVectorError,

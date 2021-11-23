@@ -58,13 +58,6 @@ workflows:
     jobs:
       - test:
           context: Hypernet Protocol
-      - publish:
-          context: Hypernet Protocol
-          filters:
-            branches:
-              only: master
-          requires:
-            - test
       # Development
       - gke/publish-and-rollout-image:
           name: Deploy Core Iframe
@@ -207,7 +200,7 @@ workflows:
           context: Hypernet Foundation
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: "--build-arg CORE_IFRAME_SOURCE=https://core.hypernet.foundation --build-arg BUILD_ENV=PROD"
+          extra-build-args: "--build-arg CORE_IFRAME_SOURCE=https://rinkeby.core.hypernet.foundation --build-arg BUILD_ENV=PROD"
       - gcr/add-image-tag:
           name: Tag Stable Launchpad
           image: launchpad

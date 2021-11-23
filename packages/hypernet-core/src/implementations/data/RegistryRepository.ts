@@ -106,6 +106,10 @@ export class RegistryRepository implements IRegistryRepository {
         return this.registryFactoryContract
           .nameToAddress(registryName)
           .andThen((registryAddress) => {
+            if (this.provider == null) {
+              throw new Error("No provider available!");
+            }
+
             // Call the NFI contract of that address
             this.nonFungibleRegistryContract =
               new NonFungibleRegistryEnumerableUpgradeableContract(
@@ -181,6 +185,10 @@ export class RegistryRepository implements IRegistryRepository {
 
     return ResultUtils.combine(
       registryAddresses.map((registryAddress) => {
+        if (this.provider == null) {
+          throw new Error("No provider available!");
+        }
+
         // Call the NFT contract of that address
         this.nonFungibleRegistryContract =
           new NonFungibleRegistryEnumerableUpgradeableContract(
@@ -261,6 +269,10 @@ export class RegistryRepository implements IRegistryRepository {
         return this.registryFactoryContract
           .nameToAddress(registryName)
           .andThen((registryAddress) => {
+            if (this.provider == null) {
+              throw new Error("No provider available!");
+            }
+
             // Call the NFI contract of that address
             this.nonFungibleRegistryContract =
               new NonFungibleRegistryEnumerableUpgradeableContract(
@@ -291,6 +303,10 @@ export class RegistryRepository implements IRegistryRepository {
     return this.registryFactoryContract
       .nameToAddress(registryName)
       .andThen((registryAddress) => {
+        if (this.provider == null) {
+          throw new Error("No provider available!");
+        }
+
         // Call the NFI contract of that address
         this.nonFungibleRegistryContract =
           new NonFungibleRegistryEnumerableUpgradeableContract(
@@ -367,6 +383,10 @@ export class RegistryRepository implements IRegistryRepository {
     return this.registryFactoryContract
       .nameToAddress(registryName)
       .andThen((registryAddress) => {
+        if (this.provider == null) {
+          throw new Error("No provider available!");
+        }
+
         // Call the NFI contract of that address
         this.nonFungibleRegistryContract =
           new NonFungibleRegistryEnumerableUpgradeableContract(
@@ -390,6 +410,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -413,6 +434,14 @@ export class RegistryRepository implements IRegistryRepository {
         >(
           new RegistryPermissionError(
             "You don't have permission to update registry entry token uri",
+          ),
+        );
+      }
+
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
           ),
         );
       }
@@ -444,6 +473,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -467,6 +497,14 @@ export class RegistryRepository implements IRegistryRepository {
         >(
           new RegistryPermissionError(
             "You don't have permission to update registry entry label",
+          ),
+        );
+      }
+
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
           ),
         );
       }
@@ -498,6 +536,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -521,6 +560,14 @@ export class RegistryRepository implements IRegistryRepository {
         >(
           new RegistryPermissionError(
             "You don't have permission to transfer registry entry",
+          ),
+        );
+      }
+
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
           ),
         );
       }
@@ -555,6 +602,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -583,6 +631,14 @@ export class RegistryRepository implements IRegistryRepository {
         );
       }
 
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
+          ),
+        );
+      }
+
       // Call the NFI contract of that address
       this.nonFungibleRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
@@ -602,6 +658,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryParams.name]),
@@ -617,6 +674,14 @@ export class RegistryRepository implements IRegistryRepository {
         return errAsync(
           new RegistryPermissionError(
             "Only registrar is allowed to update registry params",
+          ),
+        );
+      }
+
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
           ),
         );
       }
@@ -698,6 +763,7 @@ export class RegistryRepository implements IRegistryRepository {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ERC20ContractError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -713,6 +779,14 @@ export class RegistryRepository implements IRegistryRepository {
         return errAsync(
           new NonFungibleRegistryContractError(
             "Zero number or strings are not allowed as a token ID.",
+          ),
+        );
+      }
+
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
           ),
         );
       }
@@ -788,6 +862,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -817,6 +892,14 @@ export class RegistryRepository implements IRegistryRepository {
         );
       }
 
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
+          ),
+        );
+      }
+
       // Call the NFI contract of that address
       this.nonFungibleRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
@@ -837,6 +920,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -866,6 +950,14 @@ export class RegistryRepository implements IRegistryRepository {
         );
       }
 
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
+          ),
+        );
+      }
+
       // Call the NFI contract of that address
       this.nonFungibleRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
@@ -886,6 +978,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -910,6 +1003,14 @@ export class RegistryRepository implements IRegistryRepository {
         >(
           new RegistryPermissionError(
             "You don't have permission to renounceRole registry",
+          ),
+        );
+      }
+
+      if (this.signer == null) {
+        return errAsync(
+          new GovernanceSignerUnavailableError(
+            "Cannot update a token without a signer available",
           ),
         );
       }
@@ -942,6 +1043,9 @@ export class RegistryRepository implements IRegistryRepository {
       .enumerableRegistries(index)
       .andThen((registryAddress) => {
         // Call the NFI contract of that address
+        if (this.provider == null) {
+          throw new Error("No provider available!");
+        }
         this.nonFungibleRegistryContract =
           new NonFungibleRegistryEnumerableUpgradeableContract(
             this.provider,
