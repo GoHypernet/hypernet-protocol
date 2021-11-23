@@ -149,7 +149,7 @@ workflows:
           cluster: foundation-cluster-ssqcw
           container: core-iframe
           deployment: core-iframe
-          image: core-iframe/core-iframe
+          image: core-iframe
           tag: $CIRCLE_SHA1
           dockerfile-dir: packages/iframe
           docker-context: .
@@ -162,7 +162,7 @@ workflows:
           extra-build-args: '--build-arg IFRAME_SOURCE=https://vector.hypernet.foundation --build-arg VALIDATOR_IFRAME_URL=https://gateway.hypernet.foundation --build-arg NATS_URL=ws://nats.hypernet.foundation:4221 --build-arg AUTH_URL=https://auth.hypernet.foundation --build-arg GOVERNANCE_CHAIN_ID=4 --build-arg CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com --build-arg BUILD_ENV=PROD'
       - gcr/add-image-tag:
           name: Tag Stable Core Iframe
-          image: core-iframe/core-iframe
+          image: core-iframe
           source-tag: $CIRCLE_SHA1
           target-tag: stable
           requires:
@@ -173,7 +173,7 @@ workflows:
           cluster: foundation-cluster-ssqcw
           container: gateway-iframe
           deployment: gateway-iframe
-          image: gateway-iframe/gateway-iframe
+          image: gateway-iframe
           tag: $CIRCLE_SHA1
           dockerfile-dir: packages/gateway-iframe
           docker-context: .
@@ -186,7 +186,7 @@ workflows:
           extra-build-args: "--build-arg BUILD_ENV=PROD"
       - gcr/add-image-tag:
           name: Tag Stable Gateway Iframe
-          image: gateway-iframe/gateway-iframe
+          image: gateway-iframe
           source-tag: $CIRCLE_SHA1
           target-tag: stable
           requires:
@@ -197,7 +197,7 @@ workflows:
           cluster: foundation-cluster-ssqcw
           container: launchpad
           deployment: launchpad
-          image: launchpad/launchpad
+          image: launchpad
           tag: $CIRCLE_SHA1
           dockerfile-dir: packages/user-dashboard
           docker-context: .
@@ -210,7 +210,7 @@ workflows:
           extra-build-args: "--build-arg CORE_IFRAME_SOURCE=https://core.hypernet.foundation --build-arg BUILD_ENV=PROD"
       - gcr/add-image-tag:
           name: Tag Stable Launchpad
-          image: launchpad/launchpad
+          image: launchpad
           source-tag: $CIRCLE_SHA1
           target-tag: stable
           requires:
