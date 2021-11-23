@@ -58,14 +58,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0xC82e22B0Ef5808DE0F7E9CeB265499e29012b02c"), // channelFactory
       EthereumContractAddress("0x4b86a332d76b21933d245fEF7636B1019EE6C824"), // transferRegistry
       EthereumContractAddress("0x6D4eE7f794103672490830e15308A99eB7a89024"), // hypertoken
-      EthereumContractAddress("TODO"), // messageTransfer
-      EthereumContractAddress("TODO"), // insuranceTransfer
-      EthereumContractAddress("TODO"), // parameterizedTransfer
+      EthereumContractAddress("0x9E86dd60e0B1e7e142F033d1BdEf734c6b3224Bb"), // messageTransfer
+      EthereumContractAddress("0xed911640fd86f92fD1337526010adda8F3Eb8344"), // insuranceTransfer
+      EthereumContractAddress("0x5FAe7F15Ae20A10053CCca1DcFce0E2Bb4D50A7d"), // parameterizedTransfer
       EthereumContractAddress("0x3353da0f24fCACd83832b09e9371a937195D2640"), // hypernetGovernor
       EthereumContractAddress("0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB"), // registryFactory
       EthereumContractAddress("0x507D5F4E81db1c7fa078CBf1e59B37cC91640258"), // gatewayRegistry
       EthereumContractAddress("0xc616c67f9c680E662103b26cEfFcC70a121CD5d5"), // liquidityRegistry
-      EthereumContractAddress("TODO"), // tokenRegistry
+      EthereumContractAddress("0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D"), // tokenRegistry
       EthereumContractAddress("TODO"), // chainRegistry
       //[ProviderUrl("https://rinkeby.hypernet.foundation")],
       [

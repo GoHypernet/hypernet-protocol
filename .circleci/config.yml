@@ -82,7 +82,7 @@ workflows:
           context: Development
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: '--build-arg IFRAME_SOURCE=https://vector-iframe-dev.hypernetlabs.io --build-arg --build-arg VALIDATOR_IFRAME_URL=https://gateway.hypernet.foundation --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg GOVERNANCE_CHAIN_ID=1369 --build-arg GOVERNANCE_PROVIDER_URLS=''["https://eth-provider-dev.hypernetlabs.io"]'' --build-arg CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com --build-arg INFURA_ID=72827ccd538446f2a20e35a632664c52 --build-arg BUILD_ENV=PROD'
+          extra-build-args: '--build-arg IFRAME_SOURCE=https://vector-iframe-dev.hypernetlabs.io --build-arg --build-arg VALIDATOR_IFRAME_URL=https://gateway.hypernet.foundation --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg GOVERNANCE_CHAIN_ID=1369 --build-arg CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com --build-arg BUILD_ENV=PROD'
       - gcr/add-image-tag:
           name: Tag Latest Core Iframe
           image: hypernetlabs/hypernet-protocol-core-iframe
@@ -146,10 +146,10 @@ workflows:
       # Core
       - gke/publish-and-rollout-image:
           name: Deploy Core Iframe Production
-          cluster: foundation
+          cluster: foundation-cluster-ssqcw
           container: core-iframe
           deployment: core-iframe
-          image: hypernetlabs/hypernet-protocol/core-iframe
+          image: core-iframe/core-iframe
           tag: $CIRCLE_SHA1
           dockerfile-dir: packages/iframe
           docker-context: .
@@ -159,21 +159,21 @@ workflows:
           context: Hypernet Foundation
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: '--build-arg IFRAME_SOURCE=https://vector.hypernet.foundation --build-arg ''CHAIN_PROVIDERS={"1369": "https://eth-provider-dev.hypernetlabs.io"}'' --build-arg VALIDATOR_IFRAME_URL=https://gateway-iframe-dev.hypernetlabs.io --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg GOVERNANCE_CHAIN_ID=1369 --build-arg GOVERNANCE_PROVIDER_URLS=''["https://eth-provider-dev.hypernetlabs.io"]'' --build-arg CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com --build-arg INFURA_ID=72827ccd538446f2a20e35a632664c52 --build-arg BUILD_ENV=PROD'
+          extra-build-args: '--build-arg IFRAME_SOURCE=https://vector.hypernet.foundation --build-arg VALIDATOR_IFRAME_URL=https://gateway.hypernet.foundation --build-arg NATS_URL=ws://nats.hypernet.foundation:4221 --build-arg AUTH_URL=https://auth.hypernet.foundation --build-arg GOVERNANCE_CHAIN_ID=4 --build-arg CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com --build-arg BUILD_ENV=PROD'
       - gcr/add-image-tag:
-          name: Tag Latest Core Iframe
-          image: hypernetlabs/hypernet-protocol/core-iframe
+          name: Tag Stable Core Iframe
+          image: core-iframe/core-iframe
           source-tag: $CIRCLE_SHA1
-          target-tag: latest
+          target-tag: stable
           requires:
             - Deploy Core Iframe Production
           context: Hypernet Foundation
       - gke/publish-and-rollout-image:
           name: Deploy Gateway Iframe Production
-          cluster: foundation
+          cluster: foundation-cluster-ssqcw
           container: gateway-iframe
           deployment: gateway-iframe
-          image: hypernetlabs/hypernet-protocol/gateway-iframe
+          image: gateway-iframe/gateway-iframe
           tag: $CIRCLE_SHA1
           dockerfile-dir: packages/gateway-iframe
           docker-context: .
@@ -185,19 +185,19 @@ workflows:
           use-remote-docker: false
           extra-build-args: "--build-arg BUILD_ENV=PROD"
       - gcr/add-image-tag:
-          name: Tag Latest Gateway Iframe
-          image: hypernetlabs/hypernet-protocol/gateway-iframe
+          name: Tag Stable Gateway Iframe
+          image: gateway-iframe/gateway-iframe
           source-tag: $CIRCLE_SHA1
-          target-tag: latest
+          target-tag: stable
           requires:
             - Deploy Gateway Iframe Production
           context: Hypernet Foundation
       - gke/publish-and-rollout-image:
-          name: Deploy User Dashboard Production
-          cluster: foundation
-          container: user-dashboard
-          deployment: user-dashboard
-          image: hypernetlabs/hypernet-protocol/user-dashboard
+          name: Deploy Launchpad Production
+          cluster: foundation-cluster-ssqcw
+          container: launchpad
+          deployment: launchpad
+          image: launchpad/launchpad
           tag: $CIRCLE_SHA1
           dockerfile-dir: packages/user-dashboard
           docker-context: .
@@ -207,12 +207,12 @@ workflows:
           context: Hypernet Foundation
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: "--build-arg CORE_IFRAME_SOURCE=https://core-iframe-dev.hypernetlabs.io --build-arg BUILD_ENV=PROD"
+          extra-build-args: "--build-arg CORE_IFRAME_SOURCE=https://core.hypernet.foundation --build-arg BUILD_ENV=PROD"
       - gcr/add-image-tag:
-          name: Tag Latest User Dashboard
-          image: hypernetlabs/hypernet-protocol/user-dashboard
+          name: Tag Stable Launchpad
+          image: launchpad/launchpad
           source-tag: $CIRCLE_SHA1
-          target-tag: latest
+          target-tag: stable
           requires:
-            - Deploy User Dashboard Production
+            - Deploy Launchpad Production
           context: Hypernet Foundation
