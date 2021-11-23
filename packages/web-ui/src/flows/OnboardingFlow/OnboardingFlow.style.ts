@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core";
 export const useStyles = makeStyles({
   container: {
     width: "100%",
-    padding: "0 10px",
+    textAlign: "center",
   },
   emptyBalanceScreenWrapper: {},
   paymentTokenLabel: {
@@ -30,6 +30,12 @@ export const useStyles = makeStyles({
   authenticationSuccessImg: {
     maxWidth: 280,
     padding: "40px 0",
+  },
+  titleWrapper: {
+    marginBottom: 24,
+  },
+  subtitleWrapper: {
+    marginBottom: 16,
   },
   doneButtonWrapper: { width: "100%", marginBottom: "16px" },
 });

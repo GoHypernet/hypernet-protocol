@@ -7,7 +7,7 @@ import { Form, Formik, FormikValues } from "formik";
 import {
   GovernanceLargeField,
   GovernanceValueWithTitle,
-} from "@web-integration/components";
+} from "@web-ui/components";
 
 import { useStyles } from "@web-ui/components/GovernanceEditableValueWithTitle/GovernanceEditableValueWithTitle.style";
 

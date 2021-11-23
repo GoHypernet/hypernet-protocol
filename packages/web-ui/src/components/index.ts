@@ -3,7 +3,6 @@ export * from "./Button";
 export * from "./PushPaymentList";
 export * from "./PullPaymentList";
 export * from "./ModalFooter";
-export * from "./ModalHeader";
 export * from "./SelectInput";
 export * from "./SucessContent";
 export * from "./EmptyState";

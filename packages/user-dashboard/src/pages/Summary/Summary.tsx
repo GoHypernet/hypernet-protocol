@@ -12,35 +12,30 @@ const Summary: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderBalancesWidget({
         selector: "balances-wrapper",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
       .renderGatewaysWidget({
         selector: "gateway-list-wrapper",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
       .renderLinksWidget({
         selector: "payments-wrapper",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
       .renderStateChannelsWidget({
         selector: "public-identifier",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
       .renderPublicIdentifierWidget({
         selector: "state-channels",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
   }, []);

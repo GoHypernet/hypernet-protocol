@@ -5,7 +5,7 @@ import {
   IGovernanceButton,
   GovernanceChip,
 } from "@web-ui/components";
-import { GovernanceListItemValueWithTitle } from "@web-integration/index";
+import { GovernanceListItemValueWithTitle } from "@web-ui/components";
 import { Box, Grid } from "@material-ui/core";
 import { useStyles } from "@web-ui/components/GovernanceRegistryListItem/GovernanceRegistryListItem.style";
 

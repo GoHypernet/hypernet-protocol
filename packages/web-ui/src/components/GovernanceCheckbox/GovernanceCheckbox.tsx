@@ -2,7 +2,6 @@ import React from "react";
 import { Checkbox, CheckboxProps } from "@material-ui/core";
 
 import { useStyles } from "@web-ui/components/GovernanceCheckbox/GovernanceCheckbox.style";
-import { GovernanceAutocomplete } from "@web-integration/index";
 
 interface GovernanceCheckboxProps extends CheckboxProps {}
 

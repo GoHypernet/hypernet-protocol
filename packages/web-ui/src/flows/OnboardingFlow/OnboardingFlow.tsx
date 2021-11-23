@@ -4,21 +4,16 @@ import { IOnboardingFlowParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, ReactNode } from "react";
 import { useAlert } from "react-alert";
 
-import {
-  ModalHeader,
-  SucessContent,
-  Button,
-  ModalFooter,
-} from "@web-ui/components";
+import { SucessContent, ModalFooter } from "@web-ui/components";
 import { useStyles } from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
-import { EButtonStatus } from "@web-ui/theme";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget/FundWidget";
 import {
   AUTHENTICATION_IMAGE_URL,
   AUTHENTICATION_SUCCESS_IMAGE_URL,
 } from "@web-ui/constants";
+import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
 
 enum EOnboardingScreens {
   IDLE = 0,
@@ -37,6 +32,8 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     finalSuccessContent = "You are good to go and purchase using your payment token",
     closeCallback = () => {},
     gatewayName,
+    showInModal,
+    excludeCardWrapper,
   } = props;
   const alert = useAlert();
   const { balances } = useBalances();
@@ -122,27 +119,6 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     setCurrentSreen(EOnboardingScreens.ONBOARDING_SUCCESS);
   };
 
-  const renderFundWalletButton = (status?: EButtonStatus) => {
-    if (status === EButtonStatus.secondary) {
-      return (
-        <Button
-          label="Fund my wallet"
-          onClick={goToFundWalletScreen}
-          fullWidth={true}
-          status={EButtonStatus.secondary}
-        />
-      );
-    }
-    return (
-      <Button
-        label="Fund my wallet"
-        onClick={goToFundWalletScreen}
-        fullWidth={true}
-        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-      />
-    );
-  };
-
   const onOkClick = () => {
     closeCallback();
     closeModal();
@@ -156,59 +132,85 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         return (
           <>
             {balances?.length ? (
-              <Box>
-                <Box className={classes.balancesLabel}>Your Balances</Box>
-                <BalancesWidget />
-              </Box>
+              <BalancesWidget excludeCardWrapper={excludeCardWrapper} />
             ) : (
               <>
-                <Box className={classes.balancesEmptyLabel}>
+                <GovernanceTypography variant="h4">
                   You are getting closer!
-                </Box>
+                </GovernanceTypography>
                 <img
                   className={classes.authenticationImg}
                   src={AUTHENTICATION_IMAGE_URL}
                 />
               </>
             )}
-            <Button
-              label={`Approve ${gatewayName || "Hyperpay"}`}
-              onClick={handleGatewayAuthorization}
-              fullWidth={true}
-              bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-            />
+            <Box mb={2} width="100%">
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={handleGatewayAuthorization}
+              >
+                {`Approve ${gatewayName || "Hyperpay"}`}
+              </GovernanceButton>
+            </Box>
           </>
         );
       case EOnboardingScreens.EMPTY_BALANCE:
         return (
           <>
-            <Box className={classes.balancesEmptyLabel}>
-              You have successfully connected your wallet!
+            <Box className={classes.titleWrapper}>
+              <GovernanceTypography variant="h4">Success!</GovernanceTypography>
+            </Box>
+            <Box className={classes.subtitleWrapper}>
+              <GovernanceTypography variant="subtitle1">
+                You have successfully connected your wallet.
+              </GovernanceTypography>
             </Box>
             <img
               className={classes.authenticationSuccessImg}
               src={AUTHENTICATION_SUCCESS_IMAGE_URL}
             />
-            {renderFundWalletButton()}
+            <Box mb={2} width="100%">
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={goToFundWalletScreen}
+              >
+                Fund My Wallet
+              </GovernanceButton>
+            </Box>
           </>
         );
       case EOnboardingScreens.FUND_WIDGET:
-        return <FundWidget />;
+        return <FundWidget excludeCardWrapper={excludeCardWrapper} />;
       case EOnboardingScreens.BALANCES:
         return (
           <>
-            {balances?.length && <BalancesWidget />}
+            {balances?.length && (
+              <BalancesWidget excludeCardWrapper={excludeCardWrapper} />
+            )}
 
-            <Box className={classes.doneButtonWrapper}>
-              <Button
-                label="Done"
+            <Box mb={2} width="100%">
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
                 onClick={goToSuccessScreen}
-                fullWidth={true}
-                bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-              />
+              >
+                Done
+              </GovernanceButton>
             </Box>
 
-            {renderFundWalletButton(EButtonStatus.secondary)}
+            <GovernanceButton
+              fullWidth
+              variant="outlined"
+              color="default"
+              onClick={goToFundWalletScreen}
+            >
+              Fund My Wallet
+            </GovernanceButton>
           </>
         );
       case EOnboardingScreens.ONBOARDING_SUCCESS:
@@ -219,7 +221,14 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               info={finalSuccessContent}
               onOkay={onOkClick}
             />
-            {renderFundWalletButton(EButtonStatus.secondary)}
+            <GovernanceButton
+              fullWidth
+              variant="outlined"
+              color="default"
+              onClick={goToFundWalletScreen}
+            >
+              Fund My Wallet
+            </GovernanceButton>
           </>
         );
       default:
@@ -229,9 +238,10 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   return (
     <Box className={classes.container}>
-      <ModalHeader />
-      {renderScreen()}
-      <ModalFooter />
+      <Box width={480} margin="auto">
+        {renderScreen()}
+        <ModalFooter />
+      </Box>
     </Box>
   );
 };

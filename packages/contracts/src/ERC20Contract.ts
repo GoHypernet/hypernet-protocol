@@ -15,7 +15,8 @@ export class ERC20Contract implements IERC20Contract {
   constructor(
     providerOrSigner:
       | ethers.providers.Provider
-      | ethers.providers.JsonRpcSigner,
+      | ethers.providers.JsonRpcSigner
+      | ethers.Wallet,
     contractAddress: EthereumContractAddress,
   ) {
     this.contract = new ethers.Contract(

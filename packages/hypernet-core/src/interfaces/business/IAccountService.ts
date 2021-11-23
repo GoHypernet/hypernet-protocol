@@ -13,6 +13,7 @@ import {
   UtilityMessageSignature,
   EthereumAccountAddress,
   EthereumContractAddress,
+  ProviderId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -69,6 +70,9 @@ export interface IAccountService {
     UtilityMessageSignature,
     BlockchainUnavailableError | VectorError
   >;
+  provideProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError>;
 }
 
 export const IAccountServiceType = Symbol.for("IAccountService");

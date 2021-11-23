@@ -54,6 +54,7 @@ import {
   EthereumContractAddress,
   RegistryTokenId,
   PaymentCreationError,
+  ProviderId,
   TokenInformation,
   InactiveGatewayError,
 } from "@hypernetlabs/objects";
@@ -206,6 +207,7 @@ export class HypernetCore implements IHypernetCore {
   public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onWalletConnectOptionsDisplayRequested: Subject<void>;
   public onStateChannelCreated: Subject<ActiveStateChannel>;
   public onChainConnected: Subject<ChainId>;
   public onGovernanceChainConnected: Subject<ChainId>;
@@ -330,6 +332,7 @@ export class HypernetCore implements IHypernetCore {
     this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject();
+    this.onWalletConnectOptionsDisplayRequested = new Subject();
     this.onStateChannelCreated = new Subject();
     this.onChainConnected = new Subject();
     this.onGovernanceChainConnected = new Subject();
@@ -383,6 +386,7 @@ export class HypernetCore implements IHypernetCore {
       this.onCoreIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
+      this.onWalletConnectOptionsDisplayRequested,
       this.onStateChannelCreated,
       this.onChainConnected,
       this.onGovernanceChainConnected,
@@ -1297,6 +1301,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.updateRegistryEntryTokenURI(
       registryName,
@@ -1315,6 +1320,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.updateRegistryEntryLabel(
       registryName,
@@ -1364,6 +1370,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.updateRegistryParams(registryParams);
   }
@@ -1373,6 +1380,7 @@ export class HypernetCore implements IHypernetCore {
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1380,12 +1388,14 @@ export class HypernetCore implements IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ERC20ContractError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.createRegistryEntry(
       registryName,
       label,
       recipientAddress,
       data,
+      tokenId,
     );
   }
 
@@ -1399,6 +1409,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.transferRegistryEntry(
       registryName,
@@ -1416,6 +1427,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.burnRegistryEntry(registryName, tokenId);
   }
@@ -1443,6 +1455,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.grantRegistrarRole(registryName, address);
   }
@@ -1456,6 +1469,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.revokeRegistrarRole(registryName, address);
   }
@@ -1469,10 +1483,17 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryService.renounceRegistrarRole(registryName, address);
   }
 
+  public provideProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError> {
+    return this.accountService.provideProviderId(providerId);
+  }
+  
   public getTokenInformation(): ResultAsync<TokenInformation[], never> {
     return this.tokenInformationService.getTokenInformation();
   }

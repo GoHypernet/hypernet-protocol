@@ -3,7 +3,7 @@ import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { IConnectorAuthorizationFlowParams } from "@web-ui/interfaces";
 import React, { useEffect } from "react";
 
-import { ModalHeader, ModalFooter, Button } from "@web-ui/components";
+import {  ModalFooter, Button } from "@web-ui/components";
 import { useStyles } from "@web-ui/flows/ConnectorAuthorizationFlow/ConnectorAuthorizationFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import { EStatusColor } from "@web-ui/theme";
@@ -53,7 +53,6 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> =
 
     return (
       <Box className={classes.container}>
-        <ModalHeader />
         {balances?.length ? (
           <Box>
             <Box className={classes.balancesLabel}>Your Balances</Box>

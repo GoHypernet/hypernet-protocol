@@ -12,7 +12,6 @@ const BalancesSummary: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderBalancesSummaryWidget({
         selector: "balances-summary-wrapper",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
   }, []);

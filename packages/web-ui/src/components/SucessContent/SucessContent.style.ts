@@ -34,4 +34,15 @@ export const useStyles = makeStyles({
     width: "100%",
     marginBottom: "16px",
   },
+  titleWrapper: {
+    marginBottom: 24,
+  },
+  subtitleWrapper: {
+    marginBottom: 16,
+  },
+  doneButtonWrapper: {
+    marginBottom: 16,
+    marginTop: 24,
+    width: "100%",
+  },
 });

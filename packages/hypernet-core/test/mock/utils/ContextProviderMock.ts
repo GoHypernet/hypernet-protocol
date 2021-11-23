@@ -77,6 +77,8 @@ export class ContextProviderMock implements IContextProvider {
   public onInitializationRequiredActivationCount = 0;
   public onPrivateCredentialsRequested: Subject<void>;
   public onPrivateCredentialsRequestedActivationCount = 0;
+  public onWalletConnectOptionsDisplayRequested: Subject<void>;
+  public onWalletConnectOptionsDisplayRequestedActivationCount = 0;
   public onGatewayConnectorActivated: Subject<IGatewayConnectorProxy>;
   public onGatewayConnectorActivatedActivations: IGatewayConnectorProxy[] = [];
   public onStateChannelCreated: Subject<ActiveStateChannel>;
@@ -231,6 +233,11 @@ export class ContextProviderMock implements IContextProvider {
       this.onPrivateCredentialsRequestedActivationCount++;
     });
 
+    this.onWalletConnectOptionsDisplayRequested = new Subject();
+    this.onWalletConnectOptionsDisplayRequested.subscribe(() => {
+      this.onWalletConnectOptionsDisplayRequestedActivationCount++;
+    });
+
     this.onGatewayConnectorActivated = new Subject();
     this.onGatewayConnectorActivated.subscribe((val) => {
       this.onGatewayConnectorActivatedActivations.push(val);
@@ -307,6 +314,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onCoreIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
+        this.onWalletConnectOptionsDisplayRequested,
         this.onGatewayConnectorActivated,
         this.onStateChannelCreated,
         this.onChainConnected,
@@ -352,6 +360,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onCoreIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
+        this.onWalletConnectOptionsDisplayRequested,
         this.onGatewayConnectorActivated,
         this.onStateChannelCreated,
         this.onChainConnected,
@@ -412,6 +421,7 @@ export class ContextProviderMock implements IContextProvider {
       onGatewayIFrameCloseRequested: 0,
       onInitializationRequired: 0,
       onPrivateCredentialsRequested: 0,
+      onWalletConnectOptionsDisplayRequested: 0,
       onGatewayConnectorActivated: 0,
       onStateChannelCreated: 0,
       onChainConnected: 0,
@@ -495,6 +505,9 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onPrivateCredentialsRequestedActivationCount).toBe(
       counts.onPrivateCredentialsRequested,
     );
+    expect(this.onWalletConnectOptionsDisplayRequestedActivationCount).toBe(
+      counts.onWalletConnectOptionsDisplayRequested,
+    );
     expect(this.onGatewayConnectorActivatedActivations.length).toBe(
       counts.onGatewayConnectorActivated,
     );
@@ -552,6 +565,7 @@ export interface IExpectedEventCounts {
   onGatewayIFrameCloseRequested?: number;
   onInitializationRequired?: number;
   onPrivateCredentialsRequested?: number;
+  onWalletConnectOptionsDisplayRequested?: number;
   onGatewayConnectorActivated?: number;
   onStateChannelCreated?: number;
   onChainConnected?: number;

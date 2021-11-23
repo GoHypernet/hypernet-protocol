@@ -53,6 +53,7 @@ import {
   HYPERTOKEN_BALANCE_WIDGET,
   VOTING_POWER_WIDGET,
   CONNECTED_ACCOUNT_WIDGET,
+  CONNECT_WALLET_WIDGET_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -77,6 +78,8 @@ import RegistryEntryListWidget from "@web-ui/widgets/RegistryEntryListWidget";
 import HypertokenBalanceWidget from "@web-ui/widgets/HypertokenBalanceWidget";
 import VotingPowerWidget from "@web-ui/widgets/VotingPowerWidget";
 import ConnectedAccountWidget from "@web-ui/widgets/ConnectedAccountWidget";
+import WalletConnectWidget from "@web-ui/widgets/WalletConnectWidget";
+
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
@@ -202,10 +205,38 @@ export default class HypernetWebUI implements IHypernetWebUI {
   public renderMetamaskWarningModal(): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<MetamaskWarning />, true, undefined, {
-          zIndex: 99999,
-        }),
+        this._bootstrapComponent(
+          <MetamaskWarning />,
+          true,
+          undefined,
+          {
+            zIndex: 99999,
+          },
+          true,
+        ),
         this._generateDomElement(METAMASK_WARNING_ID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderWalletConnectWidget(
+    config: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <WalletConnectWidget />,
+          config.showInModal,
+          config.closeCallback,
+          {
+            zIndex: 99999,
+          },
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || CONNECT_WALLET_WIDGET_SELECTOR,
+        ),
       );
     };
     return this._getThrowableRender(renderReact);
@@ -440,6 +471,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
             gatewayLogoUrl={config.gatewayLogoUrl}
             finalSuccessContent={config.finalSuccessContent}
             closeCallback={config.closeCallback}
+            excludeCardWrapper={config.excludeCardWrapper}
           />,
           config.showInModal,
           config.closeCallback,

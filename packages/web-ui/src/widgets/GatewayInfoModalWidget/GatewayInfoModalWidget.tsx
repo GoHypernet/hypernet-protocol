@@ -15,7 +15,7 @@ import { IRenderParams } from "@web-ui/interfaces";
 import React, { useEffect, useState } from "react";
 import { useAlert } from "react-alert";
 
-import { GovernanceDialog, List, ListItem } from "@web-integration/components";
+import { GovernanceDialog, List, ListItem } from "@web-ui/components";
 import { useStyles } from "@web-ui/widgets/GatewayInfoModalWidget/GatewayInfoModalWidget.style";
 
 interface IGatewayInfoModalWidget extends IRenderParams {

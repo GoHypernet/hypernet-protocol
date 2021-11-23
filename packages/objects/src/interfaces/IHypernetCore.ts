@@ -55,6 +55,7 @@ import { RegistryParams } from "@objects/RegistryParams";
 import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
 import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
+import { ProviderId } from "@web-integration/ProviderId";
 import { TokenInformation } from "@web-integration/TokenInformation";
 
 /**
@@ -458,6 +459,7 @@ export interface IHypernetCore {
     | NonFungibleRegistryContractError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   updateRegistryEntryLabel(
@@ -471,6 +473,7 @@ export interface IHypernetCore {
     | NonFungibleRegistryContractError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   getProposalsCount(): ResultAsync<
@@ -515,6 +518,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   createRegistryEntry(
@@ -522,6 +526,7 @@ export interface IHypernetCore {
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -530,6 +535,7 @@ export interface IHypernetCore {
     | RegistryPermissionError
     | ERC20ContractError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   transferRegistryEntry(
@@ -543,6 +549,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   burnRegistryEntry(
@@ -555,6 +562,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   createRegistryByToken(
@@ -577,6 +585,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   revokeRegistrarRole(
@@ -589,6 +598,7 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
   renounceRegistrarRole(
@@ -601,8 +611,12 @@ export interface IHypernetCore {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ProxyError
+    | GovernanceSignerUnavailableError
   >;
 
+  provideProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError | ProxyError>;
   getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
 
   getTokenInformationForChain(
@@ -644,6 +658,7 @@ export interface IHypernetCore {
   onCoreIFrameCloseRequested: Subject<void>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
+  onWalletConnectOptionsDisplayRequested: Subject<void>;
   onStateChannelCreated: Subject<ActiveStateChannel>;
   onChainConnected: Subject<ChainId>;
   onGovernanceChainConnected: Subject<ChainId>;

@@ -36,7 +36,7 @@ export const AntTabs = withStyles({
   },
 })(Tabs);
 
-export const AntTab = withStyles((theme) => ({
+export const AntTab = withStyles((theme: any) => ({
   root: {
     textTransform: "none",
     minWidth: 72,

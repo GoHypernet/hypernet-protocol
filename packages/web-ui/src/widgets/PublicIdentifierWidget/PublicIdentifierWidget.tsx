@@ -5,12 +5,12 @@ import { IRenderParams } from "@web-ui/interfaces";
 import { BoxWrapper, GovernanceCard } from "@web-ui/components";
 import { useStoreContext } from "@web-ui/contexts";
 import { PublicIdentifier } from "@hypernetlabs/objects";
-import { colors } from "@web-integration/theme";
+import { colors } from "@web-ui/theme";
 
 interface IPublicIdentifierWidget extends IRenderParams {}
 
 const PublicIdentifierWidget: React.FC<IPublicIdentifierWidget> = ({
-  includeBoxWrapper,
+  excludeCardWrapper,
 }: IPublicIdentifierWidget) => {
   const { coreProxy } = useStoreContext();
   const [publicIdentifer, setPublicIdentifer] = useState<PublicIdentifier>();

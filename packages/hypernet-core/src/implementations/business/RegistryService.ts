@@ -106,6 +106,7 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.updateRegistryEntryTokenURI(
       registryName,
@@ -124,6 +125,7 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.updateRegistryEntryLabel(
       registryName,
@@ -147,6 +149,7 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.updateRegistryParams(registryParams);
   }
@@ -156,6 +159,7 @@ export class RegistryService implements IRegistryService {
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | RegistryFactoryContractError
@@ -163,12 +167,14 @@ export class RegistryService implements IRegistryService {
     | BlockchainUnavailableError
     | RegistryPermissionError
     | ERC20ContractError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.createRegistryEntry(
       registryName,
       label,
       recipientAddress,
       data,
+      tokenId,
     );
   }
 
@@ -182,6 +188,7 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.transferRegistryEntry(
       registryName,
@@ -199,6 +206,7 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.burnRegistryEntry(registryName, tokenId);
   }
@@ -226,6 +234,7 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.grantRegistrarRole(registryName, address);
   }
@@ -239,6 +248,7 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.revokeRegistrarRole(registryName, address);
   }
@@ -252,6 +262,7 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | GovernanceSignerUnavailableError
   > {
     return this.registryRepository.renounceRegistrarRole(registryName, address);
   }

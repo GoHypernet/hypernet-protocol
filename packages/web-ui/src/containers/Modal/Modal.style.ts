@@ -3,6 +3,7 @@ interface IStyleProps {
 }
 
 import { makeStyles } from "@material-ui/core";
+import { colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles({
   container: {
@@ -17,7 +18,7 @@ export const useStyles = makeStyles({
   },
   wrapper: {
     position: "absolute",
-    background: "white",
+    background: colors.GRAY100,
     padding: "30px 20px",
     textAlign: "center",
     top: "50%",
@@ -31,7 +32,7 @@ export const useStyles = makeStyles({
   },
   closeIcon: {
     position: "absolute",
-    right: "89%",
+    right: 24,
     marginRight: 10,
     cursor: "pointer",
     top: 38,
