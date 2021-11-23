@@ -666,4 +666,26 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       });
     });
   }
+
+  public getRegistryEntryByOwnerAddress(
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.tokenOfOwnerByIndex(
+        ownerAddress,
+        index,
+      ) as Promise<BigNumber>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call tokenOfOwnerByIndex()",
+          e,
+        );
+      },
+    ).andThen((tokenId) => {
+      return this.getRegistryEntryByTokenId(
+        RegistryTokenId(tokenId.toNumber()),
+      );
+    });
+  }
 }

@@ -395,13 +395,10 @@ export class RegistryRepository implements IRegistryRepository {
             registryAddress,
           );
 
-        return this.nonFungibleRegistryContract
-          .tokenOfOwnerByIndex(ownerAddress, index)
-          .andThen((tokenId) => {
-            return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
-              tokenId,
-            );
-          });
+        return this.nonFungibleRegistryContract.getRegistryEntryByOwnerAddress(
+          ownerAddress,
+          index,
+        );
       });
   }
 
