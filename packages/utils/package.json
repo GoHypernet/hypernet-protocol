@@ -1,0 +1,50 @@
+{
+  "name": "@hypernetlabs/utils",
+  "version": "0.4.7",
+  "description": "Utilities used by Hypernet Labs packages",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/core#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Nitro",
+    "Ethereum"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist/**/*",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "test": "yarn build && yarn test:ci",
+    "test:ci": "jest --runInBand --coverage",
+    "test:watch": "jest --watch --color --detectOpenHandles",
+    "prepare": "yarn build"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@connext/vector-utils": "^0.2.5-beta.6",
+    "@hypernetlabs/objects": "^0.3.7",
+    "axios": "^0.21.1",
+    "delay": "^5.0.0",
+    "inversify": "^5.1.1",
+    "neverthrow": "^4.1.0",
+    "pino": "^6.7.0",
+    "postmate": "^1.5.2"
+  }
+}

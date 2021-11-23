@@ -1,0 +1,57 @@
+{
+  "name": "@hypernetlabs/web-demo",
+  "version": "1.0.0",
+  "description": "Demonstrates loading Hypernet Core on a page and connecting it to MetaMask.",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/web-demo#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Typescript",
+    "Hypernet",
+    "Labs",
+    "Blockchain",
+    "Hypernet",
+    "Core"
+  ],
+  "main": "dist/index.ts",
+  "files": [
+    "lib"
+  ],
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "scripts": {
+    "build": "yarn clean && yarn compile && yarn webpack",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-web-demo -f Dockerfile ../..",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
+    "webpack": "webpack --config webpack.config.js",
+    "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p src/tsconfig.json",
+    "start": "webpack serve --config webpack.config.js --mode development --open",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@ethereum-waffle/chai": "^3.1.2",
+    "@hypernetlabs/web-integration": "^0.0.1",
+    "bootstrap": "^4.5.3",
+    "jquery": "^3.5.1"
+  },
+  "peerDependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-redux": "7.1.3",
+    "react-router-dom": "5.1.2"
+  }
+}

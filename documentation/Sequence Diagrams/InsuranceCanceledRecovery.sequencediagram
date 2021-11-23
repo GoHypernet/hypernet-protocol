@@ -1,0 +1,18 @@
+title Insurance Canceled 
+
+participant Gateway
+participant Sender
+participant Receiver
+
+
+Gateway->Sender:Send Payment
+activate Sender
+Sender-->Receiver:Create Offer Transfer
+deactivate Sender
+activate Receiver
+note over Gateway,Receiver:Payment Status: Proposed
+
+Receiver<--Receiver:Create Insurance Transfer
+Receiver<--Receiver:Insurance Transfer Resolved
+Receiver->Receiver:Transfer Canceled by Router\ntransferResolver = EncodedCancel
+note over Gateway,Receiver:Payment Status: Proposed

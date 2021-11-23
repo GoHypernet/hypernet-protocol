@@ -1,0 +1,41 @@
+title Make a Payment Flow
+
+participant Gateway (Galileo)
+participant Gateway (HyperPay)
+participant Gateway Connector
+participant Hypernet Core
+participant Consumer
+participant Governance Wallet
+
+activate Hypernet Core
+Gateway (Galileo)->Gateway (HyperPay):RequestUserAuth\nGalileo requests the User to authorize Galileo via HyperPay\n
+activate Gateway (HyperPay)
+Gateway (HyperPay)->Gateway Connector:RequestAuth for Gateway
+deactivate Gateway (HyperPay)
+activate Gateway Connector
+Gateway Connector->Hypernet Core:Show Me!
+Gateway Connector->Consumer:Request to Auth Galileo
+activate Consumer
+Gateway Connector<-Consumer:Click Auth Button\nGenerate a Signature
+deactivate Consumer
+Gateway Connector->Hypernet Core:Hide Me!
+Gateway (HyperPay)<-Gateway Connector:UserProduct Auth Signature
+deactivate Gateway Connector
+activate Gateway (HyperPay)
+Gateway (Galileo)<-Gateway (HyperPay):Callback to Gateway\nUser XXX has authorized you
+deactivate Gateway (HyperPay)
+Gateway (Galileo)->Gateway (HyperPay):PushPayment\nXXXX to send $3 token to vector5VM
+activate Gateway (HyperPay)
+Gateway (HyperPay)->Gateway Connector:PushPayment
+activate Gateway Connector
+Gateway Connector->Hypernet Core:PushPayment
+Hypernet Core->Hypernet Core:Send money to remote via Router\nRemote is presumably Gateway's Core
+Gateway Connector<-Hypernet Core:Status Report
+Gateway (HyperPay)<-Gateway Connector:Status Report
+Gateway Connector<-Hypernet Core:Status Report
+Gateway (HyperPay)<-Gateway Connector:Status Report
+Gateway Connector<-Hypernet Core:Payment Accepted\nRemote has received money, but insurance is still held
+Gateway (HyperPay)<-Gateway Connector:Status Report
+deactivate Gateway Connector
+Gateway (Galileo)<-Gateway (HyperPay):Callback to Gateway\nPayment Accepted
+deactivate Gateway (HyperPay)

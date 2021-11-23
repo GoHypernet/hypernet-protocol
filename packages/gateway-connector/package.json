@@ -1,0 +1,42 @@
+{
+  "name": "@hypernetlabs/gateway-connector",
+  "version": "0.0.11",
+  "description": "Package that defines how to write a Hypernet Gateway.",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/core#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Ethereum",
+    "Vector",
+    "Connext"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "prepare": "yarn build"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@hypernetlabs/objects": "^0.3.6",
+    "ethers": "^5.4.7"
+  }
+}

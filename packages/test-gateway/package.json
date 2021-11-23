@@ -1,0 +1,51 @@
+{
+  "name": "@hypernetlabs/test-gateway",
+  "version": "0.0.1",
+  "description": "An example dispute mediator for testing, which always resolve's in the sender's favor.",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/core#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Ethereum",
+    "Vector",
+    "Connext"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && cd ../test-gateway-connector && yarn build && cd ../test-gateway && yarn compile ",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-test-gateway:local -f Dockerfile --progress=plain ../..",
+    "docker-push": "docker push hypernetlabs/hypernet-protocol-test-gateway:local",
+    "start": "node dist/index.js",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "prepare": "yarn build",
+    "test": "yarn build && yarn test:ci",
+    "test:ci": "jest --runInBand --coverage --passWithNoTests",
+    "test:watch": "jest --watch --color --detectOpenHandles"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@hypernetlabs/objects": "^0.3.7",
+    "cors": "^2.8.5",
+    "ethers": "^5.4.7",
+    "express": "^4.17.1"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "@hypernetlabs/hypernet-core",
+  "version": "0.0.1",
+  "description": "Hypernet Core. Represents the SDK for running the Hypernet Protocol.",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/core#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Connext",
+    "Vector",
+    "Ethereum"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
+    "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "prepare": "yarn build",
+    "test": "yarn build && yarn test:ci",
+    "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
+    "test:ci": "jest --runInBand --coverage --passWithNoTests",
+    "test:watch": "jest --watch --color --detectOpenHandles"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@ceramicnetwork/common": "^1.5.0",
+    "@ceramicnetwork/http-client": "^1.3.0",
+    "@ceramicnetwork/stream-tile": "^1.3.1",
+    "@ceramicstudio/idx": "^0.12.2",
+    "@ceramicstudio/idx-tools": "^0.11.0",
+    "@connext/vector-browser-node": "^0.2.5-beta.6",
+    "@connext/vector-contracts": "^0.2.5-beta.6",
+    "@connext/vector-types": "^0.2.5-beta.6",
+    "@connext/vector-utils": "^0.2.5-beta.6",
+    "@hypernetlabs/gateway-connector": "^0.0.11",
+    "@hypernetlabs/objects": "^0.3.7",
+    "@hypernetlabs/utils": "^0.4.6",
+    "@hypernetlabs/contracts": "^0.0.1",
+    "@walletconnect/web3-provider": "^1.5.2",
+    "class-transformer": "^0.3.2",
+    "crypto-browserify": "^3.12.0",
+    "did-resolver": "^3.1.0",
+    "dids": "^2.1.0",
+    "ethers": "^5.4.7",
+    "inversify": "^5.1.1",
+    "key-did-provider-ed25519": "^1.1.0",
+    "key-did-resolver": "^1.4.0",
+    "neverthrow": "^4.1.0",
+    "path-browserify": "^1.0.1",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.6.2",
+    "sjcl": "^1.0.8",
+    "uuid": "^8.3.0",
+    "web3modal": "^1.9.4"
+  }
+}

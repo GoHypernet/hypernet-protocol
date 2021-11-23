@@ -1,0 +1,238 @@
+# Hypernet Protocol Contracts
+
+This package contains the Hypernet Protocol solidity contracts for the token, governance, and identity registries. 
+The token is [EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and is limited to a total supploy of `100,000,000` 
+with `18` decimal places of precision. The governance contracts are based on OpenZeppelin's 
+[Governor](https://docs.openzeppelin.com/contracts/4.x/governance) library which is itself based on a reference 
+implementation by [Compound Finance](https://compound.finance/docs/governance). Given below is a sequence diagram for the 
+proposal lifecycle. 
+
+![alt text](/documentation/images/Governance-sequence-diagram.png)
+
+This particular governance architecture has been adopted by a number of highly successful projects including
+[Uniswap](https://docs.uniswap.org/protocol/V2/concepts/governance/governance-reference) and has proven quite
+successful in practice at adopting beneficial proposals to protocol upgrades while preventing
+[adversarial attacks](https://docs.uniswap.org/protocol/V2/concepts/governance/adversarial-circumstances).
+
+![alt text](/documentation/images/Hypernet-Contract-Flow.png)
+
+The Hypernet Governance application is used for proposing and vetting (by the token holder community) new Non-Fungible Registries (NFRs), 
+which are deployed through a registry factory contract (`UpgradeableRegistryFactory.sol`), and updating various parameters in the protocol 
+itself. The factory contract implements an [upgradable beacon pattern](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UpgradeableBeacon) 
+for deploying new NFRs in a gas-efficient manner (~80% reduction in gas fee over naive implementation). Each new NFR stores its state 
+in a proxy layer and function calls to that proxy layer are delegated to an implementation contract shared by all copies of the original 
+beacon implementation. Since the reference implementation deployments are not intented to be used directly, the 
+[initializer](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializers) pattern is used for setting parameters 
+upon the creation of a new NFR. 
+
+Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token standard and have 
+several customizable functionalities. An NFR is can be deployed with or without the enumeration property and every entry is an ownable 
+token that has a corresponding `label` (seperate from the `tokenURI` or `tokenId`) that is unique within that specific NFR. That is, two 
+entries can have the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate lookups more easily for applications in 
+which the registry is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is 
+(for instance when label is a URL). Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
+
+Each NFR has a `REGISTRAR_ROLE`, which can register new identities, a `REGISTRAR_ROLE_ADMIN` which can add and remove addresses from the 
+`REGISTRAR_ROLE` as well as update NFR parameters, and a `DEFAULT_ADMIN_ROLE` which can make modifications to which addresses have the 
+`REGISTRAR_ROLE` and `REGISTRAR_ROLE_ADMIN`. Both of these roles are set up through the NFR constructor. Additionally, the 
+`REGISTRAR_ROLE` and the owner of an NFI have the option to update the information stored in the `tokenURI` after registration unless 
+`allowStorageUpdate` is set to `false` (which it is by default and can be updated by the `REGISTRAR_ROLE`). The same applies for the 
+token `label` through the `allowLabelChange` flag (which is false by default). In some cases, it can be useful to dissallow the transfer 
+of ownership of NFIs. This can be done if `REGISTRAR_ROLE` sets `allowTransfers` to `false`. In this case, the `REGISTRAR_ROLE` can still 
+transfer an NFI on the owners behalf if the NFI owner gives approval to the `REGISTRAR_ROLE` through the `approve` function.
+
+Each NFR can augment its registration logic (as well as add novel functionality) through the use of external *modules*. A module is a 
+stateless external contract which can be given the `REGISTRAR_ROLE` and thus extend an NFR's capability in an algorithmic fashion. For 
+example, the a `LazyMintModule.sol` contract offers a means to add lazy minting functionality to an NFR, while the `MerkleDropModule.sol` 
+contract implements a mechanism to fascilitate airdrop functionality. The `REGISTRAR_ROLE_ADMIN` can add and remove these modules from their
+NFR as needed. 
+
+Lastly, the Hypernet NFR implements a native mechanism for registration by staking token. By default, this feature is disabled, but the 
+`REGISTRAR_ROLE` can set `registrationToken` to an address of an EIP20-compatible token which will enable the feature. The default 
+registration fee is `1e18` (1 token assuming 18 decimal places) which can also be updated by the `REGISTRAR_ROLE`. In order to use this 
+feature, a participant will `allow` the NFR to spend `registrationFee` amount of `registrationToken` from their account. The NFR will 
+record the registration token address used and fee amount and associate this staking fee with the NFI `tokenId`. Upon burning of the NFI, 
+any non-zero registration fee associated with the burned `tokenId` will be transfered to the account who burned the token, *not* the owner
+of the token at the time of burning. 
+
+SECURITY NOTES:
+
+* [Known Timelock.sol contract vulnerability](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
+* [Initialization vulnerability](https://forum.openzeppelin.com/t/security-advisory-initialize-uups-implementation-contracts/15301)
+
+## Addresses
+
+### Rinkeby
+
+Hypertoken: `0x6D4eE7f794103672490830e15308A99eB7a89024`
+
+Timelock: `0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`
+
+DAO: `0x3353da0f24fCACd83832b09e9371a937195D2640`
+
+Registry Factory: `0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB`
+
+Hypernet Profiles: `0x6c355Ad248477eeDcadf1d6724154C6152C0edca`
+
+Gateways: `0x507D5F4E81db1c7fa078CBf1e59B37cC91640258`
+
+Liquidity Providers: `0xc616c67f9c680E662103b26cEfFcC70a121CD5d5`
+
+Payment Tokens: `0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D`
+
+Batch Module: `0x5B72838Fc364Ef73301E4ac32d2050B095666244`
+
+Lazy Mint Module: `0x5B72838Fc364Ef73301E4ac32d2050B095666244`
+
+Merkle Module: `0x5B72838Fc364Ef73301E4ac32d2050B095666244`
+
+## Install dependencies
+
+```shell
+git clone https://github.com/GoHypernet/hypernet-protocol.git
+cd hypernet-protocol/packages/contracts
+npm install
+```
+
+## Running contract tests
+
+```shell
+npx hardhat test --logs
+```
+
+## Compiling contracts to generate artifacts
+
+```shell
+npx hardhat compile
+```
+
+## Environment Variables
+
+`ETH_PROVIDER_URL`: URL that hardhat will use for its RPC provider, if blank then localhost is assumed. 
+
+`MNEMONIC`: Mnemonic phrase that hardhat will use to generate accounts for use in scripts and tasks. If blank the 
+default is `test test test test test test test test test test test junk`.  
+
+## Hardhat network - full contract deployment
+
+First, start a hardhat node (edit [hardhat.config.js](https://hardhat.org/config/#networks-configuration)
+to customize the Hardhat network settings):
+
+```shell
+npx hardhat node
+```
+
+You can run the node on a custom port by adding the `--port flag`:
+
+```shell
+npx hardhat node --port 8569
+```
+
+Once the node is running, deploy the full Solidity contract stack to the Hardhat network:
+
+```shell
+npx hardhat run scripts/hardhat-full-stack.js --network dev
+```
+
+## Hardhat tasks
+
+Use the help tasks defined in `hardhat.config.js` to interact with the deployed contracts.
+
+Get Governance contract parameters:
+
+```shell
+npx hardhat governanceParameters --network dev
+```
+
+Propose a new Non-Fungible Registry, your account must have at least `1000000` Hypertoken (1% of the total supply)
+for the proposal to go through:
+
+```shell
+npx hardhat proposeRegistry --network dev --name Gateways --symbol GTW --owner 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+```
+
+Additionally, if at any point during the voting process your voting power drops below this 1% threshold, your proposal
+is vulnerable to being canceled:
+
+```shell
+npx hardhat cancelProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
+```
+
+Check the state of an existing Proposal:
+
+```shell
+npx hardhat proposalState --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
+```
+
+Delegate your voting power to a given address:
+
+```shell
+npx hardhat delegateVote --network dev --delegate 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+
+Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
+
+```shell
+npx hardhat castVote --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
+```
+
+If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be queued then executed:
+
+```shell
+npx hardhat queueProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
+npx hardhat executeProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
+```
+
+Once a registry has been deployed via the proposal process, get the registry's info:
+
+```shell
+npx hardhat registryParameters --network dev --name Gateways
+```
+
+and set the registry's parameters:
+
+````shell
+npx hardhat setRegistryParameters --network dev --name HyperId --regtoken 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+``
+
+Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just deployed:
+
+```shell
+npx hardhat proposeRegistryEntry --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+````
+
+Set the registration token address for an NFR:
+
+```shell
+npx hardhat setRegistryParameters --network dev --name Gateways --regtoken 0x5FbDB2315678afecb367f032d93F642f64180aa3
+```
+
+If the registry is owned by the DAO, update the parameters with a proposal:
+
+```shell
+npx hardhat proposeRegistryParameterUpdate --network dev --name "Hypernet Profiles" --schema "" --storageupdate "" --labelchange "" --allowtransfers "" --registrationtoken "0x5FbDB2315678afecb367f032d93F642f64180aa3"  --registrationfee "" --burnaddress "" --burnfee ""
+```
+
+Add a new NFI by staking tokens:
+
+```shell
+npx hardhat registerWithToken --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --tokenid 007
+```
+
+burn an NFI if you are the owner or registrar:
+
+```shell
+npx hardhat burnToken --network dev --registry Gateways --tokenid 1
+```
+
+Retrieve data pertaining to a specific entry in a named Hypernet Gateway:
+
+```shell
+npx hardhat registryEntryByLabel --network dev --label https://hyperpay.io --name Gateways
+```
+
+create a new registry by burning hypertoken:
+
+```shell
+npx hardhat createRegistryByToken --network dev --name Gateways --symbol GTW --registrar 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --enumerable true
+```

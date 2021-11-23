@@ -1,0 +1,57 @@
+{
+  "extends": "./tsconfig.build.json",
+  "files": [],
+  "references": [
+    {
+      "path": "packages/hypernet-core"
+    },
+    {
+      "path": "packages/hypernet-core/test"
+    },
+    {
+      "path": "packages/web-integration"
+    },
+    {
+      "path": "packages/web-ui"
+    },
+    {
+      "path": "packages/iframe"
+    },
+    {
+      "path": "packages/gateway-iframe"
+    },
+    {
+      "path": "packages/gateway-iframe/test"
+    },
+    {
+      "path": "packages/gateway-connector"
+    },
+    {
+      "path": "packages/test-gateway"
+    },
+    {
+      "path": "packages/test-gateway-connector"
+    },
+    {
+      "path": "packages/web-demo"
+    },
+    {
+      "path": "packages/utils"
+    },
+    {
+      "path": "packages/mobile-integration"
+    },
+    {
+      "path": "packages/objects"
+    },
+    {
+      "path": "packages/user-dashboard"
+    },
+    {
+      "path": "packages/storybook"
+    },
+    {
+      "path": "packages/contracts"
+    }
+  ]
+}

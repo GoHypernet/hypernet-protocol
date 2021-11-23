@@ -1,0 +1,28 @@
+{
+  "name": "@hypernetlabs/hypernet-protocol-development",
+  "version": "1.0.0",
+  "description": "Various tools for development purposes",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Typescript",
+    "Hypernet",
+    "Labs",
+    "Blockchain",
+    "Hypernet",
+    "Core"
+  ],
+  "scripts": {
+    "deploy-custom-transfers": "yarn ts-node blockchain/deploy.ts",
+    "dockerize": "docker build -t hypernetlabs/eth-provider:local eth-provider && docker build --build-arg CHAIN_ID_ARG=1369 -t hypernetlabs/eth-provider:development eth-provider",
+    "docker-push": "docker push hypernetlabs/eth-provider:local && docker push hypernetlabs/eth-provider:development"
+  }
+}

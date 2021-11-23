@@ -1,0 +1,42 @@
+title Invalid Insurance Recovery Flow
+
+participant Gateway
+participant Sender
+participant Receiver
+
+
+Gateway->Sender:Send Payment
+activate Sender
+Sender-->Receiver:Create Offer Transfer
+deactivate Sender
+activate Receiver
+note over Gateway,Receiver:Payment Status: Proposed
+
+Sender<-Receiver:Create Insurance Transfer\nDoes not match Offer Terms
+activate Sender
+deactivate Receiver
+note over Receiver,Gateway:Payment Status: InvalidStake
+Sender->Receiver:Resolve Insurance Transfer for 0
+deactivate Sender
+activate Receiver
+note over Receiver,Gateway:Payment Status: Borked
+
+alt Not Completely Hacked
+Sender<-Receiver:Resolve Offer Transfer
+deactivate Receiver
+note over Receiver,Gateway:Payment Status: Canceled
+else Hacked
+loop
+activate Receiver
+
+Sender<-Receiver:Create Insurance Transfer\nMay or may not match offer terms
+activate Sender
+deactivate Receiver
+note over Receiver,Gateway:Payment Status: InvalidStake
+Sender->Receiver:Resolve Insurance Transfer for 0
+deactivate Sender
+activate Receiver
+note over Receiver,Gateway:Payment Status: Borked
+deactivate Receiver
+end
+end
