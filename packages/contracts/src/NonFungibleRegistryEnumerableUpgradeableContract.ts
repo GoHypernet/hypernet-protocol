@@ -271,6 +271,24 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     ).map((tokenId) => RegistryTokenId(tokenId.toNumber()));
   }
 
+  public tokenOfOwnerByIndex(
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.tokenOfOwnerByIndex(
+        ownerAddress,
+        index,
+      ) as Promise<BigNumber>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call tokenOfOwnerByIndex()",
+          e,
+        );
+      },
+    ).map((tokenId) => RegistryTokenId(tokenId.toNumber()));
+  }
+
   public registryMap(
     label: string,
   ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {

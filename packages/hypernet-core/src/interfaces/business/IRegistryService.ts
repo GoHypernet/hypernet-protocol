@@ -173,4 +173,12 @@ export interface IRegistryService {
     | RegistryPermissionError
     | GovernanceSignerUnavailableError
   >;
+  getRegistryEntryByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<
+    RegistryEntry,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 }

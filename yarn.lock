@@ -3027,6 +3027,16 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
+"@hypernetlabs/contracts@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/contracts/-/contracts-0.0.1.tgz#e7f787a7d9aae3ffe001d216e3ba8640f571fe0d"
+  integrity sha512-fyUNJzcySYY4nUIAn6SyvP6GZxk6qkaPAWpyfQcrOQ7saOlpBS24boq5lduilXL/aEZFUVWoTKPLqAl6j3SWmg==
+  dependencies:
+    "@openzeppelin/contracts" "^4.3.0"
+    "@openzeppelin/contracts-upgradeable" "^4.3.2"
+    ethers "^5.4.7"
+    hardhat-contract-sizer "^2.0.3"
+
 "@icons/material@^0.2.4":
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/@icons/material/-/material-0.2.4.tgz#e90c9f71768b3736e76d7dd6783fc6c2afa88bc8"

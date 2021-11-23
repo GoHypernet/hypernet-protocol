@@ -109,6 +109,10 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   getRegistryEntryByLabel(
     label: string,
   ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError>;
+  tokenOfOwnerByIndex(
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError>;
 }
 
 export const INonFungibleRegistryEnumerableUpgradeableContractType = Symbol.for(

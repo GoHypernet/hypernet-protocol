@@ -87,7 +87,6 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
 
   const updateRegistryParams = ({
     registrationFee,
-    primaryRegistry,
     registrationToken,
     burnAddress,
     burnFee,
@@ -107,7 +106,6 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           registrationFee,
           EthereumAccountAddress(burnAddress),
           Number(burnFee) * 100,
-          EthereumContractAddress(primaryRegistry),
         ),
       )
       .map((registry) => {
@@ -247,10 +245,10 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                     />
                     <GovernanceField
                       {...(isEditing && { className: classes.editableField })}
-                      disabled={!isEditing}
                       name="primaryRegistry"
                       title="Primary Registry"
                       type="input"
+                      disabled={true}
                     />
                     <GovernanceField
                       {...(isEditing && { className: classes.editableField })}
