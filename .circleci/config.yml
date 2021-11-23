@@ -58,13 +58,6 @@ workflows:
     jobs:
       - test:
           context: Hypernet Protocol
-      - publish:
-          context: Hypernet Protocol
-          filters:
-            branches:
-              only: master
-          requires:
-            - test
       # Development
       - gke/publish-and-rollout-image:
           name: Deploy Core Iframe
