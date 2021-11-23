@@ -47,6 +47,7 @@ import {
   TransferResolutionError,
   EthereumAccountAddress,
   EthereumContractAddress,
+  ProviderId,
   TokenInformation,
   RegistryTokenId,
 } from "@hypernetlabs/objects";
@@ -98,6 +99,7 @@ export default class HypernetIFrameProxy
     this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject();
     this.onPrivateCredentialsRequested = new Subject();
+    this.onWalletConnectOptionsDisplayRequested = new Subject();
     this.onStateChannelCreated = new Subject();
     this.onChainConnected = new Subject();
     this.onGovernanceChainConnected = new Subject();
@@ -272,6 +274,10 @@ export default class HypernetIFrameProxy
 
         child.on("onPrivateCredentialsRequested", () => {
           this.onPrivateCredentialsRequested.next();
+        });
+
+        child.on("onWalletConnectOptionsDisplayRequested", () => {
+          this.onWalletConnectOptionsDisplayRequested.next();
         });
       });
     });
@@ -898,6 +904,12 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public provideProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError | ProxyError> {
+    return this._createCall("provideProviderId", providerId);
+  }
+  
   public getTokenInformation(): ResultAsync<TokenInformation[], ProxyError> {
     return this._createCall("getTokenInformation", null);
   }
@@ -971,6 +983,7 @@ export default class HypernetIFrameProxy
   public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onWalletConnectOptionsDisplayRequested: Subject<void>;
   public onStateChannelCreated: Subject<ActiveStateChannel>;
   public onChainConnected: Subject<ChainId>;
   public onGovernanceChainConnected: Subject<ChainId>;

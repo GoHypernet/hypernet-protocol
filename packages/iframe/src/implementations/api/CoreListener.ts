@@ -18,6 +18,7 @@ import {
   EthereumContractAddress,
   EthereumAccountAddress,
   RegistryTokenId,
+  ProviderId,
 } from "@hypernetlabs/objects";
 import {
   IIFrameCallData,
@@ -507,6 +508,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
+      provideProviderId: (data: IIFrameCallData<ProviderId>) => {
+        this.returnForModel(() => {
+          return this.core.provideProviderId(data.data);
+        }, data.callId);
+      },
       getTokenInformation: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getTokenInformation();
@@ -636,6 +642,13 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
     this.core.onPrivateCredentialsRequested.subscribe(() => {
       parent.emit("onPrivateCredentialsRequested");
+    });
+
+    this.core.onWalletConnectOptionsDisplayRequested.subscribe(() => {
+      console.log(
+        "in CoreListener, emiting onWalletConnectOptionsDisplayRequested",
+      );
+      parent.emit("onWalletConnectOptionsDisplayRequested");
     });
 
     this.core.onStateChannelCreated.subscribe((activeStateChannel) => {

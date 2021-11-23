@@ -6,6 +6,7 @@ export const useStyles = makeStyles((theme) => ({
   wrapper: (props: any) => ({
     marginBottom: 24,
     cursor: "pointer",
+    textAlign: "left",
   }),
   dialogTitle: {
     display: "flex",

@@ -13,7 +13,7 @@ export interface IRenderParams {
   selector?: string;
   showInModal?: boolean;
   noLabel?: boolean;
-  includeBoxWrapper?: boolean;
+  excludeCardWrapper?: boolean;
   bodyStyle?: React.CSSProperties;
   closeCallback?: () => void;
 }
@@ -132,4 +132,5 @@ export interface IHypernetWebUI {
   renderConnectedAccountWidget(
     params?: IRenderParams,
   ): Result<void, RenderError>;
+  renderWalletConnectWidget(config: IRenderParams): Result<void, RenderError>;
 }

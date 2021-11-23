@@ -11,7 +11,7 @@ import {
   GovernanceDialogSelectLargeField,
   GovernanceLargeField,
   GovernanceWidgetHeader,
-} from "@web-integration/components";
+} from "@web-ui/components";
 
 enum ERegistryAction {
   ADD_REGISTRY = 0,

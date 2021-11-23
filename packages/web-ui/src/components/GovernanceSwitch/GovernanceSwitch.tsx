@@ -6,7 +6,7 @@ import {
   SwitchProps,
   withStyles,
 } from "@material-ui/core";
-import { colors } from "@web-integration/theme";
+import { colors } from "@web-ui/theme";
 
 type MuiSwitchPropsExtacted = Omit<SwitchProps, "onChange">;
 

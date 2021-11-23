@@ -10,7 +10,6 @@ import {
   GovernanceField,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
-import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
 
 interface IValues {
   amount: string;
@@ -30,7 +29,6 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
     activeStateChannels = [],
     selectedStateChennel,
   } = useFund();
-  const classes = useStyles({ error });
 
   const handleFormSubmit = (values: IValues) => {
     withdrawFunds(
@@ -42,7 +40,6 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
 
   return (
     <GovernanceCard
-      className={classes.wrapper}
       title={!noLabel ? "Withdraw Funds" : undefined}
       description={
         !noLabel

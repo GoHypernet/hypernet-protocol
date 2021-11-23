@@ -26,7 +26,10 @@ const MainContainer: React.FC<IMainContainer> = ({
     <>
       <LoadingSpinner />
       {withModal ? (
-        <Modal closeCallback={closeCallback} modalStyle={modalStyle}>
+        <Modal
+          closeCallback={closeCallback}
+          modalStyle={modalStyle}
+        >
           {children}
         </Modal>
       ) : isV2 ? (

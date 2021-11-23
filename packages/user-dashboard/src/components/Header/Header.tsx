@@ -69,7 +69,7 @@ const Header: React.FC = () => {
         <Hidden lgUp>
           <img
             className={classes.smallLogo}
-            src="https://res.cloudinary.com/barhantas/image/upload/v1634078961/H_V_2_copy_idcqep.png"
+            src="https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/hypernet-logo-dark.svg"
             alt=""
           />
         </Hidden>

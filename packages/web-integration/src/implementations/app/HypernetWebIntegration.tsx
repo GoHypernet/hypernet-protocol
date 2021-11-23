@@ -58,6 +58,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       //this.webUIClient.renderPrivateKeysModal();
       this.webUIClient.renderMetamaskWarningModal();
     });
+
+    this.core.onWalletConnectOptionsDisplayRequested.subscribe(() => {
+      this.webUIClient.renderWalletConnectWidget({ showInModal: true });
+    });
   }
 
   // wait for the core to be intialized

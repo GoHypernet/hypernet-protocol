@@ -12,7 +12,6 @@ const Gateways: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderGatewaysWidget({
         selector: "gateways-page-wrapper",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
   }, []);

@@ -22,9 +22,9 @@ const ref = document.querySelector("script");
 ref?.parentNode?.insertBefore(style, ref);
 
 Spinner();
-Spinner.show();
+// Spinner.show();
 
-const gatewayUrl = GatewayUrl("http://localhost:5010");
+const gatewayUrl = GatewayUrl("http://localhost:3000/users/v0");
 
 client
   .getReady()
@@ -35,6 +35,7 @@ client
         finalSuccessContent:
           'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',
         showInModal: true,
+        excludeCardWrapper: true,
       })
       .map(() => {
         Spinner.hide();

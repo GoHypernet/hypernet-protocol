@@ -2,6 +2,7 @@ import { Box } from "@material-ui/core";
 import React from "react";
 
 import { useStyles } from "@web-ui/components/EmptyState/EmptyState.style";
+import { HYPERNET_LOGO_DARK } from "@web-ui/constants";
 
 interface IEmptyStateProps {
   label?: string;
@@ -15,10 +16,7 @@ export const EmptyState: React.FC<IEmptyStateProps> = (
   const classes = useStyles();
   return (
     <Box className={classes.container}>
-      <img
-        width="150"
-        src="https://res.cloudinary.com/dqueufbs7/image/upload/v1622582034/images/Screen_Shot_2021-06-02_at_00.12.25.png"
-      />
+      <img width="150" src={HYPERNET_LOGO_DARK} />
       <Box className={classes.rightWrapper}>
         <Box className={classes.textWrapper}>
           <Box className={classes.label}>{label}</Box>

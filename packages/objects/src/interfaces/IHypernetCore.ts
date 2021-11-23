@@ -55,6 +55,7 @@ import { RegistryParams } from "@objects/RegistryParams";
 import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
 import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
+import { ProviderId } from "@web-integration/ProviderId";
 import { TokenInformation } from "@web-integration/TokenInformation";
 
 /**
@@ -613,6 +614,9 @@ export interface IHypernetCore {
     | GovernanceSignerUnavailableError
   >;
 
+  provideProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError | ProxyError>;
   getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
 
   getTokenInformationForChain(
@@ -654,6 +658,7 @@ export interface IHypernetCore {
   onCoreIFrameCloseRequested: Subject<void>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
+  onWalletConnectOptionsDisplayRequested: Subject<void>;
   onStateChannelCreated: Subject<ActiveStateChannel>;
   onChainConnected: Subject<ChainId>;
   onGovernanceChainConnected: Subject<ChainId>;

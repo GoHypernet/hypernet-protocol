@@ -53,6 +53,7 @@ export * from "@objects/TransferId";
 export * from "@objects/UnixTimestamp";
 export * from "@objects/UtilityMessageSignature";
 export * from "@objects/UUID";
+export * from "@objects/ProviderId";
 
 export * from "@objects/errors";
 export * from "@objects/interfaces";

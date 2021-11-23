@@ -1,7 +1,7 @@
 import { Box } from "@material-ui/core";
 import React from "react";
 
-import { Button } from "@web-ui/components";
+import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
 import { useStyles } from "@web-ui/components/SucessContent/SucessContent.style";
 import { AUTHENTICATION_SUCCESS_IMAGE_URL } from "@web-ui/constants";
 
@@ -18,29 +18,34 @@ export const SucessContent: React.FC<ISucessContentProps> = (
   const classes = useStyles();
   return (
     <Box className={classes.container}>
-      <Box className={classes.textWrapper}>
-        <Box className={classes.label}>{label}</Box>
-        {info && (
-          <Box
-            className={classes.info}
+      <Box className={classes.titleWrapper}>
+        <GovernanceTypography variant="h4">{label}</GovernanceTypography>
+      </Box>
+
+      <Box className={classes.subtitleWrapper}>
+        <GovernanceTypography variant="subtitle1">
+          You have successfully connected your wallet.
+        </GovernanceTypography>
+      </Box>
+
+      {info && (
+        <Box className={classes.subtitleWrapper}>
+          <GovernanceTypography
+            variant="subtitle1"
             dangerouslySetInnerHTML={{ __html: info }}
-          ></Box>
-        )}
-        <Box>
-          <img
-            className={classes.authenticationSuccessImg}
-            src={AUTHENTICATION_SUCCESS_IMAGE_URL}
           />
         </Box>
-      </Box>
+      )}
       {onOkay && (
-        <Box className={classes.buttonWrapper}>
-          <Button
-            label="Done"
+        <Box className={classes.doneButtonWrapper}>
+          <GovernanceButton
+            fullWidth
+            color="primary"
+            variant="contained"
             onClick={onOkay}
-            fullWidth={true}
-            bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-          />
+          >
+            Done
+          </GovernanceButton>
         </Box>
       )}
     </Box>

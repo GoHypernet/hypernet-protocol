@@ -54,6 +54,7 @@ import {
   EthereumContractAddress,
   RegistryTokenId,
   PaymentCreationError,
+  ProviderId,
   TokenInformation,
   InactiveGatewayError,
 } from "@hypernetlabs/objects";
@@ -206,6 +207,7 @@ export class HypernetCore implements IHypernetCore {
   public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onWalletConnectOptionsDisplayRequested: Subject<void>;
   public onStateChannelCreated: Subject<ActiveStateChannel>;
   public onChainConnected: Subject<ChainId>;
   public onGovernanceChainConnected: Subject<ChainId>;
@@ -330,6 +332,7 @@ export class HypernetCore implements IHypernetCore {
     this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject();
+    this.onWalletConnectOptionsDisplayRequested = new Subject();
     this.onStateChannelCreated = new Subject();
     this.onChainConnected = new Subject();
     this.onGovernanceChainConnected = new Subject();
@@ -383,6 +386,7 @@ export class HypernetCore implements IHypernetCore {
       this.onCoreIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
+      this.onWalletConnectOptionsDisplayRequested,
       this.onStateChannelCreated,
       this.onChainConnected,
       this.onGovernanceChainConnected,
@@ -1484,6 +1488,12 @@ export class HypernetCore implements IHypernetCore {
     return this.registryService.renounceRegistrarRole(registryName, address);
   }
 
+  public provideProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError> {
+    return this.accountService.provideProviderId(providerId);
+  }
+  
   public getTokenInformation(): ResultAsync<TokenInformation[], never> {
     return this.tokenInformationService.getTokenInformation();
   }
