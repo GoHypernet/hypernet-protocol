@@ -625,6 +625,15 @@ export interface IHypernetCore {
 
   getGovernanceChainId(): ResultAsync<ChainId, ProxyError>;
 
+  getRegistryEntryByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<
+    RegistryEntry,
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  >;
+
   /**
    * Observables for seeing what's going on
    */
