@@ -15,10 +15,6 @@ import {
 } from "@web-ui/constants";
 import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
 
-declare global {
-  interface Window {}
-}
-
 enum EOnboardingScreens {
   IDLE = 0,
   MERCHANT_AUTHORIZATION = 1,
@@ -211,12 +207,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               fullWidth
               variant="outlined"
               color="default"
-              onClick={() => {
-                document.open(
-                  "https://hypernet-protocol-dashboard-dev.hypernetlabs.io",
-                  "_blank",
-                );
-              }}
+              onClick={goToFundWalletScreen}
             >
               Fund My Wallet
             </GovernanceButton>

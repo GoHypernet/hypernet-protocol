@@ -12,9 +12,8 @@ export const ModalFooter: React.FC = () => {
         color="primary"
         fullWidth
         onClick={() => {
-          document.open(
+          window.open(
             "https://hypernet-protocol-dashboard-dev.hypernetlabs.io",
-            "_blank",
           );
         }}
       >
