@@ -130,7 +130,7 @@ task("registryParameters", "Prints NFR  parameters.")
     console.log("Storage Updating Allowed:", allowStorageUpdate);
     console.log("Transfers Allowed:", allowTransfers);
     console.log("Registration Token:", registrationToken);
-    console.log("Registration Fee:", registrationFee.toString());
+    console.log("Registration Fee:", ethers.utils.formatEther(registrationFee.toString(),"18"));
     console.log("Primary Registry:", primaryRegistry);
   });
 
@@ -253,7 +253,7 @@ task("registryEntryByLabel", "Prints NunFungible Identity Data.")
 
 task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")
-  .addParam("tokenid", "NFI label")
+  .addParam("tokenid", "NFI tokenID")
   .setAction(async (taskArgs) => {
     const name = taskArgs.name;
     const tokenId = taskArgs.tokenid;
@@ -272,6 +272,38 @@ task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
       accounts[0],
     );
 
+    const tokenURI = await registryHandle.tokenURI(tokenId);
+    const tokenOwner = await registryHandle.ownerOf(tokenId);
+    const tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
+
+    console.log("Owner of NFI:", tokenOwner);
+    console.log("Token ID:", tokenId.toString());
+    console.log("NFI Data:", tokenURI);
+    console.log("NFI label:", tokenLabel);
+  });
+
+  task("registryEntryByIndex", "Prints NunFungible Identity Data.")
+  .addParam("name", "Target NonFungle Registry Name.")
+  .addParam("tokenindex", "NFI index")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const tokenindex = taskArgs.tokenindex;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(
+      registryAddress,
+      NFR.abi,
+      accounts[0],
+    );
+
+    const tokenId = await registryHandle.tokenByIndex(tokenindex);
     const tokenURI = await registryHandle.tokenURI(tokenId);
     const tokenOwner = await registryHandle.ownerOf(tokenId);
     const tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
