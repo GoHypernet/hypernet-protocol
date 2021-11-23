@@ -36,14 +36,8 @@ export const SucessContent: React.FC<ISucessContentProps> = (
           />
         </Box>
       )}
-      <Box>
-        <img
-          className={classes.authenticationSuccessImg}
-          src={AUTHENTICATION_SUCCESS_IMAGE_URL}
-        />
-      </Box>
       {onOkay && (
-        <Box mb={2} width="100%">
+        <Box className={classes.doneButtonWrapper}>
           <GovernanceButton
             fullWidth
             color="primary"
