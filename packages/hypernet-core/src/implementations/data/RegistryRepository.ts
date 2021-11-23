@@ -709,10 +709,10 @@ export class RegistryRepository implements IRegistryRepository {
         throw new Error("Registry not found!");
       }
 
-      if (tokenId == 0) {
+      if (tokenId === 0 || isNaN(tokenId)) {
         return errAsync(
           new NonFungibleRegistryContractError(
-            "Zero number is not allowed as a token ID.",
+            "Zero number or strings are not allowed as a token ID.",
           ),
         );
       }
@@ -1072,19 +1072,12 @@ export class RegistryRepository implements IRegistryRepository {
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
     ]).map(([config, provider]) => {
-      console.log("provider123: ", provider);
-      console.log("config: ", config);
-      console.log(
-        "config.governanceChainInformation.registryFactoryAddress",
-        config.governanceChainInformation.registryFactoryAddress,
-      );
       this.provider = provider;
 
       this.registryFactoryContract = new RegistryFactoryContract(
         provider,
         config.governanceChainInformation.registryFactoryAddress,
       );
-      console.log("this.registryFactoryContract", this.registryFactoryContract);
       this.hypertokenContract = new ERC20Contract(
         provider,
         config.governanceChainInformation.hypertokenAddress,

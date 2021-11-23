@@ -87,7 +87,6 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     return ResultAsync.fromPromise(
       this.contract?.getNumberOfEnumerableRegistries() as Promise<BigNumber>,
       (e) => {
-        console.log("getNumberOfEnumerableRegistries e: ", e);
         return new RegistryFactoryContractError(
           "Unable to call factoryContract getNumberOfEnumerableRegistries()",
           e,
