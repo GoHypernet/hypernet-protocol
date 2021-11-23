@@ -136,21 +136,6 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     ).map((totalSupply) => totalSupply.toNumber());
   }
 
-  public allowLazyRegister(): ResultAsync<
-    boolean,
-    NonFungibleRegistryContractError
-  > {
-    return ResultAsync.fromPromise(
-      this.contract?.allowLazyRegister() as Promise<boolean>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call allowLazyRegister()",
-          e,
-        );
-      },
-    );
-  }
-
   public allowStorageUpdate(): ResultAsync<
     boolean,
     NonFungibleRegistryContractError
@@ -467,12 +452,14 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     recipientAddress: EthereumAccountAddress,
     label: string,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.registerByToken(
         recipientAddress,
         label,
         data,
+        tokenId,
       ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
@@ -496,12 +483,14 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     recipientAddress: EthereumAccountAddress,
     label: string,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.register(
         recipientAddress,
         label,
         data,
+        tokenId,
       ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(

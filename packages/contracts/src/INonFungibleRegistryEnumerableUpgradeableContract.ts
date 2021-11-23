@@ -28,7 +28,6 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   name(): ResultAsync<string, NonFungibleRegistryContractError>;
   symbol(): ResultAsync<string, NonFungibleRegistryContractError>;
   totalSupply(): ResultAsync<number, NonFungibleRegistryContractError>;
-  allowLazyRegister(): ResultAsync<boolean, NonFungibleRegistryContractError>;
   allowStorageUpdate(): ResultAsync<boolean, NonFungibleRegistryContractError>;
   allowLabelChange(): ResultAsync<boolean, NonFungibleRegistryContractError>;
   allowTransfers(): ResultAsync<boolean, NonFungibleRegistryContractError>;
@@ -87,11 +86,13 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     recipientAddress: EthereumAccountAddress,
     label: string,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   register(
     recipientAddress: EthereumAccountAddress,
     label: string,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   grantRole(
     address: EthereumAccountAddress,

@@ -410,6 +410,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           label: string;
           recipientAddress: EthereumAccountAddress;
           data: string;
+          tokenId: RegistryTokenId;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -418,6 +419,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.label,
             data.data.recipientAddress,
             data.data.data,
+            data.data.tokenId,
           );
         }, data.callId);
       },

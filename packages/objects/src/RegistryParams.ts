@@ -5,7 +5,6 @@ import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 export class RegistryParams {
   constructor(
     public name: string,
-    public allowLazyRegister: boolean | null,
     public allowStorageUpdate: boolean | null,
     public allowLabelChange: boolean | null,
     public allowTransfers: boolean | null,

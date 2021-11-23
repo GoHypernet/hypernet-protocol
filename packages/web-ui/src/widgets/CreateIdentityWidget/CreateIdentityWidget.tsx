@@ -1,4 +1,4 @@
-import { EthereumAccountAddress } from "@hypernetlabs/objects";
+import { EthereumAccountAddress, RegistryTokenId } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
@@ -22,6 +22,7 @@ interface ICreateIdentityFormValues {
   label: string;
   recipientAddress: string;
   tokenUri: string;
+  tokenId: string;
 }
 
 const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
@@ -45,6 +46,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
     label,
     recipientAddress,
     tokenUri,
+    tokenId,
   }: ICreateIdentityFormValues) => {
     setLoading(true);
 
@@ -54,6 +56,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
         label,
         EthereumAccountAddress(recipientAddress),
         tokenUri,
+        RegistryTokenId(Number(tokenId)),
       )
       .map(() => {
         setLoading(false);
@@ -74,6 +77,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
               label: "",
               recipientAddress: currentAccountAddress,
               tokenUri: "",
+              tokenId: "",
             }}
             onSubmit={handleCreateIdentity}
           >
@@ -85,6 +89,12 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                     name="label"
                     type="input"
                     placeholder="Enter a label"
+                  />
+                  <GovernanceField
+                    title="Token id"
+                    name="tokenId"
+                    type="input"
+                    placeholder="Enter a number for your token"
                   />
                   <GovernanceField
                     title="Recipient Address"

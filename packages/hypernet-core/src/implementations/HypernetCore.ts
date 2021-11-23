@@ -1373,6 +1373,7 @@ export class HypernetCore implements IHypernetCore {
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1386,6 +1387,7 @@ export class HypernetCore implements IHypernetCore {
       label,
       recipientAddress,
       data,
+      tokenId,
     );
   }
 

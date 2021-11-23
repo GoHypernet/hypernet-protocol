@@ -97,7 +97,6 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const getRegistryNotAllowedChipItems = (registry: Registry) => {
     const items: string[] = [];
 
-    !registry.allowLazyRegister && items.push("Lazy Registration not allowed");
     !registry.allowLabelChange && items.push("Label Change not allowed");
     !registry.allowStorageUpdate && items.push("Storage update not allowed");
     !registry.allowTransfers && items.push("Transfers not allowed");

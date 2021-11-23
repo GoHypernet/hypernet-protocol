@@ -156,6 +156,7 @@ export class RegistryService implements IRegistryService {
     label: string,
     recipientAddress: EthereumAccountAddress,
     data: string,
+    tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
     | RegistryFactoryContractError
@@ -169,6 +170,7 @@ export class RegistryService implements IRegistryService {
       label,
       recipientAddress,
       data,
+      tokenId,
     );
   }
 
