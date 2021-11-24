@@ -686,7 +686,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     index: number,
   ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError> {
     return this.balanceOf(ownerAddress).andThen((numberOfTokens) => {
-      if (numberOfTokens == 0) {
+      if (numberOfTokens == 0 || index >= numberOfTokens) {
         return okAsync(null);
       }
 
