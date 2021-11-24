@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/web-ui",
-  "version": "0.0.1",
+  "version": "5.0.8",
   "description": "Web ui react components for hypernet protocol",
   "license": "ISC",
   "repository": {
