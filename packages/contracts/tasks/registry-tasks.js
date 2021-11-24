@@ -314,6 +314,36 @@ task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
     console.log("NFI label:", tokenLabel);
   });
 
+  task("tokenOfOwnerByIndex", "Prints NunFungible Identity Data.")
+  .addParam("registry", "Target NonFungle Registry Name.")
+  .addParam("address", "asdf")
+  .addParam("tokenindex", "NFI index")
+  .setAction(async (taskArgs) => {
+    const registry = taskArgs.registry;
+    const tokenindex = taskArgs.tokenindex;
+    const address = taskArgs.address;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+    const registryAddress = await factoryHandle.nameToAddress(registry);
+    const registryHandle = new hre.ethers.Contract(
+      registryAddress,
+      NFR.abi,
+      accounts[0],
+    );
+
+    const addressbalance = await registryHandle.balanceOf(address);
+    const tokenId = await registryHandle.tokenOfOwnerByIndex(address, tokenindex);
+
+    console.log("account balance:", addressbalance.toString())
+    console.log("Token ID:", tokenId.toString());
+  });
+
 task("transferEntryByTokenID", "Transfers a token to a specified participant.")
   .addParam("name", "Target NonFungle Registry Name")
   .addParam("tokenid", "NFI tokenId")
@@ -368,10 +398,10 @@ task("burnRegistryEntry", "Prints NunFungible Identity Data.")
       accounts[0],
     );
 
-    const balanceBefore = awaite.registryHandle.balanceOf(accounts[0].address);
+    const balanceBefore = await registryHandle.balanceOf(accounts[0].address);
     const tx = await registryHandle.burn(tokenId);
     await tx.wait();
-    const balanceAfter = awaite.registryHandle.balanceOf(accounts[0].address);
+    const balanceAfter = await registryHandle.balanceOf(accounts[0].address);
     console.log("Balance before: ", balanceBefore);
     console.log("Balance after: ", balanceAfter);
   });
