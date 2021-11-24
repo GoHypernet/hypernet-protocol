@@ -13,18 +13,18 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Local Development Chain",
       ChainId(1337),
       true,
-      EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"),
-      EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"),
-      EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"),
-      EthereumContractAddress("0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6"),
-      EthereumContractAddress("0x30753E4A8aad7F8597332E813735Def5dD395028"),
-      EthereumContractAddress("0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4"),
-      EthereumContractAddress("0xdDA6327139485221633A1FcD65f4aC932E60A2e1"),
-      EthereumContractAddress("0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"),
-      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"),
-      EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"),
-      EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"),
-      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"),
+      EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"), // channelFactory
+      EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"), // transferRegistry
+      EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"), // hypertoken
+      EthereumContractAddress("0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6"), // messageTransfer
+      EthereumContractAddress("0x30753E4A8aad7F8597332E813735Def5dD395028"), // insuranceTransfer
+      EthereumContractAddress("0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4"), // parameterizedTransfer
+      EthereumContractAddress("0xdDA6327139485221633A1FcD65f4aC932E60A2e1"), // hypernetGovernor
+      EthereumContractAddress("0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"), // registryFactory
+      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // gatewayRegistry
+      EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // liquidityRegistry
+      EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
+      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       [ProviderUrl("http://localhost:8545")],
     ),
   ],
@@ -34,18 +34,18 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Dev Environment Chain",
       ChainId(1369),
       true,
-      EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"),
-      EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"),
-      EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"),
-      EthereumContractAddress("0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6"),
-      EthereumContractAddress("0x30753E4A8aad7F8597332E813735Def5dD395028"),
-      EthereumContractAddress("0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4"),
-      EthereumContractAddress("0xdDA6327139485221633A1FcD65f4aC932E60A2e1"),
-      EthereumContractAddress("0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"),
-      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"),
-      EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"),
-      EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"),
-      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"),
+      EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"), // channelFactory
+      EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"), // transferRegistry
+      EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"), // hypertoken
+      EthereumContractAddress("0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6"), // messageTransfer
+      EthereumContractAddress("0x30753E4A8aad7F8597332E813735Def5dD395028"), // insuranceTransfer
+      EthereumContractAddress("0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4"), // parameterizedTransfer
+      EthereumContractAddress("0xdDA6327139485221633A1FcD65f4aC932E60A2e1"), // hypernetGovernor
+      EthereumContractAddress("0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"), // registryFactory
+      EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // gatewayRegistry
+      EthereumContractAddress("0x29A5Df5784eC1e58a03557e825470A217534C816"), // liquidityRegistry
+      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // tokenRegistry
+      EthereumContractAddress("0xCdFa906b330485021fD37d5E3Ceab4F11D5101c6"), // chainRegistry
       [ProviderUrl("https://eth-provider-dev.hypernetlabs.io")],
     ),
   ],
