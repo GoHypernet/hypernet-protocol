@@ -266,4 +266,19 @@ export class RegistryService implements IRegistryService {
   > {
     return this.registryRepository.renounceRegistrarRole(registryName, address);
   }
+
+  public getRegistryEntryByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<
+    RegistryEntry | null,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryRepository.getRegistryEntryByOwnerAddress(
+      registryName,
+      ownerAddress,
+      index,
+    );
+  }
 }

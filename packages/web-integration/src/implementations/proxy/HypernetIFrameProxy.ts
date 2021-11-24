@@ -930,6 +930,21 @@ export default class HypernetIFrameProxy
     return this._createCall("getGovernanceChainId", null);
   }
 
+  public getRegistryEntryByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<
+    RegistryEntry | null,
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  > {
+    return this._createCall("getRegistryEntryByOwnerAddress", {
+      registryName,
+      ownerAddress,
+      index,
+    });
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {
