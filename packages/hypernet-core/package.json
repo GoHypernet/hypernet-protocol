@@ -53,7 +53,7 @@
     "@hypernetlabs/gateway-connector": "^0.0.11",
     "@hypernetlabs/objects": "^0.3.9",
     "@hypernetlabs/utils": "^0.4.7",
-    "@hypernetlabs/contracts": "^0.0.4",
+    "@hypernetlabs/contracts": "^0.0.5",
     "@walletconnect/web3-provider": "^1.5.2",
     "class-transformer": "^0.3.2",
     "crypto-browserify": "^3.12.0",
