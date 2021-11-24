@@ -378,7 +378,7 @@ export class RegistryRepository implements IRegistryRepository {
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
-    RegistryEntry,
+    RegistryEntry | null,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryFactoryContract

@@ -923,7 +923,7 @@ export default class HypernetIFrameProxy
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
-    RegistryEntry,
+    RegistryEntry | null,
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryEntryByOwnerAddress", {

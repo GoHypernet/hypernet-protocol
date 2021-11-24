@@ -186,7 +186,7 @@ export interface IRegistryRepository {
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
-    RegistryEntry,
+    RegistryEntry | null,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
 }

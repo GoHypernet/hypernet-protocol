@@ -116,7 +116,13 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   getRegistryEntryByOwnerAddress(
     ownerAddress: EthereumAccountAddress,
     index: number,
-  ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError>;
+  ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError>;
+  balanceOf(
+    address: EthereumAccountAddress,
+  ): ResultAsync<number, NonFungibleRegistryContractError>;
+  getFirstRegistryEntryByOwnerAddress(
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError>;
 }
 
 export const INonFungibleRegistryEnumerableUpgradeableContractType = Symbol.for(

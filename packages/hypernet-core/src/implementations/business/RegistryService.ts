@@ -272,7 +272,7 @@ export class RegistryService implements IRegistryService {
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
-    RegistryEntry,
+    RegistryEntry | null,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryRepository.getRegistryEntryByOwnerAddress(

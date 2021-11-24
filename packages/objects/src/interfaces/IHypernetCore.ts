@@ -630,7 +630,7 @@ export interface IHypernetCore {
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
-    RegistryEntry,
+    RegistryEntry | null,
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
