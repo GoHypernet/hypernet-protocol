@@ -75,7 +75,7 @@ task("createRegistryByToken", "Creates a registry by burning token.")
 
     // approve the registry factory to pull hypertoken from the users wallet
     let tx = await hypertoken.approve(factoryHandle.address, regFee);
-    tx.wait();
+    await tx.wait(3);
 
     tx = await factoryHandle.createRegistryByToken(
       name,
@@ -83,7 +83,7 @@ task("createRegistryByToken", "Creates a registry by burning token.")
       registrar,
       enumerable,
     );
-    tx.wait();
+    await tx.wait(2);
 
     const regAddress = await factoryHandle.nameToAddress(name);
     console.log("Registry Deployed to:", regAddress);
@@ -116,6 +116,9 @@ task("registryParameters", "Prints NFR  parameters.")
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
     const registrationToken = await registryHandle.registrationToken();
+    const allowLabelChange = await registryHandle.allowLabelChange();
+    const allowStorageUpdate = await registryHandle.allowStorageUpdate();
+    const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
     console.log("Registry Name:", name);
@@ -123,19 +126,34 @@ task("registryParameters", "Prints NFR  parameters.")
     console.log("Registry Address:", registryAddress);
     console.log("Registrar:", registrarAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
+    console.log("Label Updating Allowed:", allowLabelChange);
+    console.log("Storage Updating Allowed:", allowStorageUpdate);
+    console.log("Transfers Allowed:", allowTransfers);
     console.log("Registration Token:", registrationToken);
-    console.log("Registration Fee:", registrationFee.toString());
+    console.log("Registration Fee:", ethers.utils.formatEther(registrationFee.toString(),"18"));
     console.log("Primary Registry:", primaryRegistry);
   });
 
 task("setRegistryParameters", "Set the parameters of a registry if you have the REGISTRAR_ROLE.")
-  .addParam("name", "name of the Registry to update.")
-  .addParam("regtoken", "address of token to use for registration by token")
-  .addParam("primaryreg", "NFR for checking preregistration")
+  .addParam("name", "Name of target Registry to update.")
+  .addParam("schema", "New schema field.")
+  .addParam("storageupdate", "Boolean flag to all updating storage.")
+  .addParam("labelchange", "Boolean flag to udpate NFI labels")
+  .addParam("allowtransfers", "Boolean flag to allow NFI transfers")
+  .addParam("registrationtoken", "Address of ERC20 token to use for token-based registration")
+  .addParam("registrationfee", "Amount of registration token needed to create an NFI")
+  .addParam("burnaddress","Address where burned tokens will be sent")
+  .addParam("burnfee", "percentage of registration token to burn (<=10000)")
   .setAction(async (taskArgs) => {
     const name = taskArgs.name;
-    const tokenAddress = taskArgs.regtoken;
-    const primaryreg = taskArgs.primaryreg;
+    const schema = (taskArgs.schema.length ? [taskArgs.schema]: []);
+    const storageupdate = (taskArgs.storageupdate.length ? [taskArgs.storageupdate == 'true']: []);
+    const labelchange = (taskArgs.labelchange.length ? [taskArgs.labelchange == 'true']: []);
+    const allowtransfers = (taskArgs.allowtransfers.length ? [taskArgs.allowtransfers == 'true']: []);
+    const registrationtoken = (taskArgs.registrationtoken.length ? [taskArgs.registrationtoken] : []);
+    const registrationfee = (taskArgs.registrationfee.length ? [taskArgs.registrationfee]: []);
+    const burnaddress = (taskArgs.burnaddress.length ? [taskArgs.burnaddress]: []);
+    const burnfee = (taskArgs.burnfee.length ? [taskArgs.burnfee]: []);
 
     const accounts = await hre.ethers.getSigners();
 
@@ -155,24 +173,47 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
 
     // construct call data via ABI encoding
     let params = abiCoder.encode(
-      [
-        "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])",
-      ],
-      [[[], [], [], [], [], [tokenAddress], [], [], [], [primaryreg]]],
-    );
+        [
+          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+        ],
+        [
+            [
+            schema, 
+            storageupdate, 
+            labelchange, 
+            allowtransfers, 
+            registrationtoken, 
+            registrationfee, 
+            burnaddress, 
+            burnfee
+            ]
+        ],
+      );
 
     const tx = await registryHandle.setRegistryParameters(params);
-    tx.wait();
+    await tx.wait(3);
 
+    const REGISTRAR_ROLE = registryHandle.REGISTRAR_ROLE();
+    const registrarAddress = await registryHandle.getRoleMember(
+      REGISTRAR_ROLE,
+      0,
+    );
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
     const registrationToken = await registryHandle.registrationToken();
+    const allowLabelChange = await registryHandle.allowLabelChange();
+    const allowStorageUpdate = await registryHandle.allowStorageUpdate();
+    const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
     console.log("Registry Address:", registryAddress);
+    console.log("Registrar:", registrarAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
+    console.log("Label Updating Allowed:", allowLabelChange);
+    console.log("Storage Updating Allowed:", allowStorageUpdate);
+    console.log("Transfers Allowed:", allowTransfers);
     console.log("Registration Token:", registrationToken);
     console.log("Registration Fee:", registrationFee.toString());
     console.log("Primary Registry:", primaryRegistry);
@@ -212,7 +253,7 @@ task("registryEntryByLabel", "Prints NunFungible Identity Data.")
 
 task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")
-  .addParam("tokenid", "NFI label")
+  .addParam("tokenid", "NFI tokenID")
   .setAction(async (taskArgs) => {
     const name = taskArgs.name;
     const tokenId = taskArgs.tokenid;
@@ -241,6 +282,68 @@ task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
     console.log("NFI label:", tokenLabel);
   });
 
+  task("registryEntryByIndex", "Prints NunFungible Identity Data.")
+  .addParam("name", "Target NonFungle Registry Name.")
+  .addParam("tokenindex", "NFI index")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const tokenindex = taskArgs.tokenindex;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(
+      registryAddress,
+      NFR.abi,
+      accounts[0],
+    );
+
+    const tokenId = await registryHandle.tokenByIndex(tokenindex);
+    const tokenURI = await registryHandle.tokenURI(tokenId);
+    const tokenOwner = await registryHandle.ownerOf(tokenId);
+    const tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
+
+    console.log("Owner of NFI:", tokenOwner);
+    console.log("Token ID:", tokenId.toString());
+    console.log("NFI Data:", tokenURI);
+    console.log("NFI label:", tokenLabel);
+  });
+
+  task("tokenOfOwnerByIndex", "Prints NunFungible Identity Data.")
+  .addParam("registry", "Target NonFungle Registry Name.")
+  .addParam("address", "asdf")
+  .addParam("tokenindex", "NFI index")
+  .setAction(async (taskArgs) => {
+    const registry = taskArgs.registry;
+    const tokenindex = taskArgs.tokenindex;
+    const address = taskArgs.address;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+    const registryAddress = await factoryHandle.nameToAddress(registry);
+    const registryHandle = new hre.ethers.Contract(
+      registryAddress,
+      NFR.abi,
+      accounts[0],
+    );
+
+    const addressbalance = await registryHandle.balanceOf(address);
+    const tokenId = await registryHandle.tokenOfOwnerByIndex(address, tokenindex);
+
+    console.log("account balance:", addressbalance.toString())
+    console.log("Token ID:", tokenId.toString());
+  });
+
 task("transferEntryByTokenID", "Transfers a token to a specified participant.")
   .addParam("name", "Target NonFungle Registry Name")
   .addParam("tokenid", "NFI tokenId")
@@ -267,7 +370,7 @@ task("transferEntryByTokenID", "Transfers a token to a specified participant.")
     const tokenOwner = await registryHandle.ownerOf(tokenId);
 
     let tx = await registryHandle.transferFrom(tokenOwner, recipient, tokenId);
-    tx.wait();
+    await tx.wait();
 
     const newTokenOwner = await registryHandle.ownerOf(tokenId);
 
@@ -295,10 +398,10 @@ task("burnRegistryEntry", "Prints NunFungible Identity Data.")
       accounts[0],
     );
 
-    const balanceBefore = awaite.registryHandle.balanceOf(accounts[0].address);
+    const balanceBefore = await registryHandle.balanceOf(accounts[0].address);
     const tx = await registryHandle.burn(tokenId);
-    tx.wait();
-    const balanceAfter = awaite.registryHandle.balanceOf(accounts[0].address);
+    await tx.wait();
+    const balanceAfter = await registryHandle.balanceOf(accounts[0].address);
     console.log("Balance before: ", balanceBefore);
     console.log("Balance after: ", balanceAfter);
   });
@@ -335,7 +438,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
     // approve the transfer of tokens to the NFR
     const registrationFee = await registryHandle.registrationFee();
     let tx = await hypertoken.approve(registryAddress, registrationFee);
-    tx.wait();
+    await tx.wait(3);
 
     // call registerByToken on the NFR
     tx = await registryHandle.registerByToken(
@@ -344,7 +447,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
       NFIData,
       tokenid,
     );
-    tx.wait();
+    await tx.wait(3);
 
     const tokenId = await registryHandle.registryMap(NFILabel);
     console.log("Token ID:", tokenId.toString());
