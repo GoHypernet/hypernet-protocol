@@ -826,7 +826,7 @@ export class RegistryRepository implements IRegistryRepository {
 
       // Means registration token is not a zero address
       if (BigNumber.from(registry.registrationToken).isZero() === false) {
-        return this.registryFactoryContract
+        return this.nonFungibleRegistryContract
           .registrationFee()
           .andThen((registrationFees) => {
             return this.hypertokenContract
