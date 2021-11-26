@@ -139,7 +139,7 @@ workflows:
       # Core
       - gke/publish-and-rollout-image:
           name: Deploy Core Iframe Production
-          cluster: foundation-cluster-ssqcw
+          cluster: foundation-cluster-xyhsk
           container: core-iframe
           deployment: core-iframe
           image: core-iframe
@@ -163,7 +163,7 @@ workflows:
           context: Hypernet Foundation
       - gke/publish-and-rollout-image:
           name: Deploy Gateway Iframe Production
-          cluster: foundation-cluster-ssqcw
+          cluster: foundation-cluster-xyhsk
           container: gateway-iframe
           deployment: gateway-iframe
           image: gateway-iframe
@@ -187,7 +187,7 @@ workflows:
           context: Hypernet Foundation
       - gke/publish-and-rollout-image:
           name: Deploy Launchpad Production
-          cluster: foundation-cluster-ssqcw
+          cluster: foundation-cluster-xyhsk
           container: launchpad
           deployment: launchpad
           image: launchpad
