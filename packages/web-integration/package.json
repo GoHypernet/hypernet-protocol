@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/web-integration",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "",
   "license": "ISC",
   "author": "",
@@ -25,7 +25,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@hypernetlabs/objects": "^0.3.9",
-    "@hypernetlabs/utils": "^0.4.7",
+    "@hypernetlabs/utils": "^0.4.8",
     "@hypernetlabs/web-ui": "^5.0.10",
     "ethers": "^5.4.7",
     "neverthrow": "^4.1.0",
