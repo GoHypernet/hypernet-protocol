@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/contracts",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,8 +14,8 @@
   },
   "devDependencies": {
     "@atixlabs/hardhat-time-n-mine": "0.0.5",
-    "@hypernetlabs/objects": "^0.3.9",
-    "@hypernetlabs/utils": "^0.4.8",
+    "@hypernetlabs/objects": "^0.3.10",
+    "@hypernetlabs/utils": "^0.4.9",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-solhint": "^2.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
