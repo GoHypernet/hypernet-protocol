@@ -11,6 +11,6 @@ export const useStyles = makeStyles({
     height: "100%",
     width: "100%",
     backgroundColor: "rgba(0,0,0,0.3)",
-    zIndex: 10001,
+    zIndex: 1299,
   },
 });

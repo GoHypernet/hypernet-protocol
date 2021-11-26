@@ -181,6 +181,14 @@ export interface IRegistryRepository {
     | BlockchainUnavailableError
     | InvalidParametersError
   >;
+  getRegistryEntryByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<
+    RegistryEntry | null,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");

@@ -373,6 +373,35 @@ export class RegistryRepository implements IRegistryRepository {
       });
   }
 
+  public getRegistryEntryByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<
+    RegistryEntry | null,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryFactoryContract
+      .nameToAddress(registryName)
+      .andThen((registryAddress) => {
+        if (this.provider == null) {
+          throw new Error("No provider available!");
+        }
+
+        // Call the NFI contract of that address
+        this.nonFungibleRegistryContract =
+          new NonFungibleRegistryEnumerableUpgradeableContract(
+            this.provider,
+            registryAddress,
+          );
+
+        return this.nonFungibleRegistryContract.getRegistryEntryByOwnerAddress(
+          ownerAddress,
+          index,
+        );
+      });
+  }
+
   public getRegistryEntryDetailByTokenId(
     registryName: string,
     tokenId: RegistryTokenId,
@@ -697,7 +726,7 @@ export class RegistryRepository implements IRegistryRepository {
 
       const params = abiCoder.encode(
         [
-          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])",
+          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
         ],
         [
           [
@@ -721,9 +750,6 @@ export class RegistryRepository implements IRegistryRepository {
               ? []
               : [registryParams.burnAddress],
             registryParams.burnFee == null ? [] : [registryParams.burnFee],
-            registryParams.primaryRegistry == null
-              ? []
-              : [registryParams.primaryRegistry],
           ],
         ],
       );

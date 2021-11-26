@@ -271,6 +271,24 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     ).map((tokenId) => RegistryTokenId(tokenId.toNumber()));
   }
 
+  public tokenOfOwnerByIndex(
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.tokenOfOwnerByIndex(
+        ownerAddress,
+        index,
+      ) as Promise<BigNumber>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call tokenOfOwnerByIndex()",
+          e,
+        );
+      },
+    ).map((tokenId) => RegistryTokenId(tokenId.toNumber()));
+  }
+
   public registryMap(
     label: string,
   ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {
@@ -634,6 +652,20 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     });
   }
 
+  public balanceOf(
+    address: EthereumAccountAddress,
+  ): ResultAsync<number, NonFungibleRegistryContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.balanceOf(address) as Promise<BigNumber>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call balanceOf()",
+          e,
+        );
+      },
+    ).map((numberOfTokens) => numberOfTokens.toNumber());
+  }
+
   public getRegistryEntryByLabel(
     label: string,
   ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
@@ -647,5 +679,39 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         );
       });
     });
+  }
+
+  public getRegistryEntryByOwnerAddress(
+    ownerAddress: EthereumAccountAddress,
+    index: number,
+  ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError> {
+    return this.balanceOf(ownerAddress).andThen((numberOfTokens) => {
+      if (numberOfTokens == 0 || index >= numberOfTokens) {
+        return okAsync(null);
+      }
+
+      return ResultAsync.fromPromise(
+        this.contract?.tokenOfOwnerByIndex(
+          ownerAddress,
+          index,
+        ) as Promise<BigNumber>,
+        (e) => {
+          return new NonFungibleRegistryContractError(
+            "Unable to call tokenOfOwnerByIndex()",
+            e,
+          );
+        },
+      ).andThen((tokenId) => {
+        return this.getRegistryEntryByTokenId(
+          RegistryTokenId(tokenId.toNumber()),
+        );
+      });
+    });
+  }
+
+  public getFirstRegistryEntryByOwnerAddress(
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError> {
+    return this.getRegistryEntryByOwnerAddress(ownerAddress, 0);
   }
 }
