@@ -24,7 +24,7 @@
     "@hypernetlabs/hypernet-core": "^0.0.1",
     "@hypernetlabs/objects": "^0.3.9",
     "@hypernetlabs/utils": "^0.4.7",
-    "@hypernetlabs/web-ui": "^5.0.8",
+    "@hypernetlabs/web-ui": "^5.0.10",
     "neverthrow": "^4.1.0",
     "postmate": "^1.5.2"
   }
