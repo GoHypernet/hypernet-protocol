@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/web-ui",
-  "version": "5.0.8",
+  "version": "5.0.10",
   "description": "Web ui react components for hypernet protocol",
   "license": "ISC",
   "repository": {
@@ -29,6 +29,7 @@
     "build": "yarn clean && yarn compile",
     "alias": "tsc-alias",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "prepublish": "yarn build",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "generate-docs": "npx typedoc --options typedoc.json",
     "test": "echo \"No tests specified yet\" && exit 0"
