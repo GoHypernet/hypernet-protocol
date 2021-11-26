@@ -67,7 +67,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0xc616c67f9c680E662103b26cEfFcC70a121CD5d5"), // liquidityRegistry
       EthereumContractAddress("0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D"), // tokenRegistry
       EthereumContractAddress("TODO"), // chainRegistry
-      [ProviderUrl("https://rinkeby.hypernet.foundation")],
+      [ProviderUrl("https://rinkeby.infura.io/v3/72827ccd538446f2a20e35a632664c52")],
     ),
   ],
   [
