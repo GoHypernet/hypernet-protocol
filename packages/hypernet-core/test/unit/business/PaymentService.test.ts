@@ -27,7 +27,7 @@ import {
   paymentSigningDomain,
   pushPaymentSigningTypes,
 } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ILogUtils, IValidationUtils } from "@hypernetlabs/utils";
 import { PaymentService } from "@implementations/business/PaymentService";
 import { IPaymentService } from "@interfaces/business/IPaymentService";
 import {
@@ -37,11 +37,6 @@ import {
   IPaymentRepository,
   IGatewayRegistrationRepository,
 } from "@interfaces/data";
-import {
-  IBlockchainUtils,
-  IGatewayConnectorProxy,
-  IPaymentUtils,
-} from "@interfaces/utilities";
 import {
   defaultExpirationLength,
   gatewayUrl,
@@ -80,6 +75,12 @@ import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
 import {
+  IBlockchainTimeUtils,
+  IBlockchainUtils,
+  IGatewayConnectorProxy,
+  IPaymentUtils,
+} from "@interfaces/utilities";
+import {
   ConfigProviderMock,
   ContextProviderMock,
   VectorUtilsMockFactory,
@@ -103,6 +104,8 @@ class PaymentServiceMocks {
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
   public gatewayRegistrationRepository =
     td.object<IGatewayRegistrationRepository>();
+  public blockchainTimeUtils = td.object<IBlockchainTimeUtils>();
+  public validationUtils = td.object<IValidationUtils>();
 
   public proposedPushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
@@ -147,8 +150,8 @@ class PaymentServiceMocks {
 
     td.when(
       this.paymentRepository.createPushPayment(
-        routerPublicIdentifier,
-        chainId,
+        commonPaymentId,
+        routerChannelAddress,
         publicIdentifier,
         commonAmount,
         expirationDate,
@@ -384,6 +387,16 @@ class PaymentServiceMocks {
         gatewaySignature,
       ),
     ).thenReturn(gatewayAccount as never);
+
+    td.when(this.blockchainTimeUtils.getBlockchainTimestamp()).thenReturn(
+      okAsync(unixNow),
+    );
+    td.when(this.validationUtils.validatePaymentId(commonPaymentId)).thenReturn(
+      true,
+    );
+    td.when(
+      this.validationUtils.validatePublicIdentifier(publicIdentifier2),
+    ).thenReturn(true);
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -398,6 +411,8 @@ class PaymentServiceMocks {
       this.vectorUtils,
       this.paymentUtils,
       this.blockchainUtils,
+      this.blockchainTimeUtils,
+      this.validationUtils,
       this.logUtils,
     );
   }

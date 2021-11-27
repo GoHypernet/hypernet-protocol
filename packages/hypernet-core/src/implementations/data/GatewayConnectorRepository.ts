@@ -54,6 +54,10 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
       return okAsync(existingProxy);
     }
 
+    this.logUtils.debug(
+      `Gateway proxy for ${gatewayUrl} requested but it has not been created yet`,
+    );
+
     // The proxy does not exist yet, see if we have an existing request for it
     let existingRequest = this.proxyPromises.get(gatewayUrl);
 

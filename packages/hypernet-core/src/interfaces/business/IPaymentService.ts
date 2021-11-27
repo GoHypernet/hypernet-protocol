@@ -25,6 +25,7 @@ import {
   PullPayment,
   EPaymentType,
   NonFungibleRegistryContractError,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { PaymentInitiationResponse } from "@interfaces/objects";
 import { ResultAsync } from "neverthrow";
@@ -44,7 +45,14 @@ export interface IPaymentService {
     metadata: string | null,
   ): ResultAsync<
     PaymentInitiationResponse,
-    PaymentCreationError | InvalidParametersError
+    | PaymentCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
   >;
 
   /**
@@ -79,6 +87,11 @@ export interface IPaymentService {
     | VectorError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
+    | NonFungibleRegistryContractError
   >;
 
   /**
@@ -103,7 +116,7 @@ export interface IPaymentService {
     gatewayUrl: GatewayUrl,
     requestIdentifier: string,
     channelAddress: EthereumContractAddress,
-    counterPartyAccount: PublicIdentifier,
+    toIdentifier: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
@@ -111,7 +124,14 @@ export interface IPaymentService {
     metadata: string | null,
   ): ResultAsync<
     PaymentInitiationResponse,
-    PaymentCreationError | InvalidParametersError
+    | PaymentCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
   >;
   /**
    * Send funds to another person.
@@ -137,11 +157,16 @@ export interface IPaymentService {
   ): ResultAsync<
     Payment,
     | PaymentCreationError
-    | TransferCreationError
+    | InvalidParametersError
     | VectorError
     | BlockchainUnavailableError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
     | InvalidParametersError
     | NonFungibleRegistryContractError
+    | TransferCreationError
   >;
 
   /**

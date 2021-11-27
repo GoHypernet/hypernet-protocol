@@ -46,8 +46,8 @@ export interface IPaymentRepository {
    * "PROPOSED" status. This function just creates an OfferTransfer.
    */
   createPushPayment(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
+    paymentId: PaymentId,
+    channelIdentifier: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
@@ -65,8 +65,8 @@ export interface IPaymentRepository {
   >;
 
   createPullPayment(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
+    paymentId: PaymentId,
+    channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     maximumAmount: BigNumberString, // TODO: amounts should be consistently use BigNumber
     deltaTime: number,

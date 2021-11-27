@@ -567,6 +567,8 @@ export class HypernetCore implements IHypernetCore {
       this.vectorUtils,
       this.paymentUtils,
       this.blockchainUtils,
+      this.blockchainTimeUtils,
+      this.validationUtils,
       this.logUtils,
     );
 

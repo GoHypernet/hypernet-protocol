@@ -21,6 +21,7 @@ import {
   expirationDate,
   routerPublicIdentifier,
   chainId,
+  routerChannelAddress,
 } from "@mock/mocks";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
@@ -43,8 +44,6 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
-const counterPartyAccount = publicIdentifier2;
-const fromAccount = publicIdentifier;
 const paymentDetails = new SortedTransfers([], [], [], []);
 
 class PaymentRepositoryMocks {
@@ -111,8 +110,8 @@ class PaymentRepositoryMocks {
       commonPaymentId,
       routerPublicIdentifier,
       chainId,
-      counterPartyAccount,
-      fromAccount,
+      publicIdentifier2,
+      publicIdentifier,
       state,
       erc20AssetAddress,
       commonAmount,
@@ -162,9 +161,9 @@ describe("PaymentRepository tests", () => {
 
     // Act
     const result = await repo.createPushPayment(
-      routerPublicIdentifier,
-      chainId,
-      counterPartyAccount,
+      commonPaymentId,
+      routerChannelAddress,
+      publicIdentifier2,
       commonAmount,
       expirationDate,
       commonAmount,
@@ -187,9 +186,9 @@ describe("PaymentRepository tests", () => {
 
     // Act
     const result = await repo.createPushPayment(
-      routerPublicIdentifier,
-      chainId,
-      counterPartyAccount,
+      commonPaymentId,
+      routerChannelAddress,
+      publicIdentifier2,
       commonAmount,
       expirationDate,
       commonAmount,
