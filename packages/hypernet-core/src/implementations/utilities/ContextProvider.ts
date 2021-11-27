@@ -176,7 +176,6 @@ export class ContextProvider implements IContextProvider {
           this.context.onAccountChanged,
           this.context.onGovernanceChainChanged,
           this.context.onGovernanceAccountChanged,
-          new Map<GatewayUrl, Signature>(),
         ),
       );
     }

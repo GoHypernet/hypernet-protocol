@@ -110,12 +110,10 @@ export class VectorAPIListener implements IVectorListener {
                   if (transferType === ETransferType.Offer) {
                     // if the transfer is an offer transfer, we need to notify the payment service
                     // than an offer has been resolved.
-                    // @todo create methods in payment service
                     return this.paymentService.offerResolved(paymentId);
                   } else if (transferType === ETransferType.Insurance) {
                     // if the transfer is an insurance transfer, we need to notify the payment service
                     // that stake has been resolved.
-                    // @todo create methods in payment service
                     return this.paymentService.insuranceResolved(paymentId);
                   } else if (transferType === ETransferType.Parameterized) {
                     // if the transfer is the parameterized transfer, we need to notify the payment service

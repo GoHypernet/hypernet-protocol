@@ -6,20 +6,20 @@ import {
   GatewayUrl,
   PullPayment,
   PushPayment,
-  Signature,
   EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
   InitializedHypernetContext,
 } from "@interfaces/objects";
+import { account, activeStateChannel, publicIdentifier } from "@mock/mocks";
+import { okAsync, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
 import {
   IContextProvider,
   IGatewayConnectorProxy,
 } from "@interfaces/utilities";
-import { account, activeStateChannel, publicIdentifier } from "@mock/mocks";
-import { okAsync, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
 
 export class ContextProviderMock implements IContextProvider {
   public context: HypernetContext;
@@ -95,8 +95,6 @@ export class ContextProviderMock implements IContextProvider {
   public onGovernanceChainChangedActivations: ChainId[] = [];
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceAccountChangedActivations: EthereumAccountAddress[] = [];
-
-  public authorizedGateways: Map<GatewayUrl, Signature>;
 
   constructor(
     context: HypernetContext | null = null,
@@ -278,8 +276,6 @@ export class ContextProviderMock implements IContextProvider {
       this.onGovernanceAccountChangedActivations.push(val);
     });
 
-    this.authorizedGateways = new Map<GatewayUrl, Signature>();
-
     if (context != null) {
       this.context = context;
     } else {
@@ -369,7 +365,6 @@ export class ContextProviderMock implements IContextProvider {
         this.onAccountChanged,
         this.onGovernanceChainChanged,
         this.onGovernanceAccountChanged,
-        this.authorizedGateways,
       );
     }
   }

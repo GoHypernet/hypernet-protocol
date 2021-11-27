@@ -100,6 +100,5 @@ export class InitializedHypernetContext {
     public onAccountChanged: Subject<EthereumAccountAddress>,
     public onGovernanceChainChanged: Subject<ChainId>,
     public onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
-    public authorizedMediators: Map<GatewayUrl, Signature>,
   ) {}
 }

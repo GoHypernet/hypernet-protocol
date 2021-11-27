@@ -58,7 +58,7 @@ export class ConfigProvider implements IConfigProvider {
             ),
           ],
         ]), // storageAliases
-      config?.gatewayDeauthorizationTimeout || 5 * 1000,
+      config?.gatewayDeauthorizationTimeout || 5 * 1000, // gatewayDeauthorizationTimeout
       config?.controlClaimSubject || "HypernetProtocolControlClaims",
       config?.requireOnline || true, // requireOnline
       config?.debug || __DEBUG__, // debug
