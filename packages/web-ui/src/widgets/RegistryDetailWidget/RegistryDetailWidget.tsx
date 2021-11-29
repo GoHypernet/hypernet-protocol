@@ -4,6 +4,7 @@ import {
   RegistryParams,
   BigNumberString,
   EthereumContractAddress,
+  RegistryModule,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -47,6 +48,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registry, setRegistry] = useState<Registry>();
+  const [registryModules, setRegistryModules] = useState<RegistryModule[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
     EthereumAccountAddress(""),
@@ -65,6 +67,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
 
   useEffect(() => {
     getRegistryDetails();
+    getRegistryModules();
   }, []);
 
   const getRegistryDetails = () => {
@@ -73,6 +76,18 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
       .getRegistryByName([registryName])
       .map((registryMap) => {
         setRegistry(registryMap.get(registryName));
+        setLoading(false);
+      })
+
+      .mapErr(handleError);
+  };
+
+  const getRegistryModules = () => {
+    setLoading(true);
+    coreProxy
+      .getRegistryModules()
+      .map((registryModules) => {
+        setRegistryModules(registryModules);
         setLoading(false);
       })
 
@@ -113,6 +128,31 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
         setLoading(false);
       })
       .mapErr(handleError);
+  };
+
+  const updateRegistrarRole = (
+    value: boolean,
+    moduleAddress: EthereumContractAddress,
+  ) => {
+    if (registry?.name == null) {
+      return;
+    }
+    setLoading(true);
+    if (value) {
+      coreProxy
+        .grantRegistrarRole(registry?.name, moduleAddress)
+        .map(() => {
+          getRegistryDetails();
+        })
+        .mapErr(handleError);
+    } else {
+      coreProxy
+        .revokeRegistrarRole(registry?.name, moduleAddress)
+        .map(() => {
+          getRegistryDetails();
+        })
+        .mapErr(handleError);
+    }
   };
 
   const isRegistrar = registry?.registrarAddresses.some(
@@ -315,6 +355,35 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                       </Box>
                     </Box>
                   </GovernanceCard>
+
+                  {!!registryModules.length && (
+                    <GovernanceCard className={classes.optionsContainer}>
+                      <Box className={classes.optionsRow}>
+                        {registryModules.map((registryModule) => (
+                          <Box
+                            className={classes.switchContainer}
+                            key={registryModule.address}
+                          >
+                            <Typography className={classes.switchTitle}>
+                              {registryModule.name}
+                            </Typography>
+                            <GovernanceSwitch
+                              initialValue={registry.registrarAddresses.includes(
+                                registryModule.address,
+                              )}
+                              onChange={(value) => {
+                                updateRegistrarRole(
+                                  value,
+                                  registryModule.address,
+                                );
+                              }}
+                              disabled={!isEditing}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                    </GovernanceCard>
+                  )}
 
                   {isRegistrar && (
                     <>

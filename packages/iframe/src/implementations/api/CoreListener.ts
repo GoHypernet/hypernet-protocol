@@ -19,6 +19,7 @@ import {
   EthereumAccountAddress,
   RegistryTokenId,
   ProviderId,
+  RegistryEntry,
 } from "@hypernetlabs/objects";
 import {
   IIFrameCallData,
@@ -408,19 +409,13 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       createRegistryEntry: (
         data: IIFrameCallData<{
           registryName: string;
-          label: string;
-          recipientAddress: EthereumAccountAddress;
-          data: string;
-          tokenId: RegistryTokenId;
+          newRegistryEntry: RegistryEntry;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.createRegistryEntry(
             data.data.registryName,
-            data.data.label,
-            data.data.recipientAddress,
-            data.data.data,
-            data.data.tokenId,
+            data.data.newRegistryEntry,
           );
         }, data.callId);
       },
@@ -472,7 +467,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       grantRegistrarRole: (
         data: IIFrameCallData<{
           registryName: string;
-          address: EthereumAccountAddress;
+          address: EthereumAccountAddress | EthereumContractAddress;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -547,6 +542,24 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.registryName,
             data.data.ownerAddress,
             data.data.index,
+          );
+        }, data.callId);
+      },
+      getRegistryModules: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryModules();
+        }, data.callId);
+      },
+      createBatchRegistryEntry: (
+        data: IIFrameCallData<{
+          registryName: string;
+          newRegistryEntries: RegistryEntry[];
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.createBatchRegistryEntry(
+            data.data.registryName,
+            data.data.newRegistryEntries,
           );
         }, data.callId);
       },

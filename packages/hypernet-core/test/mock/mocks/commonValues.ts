@@ -138,6 +138,10 @@ export const registryFactoryAddress = EthereumContractAddress(
   "registryFactoryAddress",
 );
 
+export const batchModuleContract = EthereumContractAddress(
+  "batchModuleContract",
+);
+
 export const governanceChainInformation = new GovernanceChainInformation(
   "Mock Chain",
   chainId,
@@ -154,6 +158,7 @@ export const governanceChainInformation = new GovernanceChainInformation(
   liquidityRegistryAddress,
   tokenRegistryAddress,
   chainRegistryAddress,
+  batchModuleContract,
   [ProviderUrl("http://localhost:8545")],
 );
 

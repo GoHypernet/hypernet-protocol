@@ -34,6 +34,7 @@ const errorCodes = {
   TransferResolutionError: "33",
   VectorError: "34",
   InactiveGatewayError: "35",
+  BatchModuleContractError: "36",
 };
 
 export default errorCodes;

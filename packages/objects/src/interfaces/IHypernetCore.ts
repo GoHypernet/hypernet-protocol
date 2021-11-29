@@ -35,6 +35,7 @@ import {
   PaymentFinalizeError,
   PaymentCreationError,
   InactiveGatewayError,
+  BatchModuleContractError,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -55,8 +56,9 @@ import { RegistryParams } from "@objects/RegistryParams";
 import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
 import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
-import { ProviderId } from "@web-integration/ProviderId";
-import { TokenInformation } from "@web-integration/TokenInformation";
+import { ProviderId } from "@objects/ProviderId";
+import { TokenInformation } from "@objects/TokenInformation";
+import { RegistryModule } from "@objects/RegistryModule";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -523,10 +525,7 @@ export interface IHypernetCore {
 
   createRegistryEntry(
     registryName: string,
-    label: string,
-    recipientAddress: EthereumAccountAddress,
-    data: string,
-    tokenId: RegistryTokenId,
+    newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -577,7 +576,7 @@ export interface IHypernetCore {
 
   grantRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -590,7 +589,7 @@ export interface IHypernetCore {
 
   revokeRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -603,7 +602,7 @@ export interface IHypernetCore {
 
   renounceRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -636,6 +635,22 @@ export interface IHypernetCore {
   ): ResultAsync<
     RegistryEntry | null,
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  >;
+
+  getRegistryModules(): ResultAsync<
+    RegistryModule[],
+    RegistryFactoryContractError | ProxyError
+  >;
+
+  createBatchRegistryEntry(
+    registryName: string,
+    newRegistryEntries: RegistryEntry[],
+  ): ResultAsync<
+    void,
+    | BatchModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | ProxyError
   >;
 
   /**

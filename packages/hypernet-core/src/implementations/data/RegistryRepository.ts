@@ -5,6 +5,8 @@ import {
   RegistryFactoryContract,
   ERC20Contract,
   NonFungibleRegistryEnumerableUpgradeableContract,
+  BatchModuleContract,
+  IBatchModuleContract,
 } from "@hypernetlabs/contracts";
 import {
   BigNumberString,
@@ -22,6 +24,8 @@ import {
   RegistryPermissionError,
   EthereumAccountAddress,
   RegistryTokenId,
+  RegistryModule,
+  BatchModuleContractError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IRegistryRepository } from "@interfaces/data";
@@ -45,6 +49,8 @@ export class RegistryRepository implements IRegistryRepository {
   protected hypertokenContract: IERC20Contract = {} as ERC20Contract;
   protected nonFungibleRegistryContract: INonFungibleRegistryEnumerableUpgradeableContract =
     {} as NonFungibleRegistryEnumerableUpgradeableContract;
+  protected batchModuleContract: IBatchModuleContract =
+    {} as BatchModuleContract;
 
   constructor(
     @inject(IBlockchainProviderType)
@@ -778,10 +784,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   public createRegistryEntry(
     registryName: string,
-    label: string,
-    recipientAddress: EthereumAccountAddress,
-    data: string,
-    tokenId: RegistryTokenId,
+    newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -801,7 +804,7 @@ export class RegistryRepository implements IRegistryRepository {
         throw new Error("Registry not found!");
       }
 
-      if (tokenId === 0 || isNaN(tokenId)) {
+      if (newRegistryEntry.tokenId === 0 || isNaN(newRegistryEntry.tokenId)) {
         return errAsync(
           new NonFungibleRegistryContractError(
             "Zero number or strings are not allowed as a token ID.",
@@ -836,19 +839,19 @@ export class RegistryRepository implements IRegistryRepository {
               )
               .andThen(() => {
                 return this.nonFungibleRegistryContract.registerByToken(
-                  recipientAddress,
-                  label,
-                  data,
-                  tokenId,
+                  newRegistryEntry.owner,
+                  newRegistryEntry.label,
+                  newRegistryEntry.tokenURI,
+                  newRegistryEntry.tokenId,
                 );
               });
           });
       } else {
         return this.nonFungibleRegistryContract.register(
-          recipientAddress,
-          label,
-          data,
-          tokenId,
+          newRegistryEntry.owner,
+          newRegistryEntry.label,
+          newRegistryEntry.tokenURI,
+          newRegistryEntry.tokenId,
         );
       }
     });
@@ -881,7 +884,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   public grantRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -939,7 +942,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   public revokeRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -997,7 +1000,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   public renounceRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1057,6 +1060,69 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryFactoryContractError
   > {
     return this.registryFactoryContract.getNumberOfEnumerableRegistries();
+  }
+
+  public getRegistryModules(): ResultAsync<
+    RegistryModule[],
+    RegistryFactoryContractError
+  > {
+    return this.getModulesAddresses().andThen((modulesAddresses) => {
+      const moduleListResult: ResultAsync<
+        RegistryModule,
+        RegistryFactoryContractError
+      >[] = [];
+
+      modulesAddresses.forEach((moduleAddress) => {
+        moduleListResult.push(
+          this.registryFactoryContract
+            .getModuleName(moduleAddress)
+            .map((moduleName) => {
+              return new RegistryModule(moduleName, moduleAddress);
+            }),
+        );
+      });
+
+      return ResultUtils.combine(moduleListResult);
+    });
+  }
+
+  public createBatchRegistryEntry(
+    registryName: string,
+    newRegistryEntries: RegistryEntry[],
+  ): ResultAsync<
+    void,
+    | BatchModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+  > {
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+    ]).andThen((vals) => {
+      const [registryMap] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
+
+      if (
+        newRegistryEntries.some(
+          (newRegistryEntry) =>
+            isNaN(newRegistryEntry.tokenId) ||
+            newRegistryEntry.tokenId == null ||
+            newRegistryEntry.owner == null ||
+            newRegistryEntry.label == null,
+        )
+      ) {
+        return errAsync(
+          new BatchModuleContractError("BatchModule register wrong inputs."),
+        );
+      }
+
+      return this.batchModuleContract.batchRegister(
+        registry.address,
+        newRegistryEntries,
+      );
+    });
   }
 
   private getRegistryByIndex(
@@ -1179,6 +1245,26 @@ export class RegistryRepository implements IRegistryRepository {
       });
   }
 
+  private getModulesAddresses(): ResultAsync<
+    EthereumContractAddress[],
+    RegistryFactoryContractError
+  > {
+    return this.registryFactoryContract
+      .getNumberOfModules()
+      .andThen((totalCount) => {
+        const moduleListResult: ResultAsync<
+          EthereumContractAddress,
+          RegistryFactoryContractError
+        >[] = [];
+
+        for (let i = 0; i < totalCount; i++) {
+          moduleListResult.push(this.registryFactoryContract.modules(i));
+        }
+
+        return ResultUtils.combine(moduleListResult);
+      });
+  }
+
   private getSignerAddress(): ResultAsync<
     EthereumAccountAddress,
     BlockchainUnavailableError
@@ -1212,6 +1298,10 @@ export class RegistryRepository implements IRegistryRepository {
         provider,
         config.governanceChainInformation.hypertokenAddress,
       );
+      this.batchModuleContract = new BatchModuleContract(
+        provider,
+        config.governanceChainInformation.batchModuleAddress,
+      );
     });
   }
 
@@ -1234,6 +1324,10 @@ export class RegistryRepository implements IRegistryRepository {
       this.hypertokenContract = new ERC20Contract(
         signer,
         config.governanceChainInformation.hypertokenAddress,
+      );
+      this.batchModuleContract = new BatchModuleContract(
+        signer,
+        config.governanceChainInformation.batchModuleAddress,
       );
     });
   }

@@ -4,7 +4,10 @@ import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 
 export class Registry {
   constructor(
-    public registrarAddresses: EthereumAccountAddress[],
+    public registrarAddresses: (
+      | EthereumAccountAddress
+      | EthereumContractAddress
+    )[],
     public registrarAdminAddresses: EthereumAccountAddress[],
     public address: EthereumContractAddress,
     public name: string,

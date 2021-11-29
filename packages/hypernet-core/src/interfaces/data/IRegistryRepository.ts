@@ -13,6 +13,8 @@ import {
   RegistryParams,
   RegistryPermissionError,
   RegistryTokenId,
+  RegistryModule,
+  BatchModuleContractError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -99,10 +101,7 @@ export interface IRegistryRepository {
   >;
   createRegistryEntry(
     registryName: string,
-    label: string,
-    recipientAddress: EthereumAccountAddress,
-    data: string,
-    tokenId: RegistryTokenId,
+    newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -143,7 +142,7 @@ export interface IRegistryRepository {
   ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError>;
   grantRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -154,7 +153,7 @@ export interface IRegistryRepository {
   >;
   revokeRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -165,7 +164,7 @@ export interface IRegistryRepository {
   >;
   renounceRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -188,6 +187,19 @@ export interface IRegistryRepository {
   ): ResultAsync<
     RegistryEntry | null,
     RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
+  getRegistryModules(): ResultAsync<
+    RegistryModule[],
+    RegistryFactoryContractError
+  >;
+  createBatchRegistryEntry(
+    registryName: string,
+    newRegistryEntries: RegistryEntry[],
+  ): ResultAsync<
+    void,
+    | BatchModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
   >;
 }
 

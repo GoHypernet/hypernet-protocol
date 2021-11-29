@@ -1,4 +1,8 @@
-import { EthereumAccountAddress, RegistryTokenId } from "@hypernetlabs/objects";
+import {
+  EthereumAccountAddress,
+  RegistryEntry,
+  RegistryTokenId,
+} from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
@@ -56,10 +60,13 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
     coreProxy
       .createRegistryEntry(
         registryName,
-        label,
-        EthereumAccountAddress(recipientAddress),
-        tokenUri,
-        RegistryTokenId(Number(tokenId)),
+        new RegistryEntry(
+          label,
+          RegistryTokenId(Number(tokenId)),
+          EthereumAccountAddress(recipientAddress),
+          tokenUri,
+          null,
+        ),
       )
       .map(() => {
         setLoading(false);
