@@ -1,15 +1,5 @@
 import { INonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/contracts";
-import {
-  PushPayment,
-  HypernetLink,
-  Payment,
-  VectorError,
-  EPaymentState,
-  BigNumberString,
-  UnixTimestamp,
-  SortedTransfers,
-  NonFungibleRegistryContractError,
-} from "@hypernetlabs/objects";
+import { NonFungibleRegistryContractError } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { TokenInformationRepository } from "@implementations/data";
 import { ITokenInformationRepository } from "@interfaces/data";
@@ -47,11 +37,11 @@ class TokenInformationRepositoryMocks {
 
     td.when(this.contract.totalSupply()).thenReturn(okAsync(2));
 
-    td.when(this.contract.tokenByIndex(1)).thenReturn(
+    td.when(this.contract.tokenByIndex(0)).thenReturn(
       okAsync(tokenRegistryId1),
     );
 
-    td.when(this.contract.tokenByIndex(2)).thenReturn(
+    td.when(this.contract.tokenByIndex(1)).thenReturn(
       okAsync(tokenRegistryId2),
     );
 

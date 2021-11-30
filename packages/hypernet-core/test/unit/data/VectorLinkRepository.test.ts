@@ -53,8 +53,7 @@ const paymentDetails = new SortedTransfers([], [], [], []);
 
 class VectorLinkRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
-  public vectorUtils =
-    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public vectorUtils = VectorUtilsMockFactory.factoryVectorUtils();
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
   public browserNodeProvider = new BrowserNodeProviderMock();

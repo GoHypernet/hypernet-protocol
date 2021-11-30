@@ -12,7 +12,6 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   BigNumberString,
-  UnixTimestamp,
   InvalidPaymentError,
   GatewayRegistrationInfo,
   SortedTransfers,
@@ -70,6 +69,7 @@ import {
   gatewayAccount,
   errorAccount,
   validPaymentId,
+  expirationDate,
 } from "@mock/mocks";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
@@ -86,7 +86,6 @@ import {
   VectorUtilsMockFactory,
 } from "@tests/mock/utils";
 
-const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const nonExistentPaymentId = PaymentId("This payment is not mocked");
 const validatedSignature = Signature("0xValidatedSignature");
 
@@ -96,8 +95,7 @@ class PaymentServiceMocks {
   public contextProvider = new ContextProviderMock();
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
-  public vectorUtils =
-    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public vectorUtils = VectorUtilsMockFactory.factoryVectorUtils();
   public paymentUtils = td.object<IPaymentUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
@@ -211,16 +209,15 @@ class PaymentServiceMocks {
       gatewayAccount,
       gatewaySignature,
     );
-    const gatewayRegistrationInfoMap = new Map<
-      GatewayUrl,
-      GatewayRegistrationInfo
-    >();
-
     this.gatewayConnectorProxy = td.object<IGatewayConnectorProxy>();
     td.when(
       this.gatewayConnectorProxy.getConnectorActivationStatus(),
     ).thenReturn(true);
 
+    const gatewayRegistrationInfoMap = new Map<
+      GatewayUrl,
+      GatewayRegistrationInfo
+    >();
     gatewayRegistrationInfoMap.set(gatewayUrl, this.gatewayRegistrationInfo);
     td.when(
       this.gatewayRegistrationRepository.getGatewayRegistrationInfo(
@@ -382,7 +379,7 @@ class PaymentServiceMocks {
           expirationDate: expirationDate,
           requiredStake: commonAmount,
           paymentToken: hyperTokenAddress,
-          metadata: null,
+          metadata: "",
         }),
         gatewaySignature,
       ),
@@ -395,7 +392,13 @@ class PaymentServiceMocks {
       true,
     );
     td.when(
+      this.validationUtils.validatePublicIdentifier(publicIdentifier),
+    ).thenReturn(true);
+    td.when(
       this.validationUtils.validatePublicIdentifier(publicIdentifier2),
+    ).thenReturn(true);
+    td.when(
+      this.validationUtils.validateEthereumAddress(routerChannelAddress),
     ).thenReturn(true);
   }
 
@@ -830,7 +833,7 @@ describe("PaymentService tests", () => {
           expirationDate: expirationDate,
           requiredStake: commonAmount,
           paymentToken: hyperTokenAddress,
-          metadata: null,
+          metadata: "",
         }),
         gatewaySignature,
       ),

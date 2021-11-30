@@ -3,27 +3,12 @@ import {
   ChainId,
   ChainInformation,
   DefinitionName,
-  EthereumAddress,
-  GovernanceChainInformation,
-  ProviderUrl,
   SchemaUrl,
 } from "@hypernetlabs/objects";
 import { HypernetConfig } from "@interfaces/objects";
 import {
   chainId,
-  channelFactoryAddress,
   defaultExpirationLength,
-  gatewayRegistryAddress,
-  hyperTokenAddress,
-  insuranceTransferAddress,
-  liquidityRegistryAddress,
-  messageTransferAddress,
-  parameterizedTransferAddress,
-  transferRegistryAddress,
-  hypernetGovernorAddress,
-  registryFactoryAddress,
-  tokenRegistryAddress,
-  chainRegistryAddress,
   governanceChainInformation,
 } from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -37,18 +22,18 @@ export class ConfigProviderMock implements IConfigProvider {
     this.config =
       config ??
       new HypernetConfig(
-        "iframeSource",
-        chainId,
+        "iframeSource", // iframeSource
+        chainId, // governanceChainId
         new Map<ChainId, ChainInformation>([
           [chainId, governanceChainInformation],
-        ]),
-        governanceChainInformation,
-        "hypernetProtocolDomain",
-        defaultExpirationLength,
-        "natsUrl",
-        "authUrl",
-        "gatewayIframeUrl",
-        "https://ceramic-clay.3boxlabs.com",
+        ]), // chainInformation
+        governanceChainInformation, // governanceChainInformation
+        "hypernetProtocolDomain", // hypernetProtocolDomain
+        defaultExpirationLength, // defaultPaymentExpiryLength
+        "natsUrl", // natsUrl
+        "authUrl", // authUrl
+        "gatewayIframeUrl", // gatewayIframeUrl
+        "https://ceramic-clay.3boxlabs.com", // ceramicNodeUrl
         new Map([
           [
             DefinitionName(AuthorizedGatewaysSchema.title),
@@ -57,7 +42,7 @@ export class ConfigProviderMock implements IConfigProvider {
             ),
           ],
         ]), // storageAliases
-        5 * 1000,
+        5 * 1000, // gatewayDeauthorizationTimeout
         "HypernetProtocolControlClaims", // controlClaimSubject
         false, // requireOnline
         false, // debug is off for testing

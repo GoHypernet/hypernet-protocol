@@ -45,8 +45,7 @@ require("testdouble-jest")(td, jest);
 
 class AccountsRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
-  public vectorUtils =
-    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public vectorUtils = VectorUtilsMockFactory.factoryVectorUtils();
   public browserNodeProvider = new BrowserNodeProviderMock();
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
@@ -114,8 +113,7 @@ class AccountsRepositoryMocks {
 
 class AccountsRepositoryErrorMocks {
   public blockchainProvider = new BlockchainProviderMock();
-  public vectorUtils =
-    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public vectorUtils = VectorUtilsMockFactory.factoryVectorUtils();
   public browserNodeProvider = td.object<IBrowserNodeProvider>();
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
