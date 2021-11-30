@@ -18,14 +18,12 @@ declare const __AUTH_URL__: string;
 declare const __VALIDATOR_IFRAME_URL__: string;
 declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
-declare const __GOVERNANCE_CHAIN_ID__: string;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
 
   constructor(protected logUtils: ILogUtils, config?: Partial<HypernetConfig>) {
-    const governanceChainId =
-      config?.governanceChainId || ChainId(parseInt(__GOVERNANCE_CHAIN_ID__));
+    const governanceChainId = config?.governanceChainId || ChainId(1); // default to mainnet
     const governanceChainInformation = chainConfig.get(governanceChainId);
 
     if (governanceChainInformation == null) {

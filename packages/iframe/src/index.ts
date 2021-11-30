@@ -5,7 +5,6 @@ import { ChainId, IHypernetCore } from "@hypernetlabs/objects";
 import { LogUtils, JsonUtils } from "@hypernetlabs/utils";
 // Instantiate the hypernet core.
 
-// Address and signature must be provided as params
 const urlParams = new URLSearchParams(window.location.search);
 const governanceChainId = urlParams.get("governanceChainId");
 const debug = urlParams.get("debug");

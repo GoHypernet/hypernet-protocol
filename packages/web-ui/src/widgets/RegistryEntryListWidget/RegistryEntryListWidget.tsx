@@ -48,13 +48,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
-  const [governanceChainId, setGovernanceChainId] = useState<ChainId>(
-    ChainId(0),
-  );
 
   useEffect(() => {
     getRegistry();
-    getChainId();
   }, []);
 
   useEffect(() => {
@@ -82,18 +78,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
       })
-      .mapErr(handleError);
-  };
-
-  const getChainId = () => {
-    setLoading(true);
-    coreProxy
-      .getGovernanceChainId()
-      .map((governanceChainId) => {
-        setGovernanceChainId(governanceChainId);
-        setLoading(false);
-      })
-
       .mapErr(handleError);
   };
 
@@ -136,13 +120,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const getHeaderActions: () => IHeaderAction[] = () => {
     const canCreateNewRegistryEntry = isRegistrar || isRegistrationTokenEnabled;
 
-    const batchMintingAddress =
-      chainConfig.get(governanceChainId)?.batchModuleAddress;
     const canCreateNewBatchRegistryEntry =
-      isRegistrar &&
-      registry?.registrarAddresses.some(
-        (address) => address === batchMintingAddress,
-      );
+      isRegistrar && registry?.modulesCapability.batchMintEnabled;
 
     let headerActions: IHeaderAction[] = [];
 

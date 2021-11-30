@@ -67,7 +67,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     if (window.hypernetWebUIInstance) {
       this.webUIClient = window.hypernetWebUIInstance as IHypernetWebUI;
     } else {
-      this.webUIClient = new HypernetWebUI(this.core, this.UIData);
+      this.webUIClient = new HypernetWebUI(
+        this.core,
+        this.UIData,
+        this.iframeURL,
+        this.governanceChainId,
+        this.debug,
+      );
     }
 
     this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
@@ -118,19 +124,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       });
 
     return this.getReadyResult;
-  }
-
-  // This class must be used as a singleton, this enforces that restriction.
-  public static getInstance(): IHypernetWebIntegration {
-    if (HypernetWebIntegration.instance == null) {
-      HypernetWebIntegration.instance = new HypernetWebIntegration(
-        null,
-        null,
-        null,
-      );
-    }
-
-    return HypernetWebIntegration.instance;
   }
 
   public displayGatewayIFrame(gatewayUrl: GatewayUrl): void {

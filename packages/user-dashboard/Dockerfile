@@ -33,6 +33,9 @@ ENV __BUILD_ENV__ $BUILD_ENV
 ARG CORE_IFRAME_SOURCE=http://localhost:5020
 ENV __CORE_IFRAME_SOURCE__ $CORE_IFRAME_SOURCE
 
+ARG GOVERNANCE_CHAIN_ID=31337
+ENV __GOVERNANCE_CHAIN_ID__ $GOVERNANCE_CHAIN_ID
+
 # Copy the rest of the stuff and build
 COPY . /build
 RUN cd packages/user-dashboard && yarn build

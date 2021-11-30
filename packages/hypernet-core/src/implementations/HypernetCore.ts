@@ -1508,12 +1508,6 @@ export class HypernetCore implements IHypernetCore {
     );
   }
 
-  public getGovernanceChainId(): ResultAsync<ChainId, never> {
-    return this.configProvider.getConfig().map((config) => {
-      return config.governanceChainId;
-    });
-  }
-
   public getRegistryEntryByOwnerAddress(
     registryName: string,
     ownerAddress: EthereumAccountAddress,

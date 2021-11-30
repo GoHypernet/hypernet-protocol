@@ -626,8 +626,6 @@ export interface IHypernetCore {
     tokenAddress: EthereumContractAddress,
   ): ResultAsync<TokenInformation | null, ProxyError>;
 
-  getGovernanceChainId(): ResultAsync<ChainId, ProxyError>;
-
   getRegistryEntryByOwnerAddress(
     registryName: string,
     ownerAddress: EthereumAccountAddress,

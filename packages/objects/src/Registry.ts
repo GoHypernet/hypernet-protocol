@@ -1,6 +1,7 @@
 import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
+import { RegistryModuleCapability } from "@objects/RegistryModuleCapability";
 
 export class Registry {
   constructor(
@@ -21,6 +22,7 @@ export class Registry {
     public burnAddress: EthereumAccountAddress,
     public burnFee: number,
     public primaryRegistry: EthereumContractAddress,
+    public modulesCapability: RegistryModuleCapability,
     public index: number | null,
   ) {}
 }

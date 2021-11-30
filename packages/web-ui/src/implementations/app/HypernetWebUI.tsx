@@ -1,4 +1,9 @@
-import { IHypernetCore, IUIData, RenderError } from "@hypernetlabs/objects";
+import {
+  ChainId,
+  IHypernetCore,
+  IUIData,
+  RenderError,
+} from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import {
   ThemeProvider,
@@ -86,7 +91,14 @@ export default class HypernetWebUI implements IHypernetWebUI {
   protected UIData: IUIData;
   protected viewUtils: IViewUtils;
   protected dateUtils: IDateUtils;
-  constructor(_coreInstance: IHypernetCore, _UIData: IUIData) {
+  protected governanceChainId: ChainId;
+  constructor(
+    _coreInstance: IHypernetCore,
+    _UIData: IUIData,
+    iframeURL: string | null,
+    governanceChainId: number | null,
+    debug: boolean | null,
+  ) {
     if (_coreInstance) {
       this.coreInstance = _coreInstance;
     } else if (window.hypernetCoreInstance) {
@@ -94,6 +106,8 @@ export default class HypernetWebUI implements IHypernetWebUI {
     } else {
       throw new Error("core instance is required");
     }
+
+    this.governanceChainId = ChainId(governanceChainId || 1);
 
     // This is to cache web ui instance in window so it may prevent from having multiple web ui instances
     window.hypernetWebUIInstance = HypernetWebUI.instance;
@@ -162,6 +176,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
         widgetUniqueIdentifier={widgetUniqueIdentifier}
+        governanceChainId={this.governanceChainId}
       >
         <StylesProvider generateClassName={generateClassName}>
           <Theme theme={theme}>
