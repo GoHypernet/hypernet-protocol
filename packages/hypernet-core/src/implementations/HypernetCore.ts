@@ -305,7 +305,7 @@ export class HypernetCore implements IHypernetCore {
    * @param network the network to attach to
    * @param config optional config, defaults to localhost/dev config
    */
-  constructor(config?: HypernetConfig) {
+  constructor(config?: Partial<HypernetConfig>) {
     this._inControl = false;
 
     this.onControlClaimed = new Subject();

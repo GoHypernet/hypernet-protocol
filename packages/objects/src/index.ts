@@ -61,3 +61,4 @@ export * from "@objects/interfaces";
 export * from "@objects/typing";
 export * from "@objects/schemas";
 export * from "@objects/vector";
+export * from "@objects/configuration";

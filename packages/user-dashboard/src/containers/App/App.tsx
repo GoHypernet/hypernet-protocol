@@ -22,6 +22,8 @@ declare const __CORE_IFRAME_SOURCE__: string;
 
 const integration: IHypernetWebIntegration = new HypernetWebIntegration(
   __CORE_IFRAME_SOURCE__,
+  null,
+  null,
 );
 
 const App: React.FC = () => {
