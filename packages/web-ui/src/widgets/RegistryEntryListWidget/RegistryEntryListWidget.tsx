@@ -136,7 +136,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const canCreateNewBatchRegistryEntry =
       isRegistrar &&
       registryModules.some(
-        (regisryModule) => regisryModule.name === "Batch Module",
+        (regisryModule) => regisryModule.name === "Batch Minting",
       );
 
     let headerActions: IHeaderAction[] = [];
