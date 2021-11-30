@@ -1,18 +1,19 @@
 import {
   InvalidParametersError,
   PrivateCredentials,
+  ProviderId,
 } from "@hypernetlabs/objects";
 import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
-import { chainId } from "@tests/mock/mocks";
+import { chainId, injectedProviderId } from "@mock/mocks";
 import { ethers } from "ethers";
 import { Err, Ok, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import {
-  EthersBlockchainProvider,
+  BlockchainProvider,
   CeramicEIP1193Bridge,
 } from "@implementations/utilities";
-import { IBlockchainProvider, IBrowserNode } from "@interfaces/utilities";
+import { IBlockchainProvider } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 import { ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 
@@ -23,9 +24,11 @@ jest.mock("web3modal", () => {
   return class Web3Modal {
     constructor() {}
 
-    public connect() {
+    public cachedProvider = injectedProviderId;
+
+    public connectTo(providerId: ProviderId) {
       return new Promise((resolve, _) => {
-        resolve(undefined);
+        resolve(providerId);
       });
     }
   };
@@ -77,7 +80,7 @@ class BlockchainProviderMocks {
   constructor(stubSigner = true) {}
 
   public factoryProvider(): IBlockchainProvider {
-    return new EthersBlockchainProvider(
+    return new BlockchainProvider(
       this.contextProvider,
       this.configProvider,
       this.localStorageUtils,

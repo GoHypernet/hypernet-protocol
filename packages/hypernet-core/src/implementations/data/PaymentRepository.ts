@@ -681,7 +681,7 @@ export class PaymentRepository implements IPaymentRepository {
             });
 
             if (stateChannel == null) {
-              return errAsync<IBasicTransferResponse, PaymentStakeError>(
+              return errAsync(
                 new PaymentStakeError(
                   `State channel for payment ${payment.id} does not exist`,
                 ),
@@ -694,7 +694,7 @@ export class PaymentRepository implements IPaymentRepository {
             );
 
             if (paymentChainInfo == null) {
-              return errAsync<IBasicTransferResponse, PaymentCreationError>(
+              return errAsync(
                 new PaymentCreationError(
                   `No registration info for chain id ${payment.chainId} found, although payment ${payment.id} claims to use that chain`,
                 ),

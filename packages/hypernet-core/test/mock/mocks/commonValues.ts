@@ -19,6 +19,7 @@ import {
   ParameterizedResolver,
   ParameterizedState,
   PaymentId,
+  ProviderId,
   ProviderUrl,
   PublicIdentifier,
   RegistryEntry,
@@ -27,24 +28,28 @@ import {
   TransferId,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
-import { constants } from "ethers";
 
-export const account = EthereumAccountAddress("0xDEADBEEF");
-export const account2 = EthereumAccountAddress("0xBEEFDEAD");
+export const account = EthereumAccountAddress("account-address-1");
+export const account2 = EthereumAccountAddress("account-address-2");
 export const gatewayAccount = EthereumAccountAddress("gateway-account-address");
-export const errorAccount = EthereumAccountAddress("error");
-export const publicIdentifier = PublicIdentifier("vectorDEADBEEF");
-export const publicIdentifier2 = PublicIdentifier("vectorBEEFDEAD");
-export const publicIdentifier3 = PublicIdentifier("vectorDEADPORK");
+export const errorAccount = EthereumAccountAddress("error-account-address");
+export const publicIdentifier = PublicIdentifier("public-identifier-1");
+export const publicIdentifier2 = PublicIdentifier("public-identifier-2");
+export const publicIdentifier3 = PublicIdentifier("public-identifier-3");
 export const routerChannelAddress = EthereumContractAddress(
-  "0x0afd1c03a0373b4c99233cbb0719ab0cbe8258eb",
+  "router-channel-address",
 );
-export const errorRouterChannelAddress = EthereumContractAddress("error");
-export const routerPublicIdentifier = PublicIdentifier("vectorROUTERPUBLICID");
+export const errorRouterChannelAddress = EthereumContractAddress(
+  "router-channel-error-address",
+);
+export const routerPublicIdentifier = PublicIdentifier(
+  "router-public-identifier",
+);
 export const ethereumAddress = EthereumContractAddress(
   "0x0000000000000000000000000000000000000000",
 );
 export const chainId = ChainId(1337);
+export const injectedProviderId = ProviderId("injected"); // Metamask is an "injected" provider
 export const hyperTokenAddress = EthereumContractAddress("0xhyperTokenAddress");
 export const commonAmount = BigNumberString("1");
 export const uncommonAmount = BigNumberString("2");
@@ -74,8 +79,10 @@ export const parameterizedTransferId = TransferId("ParameterizedTransferId");
 export const parameterizedTransferId2 = TransferId("ParameterizedTransferId2");
 export const unixPast = UnixTimestamp(1318870398); // Less that defaultExpirationlength before now
 export const unixNow = UnixTimestamp(1318874398);
-export const defaultExpirationLength = 5000;
-export const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
+export const defaultExpirationLength = 3 * 24 * 60 * 60; // 3 days
+export const expirationDate = UnixTimestamp(
+  unixNow + defaultExpirationLength + 10,
+); // Add a bit to not play on the edges
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const gatewayUrl = GatewayUrl("https://example.gateway.com/");
 export const gatewayUrlError = GatewayUrl("gatewayUrlError");

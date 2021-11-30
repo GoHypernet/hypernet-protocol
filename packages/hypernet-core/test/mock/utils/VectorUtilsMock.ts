@@ -6,6 +6,7 @@ import {
   Signature,
   ETransferState,
   BigNumberString,
+  IHypernetOfferDetails,
 } from "@hypernetlabs/objects";
 import {
   activeInsuranceTransfer,
@@ -14,7 +15,9 @@ import {
   chainId,
   commonAmount,
   commonPaymentId,
+  defaultExpirationLength,
   erc20AssetAddress,
+  expirationDate,
   gatewayAddress,
   gatewaySignature,
   gatewayUrl,
@@ -31,12 +34,10 @@ import {
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
-import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
-
 import { IVectorUtils } from "@interfaces/utilities";
 
 export class VectorUtilsMockFactory {
-  static factoryVectorUtils(expirationDate: UnixTimestamp): IVectorUtils {
+  static factoryVectorUtils(): IVectorUtils {
     const vectorUtils = td.object<IVectorUtils>();
 
     td.when(
@@ -75,9 +76,9 @@ export class VectorUtilsMockFactory {
         routerChannelAddress,
         publicIdentifier2,
         td.matchers.contains({
+          paymentId: commonPaymentId,
           routerPublicIdentifier: routerPublicIdentifier,
           chainId: chainId,
-          paymentId: commonPaymentId,
           creationDate: unixNow,
           to: publicIdentifier2,
           from: publicIdentifier,
@@ -86,7 +87,7 @@ export class VectorUtilsMockFactory {
           expirationDate,
           paymentToken: erc20AssetAddress,
           gatewayUrl: gatewayUrl,
-        }),
+        } as IHypernetOfferDetails),
       ),
     ).thenReturn(
       okAsync({
@@ -115,7 +116,10 @@ export class VectorUtilsMockFactory {
         publicIdentifier,
         gatewayAddress,
         commonAmount,
-        expirationDate,
+        // This expiration date is not the standard one. PaymentRepository calculates
+        // a new expiration date for the payment based on the current blocktime
+        // when the new transfer is created.
+        UnixTimestamp(unixNow + defaultExpirationLength),
         commonPaymentId,
       ),
     ).thenReturn(
@@ -134,7 +138,7 @@ export class VectorUtilsMockFactory {
         erc20AssetAddress,
         commonPaymentId,
         UnixTimestamp(unixNow - 1),
-        expirationDate,
+        UnixTimestamp(unixNow + defaultExpirationLength),
         undefined,
         undefined,
       ),

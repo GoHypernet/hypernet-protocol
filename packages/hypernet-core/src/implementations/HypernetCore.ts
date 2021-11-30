@@ -140,7 +140,7 @@ import {
   BrowserNodeProvider,
   ConfigProvider,
   ContextProvider,
-  EthersBlockchainProvider,
+  BlockchainProvider,
   LinkUtils,
   PaymentUtils,
   PaymentIdUtils,
@@ -408,7 +408,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
     );
 
-    this.blockchainProvider = new EthersBlockchainProvider(
+    this.blockchainProvider = new BlockchainProvider(
       this.contextProvider,
       this.configProvider,
       this.localStorageUtils,

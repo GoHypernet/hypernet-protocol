@@ -57,8 +57,7 @@ class PaymentUtilsMocks {
   public logUtils = td.object<ILogUtils>();
   public paymentIdUtils = td.object<IPaymentIdUtils>();
   public timeUtils = td.object<ITimeUtils>();
-  public vectorUtils =
-    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public vectorUtils = VectorUtilsMockFactory.factoryVectorUtils();
   public browserNodeProvider = new BrowserNodeProviderMock();
 
   constructor() {
