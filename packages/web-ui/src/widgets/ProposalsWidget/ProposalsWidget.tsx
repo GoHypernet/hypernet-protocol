@@ -117,6 +117,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
           customPageOptions={{
             itemsPerPage: PROPOSALS_PER_PAGE,
             totalItems: proposalCount,
+            currentPage: page,
           }}
           onChange={(_, page) => {
             setPage(page);

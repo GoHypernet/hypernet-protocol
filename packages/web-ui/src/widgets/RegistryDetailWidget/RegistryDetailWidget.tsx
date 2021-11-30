@@ -177,11 +177,15 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 </Box>
                 <Box className={classes.headerDescriptionContainer}>
                   <Typography>Registrar Addresses:</Typography>
-                  <GovernanceChip
-                    className={classes.addressChip}
-                    label={registry?.registrarAddresses.join("-")}
-                    color="gray"
-                  />
+                  <Box display="flex" flexDirection="column">
+                    {registry?.registrarAddresses.map((registrarAddress) => (
+                      <GovernanceChip
+                        className={classes.addressChip}
+                        label={registrarAddress}
+                        color="gray"
+                      />
+                    ))}
+                  </Box>
                 </Box>
                 <Box className={classes.headerDescriptionContainer}>
                   <Typography>Registrar Admin Addresses:</Typography>

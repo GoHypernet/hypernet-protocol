@@ -50,7 +50,7 @@ export class BatchModuleContract implements IBatchModuleContract {
       ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new BatchModuleContractError(
-          "Unable to call hypertokenContract approve()",
+          "Unable to call BatchModuleContract batchRegister()",
           e,
         );
       },
