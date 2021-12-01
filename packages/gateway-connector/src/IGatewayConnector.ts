@@ -119,6 +119,12 @@ export interface IGatewayConnector {
   onPullPaymentDelayed(payment: PullPayment): void;
   onPullPaymentCanceled(payment: PullPayment): void;
 
+  // Called when the user requests a repair on a payment.
+  // An example scenario would be if the insurance for a payment is not
+  // being released- if the gateway thinks it has already been done, this
+  // can jog it's memory to do it again.
+  onRepairRequested(payment: PushPayment | PullPayment): void;
+
   /**
    * This method will be called by the core when the public identifier is sent.
    * This occurs usually shortly after startup, and it should be stored by the

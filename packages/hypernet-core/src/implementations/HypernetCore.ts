@@ -839,11 +839,27 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Finalize a pull-payment.
    */
+  // TODO
   public async finalizePullPayment(
     paymentId: PaymentId,
     finalAmount: BigNumberString,
   ): Promise<HypernetLink> {
     throw new Error("Method not yet implemented.");
+  }
+
+  public repairPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    void,
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+    | InvalidPaymentIdError
+    | ProxyError
+  > {
+    return this.paymentService.repairPayments(paymentIds).map(() => {});
   }
 
   /**

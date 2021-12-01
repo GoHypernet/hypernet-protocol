@@ -1,7 +1,9 @@
-import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { ChainId } from "@objects/ChainId";
-import { ChainInformation } from "@objects/ChainInformation";
-import { GovernanceChainInformation } from "@objects/ChainInformation";
+import {
+  ChainInformation,
+  GovernanceChainInformation,
+} from "@objects/ChainInformation";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { ProviderUrl } from "@objects/ProviderUrl";
 
 export const chainConfig = new Map<ChainId, ChainInformation>([
@@ -68,11 +70,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D"), // tokenRegistry
       EthereumContractAddress("TODO"), // chainRegistry
       EthereumContractAddress("TODO"), // batchModuleAddress
-      [
-        ProviderUrl(
-          "https://rinkeby.infura.io/v3/72827ccd538446f2a20e35a632664c52",
-        ),
-      ],
+      [ProviderUrl("https://rinkeby.hypernet.foundation")],
     ),
   ],
   [

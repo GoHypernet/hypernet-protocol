@@ -49,9 +49,9 @@ import {
   EthereumContractAddress,
   ProviderId,
   TokenInformation,
-  RegistryTokenId,
   RegistryModule,
   BatchModuleContractError,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -435,6 +435,21 @@ export default class HypernetIFrameProxy
       paymentId,
       amount: amount,
     });
+  }
+
+  public repairPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    void,
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+    | InvalidPaymentIdError
+    | ProxyError
+  > {
+    return this._createCall("repairPayments", paymentIds);
   }
 
   public mintTestToken(

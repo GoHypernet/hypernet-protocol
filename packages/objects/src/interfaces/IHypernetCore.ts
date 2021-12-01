@@ -242,6 +242,28 @@ export interface IHypernetCore {
   ): Promise<HypernetLink>;
 
   /**
+   * This method is used to force the system to take a very, very close
+   * look at a particular payment. It will also notify the gateway
+   * and send all the payment details to the gateway. The gateway may
+   * be able to fix the payment- for instance, if the payment is stuck
+   * in Approved waiting for the gateway to release the insurance, and
+   * the gateway doesn't know about the payment
+   * @param paymentId
+   */
+  repairPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    void,
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+    | InvalidPaymentIdError
+    | ProxyError
+  >;
+
+  /**
    * Only used for development purposes!
    * @param amount
    */
