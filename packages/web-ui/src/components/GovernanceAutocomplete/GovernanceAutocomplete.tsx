@@ -63,7 +63,7 @@ export const GovernanceAutocomplete: React.FC<IGovernanceAutocompleteProps> = ({
         <>
           {title && (
             <Typography
-              variant="h6"
+              variant="body1"
               color="textPrimary"
               className={classes.title}
             >

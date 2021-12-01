@@ -50,7 +50,7 @@ export const GovernanceDialogSelectLargeField: React.FC<GovernanceDialogSelectLa
         <Box className={classes.wrapper} onClick={toggleDialogOpen}>
           {title && (
             <Typography
-              variant="h6"
+              variant="body1"
               color="textPrimary"
               className={classes.title}
             >

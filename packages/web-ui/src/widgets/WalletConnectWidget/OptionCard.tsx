@@ -85,7 +85,7 @@ const OptionCard: React.FunctionComponent<OptionCardProps> = (
               marginRight: 8,
             }}
           >
-            <Typography variant="h3">{`${label
+            <Typography variant="body2">{`${label
               ?.charAt(0)
               .toUpperCase()}${label?.slice(1)}`}</Typography>
           </Box>

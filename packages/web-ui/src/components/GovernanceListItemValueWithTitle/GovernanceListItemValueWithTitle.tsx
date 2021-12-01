@@ -15,12 +15,16 @@ export const GovernanceListItemValueWithTitle: React.FC<IGovernanceListItemValue
 
     return (
       <Box className={classes.wrapper}>
-        <Typography variant="h6" color="textPrimary" className={classes.title}>
+        <Typography
+          variant="body2"
+          color="textPrimary"
+          className={classes.title}
+        >
           {title}
         </Typography>
 
         <Typography
-          variant="body2"
+          variant="body1"
           color="textPrimary"
           className={classes.value}
         >

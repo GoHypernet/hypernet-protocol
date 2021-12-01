@@ -78,11 +78,11 @@ export const GovernanceSideFilter: React.FC<IGovernanceSideFilterProps> = (
       className={classes.header}
     >
       <Box display="flex" alignItems="baseline">
-        <Typography variant="h4" color="textPrimary">
+        <Typography variant="h3" color="textPrimary">
           Filter
         </Typography>
         {itemsCount > -1 && (
-          <Typography variant="h6" className={classes.headerInfo}>
+          <Typography variant="h5" className={classes.headerInfo}>
             {itemsCount} results
           </Typography>
         )}

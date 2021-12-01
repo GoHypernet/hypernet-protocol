@@ -55,7 +55,7 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
 
     return (
       <Box className={classes.wrapper}>
-        <Typography variant="h5" className={classes.label}>
+        <Typography variant="body2" className={classes.label}>
           Current Account Address
         </Typography>
         <Formik

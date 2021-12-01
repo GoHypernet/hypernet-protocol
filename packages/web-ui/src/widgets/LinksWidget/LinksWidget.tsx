@@ -183,7 +183,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     <GovernanceCard
       title={
         <Box display="flex">
-          <Typography variant="h5">Transaction History</Typography>
+          <Typography variant="h6">Transaction History</Typography>
           <Box display="flex" alignItems="center" marginLeft="auto">
             <Box display="flex" alignItems="center" marginRight={1}>
               <Tooltip title="Enabling auto-accept will free you from manually approving every change to your Hypernet account.">

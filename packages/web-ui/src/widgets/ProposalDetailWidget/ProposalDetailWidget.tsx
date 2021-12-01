@@ -273,14 +273,14 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         </Grid>
       </Box>
       <Box className={classes.proposalDetails}>
-        <Typography variant="h5" className={classes.proposalDetailsLabel}>
+        <Typography variant="h6" className={classes.proposalDetailsLabel}>
           Details:
         </Typography>
         <Box className={classes.proposerSectionWrapper}>
-          <Typography variant="h5" className={classes.proposerLabel}>
+          <Typography variant="body1" className={classes.proposerLabel}>
             Proposer
           </Typography>
-          <Typography variant="h5" className={classes.proposerValue}>
+          <Typography variant="body1" className={classes.proposerValue}>
             {proposal?.originator}
           </Typography>
         </Box>

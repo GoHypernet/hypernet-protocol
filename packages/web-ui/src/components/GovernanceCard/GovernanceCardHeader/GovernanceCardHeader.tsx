@@ -23,12 +23,12 @@ export const GovernanceCardHeader: React.FC<GovernanceCardHeader> = (
       })}
     >
       <Box className={classes.header}>
-        <Typography variant="h5" color="textPrimary" className={classes.title}>
+        <Typography variant="h6" color="textPrimary" className={classes.title}>
           {title}
         </Typography>
         {description && (
           <Typography
-            variant="body2"
+            variant="body1"
             color="textPrimary"
             className={classes.description}
           >

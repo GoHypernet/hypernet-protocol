@@ -182,7 +182,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
 
             <GovernanceButton
               variant="contained"
-              size="large"
+              size="medium"
               form="CreateProposalForm"
               type="submit"
               fullWidth

@@ -105,7 +105,7 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
         <GovernanceButton
           color="primary"
           variant="contained"
-          size="large"
+          size="medium"
           fullWidth
           onClick={() => {
             handleSubmit();

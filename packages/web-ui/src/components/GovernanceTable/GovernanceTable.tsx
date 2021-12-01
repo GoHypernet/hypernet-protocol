@@ -73,7 +73,7 @@ export const GovernanceTable: React.FC<GovernanceTableProps> = (
       {title && (
         <Box className={classes.topWrapper}>
           <Box className={classes.titleWrapper}>
-            <Typography variant="h3">{title}</Typography>
+            <Typography variant="h6">{title}</Typography>
             {headerAction && (
               <GovernanceButton {...headerAction} size="medium" color="primary">
                 {headerAction.label}

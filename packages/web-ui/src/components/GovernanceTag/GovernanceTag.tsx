@@ -32,7 +32,7 @@ export const GovernanceTag: React.FC<GovernanceTagProps> = (
 
   return (
     <Box className={classes.wrapper}>
-      <Typography className={classes.text} variant="body2">
+      <Typography className={classes.text} variant="body1">
         {text}
       </Typography>
     </Box>

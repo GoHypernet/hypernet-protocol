@@ -74,19 +74,25 @@ export enum EFontWeight {
 
 export enum EFontSize {
   BASE = "1rem",
-  H1 = "1.602rem",
-  H2 = "1.424rem",
-  H3 = "1.266rem",
-  H4 = "1.125rem",
-  H5 = "1rem",
-  H6 = ".75rem",
+  H1 = "1.476rem",
+  H2 = "1.383rem",
+  H3 = "1.296rem",
+  H4 = "1.215rem",
+  H5 = "1.138rem",
+  H6 = "1.067rem",
 
-  SUBTITLE1 = "1.266rem",
-  BODY1 = "1rem",
-  BODY2 = ".889rem",
+  SUBTITLE1 = "1rem",
+  SUBTITLE2 = ".878rem",
+
+  BODY1 = ".878rem",
+  BODY2 = ".823rem",
+
   BUTTON_LARGE = "1rem",
-  BUTTON_MEDIUM = ".889rem",
-  BUTTON_SMALL = ".75rem",
+  BUTTON_MEDIUM = ".878rem",
+  BUTTON_SMALL = ".772rem",
+
+  LABEL_LARGE = ".878rem",
+  LABEL_SMALL = ".772rem",
 }
 
 export const getColorFromStatus = (status: EStatusColor) => {
@@ -178,6 +184,7 @@ const MuiTextField = {
     background: colors.GRAY100,
     border: `2px solid ${colors.GRAY200}`,
     borderRadius: 3,
+    fontSize: EFontSize.BODY2,
   },
 };
 
@@ -243,11 +250,21 @@ const typography = {
     fontSize: EFontSize.H6,
     fontFamily: bodyFontFamily,
   },
+  subtitle1: {
+    fontSize: EFontSize.SUBTITLE1,
+    fontFamily: bodyFontFamily,
+  },
+  subtitle2: {
+    fontSize: EFontSize.SUBTITLE2,
+    fontFamily: bodyFontFamily,
+  },
   body1: {
     fontSize: EFontSize.BODY1,
+    fontFamily: bodyFontFamily,
   },
   body2: {
     fontSize: EFontSize.BODY2,
+    fontFamily: bodyFontFamily,
   },
   button: {
     fontSize: EFontSize.BASE,
