@@ -210,9 +210,13 @@ class PaymentServiceMocks {
       gatewaySignature,
     );
     this.gatewayConnectorProxy = td.object<IGatewayConnectorProxy>();
+    this.gatewayConnectorProxy.gatewayUrl = gatewayUrl;
     td.when(
       this.gatewayConnectorProxy.getConnectorActivationStatus(),
     ).thenReturn(true);
+    td.when(
+      this.gatewayConnectorProxy.notifyRepairRequested(td.matchers.anything()),
+    ).thenReturn(okAsync(undefined));
 
     const gatewayRegistrationInfoMap = new Map<
       GatewayUrl,
@@ -1388,6 +1392,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isOk()).toBeTruthy();
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
   test("repairPayments cancels second insurance transfer if duplicates are detected", async () => {
@@ -1427,6 +1432,7 @@ describe("PaymentService tests", () => {
     expect(result.isOk()).toBeTruthy();
     const retPayments = result._unsafeUnwrap();
     expect(retPayments).toContain(paymentServiceMock.stakedPushPayment);
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
   test("repairPayments cancels second payment transfer if duplicates are detected", async () => {
@@ -1466,5 +1472,6 @@ describe("PaymentService tests", () => {
     expect(result.isOk()).toBeTruthy();
     const retPayments = result._unsafeUnwrap();
     expect(retPayments).toContain(paymentServiceMock.approvedPushPayment);
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 });

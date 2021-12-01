@@ -1267,9 +1267,9 @@ export class PaymentService implements IPaymentService {
           return ResultUtils.combine(
             payments.map((payment) => {
               // Get the gateway proxy for the payment
-              const gatewayConnector = gatewayConnectorProxies.find(
-                (proxy) => proxy.gatewayUrl == payment.gatewayUrl,
-              );
+              const gatewayConnector = gatewayConnectorProxies.find((proxy) => {
+                return proxy.gatewayUrl == payment.gatewayUrl;
+              });
 
               // If the proxy exists, notify the proxy
               if (gatewayConnector != null) {
