@@ -12,6 +12,8 @@ import {
   ERC20ContractError,
   EthereumContractAddress,
   RegistryTokenId,
+  RegistryModule,
+  BatchModuleContractError,
 } from "@hypernetlabs/objects";
 import { IRegistryService } from "@interfaces/business";
 import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
@@ -156,10 +158,7 @@ export class RegistryService implements IRegistryService {
 
   public createRegistryEntry(
     registryName: string,
-    label: string,
-    recipientAddress: EthereumAccountAddress,
-    data: string,
-    tokenId: RegistryTokenId,
+    newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
     | RegistryFactoryContractError
@@ -171,10 +170,7 @@ export class RegistryService implements IRegistryService {
   > {
     return this.registryRepository.createRegistryEntry(
       registryName,
-      label,
-      recipientAddress,
-      data,
-      tokenId,
+      newRegistryEntry,
     );
   }
 
@@ -227,7 +223,7 @@ export class RegistryService implements IRegistryService {
 
   public grantRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -241,7 +237,7 @@ export class RegistryService implements IRegistryService {
 
   public revokeRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -255,7 +251,7 @@ export class RegistryService implements IRegistryService {
 
   public renounceRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -279,6 +275,28 @@ export class RegistryService implements IRegistryService {
       registryName,
       ownerAddress,
       index,
+    );
+  }
+
+  public getRegistryModules(): ResultAsync<
+    RegistryModule[],
+    RegistryFactoryContractError
+  > {
+    return this.registryRepository.getRegistryModules();
+  }
+
+  public createBatchRegistryEntry(
+    registryName: string,
+    newRegistryEntries: RegistryEntry[],
+  ): ResultAsync<
+    void,
+    | BatchModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+  > {
+    return this.registryRepository.createBatchRegistryEntry(
+      registryName,
+      newRegistryEntries,
     );
   }
 }

@@ -33,3 +33,4 @@ export * from "@objects/errors/RouterUnauthorizedError";
 export * from "@objects/errors/TransferCreationError";
 export * from "@objects/errors/TransferResolutionError";
 export * from "@objects/errors/VectorError";
+export * from "@objects/errors/BatchModuleContractError";

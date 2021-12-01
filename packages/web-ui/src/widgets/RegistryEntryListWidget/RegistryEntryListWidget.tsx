@@ -1,8 +1,10 @@
 import {
+  ChainId,
   ERegistrySortOrder,
   EthereumAccountAddress,
   Registry,
   RegistryEntry,
+  chainConfig,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -16,8 +18,10 @@ import {
   GovernancePagination,
   GovernanceEmptyState,
   GovernanceSwitch,
+  IHeaderAction,
 } from "@web-ui/components";
 import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
+import CreateBatchIdentityWidget from "@web-ui/widgets/CreateBatchIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
 
@@ -38,6 +42,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     useState<boolean>(false);
 
   const [createIdentityModalOpen, setCreateIdentityModalOpen] =
+    useState<boolean>(false);
+  const [createBatchIdentityModalOpen, setCreateBatchIdentityModalOpen] =
     useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
@@ -111,7 +117,34 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     );
   }, [JSON.stringify(registry?.registrationToken)]);
 
-  const canCreateNewRegistryEntry = isRegistrar || isRegistrationTokenEnabled;
+  const getHeaderActions: () => IHeaderAction[] = () => {
+    const canCreateNewRegistryEntry = isRegistrar || isRegistrationTokenEnabled;
+
+    const canCreateNewBatchRegistryEntry =
+      isRegistrar && registry?.modulesCapability.batchMintEnabled;
+
+    let headerActions: IHeaderAction[] = [];
+
+    if (canCreateNewBatchRegistryEntry) {
+      headerActions.push({
+        label: "Create Batch Identity",
+        onClick: () => setCreateBatchIdentityModalOpen(true),
+        variant: "contained",
+        color: "primary",
+      });
+    }
+
+    if (canCreateNewRegistryEntry) {
+      headerActions.push({
+        label: "Create New Identity",
+        onClick: () => setCreateIdentityModalOpen(true),
+        variant: "contained",
+        color: "primary",
+      });
+    }
+
+    return headerActions;
+  };
 
   return (
     <Box>
@@ -123,16 +156,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             onRegistryListNavigate?.();
           },
         }}
-        {...(canCreateNewRegistryEntry && {
-          headerActions: [
-            {
-              label: "Create New Identity",
-              onClick: () => setCreateIdentityModalOpen(true),
-              variant: "contained",
-              color: "primary",
-            },
-          ],
-        })}
+        headerActions={getHeaderActions()}
         rightContent={
           <Box display="flex" alignItems="center" marginTop={5}>
             <Typography style={{ paddingRight: 5 }}>Reverse sorting</Typography>
@@ -200,6 +224,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,
             totalItems: registry?.numberOfEntries,
+            currentPage: page,
           }}
           onChange={(_, page) => {
             setPage(page);
@@ -211,6 +236,16 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           onCloseCallback={() => {
             getRegistry();
             setCreateIdentityModalOpen(false);
+          }}
+          registryName={registryName}
+          currentAccountAddress={accountAddress}
+        />
+      )}
+      {createBatchIdentityModalOpen && (
+        <CreateBatchIdentityWidget
+          onCloseCallback={() => {
+            getRegistry();
+            setCreateBatchIdentityModalOpen(false);
           }}
           registryName={registryName}
           currentAccountAddress={accountAddress}

@@ -36,6 +36,7 @@ export const useStyles = makeStyles({
   },
   addressChip: {
     marginLeft: 8,
+    marginBottom: 5,
   },
   editableField: {
     borderColor: colors.GRAY500,

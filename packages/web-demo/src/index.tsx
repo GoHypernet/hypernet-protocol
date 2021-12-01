@@ -5,7 +5,11 @@ import HypernetWebIntegration, {
 
 import Spinner from "./assets/loading-spinner";
 
-const client: IHypernetWebIntegration = new HypernetWebIntegration();
+const client: IHypernetWebIntegration = new HypernetWebIntegration(
+  null,
+  null,
+  null,
+);
 
 // set image background styles
 const style = document.createElement("style");

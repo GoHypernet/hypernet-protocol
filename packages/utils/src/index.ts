@@ -12,3 +12,5 @@ export * from "@utils/IValidationUtils";
 export * from "@utils/ValidationUtils";
 export * from "@utils/ITimeUtils";
 export * from "@utils/TimeUtils";
+export * from "@utils/JsonUtils";
+export * from "@utils/IJsonUtils";

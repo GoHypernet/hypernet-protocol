@@ -469,7 +469,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public registerByToken(
     recipientAddress: EthereumAccountAddress,
     label: string,
-    data: string,
+    data: string | null,
     tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
@@ -500,7 +500,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public register(
     recipientAddress: EthereumAccountAddress,
     label: string,
-    data: string,
+    data: string | null,
     tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
@@ -529,7 +529,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public grantRole(
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
@@ -566,7 +566,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public revokeRole(
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
@@ -603,7 +603,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public renounceRole(
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,

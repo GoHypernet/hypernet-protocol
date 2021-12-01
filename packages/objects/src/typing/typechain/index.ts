@@ -46,6 +46,7 @@ import MessageTransferAbi from "./artifacts/MessageTransfer";
 import NonFungibleRegistryEnumerableUpgradeableAbi from "./artifacts/NonFungibleRegistryEnumerableUpgradeable";
 import ParameterizedAbi from "./artifacts/Parameterized";
 import UpgradeableRegistryFactoryAbi from "./artifacts/UpgradeableRegistryFactory";
+import BatchModuleAbi from "./artifacts/BatchModule";
 
 const TransferAbis = {
   ERC721: ERC721Abi,
@@ -60,6 +61,7 @@ const GovernanceAbis = {
   UpgradeableRegistryFactory: UpgradeableRegistryFactoryAbi,
   NonFungibleRegistryEnumerableUpgradeable:
     NonFungibleRegistryEnumerableUpgradeableAbi,
+  BatchModule: BatchModuleAbi,
 };
 
 export { TransferAbis, GovernanceAbis };

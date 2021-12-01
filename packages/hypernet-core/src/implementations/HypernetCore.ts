@@ -57,6 +57,8 @@ import {
   ProviderId,
   TokenInformation,
   InactiveGatewayError,
+  RegistryModule,
+  BatchModuleContractError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -303,7 +305,7 @@ export class HypernetCore implements IHypernetCore {
    * @param network the network to attach to
    * @param config optional config, defaults to localhost/dev config
    */
-  constructor(config?: HypernetConfig) {
+  constructor(config?: Partial<HypernetConfig>) {
     this._inControl = false;
 
     this.onControlClaimed = new Subject();
@@ -1377,10 +1379,7 @@ export class HypernetCore implements IHypernetCore {
 
   public createRegistryEntry(
     registryName: string,
-    label: string,
-    recipientAddress: EthereumAccountAddress,
-    data: string,
-    tokenId: RegistryTokenId,
+    newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1392,10 +1391,7 @@ export class HypernetCore implements IHypernetCore {
   > {
     return this.registryService.createRegistryEntry(
       registryName,
-      label,
-      recipientAddress,
-      data,
-      tokenId,
+      newRegistryEntry,
     );
   }
 
@@ -1448,7 +1444,7 @@ export class HypernetCore implements IHypernetCore {
 
   public grantRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1462,7 +1458,7 @@ export class HypernetCore implements IHypernetCore {
 
   public revokeRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1476,7 +1472,7 @@ export class HypernetCore implements IHypernetCore {
 
   public renounceRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -1493,7 +1489,7 @@ export class HypernetCore implements IHypernetCore {
   ): ResultAsync<void, InvalidParametersError> {
     return this.accountService.provideProviderId(providerId);
   }
-  
+
   public getTokenInformation(): ResultAsync<TokenInformation[], never> {
     return this.tokenInformationService.getTokenInformation();
   }
@@ -1512,12 +1508,6 @@ export class HypernetCore implements IHypernetCore {
     );
   }
 
-  public getGovernanceChainId(): ResultAsync<ChainId, never> {
-    return this.configProvider.getConfig().map((config) => {
-      return config.governanceChainId;
-    });
-  }
-
   public getRegistryEntryByOwnerAddress(
     registryName: string,
     ownerAddress: EthereumAccountAddress,
@@ -1530,6 +1520,28 @@ export class HypernetCore implements IHypernetCore {
       registryName,
       ownerAddress,
       index,
+    );
+  }
+
+  public getRegistryModules(): ResultAsync<
+    RegistryModule[],
+    RegistryFactoryContractError
+  > {
+    return this.registryService.getRegistryModules();
+  }
+
+  public createBatchRegistryEntry(
+    registryName: string,
+    newRegistryEntries: RegistryEntry[],
+  ): ResultAsync<
+    void,
+    | BatchModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+  > {
+    return this.registryService.createBatchRegistryEntry(
+      registryName,
+      newRegistryEntries,
     );
   }
 }

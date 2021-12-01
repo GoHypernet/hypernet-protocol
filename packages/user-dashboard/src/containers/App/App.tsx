@@ -1,4 +1,5 @@
 import HypernetWebIntegration, {
+  ChainId,
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
 import {
@@ -19,9 +20,12 @@ import Router from "@user-dashboard/containers/Router";
 import { useLayoutContext, StoreProvider } from "@user-dashboard/contexts";
 
 declare const __CORE_IFRAME_SOURCE__: string;
+declare const __GOVERNANCE_CHAIN_ID__: string;
 
 const integration: IHypernetWebIntegration = new HypernetWebIntegration(
   __CORE_IFRAME_SOURCE__,
+  ChainId(parseInt(__GOVERNANCE_CHAIN_ID__)),
+  null,
 );
 
 const App: React.FC = () => {
