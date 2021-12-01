@@ -11,6 +11,8 @@ import {
   StylesProvider,
   createGenerateClassName,
 } from "@material-ui/core";
+import { positions, Provider } from "react-alert";
+import AlertTemplate from "react-alert-template-basic";
 
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
@@ -180,16 +182,22 @@ export default class HypernetWebUI implements IHypernetWebUI {
       >
         <StylesProvider generateClassName={generateClassName}>
           <Theme theme={theme}>
-            <LayoutProvider>
-              <MainContainer
-                withModal={withModal}
-                closeCallback={closeCallback}
-                modalStyle={modalStyle}
-                isV2={hasTheme}
-              >
-                {component}
-              </MainContainer>
-            </LayoutProvider>
+            <Provider
+              template={AlertTemplate}
+              timeout={10000}
+              position={positions.BOTTOM_CENTER}
+            >
+              <LayoutProvider>
+                <MainContainer
+                  withModal={withModal}
+                  closeCallback={closeCallback}
+                  modalStyle={modalStyle}
+                  isV2={hasTheme}
+                >
+                  {component}
+                </MainContainer>
+              </LayoutProvider>
+            </Provider>
           </Theme>
         </StylesProvider>
       </StoreProvider>

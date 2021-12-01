@@ -3,17 +3,15 @@ import { Typography, Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRenderParams } from "@web-ui/interfaces";
 import React, { useEffect, useState } from "react";
-import { useAlert } from "react-alert";
 
 import { useStyles } from "@web-ui/widgets/ConnectedAccountWidget/ConnectedAccountWidget.style";
 
 interface ConnectedAccountWidgetParams extends IRenderParams {}
 
 const ConnectedAccountWidget: React.FC<ConnectedAccountWidgetParams> = () => {
-  const alert = useAlert();
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [accountAddress, setAccountAddress] =
     useState<EthereumAccountAddress>();
 
@@ -28,15 +26,10 @@ const ConnectedAccountWidget: React.FC<ConnectedAccountWidgetParams> = () => {
             setAccountAddress(accounts[0]);
             setLoading(false);
           })
-          .mapErr(handleError);
+          .mapErr(handleCoreError);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   }, []);
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
-  };
 
   if (accountAddress == null) return <></>;
 

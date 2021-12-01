@@ -2,8 +2,7 @@ import { EthereumAccountAddress, RegistryTokenId } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
-import React, { useState } from "react";
-import { useAlert } from "react-alert";
+import React from "react";
 
 import {
   GovernanceDialog,
@@ -25,13 +24,9 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
   registryName,
   tokenId,
 }: ITransferIdentityWidget) => {
-  const alert = useAlert();
   const classes = useStyles();
-  const { coreProxy, UIData } = useStoreContext();
-  const { setLoading } = useLayoutContext();
-  const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
-    EthereumAccountAddress(""),
-  );
+  const { coreProxy } = useStoreContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
 
   const transferIdentity = (values: { address: string }) => {
     setLoading(true);
@@ -45,16 +40,7 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
         setLoading(false);
         onSuccessCallback();
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
-  };
-
-  const handleAddressFieldChange = (value: string) => {
-    setAccountAddress(EthereumAccountAddress(value));
+      .mapErr(handleCoreError);
   };
 
   return (
@@ -80,7 +66,6 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
                     type="input"
                     placeholder="Enter the address"
                     required={true}
-                    handleChange={handleAddressFieldChange}
                   />
                   <Box className={classes.actionContainer}>
                     <GovernanceButton

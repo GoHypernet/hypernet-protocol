@@ -1,6 +1,5 @@
 import React, { ReactNode, useState, createContext, useContext } from "react";
-import { positions, Provider } from "react-alert";
-import AlertTemplate from "react-alert-template-basic";
+import { useAlert } from "react-alert";
 
 import { WEB_UI_MODAL_ID_SELECTOR } from "@web-ui/constants";
 import { EStatusColor } from "@web-ui/theme";
@@ -13,6 +12,7 @@ interface ILayout {
   closeModal: () => void;
   loading: boolean;
   setLoading: (loading: boolean) => void;
+  handleCoreError: (err: any) => void;
 }
 
 interface ILayoutProps {
@@ -22,6 +22,7 @@ interface ILayoutProps {
 const LayoutContext = createContext<ILayout>({} as ILayout);
 
 export function LayoutProvider({ children }: ILayoutProps) {
+  const alert = useAlert();
   const [modalWidth, setModalWidth] = useState<number>(900);
   const [loading, setLoading] = useState<boolean>(false);
   const [modalStatus, setModalStatus] = useState<EStatusColor>(
@@ -35,6 +36,22 @@ export function LayoutProvider({ children }: ILayoutProps) {
     }
   };
 
+  const handleCoreError = (err) => {
+    setLoading(false);
+
+    let errorMessage = "";
+    if (err?.message != null && err?.message.includes("Nonce too high")) {
+      errorMessage =
+        "Nonce too high error, try to restart your metamask from the advanced option";
+    } else if (err?.message != null) {
+      errorMessage = err?.message;
+    } else {
+      errorMessage = "Something went wrong!";
+    }
+
+    alert.error(errorMessage);
+  };
+
   const initialState: ILayout = {
     setModalWidth,
     modalWidth,
@@ -43,18 +60,12 @@ export function LayoutProvider({ children }: ILayoutProps) {
     closeModal,
     loading,
     setLoading,
-  };
-
-  const alertOptions = {
-    timeout: 5000,
-    position: positions.BOTTOM_CENTER,
+    handleCoreError,
   };
 
   return (
     <LayoutContext.Provider value={initialState}>
-      <Provider template={AlertTemplate} {...alertOptions}>
-        {children}
-      </Provider>
+      {children}
     </LayoutContext.Provider>
   );
 }

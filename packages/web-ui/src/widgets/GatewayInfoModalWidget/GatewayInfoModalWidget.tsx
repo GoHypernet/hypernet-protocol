@@ -4,7 +4,7 @@ import {
   BigNumberString,
   EthereumContractAddress,
 } from "@hypernetlabs/objects";
-import { Box, Tooltip, IconButton, Typography, Grid } from "@material-ui/core";
+import { Box, Tooltip, IconButton, Typography } from "@material-ui/core";
 import {
   Add as AddIcon,
   LocalGasStation as LocalGasStationIcon,
@@ -36,7 +36,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
   const classes = useStyles();
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [gatewayTokenInfo, setGatewayTokenInfo] = useState<GatewayTokenInfo[]>(
     [],
   );
@@ -55,7 +55,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
         }
         checkTokensStateChannelsStatus(gatewayTokenInfoVal);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   }, []);
 
   const checkTokensStateChannelsStatus = (
@@ -102,7 +102,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
           });
           setLoading(false);
         })
-        .mapErr(handleError);
+        .mapErr(handleCoreError);
     });
   };
 
@@ -119,16 +119,11 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
           "Your token has been registered and a new account has been created!",
         );
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const addFunds = (gatewayToken: GatewayTokenInfo) => {
     console.log("addFunds gatewayToken: ", gatewayToken);
-  };
-
-  const handleError = (err) => {
-    alert.error(err.message || "Something went wrong!");
-    setLoading(false);
   };
 
   return (

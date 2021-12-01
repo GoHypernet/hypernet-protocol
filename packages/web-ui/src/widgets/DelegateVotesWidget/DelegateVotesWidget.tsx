@@ -3,7 +3,6 @@ import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
-import { useAlert } from "react-alert";
 
 import {
   GovernanceDialog,
@@ -22,10 +21,9 @@ interface IDelegateVotesWidget {
 const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
   onCloseCallback,
 }: IDelegateVotesWidget) => {
-  const alert = useAlert();
   const classes = useStyles();
   const { coreProxy, UIData } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
     EthereumAccountAddress(""),
   );
@@ -45,12 +43,7 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
         setLoading(false);
         onCloseCallback();
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   return (

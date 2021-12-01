@@ -11,7 +11,6 @@ import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
 import { Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
-import { useAlert } from "react-alert";
 
 import {
   GovernanceChip,
@@ -43,10 +42,9 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   onRegistryListNavigate,
   registryName,
 }: IRegistryDetailWidgetParams) => {
-  const alert = useAlert();
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [registry, setRegistry] = useState<Registry>();
   const [registryModules, setRegistryModules] = useState<RegistryModule[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -79,7 +77,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
         setLoading(false);
       })
 
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const getRegistryModules = () => {
@@ -91,13 +89,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
         setLoading(false);
       })
 
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    setIsEditing(false);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   const updateRegistryParams = ({
@@ -127,7 +119,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
         setRegistry(registry);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const updateRegistrarRole = (
@@ -144,14 +136,14 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
         .map(() => {
           getRegistryDetails();
         })
-        .mapErr(handleError);
+        .mapErr(handleCoreError);
     } else {
       coreProxy
         .revokeRegistrarRole(registry?.name, moduleAddress)
         .map(() => {
           getRegistryDetails();
         })
-        .mapErr(handleError);
+        .mapErr(handleCoreError);
     }
   };
 

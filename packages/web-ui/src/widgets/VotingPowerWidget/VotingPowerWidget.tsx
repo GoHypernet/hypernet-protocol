@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useAlert } from "react-alert";
 import { Typography } from "@material-ui/core";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -9,10 +8,9 @@ import { IRenderParams } from "@web-ui/interfaces";
 interface VotingPowerWidgetParams extends IRenderParams {}
 
 const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
-  const alert = useAlert();
   const { coreProxy, UIData } = useStoreContext();
   const classes = useStyles();
-  const { setLoading } = useLayoutContext();
+  const { handleCoreError } = useLayoutContext();
   const [votingPower, setVotingPower] = useState<number>();
 
   useEffect(() => {
@@ -34,16 +32,11 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
               .map((votingPower) => {
                 setVotingPower(votingPower);
               })
-              .mapErr(handleError);
+              .mapErr(handleCoreError);
           })
-          .mapErr(handleError);
+          .mapErr(handleCoreError);
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   return (
