@@ -1,4 +1,4 @@
-import { IHypernetCore, IUIData } from "@hypernetlabs/objects";
+import { ChainId, IHypernetCore, IUIData } from "@hypernetlabs/objects";
 import { IViewUtils, IDateUtils } from "@web-ui/interfaces";
 import React, { createContext, useContext } from "react";
 
@@ -8,6 +8,7 @@ interface IStore {
   viewUtils: IViewUtils;
   dateUtils: IDateUtils;
   widgetUniqueIdentifier: string;
+  governanceChainId: ChainId;
 }
 
 interface IStoreProps extends IStore {
@@ -22,6 +23,7 @@ export function StoreProvider({
   viewUtils,
   dateUtils,
   widgetUniqueIdentifier,
+  governanceChainId,
   children,
 }: IStoreProps) {
   const initialState: IStore = {
@@ -30,6 +32,7 @@ export function StoreProvider({
     viewUtils,
     dateUtils,
     widgetUniqueIdentifier,
+    governanceChainId,
   };
 
   return (

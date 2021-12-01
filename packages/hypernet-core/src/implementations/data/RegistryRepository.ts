@@ -26,6 +26,8 @@ import {
   RegistryTokenId,
   RegistryModule,
   BatchModuleContractError,
+  RegistryModuleCapability,
+  chainConfig,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IRegistryRepository } from "@interfaces/data";
@@ -106,60 +108,42 @@ export class RegistryRepository implements IRegistryRepository {
     Map<string, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
-    const registriesMap: Map<string, Registry> = new Map();
-    return ResultUtils.combine(
-      registryNames.map((registryName) => {
-        return this.registryFactoryContract
-          .nameToAddress(registryName)
-          .andThen((registryAddress) => {
-            if (this.provider == null) {
-              throw new Error("No provider available!");
-            }
+    return this.configProvider.getConfig().andThen((config) => {
+      const registriesMap: Map<string, Registry> = new Map();
+      return ResultUtils.combine(
+        registryNames.map((registryName) => {
+          return this.registryFactoryContract
+            .nameToAddress(registryName)
+            .andThen((registryAddress) => {
+              if (this.provider == null) {
+                throw new Error("No provider available!");
+              }
 
-            // Call the NFI contract of that address
-            this.nonFungibleRegistryContract =
-              new NonFungibleRegistryEnumerableUpgradeableContract(
-                this.provider,
-                registryAddress,
-              );
+              // Call the NFI contract of that address
+              this.nonFungibleRegistryContract =
+                new NonFungibleRegistryEnumerableUpgradeableContract(
+                  this.provider,
+                  registryAddress,
+                );
 
-            // Get the symbol and NumberOfEntries of that registry address
-            return ResultUtils.combine([
-              this.getRegistryContractRegistrarRoleAddresses(),
-              this.getRegistryContractRegistrarRoleAdminAddresses(),
-              this.nonFungibleRegistryContract.symbol(),
-              this.nonFungibleRegistryContract.totalSupply(),
-              this.nonFungibleRegistryContract.allowStorageUpdate(),
-              this.nonFungibleRegistryContract.allowLabelChange(),
-              this.nonFungibleRegistryContract.allowTransfers(),
-              this.nonFungibleRegistryContract.registrationToken(),
-              this.nonFungibleRegistryContract.registrationFee(),
-              this.nonFungibleRegistryContract.burnAddress(),
-              this.nonFungibleRegistryContract.burnFee(),
-              this.nonFungibleRegistryContract.primaryRegistry(),
-            ]).map((vals) => {
-              const [
-                registrarAddresses,
-                registrarAdminAddresses,
-                registrySymbol,
-                registryNumberOfEntries,
-                allowStorageUpdate,
-                allowLabelChange,
-                allowTransfers,
-                registrationToken,
-                registrationFee,
-                burnAddress,
-                burnFee,
-                primaryRegistry,
-              ] = vals;
-
-              registriesMap.set(
-                registryName,
-                new Registry(
+              // Get the symbol and NumberOfEntries of that registry address
+              return ResultUtils.combine([
+                this.getRegistryContractRegistrarRoleAddresses(),
+                this.getRegistryContractRegistrarRoleAdminAddresses(),
+                this.nonFungibleRegistryContract.symbol(),
+                this.nonFungibleRegistryContract.totalSupply(),
+                this.nonFungibleRegistryContract.allowStorageUpdate(),
+                this.nonFungibleRegistryContract.allowLabelChange(),
+                this.nonFungibleRegistryContract.allowTransfers(),
+                this.nonFungibleRegistryContract.registrationToken(),
+                this.nonFungibleRegistryContract.registrationFee(),
+                this.nonFungibleRegistryContract.burnAddress(),
+                this.nonFungibleRegistryContract.burnFee(),
+                this.nonFungibleRegistryContract.primaryRegistry(),
+              ]).map((vals) => {
+                const [
                   registrarAddresses,
                   registrarAdminAddresses,
-                  registryAddress,
-                  registryName,
                   registrySymbol,
                   registryNumberOfEntries,
                   allowStorageUpdate,
@@ -170,14 +154,45 @@ export class RegistryRepository implements IRegistryRepository {
                   burnAddress,
                   burnFee,
                   primaryRegistry,
-                  null,
-                ),
-              );
+                ] = vals;
+
+                const modulesCapability = new RegistryModuleCapability(
+                  registryAddress,
+                  registrarAddresses.some(
+                    (registrarAddress) =>
+                      EthereumContractAddress(registrarAddress) ===
+                      chainConfig.get(config.governanceChainId)
+                        ?.batchModuleAddress,
+                  ),
+                );
+
+                registriesMap.set(
+                  registryName,
+                  new Registry(
+                    registrarAddresses,
+                    registrarAdminAddresses,
+                    registryAddress,
+                    registryName,
+                    registrySymbol,
+                    registryNumberOfEntries,
+                    allowStorageUpdate,
+                    allowLabelChange,
+                    allowTransfers,
+                    registrationToken,
+                    registrationFee,
+                    burnAddress,
+                    burnFee,
+                    primaryRegistry,
+                    modulesCapability,
+                    null,
+                  ),
+                );
+              });
             });
-          });
-      }),
-    ).map(() => {
-      return registriesMap;
+        }),
+      ).map(() => {
+        return registriesMap;
+      });
     });
   }
 
@@ -189,57 +204,39 @@ export class RegistryRepository implements IRegistryRepository {
   > {
     const registriesMap: Map<EthereumContractAddress, Registry> = new Map();
 
-    return ResultUtils.combine(
-      registryAddresses.map((registryAddress) => {
-        if (this.provider == null) {
-          throw new Error("No provider available!");
-        }
+    return this.configProvider.getConfig().andThen((config) => {
+      return ResultUtils.combine(
+        registryAddresses.map((registryAddress) => {
+          if (this.provider == null) {
+            throw new Error("No provider available!");
+          }
 
-        // Call the NFT contract of that address
-        this.nonFungibleRegistryContract =
-          new NonFungibleRegistryEnumerableUpgradeableContract(
-            this.provider,
-            registryAddress,
-          );
+          // Call the NFT contract of that address
+          this.nonFungibleRegistryContract =
+            new NonFungibleRegistryEnumerableUpgradeableContract(
+              this.provider,
+              registryAddress,
+            );
 
-        // Get the symbol and NumberOfEntries of that registry address
-        return ResultUtils.combine([
-          this.getRegistryContractRegistrarRoleAddresses(),
-          this.getRegistryContractRegistrarRoleAdminAddresses(),
-          this.nonFungibleRegistryContract.name(),
-          this.nonFungibleRegistryContract.symbol(),
-          this.nonFungibleRegistryContract.totalSupply(),
-          this.nonFungibleRegistryContract.allowStorageUpdate(),
-          this.nonFungibleRegistryContract.allowLabelChange(),
-          this.nonFungibleRegistryContract.allowTransfers(),
-          this.nonFungibleRegistryContract.registrationToken(),
-          this.nonFungibleRegistryContract.registrationFee(),
-          this.nonFungibleRegistryContract.burnAddress(),
-          this.nonFungibleRegistryContract.burnFee(),
-          this.nonFungibleRegistryContract.primaryRegistry(),
-        ]).map((vals) => {
-          const [
-            registrarAddresses,
-            registrarAdminAddresses,
-            registryName,
-            registrySymbol,
-            registryNumberOfEntries,
-            allowStorageUpdate,
-            allowLabelChange,
-            allowTransfers,
-            registrationToken,
-            registrationFee,
-            burnAddress,
-            burnFee,
-            primaryRegistry,
-          ] = vals;
-
-          registriesMap.set(
-            registryAddress,
-            new Registry(
+          // Get the symbol and NumberOfEntries of that registry address
+          return ResultUtils.combine([
+            this.getRegistryContractRegistrarRoleAddresses(),
+            this.getRegistryContractRegistrarRoleAdminAddresses(),
+            this.nonFungibleRegistryContract.name(),
+            this.nonFungibleRegistryContract.symbol(),
+            this.nonFungibleRegistryContract.totalSupply(),
+            this.nonFungibleRegistryContract.allowStorageUpdate(),
+            this.nonFungibleRegistryContract.allowLabelChange(),
+            this.nonFungibleRegistryContract.allowTransfers(),
+            this.nonFungibleRegistryContract.registrationToken(),
+            this.nonFungibleRegistryContract.registrationFee(),
+            this.nonFungibleRegistryContract.burnAddress(),
+            this.nonFungibleRegistryContract.burnFee(),
+            this.nonFungibleRegistryContract.primaryRegistry(),
+          ]).map((vals) => {
+            const [
               registrarAddresses,
               registrarAdminAddresses,
-              registryAddress,
               registryName,
               registrySymbol,
               registryNumberOfEntries,
@@ -251,13 +248,43 @@ export class RegistryRepository implements IRegistryRepository {
               burnAddress,
               burnFee,
               primaryRegistry,
-              null,
-            ),
-          );
-        });
-      }),
-    ).map(() => {
-      return registriesMap;
+            ] = vals;
+
+            const modulesCapability = new RegistryModuleCapability(
+              registryAddress,
+              registrarAddresses.some(
+                (registrarAddress) =>
+                  EthereumContractAddress(registrarAddress) ===
+                  chainConfig.get(config.governanceChainId)?.batchModuleAddress,
+              ),
+            );
+
+            registriesMap.set(
+              registryAddress,
+              new Registry(
+                registrarAddresses,
+                registrarAdminAddresses,
+                registryAddress,
+                registryName,
+                registrySymbol,
+                registryNumberOfEntries,
+                allowStorageUpdate,
+                allowLabelChange,
+                allowTransfers,
+                registrationToken,
+                registrationFee,
+                burnAddress,
+                burnFee,
+                primaryRegistry,
+                modulesCapability,
+                null,
+              ),
+            );
+          });
+        }),
+      ).map(() => {
+        return registriesMap;
+      });
     });
   }
 
@@ -1131,9 +1158,12 @@ export class RegistryRepository implements IRegistryRepository {
     Registry | null,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
-    return this.registryFactoryContract
-      .enumerableRegistries(index)
-      .andThen((registryAddress) => {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.registryFactoryContract.enumerableRegistries(index),
+    ])
+      .andThen((vals) => {
+        const [config, registryAddress] = vals;
         // Call the NFI contract of that address
         if (this.provider == null) {
           throw new Error("No provider available!");
@@ -1146,6 +1176,7 @@ export class RegistryRepository implements IRegistryRepository {
 
         // Get the name, symbol and NumberOfEntries of that registry address
         return ResultUtils.combine([
+          this.getRegistryContractRegistrarRoleAddresses(),
           this.nonFungibleRegistryContract.getRegistrarRoleMember(),
           this.nonFungibleRegistryContract.getRegistrarRoleAdminMember(),
           this.nonFungibleRegistryContract.name(),
@@ -1162,7 +1193,8 @@ export class RegistryRepository implements IRegistryRepository {
         ]).andThen((vals) => {
           const [
             registrarAddresses,
-            registrarAdminAddresses,
+            registrarAddress,
+            registrarAdminAddress,
             registryName,
             registrySymbol,
             registryNumberOfEntries,
@@ -1175,10 +1207,20 @@ export class RegistryRepository implements IRegistryRepository {
             burnFee,
             primaryRegistry,
           ] = vals;
+
+          const modulesCapability = new RegistryModuleCapability(
+            registryAddress,
+            registrarAddresses.some(
+              (registrarAddress) =>
+                EthereumContractAddress(registrarAddress) ===
+                chainConfig.get(config.governanceChainId)?.batchModuleAddress,
+            ),
+          );
+
           return okAsync(
             new Registry(
-              [registrarAddresses],
-              [registrarAdminAddresses],
+              [registrarAddress],
+              [registrarAdminAddress],
               registryAddress,
               registryName,
               registrySymbol,
@@ -1191,6 +1233,7 @@ export class RegistryRepository implements IRegistryRepository {
               burnAddress,
               burnFee,
               primaryRegistry,
+              modulesCapability,
               index,
             ),
           );

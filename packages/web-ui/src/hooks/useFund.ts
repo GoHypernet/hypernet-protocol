@@ -77,7 +77,7 @@ type Action =
     };
 
 export function useFund(): IReducerStateReducer {
-  const { coreProxy, UIData } = useStoreContext();
+  const { coreProxy, UIData, governanceChainId } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -157,16 +157,14 @@ export function useFund(): IReducerStateReducer {
         coreProxy
           ?.getTokenInformation()
           .map((tokenInformation: TokenInformation[]) => {
-            coreProxy.getGovernanceChainId().map((governanceChainId) => {
-              const tokenInformationList = tokenInformation.filter(
-                (tokenInfo) => tokenInfo.chainId === governanceChainId,
-              );
-              // prepare balances
-              setLoading(false);
-              dispatch({
-                type: EActionTypes.FETCHED,
-                payload: tokenInformationList,
-              });
+            const tokenInformationList = tokenInformation.filter(
+              (tokenInfo) => tokenInfo.chainId === governanceChainId,
+            );
+            // prepare balances
+            setLoading(false);
+            dispatch({
+              type: EActionTypes.FETCHED,
+              payload: tokenInformationList,
             });
           });
 

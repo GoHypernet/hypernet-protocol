@@ -1,9 +1,10 @@
 import {
+  ChainId,
   ERegistrySortOrder,
   EthereumAccountAddress,
   Registry,
   RegistryEntry,
-  RegistryModule,
+  chainConfig,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -47,11 +48,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
-  const [registryModules, setRegistryModules] = useState<RegistryModule[]>([]);
 
   useEffect(() => {
     getRegistry();
-    getRegistryModules();
   }, []);
 
   useEffect(() => {
@@ -79,18 +78,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
       })
-      .mapErr(handleError);
-  };
-
-  const getRegistryModules = () => {
-    setLoading(true);
-    coreProxy
-      .getRegistryModules()
-      .map((registryModules) => {
-        setRegistryModules(registryModules);
-        setLoading(false);
-      })
-
       .mapErr(handleError);
   };
 
@@ -134,10 +121,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const canCreateNewRegistryEntry = isRegistrar || isRegistrationTokenEnabled;
 
     const canCreateNewBatchRegistryEntry =
-      isRegistrar &&
-      registryModules.some(
-        (regisryModule) => regisryModule.name === "Batch Minting",
-      );
+      isRegistrar && registry?.modulesCapability.batchMintEnabled;
 
     let headerActions: IHeaderAction[] = [];
 

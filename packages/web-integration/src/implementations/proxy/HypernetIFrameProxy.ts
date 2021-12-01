@@ -922,10 +922,6 @@ export default class HypernetIFrameProxy
     return this._createCall("getTokenInformationByAddress", tokenAddress);
   }
 
-  public getGovernanceChainId(): ResultAsync<ChainId, ProxyError> {
-    return this._createCall("getGovernanceChainId", null);
-  }
-
   public getRegistryEntryByOwnerAddress(
     registryName: string,
     ownerAddress: EthereumAccountAddress,

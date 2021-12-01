@@ -1,10 +1,8 @@
-import {
-  ChainId,
-  ChainInformation,
-  EthereumContractAddress,
-  GovernanceChainInformation,
-  ProviderUrl,
-} from "@hypernetlabs/objects";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
+import { ChainId } from "@objects/ChainId";
+import { ChainInformation } from "@objects/ChainInformation";
+import { GovernanceChainInformation } from "@objects/ChainInformation";
+import { ProviderUrl } from "@objects/ProviderUrl";
 
 export const chainConfig = new Map<ChainId, ChainInformation>([
   [

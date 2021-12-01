@@ -123,6 +123,9 @@ module.exports = {
       __CORE_IFRAME_SOURCE__: JSON.stringify(
         process.env.__CORE_IFRAME_SOURCE__,
       ),
+      __GOVERNANCE_CHAIN_ID__: JSON.stringify(
+        process.env.__GOVERNANCE_CHAIN_ID__,
+      ),
       __BUILD_ENV__: JSON.stringify(process.env.__BUILD_ENV__),
     }),
   ],

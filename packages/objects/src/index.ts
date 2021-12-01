@@ -55,9 +55,11 @@ export * from "@objects/UtilityMessageSignature";
 export * from "@objects/UUID";
 export * from "@objects/ProviderId";
 export * from "@objects/RegistryModule";
+export * from "@objects/RegistryModuleCapability";
 
 export * from "@objects/errors";
 export * from "@objects/interfaces";
 export * from "@objects/typing";
 export * from "@objects/schemas";
 export * from "@objects/vector";
+export * from "@objects/configuration";

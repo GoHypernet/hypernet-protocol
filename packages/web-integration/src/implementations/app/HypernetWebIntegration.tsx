@@ -13,7 +13,9 @@ import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypern
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
-  protected iframeURL = "http://localhost:5020"; // TODO: This should eventually be mainnet release
+  protected iframeURL = "http://localhost:5020";
+  protected governanceChainId = 1337;
+  protected debug = false;
   protected currentGatewayUrl: GatewayUrl | undefined | null;
   protected getReadyTimeout: number = 15 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
@@ -24,8 +26,26 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   public core: HypernetIFrameProxy;
   public UIData: IUIData;
 
-  constructor(iframeURL?: string) {
-    this.iframeURL = iframeURL || this.iframeURL;
+  constructor(
+    iframeURL: string | null,
+    governanceChainId: number | null,
+    debug: boolean | null,
+  ) {
+    let iframeURLWithSearchParams = new URL(iframeURL || this.iframeURL);
+
+    if (governanceChainId != null) {
+      iframeURLWithSearchParams.searchParams.append(
+        "governanceChainId",
+        governanceChainId.toString(),
+      );
+    }
+
+    if (debug != null) {
+      iframeURLWithSearchParams.searchParams.append("debug", debug.toString());
+    }
+    this.iframeURL = iframeURLWithSearchParams.toString();
+    this.debug = debug || this.debug;
+    this.governanceChainId = governanceChainId || this.governanceChainId;
 
     // Create a proxy connection to the iframe
     this.core = new HypernetIFrameProxy(
@@ -47,7 +67,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     if (window.hypernetWebUIInstance) {
       this.webUIClient = window.hypernetWebUIInstance as IHypernetWebUI;
     } else {
-      this.webUIClient = new HypernetWebUI(this.core, this.UIData);
+      this.webUIClient = new HypernetWebUI(
+        this.core,
+        this.UIData,
+        this.iframeURL,
+        this.governanceChainId,
+        this.debug,
+      );
     }
 
     this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
@@ -98,15 +124,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       });
 
     return this.getReadyResult;
-  }
-
-  // This class must be used as a singleton, this enforces that restriction.
-  public static getInstance(): IHypernetWebIntegration {
-    if (HypernetWebIntegration.instance == null) {
-      HypernetWebIntegration.instance = new HypernetWebIntegration();
-    }
-
-    return HypernetWebIntegration.instance;
   }
 
   public displayGatewayIFrame(gatewayUrl: GatewayUrl): void {
