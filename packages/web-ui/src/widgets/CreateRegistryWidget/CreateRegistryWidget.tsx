@@ -3,7 +3,6 @@ import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
 import React from "react";
-import { useAlert } from "react-alert";
 
 import {
   GovernanceDialog,
@@ -29,16 +28,9 @@ const CreateRegistryWidget: React.FC<ICreateRegistryWidget> = ({
   onCloseCallback,
   currentAccountAddress,
 }: ICreateRegistryWidget) => {
-  const alert = useAlert();
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
-    onCloseCallback();
-  };
+  const { setLoading, handleCoreError } = useLayoutContext();
 
   const handleCreateRegistry = ({
     name,
@@ -46,8 +38,7 @@ const CreateRegistryWidget: React.FC<ICreateRegistryWidget> = ({
     registrar,
     enumerable,
   }: ICreateRegistryFormValues) => {
-    //setLoading(true);
-    console.log("name", name, symbol, registrar, enumerable);
+    setLoading(true);
 
     coreProxy
       .createRegistryByToken(
@@ -60,7 +51,7 @@ const CreateRegistryWidget: React.FC<ICreateRegistryWidget> = ({
         setLoading(false);
         onCloseCallback();
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   return (

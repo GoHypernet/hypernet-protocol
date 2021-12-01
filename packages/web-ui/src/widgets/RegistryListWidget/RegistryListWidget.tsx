@@ -6,8 +6,7 @@ import {
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryListWidgetParams } from "@web-ui/interfaces";
-import React, { useEffect, useState, useMemo } from "react";
-import { useAlert } from "react-alert";
+import React, { useEffect, useState } from "react";
 
 import {
   GovernanceRegistryListItem,
@@ -25,9 +24,8 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryEntryListNavigate,
   onRegistryDetailNavigate,
 }: IRegistryListWidgetParams) => {
-  const alert = useAlert();
   const { coreProxy } = useStoreContext();
-  const { loading, setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [registries, setRegistries] = useState<Registry[]>([]);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
@@ -41,6 +39,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     useState<boolean>(false);
 
   useEffect(() => {
+    setLoading(true);
     coreProxy
       .getNumberOfRegistries()
       .map((numberOfRegistries) => {
@@ -48,8 +47,9 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
         if (!numberOfRegistries) {
           setHasEmptyState(true);
         }
+        setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   }, []);
 
   useEffect(() => {
@@ -67,6 +67,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   }, [reversedSortingEnabled]);
 
   const getRegistries = (pageNumber: number) => {
+    setLoading(true);
     coreProxy
       .getRegistries(
         pageNumber,
@@ -84,14 +85,9 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
           setRegistries(registries);
           setHasEmptyState(false);
         }
+        setLoading(false);
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    setHasEmptyState(true);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   const getRegistryNotAllowedChipItems = (registry: Registry) => {
@@ -103,9 +99,6 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
     return items;
   };
-
-  const getIsRegistrar = (registry: Registry) =>
-    registry.registrarAddresses.some((address) => address === accountAddress);
 
   return (
     <Box>

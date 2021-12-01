@@ -1,8 +1,7 @@
 import { RegistryTokenId } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import React, { useState } from "react";
-import { useAlert } from "react-alert";
+import React from "react";
 
 import { GovernanceDialog, GovernanceButton } from "@web-ui/components";
 import { useStyles } from "@web-ui/widgets/BurnEntryWidget/BurnEntryWidget.style";
@@ -20,10 +19,9 @@ const BurnEntryWidget: React.FC<IBurnEntryWidget> = ({
   registryName,
   tokenId,
 }: IBurnEntryWidget) => {
-  const alert = useAlert();
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
 
   const burnEntry = () => {
     setLoading(true);
@@ -33,12 +31,7 @@ const BurnEntryWidget: React.FC<IBurnEntryWidget> = ({
         setLoading(false);
         onSuccessCallback();
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   return (

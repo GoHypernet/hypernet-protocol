@@ -8,7 +8,6 @@ import { Box, Typography, Grid } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IProposalDetailWidgetParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, useMemo } from "react";
-import { useAlert } from "react-alert";
 
 import {
   GovernanceWidgetHeader,
@@ -24,9 +23,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   proposalId,
 }: IProposalDetailWidgetParams) => {
   const classes = useStyles();
-  const alert = useAlert();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
   const [accountAddress, setAccountAddress] =
     useState<EthereumAccountAddress>();
@@ -47,7 +45,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         .map((proposal) => {
           setProposal(proposal);
         })
-        .mapErr(handleError);
+        .mapErr(handleCoreError);
 
       getProposalVotesReceipt(accounts[0]);
     });
@@ -65,12 +63,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
         setLoading(false);
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   const proposalVotesFor = proposal ? proposal.votesFor : 0;
@@ -101,7 +94,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         setProposal(proposal);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const cancelProposal = () => {
@@ -112,7 +105,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         setProposal(proposal);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const executeProposal = () => {
@@ -123,7 +116,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         setProposal(proposal);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const castVote = (voteSupport: EProposalVoteSupport) => {
@@ -137,7 +130,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           getProposalVotesReceipt(accountAddress);
         }
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const isUserProposalOwner = useMemo(

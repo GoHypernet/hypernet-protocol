@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useAlert } from "react-alert";
 import { Typography, Box } from "@material-ui/core";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -10,10 +9,9 @@ import { HYPER_TOKEN_LOGO_PURPLE_URL } from "@web-ui/constants";
 interface HypertokenBalanceWidgetParams extends IRenderParams {}
 
 const HypertokenBalanceWidget: React.FC<HypertokenBalanceWidgetParams> = () => {
-  const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const classes = useStyles();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [balance, setBalance] = useState<number>();
 
   useEffect(() => {
@@ -30,17 +28,12 @@ const HypertokenBalanceWidget: React.FC<HypertokenBalanceWidgetParams> = () => {
                 setBalance(balance);
                 setLoading(false);
               })
-              .mapErr(handleError);
+              .mapErr(handleCoreError);
           })
-          .mapErr(handleError);
+          .mapErr(handleCoreError);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   }, []);
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
-  };
 
   return (
     <Box className={classes.wrapper}>

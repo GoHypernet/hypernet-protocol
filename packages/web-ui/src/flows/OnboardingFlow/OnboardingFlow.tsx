@@ -32,14 +32,13 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     finalSuccessContent = "You are good to go and purchase using your payment token",
     closeCallback = () => {},
     gatewayName,
-    showInModal,
     excludeCardWrapper,
   } = props;
   const alert = useAlert();
   const { balances } = useBalances();
 
   const { coreProxy } = useStoreContext();
-  const { setLoading, closeModal } = useLayoutContext();
+  const { setLoading, closeModal, handleCoreError } = useLayoutContext();
   const classes = useStyles();
 
   const [currentSreen, setCurrentSreen] = useState<EOnboardingScreens>(
@@ -56,13 +55,13 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
           decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
-        }, handleError);
+        }, handleCoreError);
       } else {
         setCurrentSreen(EOnboardingScreens.MERCHANT_AUTHORIZATION);
       }
 
       setLoading(false);
-    }, handleError);
+    }, handleCoreError);
 
     coreProxy.onGatewayAuthorized.subscribe((_gatewayUrl) => {
       if (gatewayUrl === _gatewayUrl) {
@@ -72,7 +71,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
           decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
-        }, handleError);
+        }, handleCoreError);
       }
     });
 
@@ -103,16 +102,11 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   const handleGatewayAuthorization = () => {
     setLoading(true);
-    coreProxy.authorizeGateway(gatewayUrl).mapErr(handleError);
+    coreProxy.authorizeGateway(gatewayUrl).mapErr(handleCoreError);
   };
 
   const goToFundWalletScreen = () => {
     setCurrentSreen(EOnboardingScreens.FUND_WIDGET);
-  };
-
-  const handleError = (err?: Error) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
   };
 
   const goToSuccessScreen = () => {

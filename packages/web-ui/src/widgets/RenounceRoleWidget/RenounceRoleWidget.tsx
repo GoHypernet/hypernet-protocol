@@ -2,8 +2,7 @@ import { EthereumAccountAddress } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
-import React, { useEffect, useState } from "react";
-import { useAlert } from "react-alert";
+import React, { useState } from "react";
 
 import {
   GovernanceDialog,
@@ -24,10 +23,9 @@ const RenounceRoleWidget: React.FC<IRenounceRoleWidget> = ({
   onCloseCallback,
   registrarName,
 }: IRenounceRoleWidget) => {
-  const alert = useAlert();
   const classes = useStyles();
-  const { coreProxy, UIData } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { coreProxy } = useStoreContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
     EthereumAccountAddress(""),
   );
@@ -40,12 +38,7 @@ const RenounceRoleWidget: React.FC<IRenounceRoleWidget> = ({
         setLoading(false);
         onCloseCallback();
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err?: Error) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   return (

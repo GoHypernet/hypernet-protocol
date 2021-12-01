@@ -1,16 +1,13 @@
 import {
-  ChainId,
   ERegistrySortOrder,
   EthereumAccountAddress,
   Registry,
   RegistryEntry,
-  chainConfig,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, useMemo } from "react";
-import { useAlert } from "react-alert";
 
 import {
   GovernanceRegistryListItem,
@@ -30,9 +27,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   onRegistryListNavigate,
   registryName,
 }: IRegistryEntryListWidgetParams) => {
-  const alert = useAlert();
   const { coreProxy, viewUtils } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
   const [registry, setRegistry] = useState<Registry>();
   const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
@@ -78,7 +74,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const getRegistryEntries = (pageNumber: number) => {
@@ -95,13 +91,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         setRegistryEntries(registryEntries);
         setPage(pageNumber);
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    setHasEmptyState(true);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   const isRegistrar = useMemo(() => {

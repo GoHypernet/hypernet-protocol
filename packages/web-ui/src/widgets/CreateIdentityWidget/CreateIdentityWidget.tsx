@@ -7,7 +7,6 @@ import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
 import React, { useState } from "react";
-import { useAlert } from "react-alert";
 
 import {
   GovernanceDialog,
@@ -35,19 +34,11 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   registryName,
   currentAccountAddress,
 }: ICreateIdentityWidget) => {
-  const alert = useAlert();
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [generateRandomTokenIdSwitch, setGenerateRandomTokenIdSwitch] =
     useState<boolean>(true);
-
-  const handleError = (err) => {
-    console.log("handleError err: ", err);
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
-    onCloseCallback();
-  };
 
   const handleCreateIdentity = ({
     label,
@@ -72,7 +63,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
         setLoading(false);
         onCloseCallback();
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const handleGenerateTokenIdSwitchChange = (
