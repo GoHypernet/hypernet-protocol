@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       alignItems: "center",
       width: "calc(100% - 20px)",
-      border: `1px solid ${colors.GRAY200}`,
+      border: `1px solid ${colors.GRAY300}`,
       cursor: "pointer",
     },
     iconStyle: {

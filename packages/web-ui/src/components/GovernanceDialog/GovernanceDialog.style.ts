@@ -11,7 +11,7 @@ export const useStyles = () => {
       [`& .${widgetUniqueIdentifier}MuiDialog-paper`]: {
         borderRadius: 3,
         backgroundColor: colors.GRAY100,
-        border: `2px solid ${colors.GRAY200}`,
+        border: `2px solid ${colors.GRAY300}`,
       },
 
       [`& .${widgetUniqueIdentifier}MuiDialogTitle-root`]: {

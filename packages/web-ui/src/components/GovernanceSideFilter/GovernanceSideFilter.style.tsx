@@ -49,7 +49,7 @@ export const useStyles = () => {
     },
     filterChipItem: {
       margin: 4,
-      border: `1px solid ${colors.GRAY200}`,
+      border: `1px solid ${colors.GRAY300}`,
       backgroundColor: colors.WHITE,
     },
     checkItem: {
