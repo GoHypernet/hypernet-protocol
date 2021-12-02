@@ -51,6 +51,8 @@ describe("HypernetCoreRepository tests", () => {
     );
     const result = response._unsafeUnwrap();
 
+    delete (sendFundsRequest as any).callback;
+
     // Assert
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
@@ -79,6 +81,8 @@ describe("HypernetCoreRepository tests", () => {
       authorizeFundsRequest,
     );
     const result = response._unsafeUnwrap();
+
+    delete (authorizeFundsRequest as any).callback;
 
     // Assert
     expect(response).toBeDefined();
