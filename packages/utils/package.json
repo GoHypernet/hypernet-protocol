@@ -31,9 +31,7 @@
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
     "generate-docs": "npx typedoc --options typedoc.json",
-    "test": "yarn build && yarn test:ci",
-    "test:ci": "jest --runInBand --coverage",
-    "test:watch": "jest --watch --color --detectOpenHandles",
+    "test": "echo \"No tests specified yet\" && exit 0",
     "prepare": "yarn build",
     "prepublish": "yarn build"
   },

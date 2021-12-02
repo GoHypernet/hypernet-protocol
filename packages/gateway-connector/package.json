@@ -33,7 +33,8 @@
     "alias": "tsc-alias",
     "generate-docs": "npx typedoc --options typedoc.json",
     "prepublish": "yarn build",
-    "prepare": "yarn build"
+    "prepare": "yarn build",
+    "test": "echo \"No tests specified yet\" && exit 0"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
