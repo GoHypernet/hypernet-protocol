@@ -313,6 +313,12 @@ export class GatewayConnectorProxy
     return this._createCall("notifyPullPaymentCanceled", payment);
   }
 
+  public notifyRepairRequested(
+    payment: PushPayment | PullPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
+    return this._createCall("notifyRepairRequested", payment);
+  }
+
   public notifyPublicIdentifier(
     public_identifier: PublicIdentifier,
   ): ResultAsync<void, GatewayConnectorError | ProxyError> {

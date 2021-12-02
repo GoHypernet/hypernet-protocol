@@ -210,9 +210,13 @@ class PaymentServiceMocks {
       gatewaySignature,
     );
     this.gatewayConnectorProxy = td.object<IGatewayConnectorProxy>();
+    this.gatewayConnectorProxy.gatewayUrl = gatewayUrl;
     td.when(
       this.gatewayConnectorProxy.getConnectorActivationStatus(),
     ).thenReturn(true);
+    td.when(
+      this.gatewayConnectorProxy.notifyRepairRequested(td.matchers.anything()),
+    ).thenReturn(okAsync(undefined));
 
     const gatewayRegistrationInfoMap = new Map<
       GatewayUrl,
@@ -1377,20 +1381,21 @@ describe("PaymentService tests", () => {
     paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("recoverPayments returns immediately if payment is not actually borked", async () => {
+  test("repairPayments returns immediately if payment is not actually borked", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([commonPaymentId]);
+    const result = await paymentService.repairPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isOk()).toBeTruthy();
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("recoverPayments cancels second insurance transfer if duplicates are detected", async () => {
+  test("repairPayments cancels second insurance transfer if duplicates are detected", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
@@ -1420,16 +1425,17 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([commonPaymentId]);
+    const result = await paymentService.repairPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isOk()).toBeTruthy();
     const retPayments = result._unsafeUnwrap();
     expect(retPayments).toContain(paymentServiceMock.stakedPushPayment);
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("recoverPayments cancels second payment transfer if duplicates are detected", async () => {
+  test("repairPayments cancels second payment transfer if duplicates are detected", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
@@ -1459,12 +1465,13 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([commonPaymentId]);
+    const result = await paymentService.repairPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isOk()).toBeTruthy();
     const retPayments = result._unsafeUnwrap();
     expect(retPayments).toContain(paymentServiceMock.approvedPushPayment);
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 });

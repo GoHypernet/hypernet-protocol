@@ -1227,12 +1227,13 @@ export class PaymentService implements IPaymentService {
       .map(() => {});
   }
 
-  public recoverPayments(
+  public repairPayments(
     paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
-    | VectorError
     | BlockchainUnavailableError
+    | ProxyError
+    | VectorError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
@@ -1244,22 +1245,44 @@ export class PaymentService implements IPaymentService {
       this.paymentRepository.getPaymentsByIds(paymentIds),
       this.contextProvider.getInitializedContext(),
     ])
-      .andThen((vals) => {
-        const [paymentsById, context] = vals;
-        const borkedPayments = new Array<Payment>();
-        // Sort out the payments that are borked. We are only worried about those.
-        for (const payment of paymentsById.values()) {
-          if (payment.state === EPaymentState.Borked) {
-            borkedPayments.push(payment);
+      .andThen(([paymentsById, context]) => {
+        // Pull out a list of gateway connectors for the payments
+        const payments = Array.from(paymentsById.values());
+        const gatewayUrls = payments.reduce((prev, cur) => {
+          if (!prev.includes(cur.gatewayUrl)) {
+            prev.push(cur.gatewayUrl);
           }
-        }
+          return prev;
+        }, new Array<GatewayUrl>());
 
-        // Now we have a list of borked payments. Let's try and recover them.
+        // Get the gateways
         return ResultUtils.combine(
-          borkedPayments.map((payment) => {
-            return this._recoverPayment(payment, context);
+          gatewayUrls.map((gatewayUrl) => {
+            return this.gatewayConnectorRepository.getGatewayProxy(gatewayUrl);
           }),
-        );
+        ).andThen((gatewayConnectorProxies) => {
+          // Let's try and repair the payments. Most of the time, the payment
+          // will be in the "borked" state, but not always. I'm going to allow
+          // repairs to be attempted at any state.
+          return ResultUtils.combine(
+            payments.map((payment) => {
+              // Get the gateway proxy for the payment
+              const gatewayConnector = gatewayConnectorProxies.find((proxy) => {
+                return proxy.gatewayUrl == payment.gatewayUrl;
+              });
+
+              // If the proxy exists, notify the proxy
+              if (gatewayConnector != null) {
+                gatewayConnector.notifyRepairRequested(payment).mapErr((e) => {
+                  this.logUtils.error(
+                    `Could not notify the gateway ${payment.gatewayUrl} about a repair request for payment ${payment.id}`,
+                  );
+                });
+              }
+              return this._recoverPayment(payment, context);
+            }),
+          );
+        });
       })
       .andThen(() => {
         return this.paymentRepository.getPaymentsByIds(paymentIds);

@@ -376,20 +376,22 @@ export interface IPaymentService {
   >;
 
   /**
-   * recoverPayments() will attempt to "recover" any payments that are in the Borked state.
+   * repairPayments() will attempt to "repair" any payments that are in the Borked state.
    * Borked simply means that something has gone wrong in the payment process, such as out
    * of order resolutions, or most commonly double transfers being created. Recovery is
    * automatically attempted by advancePayments(), but in the off chance that we want to try
    * to do it explicitly, this function exists.
-   * Recovery basically amounts to canceling bad or excess transfers.
-   * @param paymentIds Payment IDs to attempt recovery on
+   * Repair basically amounts to canceling bad or excess transfers, but
+   * the gateway will also be notified and may be able to help
+   * @param paymentIds Payment IDs to attempt repair on
    */
-  recoverPayments(
+  repairPayments(
     paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
-    | VectorError
     | BlockchainUnavailableError
+    | ProxyError
+    | VectorError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError

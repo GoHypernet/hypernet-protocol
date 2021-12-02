@@ -104,6 +104,10 @@ export interface IGatewayConnectorProxy extends ParentProxy {
     payment: PullPayment,
   ): ResultAsync<void, GatewayConnectorError | ProxyError>;
 
+  notifyRepairRequested(
+    payment: PushPayment | PullPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
+
   notifyBalancesReceived(
     balances: Balances,
   ): ResultAsync<void, GatewayConnectorError | ProxyError>;
