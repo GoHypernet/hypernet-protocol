@@ -60,4 +60,4 @@ export const WALLET_CONNECTION_SUCCESS_IMAGE_URL =
 export const INSECURE_CONTENT_IMAGE_URL =
   "https://res.cloudinary.com/dqueufbs7/image/upload/v1624476851/images/Screen_Shot_2021-06-23_at_22.32.55.png";
 export const HYPERPAY_LOGO_URL =
-  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624392990/images/HyperPay_logo.svg";
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png";
