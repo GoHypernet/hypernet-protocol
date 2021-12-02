@@ -7,7 +7,7 @@ export const useStyles = makeStyles((theme) => ({
     padding: 16,
     marginBottom: 24,
     backgroundColor: colors.GRAY100,
-    border: `2px solid ${colors.GRAY200}`,
+    border: `2px solid ${colors.GRAY300}`,
     borderRadius: 3,
     cursor: "pointer",
     textAlign: "left",

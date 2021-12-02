@@ -17,7 +17,7 @@ export const useStyles = makeStyles({
   proposalDetails: {
     marginTop: 28,
     backgroundColor: colors.GRAY100,
-    border: `1px solid ${colors.GRAY200}`,
+    border: `1px solid ${colors.GRAY300}`,
     borderRadius: 3,
     padding: 16,
   },

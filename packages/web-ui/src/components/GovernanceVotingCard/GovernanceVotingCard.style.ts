@@ -6,7 +6,7 @@ export const useStyles = makeStyles((theme) => ({
   wrapper: {
     padding: 16,
     backgroundColor: colors.GRAY100,
-    border: `1px solid ${colors.GRAY200}`,
+    border: `1px solid ${colors.GRAY300}`,
     borderRadius: 3,
   },
   titleWrapper: {

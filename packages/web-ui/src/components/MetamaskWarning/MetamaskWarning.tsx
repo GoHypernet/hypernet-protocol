@@ -28,7 +28,7 @@ export const MetamaskWarning: React.FC = () => {
       <GovernanceButton
         color="primary"
         variant="contained"
-        size="large"
+        size="medium"
         fullWidth
         onClick={() => {
           window.open(METAMASK_DOWNLOAD_URL, "_blank");

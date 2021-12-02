@@ -4,6 +4,6 @@ export const useStyles = makeStyles((theme) => ({
   wrapper: {
     display: "flex",
     justifyContent: "space-between",
-    marginBottom: 24,
+    marginBottom: 16,
   },
 }));

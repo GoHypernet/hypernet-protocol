@@ -39,18 +39,20 @@ export const GovernanceBalanceList: React.FC<GovernanceBalanceListProps> = (
                 tokenLogoRef.current?.setAttribute("src", HYPER_TOKEN_LOGO_URL);
               }}
             />
-            <Typography variant="h4">{balance.name.toUpperCase()}</Typography>
+            <Typography variant="subtitle2">
+              {balance.name.toUpperCase()}
+            </Typography>
           </Box>
           <Box display="flex">
             <Typography
-              variant="h4"
+              variant="subtitle2"
               color="textPrimary"
               className={classes.tokenAmount}
             >
               {viewUtils.convertToEther(balance.freeAmount)}
             </Typography>
             <Tooltip title={balance.name} placement="top">
-              <Typography variant="h4" color="textSecondary">
+              <Typography variant="subtitle2" color="textSecondary">
                 {balance.symbol}
               </Typography>
             </Tooltip>

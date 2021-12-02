@@ -42,7 +42,7 @@ export const GovernanceLargeField: React.FC<GovernanceLargeFieldProps> = (
   return (
     <Box className={classes.wrapper}>
       {title && (
-        <Typography variant="h6" color="textPrimary" className={classes.title}>
+        <Typography variant="body1" color="textPrimary" className={classes.title}>
           {titleText}
         </Typography>
       )}

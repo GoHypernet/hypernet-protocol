@@ -20,7 +20,7 @@ export const GovernanceProposalListItem: React.FC<GovernanceProposalListItemProp
 
     return (
       <Button fullWidth className={classes.button} onClick={onClick}>
-        <Typography variant="h5" className={classes.number}>
+        <Typography variant="body1" className={classes.number}>
           {number}
         </Typography>
         {status === EProposalState.ACTIVE && (
@@ -30,7 +30,11 @@ export const GovernanceProposalListItem: React.FC<GovernanceProposalListItemProp
             className={classes.activePulse}
           />
         )}
-        <Typography variant="h5" color="textPrimary" className={classes.title}>
+        <Typography
+          variant="body1"
+          color="textPrimary"
+          className={classes.title}
+        >
           {title}
         </Typography>
         <Box className={classes.status}>

@@ -18,14 +18,18 @@ export const GovernanceListItem: React.FC<GovernanceListItemProps> = (
 
   return (
     <Box className={classes.root}>
-      <Typography variant="h5" color="textSecondary" className={classes.number}>
+      <Typography
+        variant="subtitle1"
+        color="textSecondary"
+        className={classes.number}
+      >
         {`${number}.`}
       </Typography>
 
       <Box className={classes.contentWrapper}>
         <Box className={classes.titleRow}>
           <Typography
-            variant="h5"
+            variant="subtitle1"
             color="textPrimary"
             className={classes.title}
           >

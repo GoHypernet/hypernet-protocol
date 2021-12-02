@@ -1,4 +1,6 @@
 import React from "react";
+import { Box } from "@material-ui/core";
+
 import { GovernanceTag, ETagColor } from "@web-ui/components/GovernanceTag";
 import { EProposalState } from "@hypernetlabs/objects";
 
@@ -12,7 +14,11 @@ export const GovernanceStatusTag: React.FC<GovernanceStatusTagProps> = (
   const { status } = props;
   const { text, color } = getStatusConfig(status);
 
-  return <GovernanceTag text={text} color={color} />;
+  return (
+    <Box width={92}>
+      <GovernanceTag text={text} color={color} />
+    </Box>
+  );
 };
 
 export interface IStatusConfig {

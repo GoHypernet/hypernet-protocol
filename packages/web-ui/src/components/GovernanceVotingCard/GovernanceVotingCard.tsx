@@ -43,10 +43,10 @@ export const GovernanceVotingCard: React.FC<GovernanceVotingCardProps> = (
   return (
     <Box className={classes.wrapper}>
       <Box className={classes.titleWrapper}>
-        <Typography className={classes.titleText} variant="h5">
+        <Typography className={classes.titleText} variant="h6">
           {titleConfig[type]}
         </Typography>
-        <Typography className={classes.valueText} variant="h5">
+        <Typography className={classes.valueText} variant="h6">
           {value}
         </Typography>
       </Box>
