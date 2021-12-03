@@ -1,7 +1,7 @@
-const HT = require("../artifacts/contracts/governance/Hypertoken.sol/Hypertoken.json");
-const HG = require("../artifacts/contracts/governance/HypernetGovernor.sol/HypernetGovernor.json");
-const RF = require("../artifacts/contracts/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
-const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
+const HT = require("../deployments/rinkeby/governance/Hypertoken.sol/Hypertoken.json");
+const HG = require("../deployments/rinkeby/governance/HypernetGovernor.sol/HypernetGovernor.json");
+const RF = require("../deployments/rinkeby/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
+const NFR = require("../deployments/rinkeby/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
 
 // define some dynamic imports
 const hAddress = function () {
