@@ -10,7 +10,7 @@ executors:
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: "cimg/node:12.20.0"
+    - image: "cimg/node:14.0.0"
       auth:
         username: mydockerhub-user
         password: $DOCKERHUB_PASSWORD
