@@ -48,7 +48,7 @@ Each NFR can augment its registration logic (as well as add novel functionality)
 [*modules*](/packages/contracts/contracts/modules). A module is a stateless external contract which can be given the `REGISTRAR_ROLE` 
 and thus extend an NFR's capability in an algorithmic fashion. For example, the a 
 [LazyMintModule.sol](/packages/contracts/contracts/modules/LazyMintModule.sol) contract offers a means to add lazy minting functionality 
-to an NFR, while the [MerkleDropModule.sol](/packages/contracts/contracts/modules/MerkleDropModule.sol) contract implements a mechanism to 
+to an NFR, while the [MerkleModule.sol](/packages/contracts/contracts/modules/MerkleModule.sol) contract implements a mechanism to 
 fascilitate airdrop functionality. The `REGISTRAR_ROLE_ADMIN` can add and remove these modules from their NFR as needed. 
 
 Lastly, the Hypernet NFR implements a native mechanism for registration by staking and ERC20-compatible token. By default, this feature is 
@@ -68,13 +68,13 @@ SECURITY NOTES:
 
 ### Rinkeby
 
-Hypertoken: `0x6D4eE7f794103672490830e15308A99eB7a89024`
+Hypertoken: [`0x6D4eE7f794103672490830e15308A99eB7a89024`](https://rinkeby.etherscan.io/address/0x6D4eE7f794103672490830e15308A99eB7a89024)
 
-Timelock: `0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`
+Timelock: [`0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`](https://rinkeby.etherscan.io/address/0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a)
 
-DAO: `0x3353da0f24fCACd83832b09e9371a937195D2640`
+DAO: [`0x3353da0f24fCACd83832b09e9371a937195D2640`](https://rinkeby.etherscan.io/address/0x3353da0f24fCACd83832b09e9371a937195D2640)
 
-Registry Factory: `0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB`
+Registry Factory: [`0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB`](https://rinkeby.etherscan.io/address/0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB)
 
 Hypernet Profiles: `0x6c355Ad248477eeDcadf1d6724154C6152C0edca`
 
