@@ -16,7 +16,7 @@ export const useStyles = makeStyles((theme) => ({
   tableColumnHeader: {
     fontWeight: EFontWeight.SEMI_BOLD,
     fontSize: EFontSize.BODY2,
-    borderBottom: `1px solid ${colors.GRAY200}`,
+    borderBottom: `1px solid ${colors.GRAY300}`,
   },
   tableCell: {
     fontWeight: EFontWeight.MEDIUM,
@@ -25,5 +25,9 @@ export const useStyles = makeStyles((theme) => ({
   },
   mobileRowCard: {
     marginBottom: 24,
+  },
+  mobileExpandButton: {
+    display: "flex",
+    margin: "auto",
   },
 }));

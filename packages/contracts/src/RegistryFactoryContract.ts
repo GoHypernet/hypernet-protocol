@@ -12,7 +12,7 @@ import { IRegistryFactoryContract } from "@contracts/IRegistryFactoryContract";
 export class RegistryFactoryContract implements IRegistryFactoryContract {
   protected contract: ethers.Contract | null = null;
   constructor(
-    providerOrSigner:
+    protected providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner
       | ethers.Wallet,
@@ -137,5 +137,70 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
         });
       })
       .map(() => {});
+  }
+
+  public modules(
+    index: number,
+  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.modules(index) as Promise<EthereumContractAddress>,
+      (e) => {
+        return new RegistryFactoryContractError(
+          "Unable to call factoryContract modules()",
+          e,
+        );
+      },
+    );
+  }
+
+  public getModuleName(
+    moduleAddress: EthereumContractAddress,
+  ): ResultAsync<string, RegistryFactoryContractError> {
+    const moduleABI = [
+      {
+        inputs: [],
+        name: "name",
+        outputs: [
+          {
+            internalType: "string",
+            name: "",
+            type: "string",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+    ];
+
+    const moduleContract = new ethers.Contract(
+      moduleAddress,
+      moduleABI,
+      this.providerOrSigner,
+    );
+
+    return ResultAsync.fromPromise(
+      moduleContract?.name() as Promise<string>,
+      (e) => {
+        return new RegistryFactoryContractError(
+          "Unable to call moduleContract name()",
+          e,
+        );
+      },
+    );
+  }
+
+  public getNumberOfModules(): ResultAsync<
+    number,
+    RegistryFactoryContractError
+  > {
+    return ResultAsync.fromPromise(
+      this.contract?.getNumberOfModules() as Promise<BigNumber>,
+      (e) => {
+        return new RegistryFactoryContractError(
+          "Unable to call factoryContract getNumberOfModules()",
+          e,
+        );
+      },
+    ).map((numberOfRegistries) => numberOfRegistries.toNumber());
   }
 }

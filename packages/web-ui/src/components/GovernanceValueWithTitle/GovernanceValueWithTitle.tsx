@@ -19,7 +19,11 @@ export const GovernanceValueWithTitle: React.FC<IGovernanceValueWithTitle> = (
   return (
     <Box className={classes.wrapper}>
       <Box className={classes.rowWrapper}>
-        <Typography variant="h6" color="textPrimary" className={classes.title}>
+        <Typography
+          variant="body2"
+          color="textPrimary"
+          className={classes.title}
+        >
           {title}
         </Typography>
         {topRightContent}
@@ -27,7 +31,7 @@ export const GovernanceValueWithTitle: React.FC<IGovernanceValueWithTitle> = (
 
       <Box className={classes.rowWrapper}>
         <Typography
-          variant="body2"
+          variant="body1"
           color="textPrimary"
           className={classes.value}
         >

@@ -7,7 +7,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "start": "react-native start",
-    "test": "jest"
+    "test": "echo \"No tests specified yet\" && exit 0"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -21,7 +21,7 @@
     "preset": "react-native"
   },
   "dependencies": {
-    "@hypernetlabs/objects": "^0.3.9",
+    "@hypernetlabs/objects": "^0.3.12",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/bottom-tabs": "^5.11.7",
     "@react-navigation/native": "^5.9.2",

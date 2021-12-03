@@ -41,7 +41,7 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
           >
             <ArrowBackIcon className={classes.navigationIcon} />
             <Typography
-              variant="body2"
+              variant="subtitle2"
               color="textPrimary"
               className={classes.navigationLabel}
             >
@@ -56,13 +56,19 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
       </Box>
       {(headerActions?.length || rightContent) && (
         <Box className={classes.rightSection}>
-          {headerActions.map((headerAction) => (
-            <Box className={classes.buttonWrapper}>
-              <GovernanceButton color="primary" size="medium" {...headerAction}>
-                {headerAction.label}
-              </GovernanceButton>
-            </Box>
-          ))}
+          <Box display="flex">
+            {headerActions.map((headerAction) => (
+              <Box className={classes.buttonWrapper}>
+                <GovernanceButton
+                  color="primary"
+                  size="medium"
+                  {...headerAction}
+                >
+                  {headerAction.label}
+                </GovernanceButton>
+              </Box>
+            ))}
+          </Box>
           {rightContent && (
             <Box className={classes.rightSection}>{rightContent}</Box>
           )}

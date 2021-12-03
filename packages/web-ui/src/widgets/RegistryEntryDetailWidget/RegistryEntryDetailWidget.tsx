@@ -8,7 +8,6 @@ import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryEntryDetailWidgetParams } from "@web-ui/interfaces";
 import React, { useEffect, useMemo, useState } from "react";
-import { useAlert } from "react-alert";
 
 import BurnEntryWidget from "../BurnEntryWidget";
 import TransferIdentityWidget from "../TransferIdentityWidget";
@@ -27,9 +26,8 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   registryName,
   entryTokenId,
 }: IRegistryEntryDetailWidgetParams) => {
-  const alert = useAlert();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [registryEntry, setRegistryEntry] = useState<RegistryEntry>();
   const [registry, setRegistry] = useState<Registry>();
   const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
@@ -65,7 +63,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         setRegistryEntry(registryEntry);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const getRegistryByName = () => {
@@ -76,7 +74,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         setRegistry(registryMap.get(registryName));
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const updateLabel = (val: string) => {
@@ -91,7 +89,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         setRegistryEntry(registryEntry);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const updateTokenURI = (val: string) => {
@@ -106,12 +104,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         setRegistryEntry(registryEntry);
         setLoading(false);
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   const isRegistrar = useMemo(() => {

@@ -21,6 +21,7 @@ import {
   expirationDate,
   routerPublicIdentifier,
   chainId,
+  routerChannelAddress,
 } from "@mock/mocks";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
@@ -43,16 +44,13 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
-const counterPartyAccount = publicIdentifier2;
-const fromAccount = publicIdentifier;
 const paymentDetails = new SortedTransfers([], [], [], []);
 
 class PaymentRepositoryMocks {
   public timeUtils = td.object<ITimeUtils>();
   public blockchainTimeUtils = td.object<IBlockchainTimeUtils>();
   public blockchainProvider = new BlockchainProviderMock();
-  public vectorUtils =
-    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public vectorUtils = VectorUtilsMockFactory.factoryVectorUtils();
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
   public browserNodeProvider: BrowserNodeProviderMock;
@@ -108,24 +106,24 @@ class PaymentRepositoryMocks {
     amountStaked: BigNumberString = commonAmount,
   ): PushPayment {
     return new PushPayment(
-      commonPaymentId,
-      routerPublicIdentifier,
-      chainId,
-      counterPartyAccount,
-      fromAccount,
-      state,
-      erc20AssetAddress,
-      commonAmount,
-      amountStaked,
-      expirationDate,
-      unixNow,
-      unixNow,
-      BigNumberString("0"),
-      gatewayUrl,
-      paymentDetails,
-      null,
-      commonAmount,
-      BigNumberString("0"),
+      commonPaymentId, // id
+      routerPublicIdentifier, // routerPublicIdentifier
+      chainId, // chainId
+      publicIdentifier2, // to
+      publicIdentifier, // from
+      state, // state
+      erc20AssetAddress, // paymentToken
+      commonAmount, // requiredStake
+      amountStaked, // amountStaked
+      expirationDate, // expirationDate
+      unixNow, // createdTimestamp
+      unixNow, // updatedTimestamp
+      BigNumberString("0"), // collateralRecovered
+      gatewayUrl, // gatewayUrl
+      paymentDetails, // details
+      null, // metadata
+      commonAmount, // paymentAmount
+      BigNumberString("0"), // amountTransferred
     );
   }
 }
@@ -162,9 +160,9 @@ describe("PaymentRepository tests", () => {
 
     // Act
     const result = await repo.createPushPayment(
-      routerPublicIdentifier,
-      chainId,
-      counterPartyAccount,
+      commonPaymentId,
+      routerChannelAddress,
+      publicIdentifier2,
       commonAmount,
       expirationDate,
       commonAmount,
@@ -187,9 +185,9 @@ describe("PaymentRepository tests", () => {
 
     // Act
     const result = await repo.createPushPayment(
-      routerPublicIdentifier,
-      chainId,
-      counterPartyAccount,
+      commonPaymentId,
+      routerChannelAddress,
+      publicIdentifier2,
       commonAmount,
       expirationDate,
       commonAmount,

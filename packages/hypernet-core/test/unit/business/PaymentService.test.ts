@@ -12,7 +12,6 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   BigNumberString,
-  UnixTimestamp,
   InvalidPaymentError,
   GatewayRegistrationInfo,
   SortedTransfers,
@@ -27,7 +26,7 @@ import {
   paymentSigningDomain,
   pushPaymentSigningTypes,
 } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ILogUtils, IValidationUtils } from "@hypernetlabs/utils";
 import { PaymentService } from "@implementations/business/PaymentService";
 import { IPaymentService } from "@interfaces/business/IPaymentService";
 import {
@@ -37,11 +36,6 @@ import {
   IPaymentRepository,
   IGatewayRegistrationRepository,
 } from "@interfaces/data";
-import {
-  IBlockchainUtils,
-  IGatewayConnectorProxy,
-  IPaymentUtils,
-} from "@interfaces/utilities";
 import {
   defaultExpirationLength,
   gatewayUrl,
@@ -75,17 +69,23 @@ import {
   gatewayAccount,
   errorAccount,
   validPaymentId,
+  expirationDate,
 } from "@mock/mocks";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
+import {
+  IBlockchainTimeUtils,
+  IBlockchainUtils,
+  IGatewayConnectorProxy,
+  IPaymentUtils,
+} from "@interfaces/utilities";
 import {
   ConfigProviderMock,
   ContextProviderMock,
   VectorUtilsMockFactory,
 } from "@tests/mock/utils";
 
-const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const nonExistentPaymentId = PaymentId("This payment is not mocked");
 const validatedSignature = Signature("0xValidatedSignature");
 
@@ -95,14 +95,15 @@ class PaymentServiceMocks {
   public contextProvider = new ContextProviderMock();
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
-  public vectorUtils =
-    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public vectorUtils = VectorUtilsMockFactory.factoryVectorUtils();
   public paymentUtils = td.object<IPaymentUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
   public gatewayRegistrationRepository =
     td.object<IGatewayRegistrationRepository>();
+  public blockchainTimeUtils = td.object<IBlockchainTimeUtils>();
+  public validationUtils = td.object<IValidationUtils>();
 
   public proposedPushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
@@ -147,8 +148,8 @@ class PaymentServiceMocks {
 
     td.when(
       this.paymentRepository.createPushPayment(
-        routerPublicIdentifier,
-        chainId,
+        commonPaymentId,
+        routerChannelAddress,
         publicIdentifier,
         commonAmount,
         expirationDate,
@@ -208,16 +209,19 @@ class PaymentServiceMocks {
       gatewayAccount,
       gatewaySignature,
     );
+    this.gatewayConnectorProxy = td.object<IGatewayConnectorProxy>();
+    this.gatewayConnectorProxy.gatewayUrl = gatewayUrl;
+    td.when(
+      this.gatewayConnectorProxy.getConnectorActivationStatus(),
+    ).thenReturn(true);
+    td.when(
+      this.gatewayConnectorProxy.notifyRepairRequested(td.matchers.anything()),
+    ).thenReturn(okAsync(undefined));
+
     const gatewayRegistrationInfoMap = new Map<
       GatewayUrl,
       GatewayRegistrationInfo
     >();
-
-    this.gatewayConnectorProxy = td.object<IGatewayConnectorProxy>();
-    td.when(
-      this.gatewayConnectorProxy.getConnectorActivationStatus(),
-    ).thenReturn(true);
-
     gatewayRegistrationInfoMap.set(gatewayUrl, this.gatewayRegistrationInfo);
     td.when(
       this.gatewayRegistrationRepository.getGatewayRegistrationInfo(
@@ -379,11 +383,27 @@ class PaymentServiceMocks {
           expirationDate: expirationDate,
           requiredStake: commonAmount,
           paymentToken: hyperTokenAddress,
-          metadata: null,
+          metadata: "",
         }),
         gatewaySignature,
       ),
     ).thenReturn(gatewayAccount as never);
+
+    td.when(this.blockchainTimeUtils.getBlockchainTimestamp()).thenReturn(
+      okAsync(unixNow),
+    );
+    td.when(this.validationUtils.validatePaymentId(commonPaymentId)).thenReturn(
+      true,
+    );
+    td.when(
+      this.validationUtils.validatePublicIdentifier(publicIdentifier),
+    ).thenReturn(true);
+    td.when(
+      this.validationUtils.validatePublicIdentifier(publicIdentifier2),
+    ).thenReturn(true);
+    td.when(
+      this.validationUtils.validateEthereumAddress(routerChannelAddress),
+    ).thenReturn(true);
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -398,6 +418,8 @@ class PaymentServiceMocks {
       this.vectorUtils,
       this.paymentUtils,
       this.blockchainUtils,
+      this.blockchainTimeUtils,
+      this.validationUtils,
       this.logUtils,
     );
   }
@@ -815,7 +837,7 @@ describe("PaymentService tests", () => {
           expirationDate: expirationDate,
           requiredStake: commonAmount,
           paymentToken: hyperTokenAddress,
-          metadata: null,
+          metadata: "",
         }),
         gatewaySignature,
       ),
@@ -1359,20 +1381,21 @@ describe("PaymentService tests", () => {
     paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("recoverPayments returns immediately if payment is not actually borked", async () => {
+  test("repairPayments returns immediately if payment is not actually borked", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([commonPaymentId]);
+    const result = await paymentService.repairPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isOk()).toBeTruthy();
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("recoverPayments cancels second insurance transfer if duplicates are detected", async () => {
+  test("repairPayments cancels second insurance transfer if duplicates are detected", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
@@ -1402,16 +1425,17 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([commonPaymentId]);
+    const result = await paymentService.repairPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isOk()).toBeTruthy();
     const retPayments = result._unsafeUnwrap();
     expect(retPayments).toContain(paymentServiceMock.stakedPushPayment);
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("recoverPayments cancels second payment transfer if duplicates are detected", async () => {
+  test("repairPayments cancels second payment transfer if duplicates are detected", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
@@ -1441,12 +1465,13 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([commonPaymentId]);
+    const result = await paymentService.repairPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isOk()).toBeTruthy();
     const retPayments = result._unsafeUnwrap();
     expect(retPayments).toContain(paymentServiceMock.approvedPushPayment);
+    paymentServiceMock.contextProvider.assertEventCounts({});
   });
 });

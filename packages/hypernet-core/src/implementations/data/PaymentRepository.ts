@@ -168,8 +168,8 @@ export class PaymentRepository implements IPaymentRepository {
   }
 
   public createPullPayment(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
+    paymentId: PaymentId,
+    channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     maximumAmount: BigNumberString,
     deltaTime: number,
@@ -190,16 +190,12 @@ export class PaymentRepository implements IPaymentRepository {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
-      this.paymentUtils.createPaymentId(EPaymentType.Pull),
       this.blockchainTimeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
-    ]).andThen(([browserNode, context, paymentId, timestamp, config]) => {
+    ]).andThen(([browserNode, context, timestamp, config]) => {
       // Get the state channel to use
       const stateChannel = context.activeStateChannels.find((asc) => {
-        return (
-          asc.chainId == chainId &&
-          asc.routerPublicIdentifier == routerPublicIdentifier
-        );
+        return asc.channelAddress == channelAddress;
       });
 
       if (stateChannel == null) {
@@ -208,19 +204,19 @@ export class PaymentRepository implements IPaymentRepository {
         );
       }
 
-      const chainInfo = config.chainInformation.get(chainId);
+      const chainInfo = config.chainInformation.get(stateChannel.chainId);
 
       if (chainInfo == null) {
         return errAsync(
           new PaymentCreationError(
-            `Can not create a payment on chain ${chainId}, no configuration information exists for this chain.`,
+            `Can not create a payment on chain ${stateChannel.chainId}, no configuration information exists for this chain.`,
           ),
         );
       }
 
       const message: IHypernetOfferDetails = {
-        routerPublicIdentifier,
-        chainId,
+        routerPublicIdentifier: stateChannel.routerPublicIdentifier,
+        chainId: stateChannel.chainId,
         messageType: EMessageTransferType.OFFER,
         requireOnline: config.requireOnline,
         paymentId,
@@ -273,8 +269,8 @@ export class PaymentRepository implements IPaymentRepository {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public createPushPayment(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
+    paymentId: PaymentId,
+    channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
@@ -293,16 +289,12 @@ export class PaymentRepository implements IPaymentRepository {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
-      this.paymentUtils.createPaymentId(EPaymentType.Push),
       this.blockchainTimeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
-    ]).andThen(([browserNode, context, paymentId, timestamp, config]) => {
+    ]).andThen(([browserNode, context, timestamp, config]) => {
       // Get the state channel to use
       const stateChannel = context.activeStateChannels.find((asc) => {
-        return (
-          asc.chainId == chainId &&
-          asc.routerPublicIdentifier == routerPublicIdentifier
-        );
+        return asc.channelAddress == channelAddress;
       });
 
       if (stateChannel == null) {
@@ -311,19 +303,19 @@ export class PaymentRepository implements IPaymentRepository {
         );
       }
 
-      const chainInfo = config.chainInformation.get(chainId);
+      const chainInfo = config.chainInformation.get(stateChannel.chainId);
 
       if (chainInfo == null) {
         return errAsync(
           new PaymentCreationError(
-            `Can not create a payment on chain ${chainId}, no configuration information exists for this chain.`,
+            `Can not create a payment on chain ${stateChannel.chainId}, no configuration information exists for this chain.`,
           ),
         );
       }
 
       const message: IHypernetOfferDetails = {
-        routerPublicIdentifier,
-        chainId,
+        routerPublicIdentifier: stateChannel.routerPublicIdentifier,
+        chainId: stateChannel.chainId,
         messageType: EMessageTransferType.OFFER,
         paymentId,
         creationDate: timestamp,
@@ -689,7 +681,7 @@ export class PaymentRepository implements IPaymentRepository {
             });
 
             if (stateChannel == null) {
-              return errAsync<IBasicTransferResponse, PaymentStakeError>(
+              return errAsync(
                 new PaymentStakeError(
                   `State channel for payment ${payment.id} does not exist`,
                 ),
@@ -702,7 +694,7 @@ export class PaymentRepository implements IPaymentRepository {
             );
 
             if (paymentChainInfo == null) {
-              return errAsync<IBasicTransferResponse, PaymentCreationError>(
+              return errAsync(
                 new PaymentCreationError(
                   `No registration info for chain id ${payment.chainId} found, although payment ${payment.id} claims to use that chain`,
                 ),

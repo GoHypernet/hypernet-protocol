@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/objects",
-  "version": "0.3.9",
+  "version": "0.3.12",
   "description": "Objects and types shared by the Hypernet Protocol",
   "license": "ISC",
   "repository": {
@@ -32,6 +32,7 @@
     "alias": "yarn copy-files && tsc-alias",
     "copy-files": "copyfiles -u 1 src/**/*.d.ts dist/",
     "generate-docs": "npx typedoc --options typedoc.json",
+    "prepublish": "yarn build",
     "prepare": "yarn build",
     "test": "echo \"No tests specified yet\" && exit 0"
   },

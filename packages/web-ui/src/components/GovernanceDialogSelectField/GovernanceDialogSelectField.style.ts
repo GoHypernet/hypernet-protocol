@@ -50,7 +50,7 @@ export const useStyles = makeStyles((theme) => ({
   fieldTextWrapper: {
     display: "flex",
     justifyContent: "space-between",
-    border: `2px solid ${colors.GRAY200}`,
+    border: `2px solid ${colors.GRAY300}`,
     padding: "12px 16px",
     borderRadius: 3,
     background: colors.GRAY100,

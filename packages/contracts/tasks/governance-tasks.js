@@ -1,4 +1,4 @@
-const {  HT, HG, RF, NFR, govAddress, factoryAddress, hAddress}  = require("./constants.js");
+const {  HT, HG, RF, NFR, govAddress, timelockAddress, factoryAddress, hAddress}  = require("./constants.js");
 
 task("delegateVote", "Delegate your voting power")
   .addParam("delegate", "Address of the delegate (can be self)")
@@ -9,7 +9,7 @@ task("delegateVote", "Delegate your voting power")
     const delegate = taskArgs.delegate;
     const amount = taskArgs.amount;
     const tx = await hypertoken.delegate(delegate);
-    tx.wait();
+    await tx.wait();
     const votePowerDelegate = await hypertoken.getVotes(delegate)
     const votePowerOwner = await hypertoken.getVotes(owner.address)
 
@@ -76,7 +76,7 @@ task("castVote", "Cast a vote for an existing proposal")
     const proposalID = taskArgs.id;
     const support = taskArgs.support;
     const tx = await govHandle.castVote(proposalID, support);
-    const tx_rcpt = tx.wait();
+    const tx_rcpt = await tx.wait();
     const proposal = await govHandle.proposals(proposalID);
 
     console.log("Proposal Originator:", proposal[1]);
@@ -102,7 +102,7 @@ task("queueProposal", "queue a proposal that has been successfully passed.")
     console.log("Proposal Signatures:", signatures);
     console.log("Call Datas:", calldatas);
     const tx = await govHandle["queue(uint256)"](proposalID);
-    const tx_rcp = tx.wait();
+    const tx_rcp = await tx.wait();
 });
 
 task("executeProposal", "Execute a proposal that has been successfully passed.")
@@ -119,7 +119,7 @@ task("executeProposal", "Execute a proposal that has been successfully passed.")
     console.log("Executing Proposal:", proposalID);
     console.log("Target Addresses:", targets);
     const tx = await govHandle["execute(uint256)"](proposalID);
-    const tx_rcp = tx.wait();
+    const tx_rcp = await tx.wait();
 });
 
 task("cancelProposal", "Cancel a proposal if it is your or if proposer is below proposal threshold.")
@@ -132,7 +132,7 @@ task("cancelProposal", "Cancel a proposal if it is your or if proposer is below 
     const proposalID = taskArgs.id;
     console.log("Cancelling Proposal:", proposalID);
     const tx = await govHandle["cancel(uint256)"](proposalID);
-    const tx_rcp = tx.wait();
+    const tx_rcp = await tx.wait();
 });
 
 task("proposeDAOProfileRegistry", "Propose a registry to serve as profile accounts for the DAO.")
@@ -364,6 +364,78 @@ task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance
     console.log("Description Hash:", descriptionHash.toString());
 });
 
+task("proposePaymentToken", "Propose a new Payment Token for the Hypernet Protocol.")
+  .addParam("name", "Name of the Payment token to display in the UI.")
+  .addParam("symbol", "Token symbol.")
+  .addParam("chainid", "Id of the blockchain.")
+  .addParam("address", "Contract address of the token.")
+  .addParam("nativetoken", "Boolean indicating if this is a native token to the chain.")
+  .addParam("erc20", "Boolean indicated if the token is ERC20.")
+  .addParam("decimals", "Number of decimal places supported by the token.")
+  .addParam("logourl", "Location to pull token logo for UI.")
+  .addParam("tokenid", "Unique id for the NFI.")
+  .setAction(async (taskArgs) => {
+    const registryName = "Payment Tokens";
+
+    const accounts = await hre.ethers.getSigners();
+    
+    const name = taskArgs.name;
+    const symbol = taskArgs.symbol;
+    const chainid = taskArgs.chainid;
+    const address = taskArgs.address;
+    const nativetoken = (taskArgs.nativetoken == 'true');
+    const erc20 = (taskArgs.erc20 == 'true');
+    const decimals = taskArgs.decimals;
+    const logourl = taskArgs.logourl;
+    const tokenid = taskArgs.tokenid; 
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
+
+    // lookup address for target registry
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    const tokenData = JSON.stringify({
+        name: name,
+        symbol: symbol,
+        chainId: chainid,
+        address: address,
+        nativeToken: nativetoken,
+        erc20: erc20,
+        decimals: decimals,
+        logoUrl: logourl,
+      });
+
+    const tokenLabel = `${chainid}:${name}`;
+
+    // construct proposal
+    const proposalDescription = `${tokenLabel}, ${tokenData}, ${tokenid}`; // just name the proposal after the lable of the NonFungibleIdentity
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = registryHandle.interface.encodeFunctionData(
+      "register",
+      [timelockAddress(), tokenLabel, tokenData, tokenid],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [registryAddress],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+    // propose a new registry
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [registryAddress],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    const tx_reciept = await tx.wait();
+    console.log("Proposal Description:", proposalDescription);
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+});
+
 task("proposeRegistryParameterUpdate", "Propose updates to a registries parameters.")
   .addParam("name", "Name of target Registry to update.")
   .addParam("schema", "New schema field.")
@@ -378,9 +450,9 @@ task("proposeRegistryParameterUpdate", "Propose updates to a registries paramete
     const accounts = await hre.ethers.getSigners();
     const registryName = taskArgs.name;
     const schema = (taskArgs.schema.length ? [taskArgs.schema]: []);
-    const storageupdate = (taskArgs.storageupdate.length ? [taskArgs.storageupdate]: []);
-    const labelchange = (taskArgs.labelchange.length ? [taskArgs.labelchange]: []);
-    const allowtransfers = (taskArgs.allowtransfers.length ? [taskArgs.allowtransfers]: []);
+    const storageupdate = (taskArgs.storageupdate.length ? [taskArgs.storageupdate == 'true']: []);
+    const labelchange = (taskArgs.labelchange.length ? [taskArgs.labelchange == 'true']: []);
+    const allowtransfers = (taskArgs.allowtransfers.length ? [taskArgs.allowtransfers == 'true']: []);
     const registrationtoken = (taskArgs.registrationtoken.length ? [taskArgs.registrationtoken] : []);
     const registrationfee = (taskArgs.registrationfee.length ? [taskArgs.registrationfee]: []);
     const burnaddress = (taskArgs.burnaddress.length ? [taskArgs.burnaddress]: []);

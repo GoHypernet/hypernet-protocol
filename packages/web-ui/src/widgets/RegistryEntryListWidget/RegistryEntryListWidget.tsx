@@ -8,7 +8,6 @@ import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, useMemo } from "react";
-import { useAlert } from "react-alert";
 
 import {
   GovernanceRegistryListItem,
@@ -16,8 +15,10 @@ import {
   GovernancePagination,
   GovernanceEmptyState,
   GovernanceSwitch,
+  IHeaderAction,
 } from "@web-ui/components";
 import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
+import CreateBatchIdentityWidget from "@web-ui/widgets/CreateBatchIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
 
@@ -26,9 +27,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   onRegistryListNavigate,
   registryName,
 }: IRegistryEntryListWidgetParams) => {
-  const alert = useAlert();
   const { coreProxy, viewUtils } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
   const [registry, setRegistry] = useState<Registry>();
   const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
@@ -38,6 +38,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     useState<boolean>(false);
 
   const [createIdentityModalOpen, setCreateIdentityModalOpen] =
+    useState<boolean>(false);
+  const [createBatchIdentityModalOpen, setCreateBatchIdentityModalOpen] =
     useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
@@ -72,7 +74,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const getRegistryEntries = (pageNumber: number) => {
@@ -89,13 +91,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         setRegistryEntries(registryEntries);
         setPage(pageNumber);
       })
-      .mapErr(handleError);
-  };
-
-  const handleError = (err) => {
-    setLoading(false);
-    setHasEmptyState(true);
-    alert.error(err?.message || "Something went wrong!");
+      .mapErr(handleCoreError);
   };
 
   const isRegistrar = useMemo(() => {
@@ -111,7 +107,34 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     );
   }, [JSON.stringify(registry?.registrationToken)]);
 
-  const canCreateNewRegistryEntry = isRegistrar || isRegistrationTokenEnabled;
+  const getHeaderActions: () => IHeaderAction[] = () => {
+    const canCreateNewRegistryEntry = isRegistrar || isRegistrationTokenEnabled;
+
+    const canCreateNewBatchRegistryEntry =
+      isRegistrar && registry?.modulesCapability.batchMintEnabled;
+
+    let headerActions: IHeaderAction[] = [];
+
+    if (canCreateNewBatchRegistryEntry) {
+      headerActions.push({
+        label: "Create Batch Identity",
+        onClick: () => setCreateBatchIdentityModalOpen(true),
+        variant: "contained",
+        color: "primary",
+      });
+    }
+
+    if (canCreateNewRegistryEntry) {
+      headerActions.push({
+        label: "Create New Identity",
+        onClick: () => setCreateIdentityModalOpen(true),
+        variant: "contained",
+        color: "primary",
+      });
+    }
+
+    return headerActions;
+  };
 
   return (
     <Box>
@@ -123,16 +146,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             onRegistryListNavigate?.();
           },
         }}
-        {...(canCreateNewRegistryEntry && {
-          headerActions: [
-            {
-              label: "Create New Identity",
-              onClick: () => setCreateIdentityModalOpen(true),
-              variant: "contained",
-              color: "primary",
-            },
-          ],
-        })}
+        headerActions={getHeaderActions()}
         rightContent={
           <Box display="flex" alignItems="center" marginTop={5}>
             <Typography style={{ paddingRight: 5 }}>Reverse sorting</Typography>
@@ -200,6 +214,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,
             totalItems: registry?.numberOfEntries,
+            currentPage: page,
           }}
           onChange={(_, page) => {
             setPage(page);
@@ -211,6 +226,16 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           onCloseCallback={() => {
             getRegistry();
             setCreateIdentityModalOpen(false);
+          }}
+          registryName={registryName}
+          currentAccountAddress={accountAddress}
+        />
+      )}
+      {createBatchIdentityModalOpen && (
+        <CreateBatchIdentityWidget
+          onCloseCallback={() => {
+            getRegistry();
+            setCreateBatchIdentityModalOpen(false);
           }}
           registryName={registryName}
           currentAccountAddress={accountAddress}

@@ -1,14 +1,15 @@
-const { pathsToModuleNameMapper } = require("ts-jest/utils");
+import type { Config } from "@jest/types";
+import { pathsToModuleNameMapper } from "ts-jest/utils";
 
 // In the following statement, replace `./tsconfig` with the path to your `tsconfig` file
 // which contains the path mapping (ie the `compilerOptions.paths` option):
-const { compilerOptions } = require("../../tsconfig.build");
+import { compilerOptions } from "../../tsconfig.build.json";
 
 const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, {
   prefix: "<rootDir>/src",
 });
 
-module.exports = {
+const config: Config.InitialOptions = {
   preset: "ts-jest",
   testEnvironment: "node",
   // Ignore lib folder, use this or root property include paths but not both https://medium.com/swlh/jest-with-typescript-446ea996cc68
@@ -42,3 +43,5 @@ module.exports = {
     __DEBUG__: true,
   },
 };
+
+export default config;

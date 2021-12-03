@@ -13,7 +13,7 @@ import {
 } from "@hypernetlabs/objects";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
-import { okAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
 import Postmate from "postmate";
 
 import { IHypernetCoreListener } from "@gateway-iframe/interfaces/api";
@@ -50,151 +50,244 @@ export class HypernetCoreListener
     return new Postmate.Model({
       activateConnector: (data: IIFrameCallData<IActivateConnectorData>) => {
         this.returnForModel(() => {
-          // Convert the balances to an actual balances object
-          const assets = data.data.balances.assets.map((val) => {
-            return new AssetBalance(
-              val.channelAddress,
-              val.assetAddress,
-              val.name,
-              val.symbol,
-              val.decimals,
-              val.totalAmount,
-              val.lockedAmount,
-              val.freeAmount,
-            );
-          });
-          const balances = new Balances(assets);
-
-          return this.gatewayService
-            .activateGatewayConnector(data.data.publicIdentifier, balances)
-            .map((gatewayConnector) => {
-              this.gatewayConnector = gatewayConnector;
+          try {
+            // Convert the balances to an actual balances object
+            const assets = data.data.balances.assets.map((val) => {
+              return new AssetBalance(
+                val.channelAddress,
+                val.assetAddress,
+                val.name,
+                val.symbol,
+                val.decimals,
+                val.totalAmount,
+                val.lockedAmount,
+                val.freeAmount,
+              );
             });
+            const balances = new Balances(assets);
+
+            return this.gatewayService
+              .activateGatewayConnector(data.data.publicIdentifier, balances)
+              .map((gatewayConnector) => {
+                this.gatewayConnector = gatewayConnector;
+              });
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       deauthorize: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.gatewayService.deauthorize();
+          try {
+            return this.gatewayService.deauthorize();
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       getValidatedSignature: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.gatewayService.getValidatedSignature();
+          try {
+            return this.gatewayService.getValidatedSignature();
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       getGatewayTokenInfo: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.gatewayService.getGatewayTokenInfo();
+          try {
+            return this.gatewayService.getGatewayTokenInfo();
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       getGatewayUrl: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.gatewayService.getGatewayUrl();
+          try {
+            return this.gatewayService.getGatewayUrl();
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       gatewayIFrameClosed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onIFrameClosed();
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onIFrameClosed();
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       gatewayIFrameDisplayed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onIFrameDisplayed();
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onIFrameDisplayed();
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPushPaymentSent: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPushPaymentSent(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPushPaymentSent(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPushPaymentUpdated: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPushPaymentUpdated(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPushPaymentUpdated(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPushPaymentReceived: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPushPaymentReceived(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPushPaymentReceived(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPushPaymentDelayed: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPushPaymentDelayed(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPushPaymentDelayed(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPushPaymentCanceled: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPushPaymentCanceled(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPushPaymentCanceled(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPullPaymentSent: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPullPaymentSent(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPullPaymentSent(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPullPaymentUpdated: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPullPaymentUpdated(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPullPaymentUpdated(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPullPaymentReceived: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPullPaymentReceived(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPullPaymentReceived(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPullPaymentDelayed: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPullPaymentDelayed(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPullPaymentDelayed(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPullPaymentCanceled: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onPullPaymentCanceled(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onPullPaymentCanceled(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
+        }, data.callId);
+      },
+      notifyRepairRequested: (
+        data: IIFrameCallData<PushPayment | PullPayment>,
+      ) => {
+        this.returnForModel(() => {
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onRepairRequested(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyPublicIdentifier: (data: IIFrameCallData<PublicIdentifier>) => {
         this.returnForModel(() => {
-          return this.gatewayService.publicIdentifierReceived(data.data);
+          try {
+            return this.gatewayService.publicIdentifierReceived(data.data);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
       notifyBalancesReceived: (data: IIFrameCallData<Balances>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onBalancesReceived(data.data);
-          return okAsync(undefined);
+          try {
+            const context = this.contextProvider.getGatewayContext();
+            context.gatewayConnector?.onBalancesReceived(data.data);
+            return okAsync(undefined);
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
 
       sendFundsInitiated: (data: IIFrameCallData<ISendFundsInitiatedData>) => {
         this.returnForModel(() => {
-          return this.paymentService.sendFundsInitiated(
-            data.data.requestId,
-            data.data.paymentId,
-          );
+          try {
+            return this.paymentService.sendFundsInitiated(
+              data.data.requestId,
+              data.data.paymentId,
+            );
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
 
@@ -202,19 +295,27 @@ export class HypernetCoreListener
         data: IIFrameCallData<IAuthorizeFundsInitiatedData>,
       ) => {
         this.returnForModel(() => {
-          return this.paymentService.authorizeFundsInitiated(
-            data.data.requestId,
-            data.data.paymentId,
-          );
+          try {
+            return this.paymentService.authorizeFundsInitiated(
+              data.data.requestId,
+              data.data.paymentId,
+            );
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
 
       messageSigned: (data: IIFrameCallData<ISignatureResponseData>) => {
         this.returnForModel(() => {
-          return this.gatewayService.messageSigned(
-            data.data.message,
-            data.data.signature,
-          );
+          try {
+            return this.gatewayService.messageSigned(
+              data.data.message,
+              data.data.signature,
+            );
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
 
@@ -222,20 +323,28 @@ export class HypernetCoreListener
         data: IIFrameCallData<IStateChannelReturnedResponseData>,
       ) => {
         this.returnForModel(() => {
-          return this.gatewayService.stateChannelAssured(
-            data.data.id,
-            data.data.stateChannel,
-          );
+          try {
+            return this.gatewayService.stateChannelAssured(
+              data.data.id,
+              data.data.stateChannel,
+            );
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
 
       returnPayment: (data: IIFrameCallData<IPaymentReturnedResponseData>) => {
         this.returnForModel(() => {
-          return this.paymentService.paymentReceived(
-            data.data.paymentId,
-            data.data.payment,
-            data.data.paymentType,
-          );
+          try {
+            return this.paymentService.paymentReceived(
+              data.data.paymentId,
+              data.data.payment,
+              data.data.paymentType,
+            );
+          } catch (e) {
+            return errAsync(e);
+          }
         }, data.callId);
       },
     });

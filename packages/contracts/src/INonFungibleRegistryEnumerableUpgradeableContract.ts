@@ -85,23 +85,23 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   registerByToken(
     recipientAddress: EthereumAccountAddress,
     label: string,
-    data: string,
+    data: string | null,
     tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   register(
     recipientAddress: EthereumAccountAddress,
     label: string,
-    data: string,
+    data: string | null,
     tokenId: RegistryTokenId,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   grantRole(
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   revokeRole(
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   renounceRole(
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   getRegistryEntryByTokenId(
     tokenId: RegistryTokenId,

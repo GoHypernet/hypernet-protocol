@@ -26,17 +26,21 @@ const PublicIdentifierWidget: React.FC<IPublicIdentifierWidget> = ({
       className="public-identifier-widget"
       hideDivider
       title={
-        <Box display="flex" alignItems="center">
+        <Box
+          display="flex"
+          alignItems="center"
+          style={{ wordBreak: "break-word" }}
+        >
           <Tooltip title="Online" placement="top">
             <Box
-              height="15px"
-              width="15px"
+              minHeight={14}
+              minWidth={14}
               bgcolor={colors.GREEN700}
               borderRadius="50%"
               marginRight="20px"
             ></Box>
           </Tooltip>
-          <Typography variant="h5">{publicIdentifer}</Typography>
+          <Typography variant="body1">{publicIdentifer}</Typography>
         </Box>
       }
     />

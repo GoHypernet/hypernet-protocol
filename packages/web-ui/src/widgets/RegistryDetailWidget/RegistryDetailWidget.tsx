@@ -4,13 +4,13 @@ import {
   RegistryParams,
   BigNumberString,
   EthereumContractAddress,
+  RegistryModule,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
 import { Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
-import { useAlert } from "react-alert";
 
 import {
   GovernanceChip,
@@ -42,11 +42,11 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   onRegistryListNavigate,
   registryName,
 }: IRegistryDetailWidgetParams) => {
-  const alert = useAlert();
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [registry, setRegistry] = useState<Registry>();
+  const [registryModules, setRegistryModules] = useState<RegistryModule[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
     EthereumAccountAddress(""),
@@ -65,6 +65,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
 
   useEffect(() => {
     getRegistryDetails();
+    getRegistryModules();
   }, []);
 
   const getRegistryDetails = () => {
@@ -76,13 +77,19 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
         setLoading(false);
       })
 
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
-  const handleError = (err) => {
-    setLoading(false);
-    setIsEditing(false);
-    alert.error(err?.message || "Something went wrong!");
+  const getRegistryModules = () => {
+    setLoading(true);
+    coreProxy
+      .getRegistryModules()
+      .map((registryModules) => {
+        setRegistryModules(registryModules);
+        setLoading(false);
+      })
+
+      .mapErr(handleCoreError);
   };
 
   const updateRegistryParams = ({
@@ -112,7 +119,32 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
         setRegistry(registry);
         setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
+  };
+
+  const updateRegistrarRole = (
+    value: boolean,
+    moduleAddress: EthereumContractAddress,
+  ) => {
+    if (registry?.name == null) {
+      return;
+    }
+    setLoading(true);
+    if (value) {
+      coreProxy
+        .grantRegistrarRole(registry?.name, moduleAddress)
+        .map(() => {
+          getRegistryDetails();
+        })
+        .mapErr(handleCoreError);
+    } else {
+      coreProxy
+        .revokeRegistrarRole(registry?.name, moduleAddress)
+        .map(() => {
+          getRegistryDetails();
+        })
+        .mapErr(handleCoreError);
+    }
   };
 
   const isRegistrar = registry?.registrarAddresses.some(
@@ -137,11 +169,15 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 </Box>
                 <Box className={classes.headerDescriptionContainer}>
                   <Typography>Registrar Addresses:</Typography>
-                  <GovernanceChip
-                    className={classes.addressChip}
-                    label={registry?.registrarAddresses.join("-")}
-                    color="gray"
-                  />
+                  <Box display="flex" flexDirection="column">
+                    {registry?.registrarAddresses.map((registrarAddress) => (
+                      <GovernanceChip
+                        className={classes.addressChip}
+                        label={registrarAddress}
+                        color="gray"
+                      />
+                    ))}
+                  </Box>
                 </Box>
                 <Box className={classes.headerDescriptionContainer}>
                   <Typography>Registrar Admin Addresses:</Typography>
@@ -315,6 +351,35 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                       </Box>
                     </Box>
                   </GovernanceCard>
+
+                  {!!registryModules.length && (
+                    <GovernanceCard className={classes.optionsContainer}>
+                      <Box className={classes.optionsRow}>
+                        {registryModules.map((registryModule) => (
+                          <Box
+                            className={classes.switchContainer}
+                            key={registryModule.address}
+                          >
+                            <Typography className={classes.switchTitle}>
+                              {registryModule.name}
+                            </Typography>
+                            <GovernanceSwitch
+                              initialValue={registry.registrarAddresses.includes(
+                                registryModule.address,
+                              )}
+                              onChange={(value) => {
+                                updateRegistrarRole(
+                                  value,
+                                  registryModule.address,
+                                );
+                              }}
+                              disabled={!isEditing}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                    </GovernanceCard>
+                  )}
 
                   {isRegistrar && (
                     <>

@@ -35,8 +35,16 @@ import {
   paymentSigningDomain,
   pushPaymentSigningTypes,
   NonFungibleRegistryContractError,
+  PersistenceError,
+  pullPaymentSigningTypes,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
+import {
+  ResultUtils,
+  ILogUtils,
+  ILogUtilsType,
+  IValidationUtils,
+  IValidationUtilsType,
+} from "@hypernetlabs/utils";
 import { GetPaymentResponse, IPaymentService } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -59,6 +67,8 @@ import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import {
+  IBlockchainTimeUtils,
+  IBlockchainTimeUtilsType,
   IBlockchainUtils,
   IBlockchainUtilsType,
   IConfigProvider,
@@ -81,8 +91,6 @@ import {
  * paymentPosted() on the recipient's side, which finalizes/resolves the vector parameterized transfer.
  *
  * Note that the general expected order of operations is mirrored by the ordering of functions within this class.
- *
- * @todo we should also finalize the insurance transfer, and maybe finalize the offer transfer
  */
 @injectable()
 export class PaymentService implements IPaymentService {
@@ -101,6 +109,9 @@ export class PaymentService implements IPaymentService {
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(IPaymentUtilsType) protected paymentUtils: IPaymentUtils,
     @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
+    @inject(IBlockchainTimeUtilsType)
+    protected blockchainTimeUtils: IBlockchainTimeUtils,
+    @inject(IValidationUtilsType) protected validationUtils: IValidationUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -108,7 +119,7 @@ export class PaymentService implements IPaymentService {
     gatewayUrl: GatewayUrl,
     requestIdentifier: string,
     channelAddress: EthereumContractAddress,
-    counterPartyAccount: PublicIdentifier,
+    toIdentifier: PublicIdentifier,
     totalAuthorized: BigNumberString,
     expirationDate: UnixTimestamp,
     deltaAmount: BigNumberString,
@@ -118,28 +129,30 @@ export class PaymentService implements IPaymentService {
     metadata: string | null,
   ): ResultAsync<
     PaymentInitiationResponse,
-    PaymentCreationError | InvalidParametersError
+    | PaymentCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
   > {
-    // TODO: Step 1: Sanity checking on the values
-    return this.contextProvider
-      .getInitializedContext()
-      .andThen((context) => {
-        // Lookup the ActiveStateChannel from the context
-        const activeStateChannel = context.activeStateChannels.find((val) => {
-          return val.channelAddress == channelAddress;
-        });
-
-        if (activeStateChannel == null) {
-          return errAsync<
-            PaymentId,
-            PaymentCreationError | InvalidParametersError
-          >(
-            new PaymentCreationError(
-              `Channel ID ${channelAddress} does not exist`,
-            ),
-          );
-        }
-
+    // Step 1: Sanity checking on the values
+    return this._validatePullPayment(
+      gatewayUrl,
+      requestIdentifier,
+      channelAddress,
+      toIdentifier,
+      totalAuthorized,
+      expirationDate,
+      deltaAmount,
+      deltaTime,
+      requiredStake,
+      paymentToken,
+      metadata,
+    )
+      .andThen(() => {
         // Create a payment ID
         return this.paymentUtils.createPaymentId(EPaymentType.Push);
       })
@@ -157,7 +170,7 @@ export class PaymentService implements IPaymentService {
 
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
-   * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
+   * @param toIdentifier the public identifier of the counterparty to authorize funds to
    * @param totalAuthorized the total amount the counterparty is allowed to "pull"
    * @param expirationDate the latest time in which the counterparty can pull funds. This must be after the full maturation date of totalAuthorized, as calculated via deltaAmount and deltaTime.
    * @param deltaAmount The amount per deltaTime to authorize
@@ -170,7 +183,7 @@ export class PaymentService implements IPaymentService {
     requestIdentifier: string,
     paymentId: PaymentId,
     channelAddress: EthereumContractAddress,
-    counterPartyAccount: PublicIdentifier,
+    toIdentifier: PublicIdentifier,
     totalAuthorized: BigNumberString,
     expirationDate: UnixTimestamp,
     deltaAmount: BigNumberString,
@@ -187,43 +200,112 @@ export class PaymentService implements IPaymentService {
     | VectorError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
+    | NonFungibleRegistryContractError
   > {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
 
-    return this.contextProvider.getInitializedContext().andThen((context) => {
-      const activeStateChannel = context.activeStateChannels.find((val) => {
-        return val.channelAddress == channelAddress;
-      });
-
-      if (activeStateChannel == null) {
-        return errAsync(
-          new PaymentCreationError(
-            `Channel ID ${channelAddress} does not exist`,
+    return this._validatePullPayment(
+      gatewayUrl,
+      requestIdentifier,
+      channelAddress,
+      toIdentifier,
+      totalAuthorized,
+      expirationDate,
+      deltaAmount,
+      deltaTime,
+      requiredStake,
+      paymentToken,
+      metadata,
+    )
+      .andThen(() => {
+        return ResultUtils.combine([
+          this.paymentRepository.getReservedPaymentIdByRequestId(
+            requestIdentifier,
           ),
-        );
-      }
-      return this.paymentRepository
-        .createPullPayment(
-          activeStateChannel.routerPublicIdentifier,
-          activeStateChannel.chainId,
-          counterPartyAccount,
-          totalAuthorized,
-          deltaTime,
-          deltaAmount,
-          expirationDate,
-          requiredStake,
-          paymentToken,
-          gatewayUrl,
-          metadata,
-        )
-        .map((payment) => {
-          // Send an event
-          context.onPullPaymentSent.next(payment);
+          this.gatewayRegistrationRepository.getGatewayRegistrationInfo([
+            gatewayUrl,
+          ]),
+        ]);
+      })
+      .andThen(([reservedPaymentId, gatewayRegistrationInfoMap]) => {
+        // Make sure the payment ID for this request matches the reserved payment.
+        // This would also show up via the signature check
+        if (reservedPaymentId != paymentId) {
+          return errAsync(
+            new PaymentCreationError(
+              `Mismatch between payment initiation and payment; reserved PaymentId ${reservedPaymentId} does not match PaymentId ${paymentId}`,
+            ),
+          );
+        }
+        const gatewayRegistrationInfo =
+          gatewayRegistrationInfoMap.get(gatewayUrl);
+        if (gatewayRegistrationInfo == null) {
+          return errAsync(
+            new PaymentCreationError(
+              `No registration info for gateway with url ${gatewayUrl}. Cannot authorize funds for payment ${paymentId} with request id ${requestIdentifier}`,
+            ),
+          );
+        }
 
-          return payment;
-        });
-    });
+        // Check the signature
+        const value = {
+          requestIdentifier: requestIdentifier,
+          paymentId: paymentId,
+          channelAddress: channelAddress,
+          recipientPublicIdentifier: toIdentifier,
+          totalAuthorized: totalAuthorized,
+          expirationDate: expirationDate,
+          deltaAmount: deltaAmount,
+          deltaTime: deltaTime,
+          requiredStake: requiredStake,
+          paymentToken: paymentToken,
+          metadata: metadata ?? "",
+        } as Record<string, unknown>;
+
+        const verifiedGatewayAccount = this.blockchainUtils.verifyTypedData(
+          paymentSigningDomain,
+          pullPaymentSigningTypes,
+          value,
+          gatewaySignature,
+        );
+
+        // Make sure that the verified account matches the gateway's published account adddress
+        if (verifiedGatewayAccount != gatewayRegistrationInfo.address) {
+          return errAsync(
+            new PaymentCreationError(
+              `Payment ${paymentId} with request id ${requestIdentifier} has an improper signature. Will not send funds!`,
+            ),
+          );
+        }
+
+        return ResultUtils.combine([
+          this.paymentRepository.createPullPayment(
+            paymentId,
+            channelAddress,
+            toIdentifier,
+            totalAuthorized,
+            deltaTime,
+            deltaAmount,
+            expirationDate,
+            requiredStake,
+            paymentToken,
+            gatewayUrl,
+            metadata,
+          ),
+          this.contextProvider.getContext(),
+        ]);
+      })
+      .map(([payment, context]) => {
+        // Send an event
+        context.onPullPaymentSent.next(payment);
+
+        return payment;
+      });
   }
 
   public pullFunds(
@@ -316,7 +398,7 @@ export class PaymentService implements IPaymentService {
    * @param gatewayUrl
    * @param requestIdentifier
    * @param channelAddress
-   * @param counterPartyAccount
+   * @param toIdentifier
    * @param amount
    * @param expirationDate
    * @param requiredStake
@@ -327,7 +409,7 @@ export class PaymentService implements IPaymentService {
     gatewayUrl: GatewayUrl,
     requestIdentifier: string,
     channelAddress: EthereumContractAddress,
-    counterPartyAccount: PublicIdentifier,
+    toIdentifier: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
@@ -335,28 +417,28 @@ export class PaymentService implements IPaymentService {
     metadata: string | null,
   ): ResultAsync<
     PaymentInitiationResponse,
-    PaymentCreationError | InvalidParametersError
+    | PaymentCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
   > {
     // TODO: Step 1: Sanity checking on the values
-    return this.contextProvider
-      .getInitializedContext()
-      .andThen((context) => {
-        // Lookup the ActiveStateChannel from the context
-        const activeStateChannel = context.activeStateChannels.find((val) => {
-          return val.channelAddress == channelAddress;
-        });
-
-        if (activeStateChannel == null) {
-          return errAsync<
-            PaymentId,
-            PaymentCreationError | InvalidParametersError
-          >(
-            new PaymentCreationError(
-              `Channel ID ${channelAddress} does not exist`,
-            ),
-          );
-        }
-
+    return this._validatePushPayment(
+      gatewayUrl,
+      requestIdentifier,
+      channelAddress,
+      toIdentifier,
+      amount,
+      expirationDate,
+      requiredStake,
+      paymentToken,
+      metadata,
+    )
+      .andThen(() => {
         // Create a payment ID
         return this.paymentUtils.createPaymentId(EPaymentType.Push);
       })
@@ -385,7 +467,7 @@ export class PaymentService implements IPaymentService {
     requestIdentifier: string,
     paymentId: PaymentId,
     channelAddress: EthereumContractAddress,
-    counterPartyAccount: PublicIdentifier,
+    toIdentifier: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
@@ -396,102 +478,109 @@ export class PaymentService implements IPaymentService {
   ): ResultAsync<
     PushPayment,
     | PaymentCreationError
-    | TransferCreationError
+    | InvalidParametersError
     | VectorError
     | BlockchainUnavailableError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
     | InvalidParametersError
     | NonFungibleRegistryContractError
+    | TransferCreationError
   > {
-    // TODO: Sanity checking on the values
-    return ResultUtils.combine([
-      this.contextProvider.getInitializedContext(),
-      this.paymentRepository.getReservedPaymentIdByRequestId(requestIdentifier),
-      this.gatewayRegistrationRepository.getGatewayRegistrationInfo([
-        gatewayUrl,
-      ]),
-    ]).andThen(([context, reservedPaymentId, gatewayRegistrationInfoMap]) => {
-      // Lookup the ActiveStateChannel from the context
-      const activeStateChannel = context.activeStateChannels.find((val) => {
-        return val.channelAddress == channelAddress;
-      });
-
-      if (activeStateChannel == null) {
-        return errAsync<PushPayment, PaymentCreationError>(
-          new PaymentCreationError(
-            `Channel ID ${channelAddress} does not exist`,
+    return this._validatePushPayment(
+      gatewayUrl,
+      requestIdentifier,
+      channelAddress,
+      toIdentifier,
+      amount,
+      expirationDate,
+      requiredStake,
+      paymentToken,
+      metadata,
+    )
+      .andThen(() => {
+        return ResultUtils.combine([
+          this.paymentRepository.getReservedPaymentIdByRequestId(
+            requestIdentifier,
           ),
-        );
-      }
+          this.gatewayRegistrationRepository.getGatewayRegistrationInfo([
+            gatewayUrl,
+          ]),
+        ]);
+      })
+      .andThen(([reservedPaymentId, gatewayRegistrationInfoMap]) => {
+        // Make sure the payment ID for this request matches the reserved payment.
+        // This would also show up via the signature check
+        if (reservedPaymentId != paymentId) {
+          return errAsync(
+            new PaymentCreationError(
+              `Mismatch between payment initiation and payment; reserved PaymentId ${reservedPaymentId} does not match PaymentId ${paymentId}`,
+            ),
+          );
+        }
 
-      // Make sure the payment ID for this request matches the reserved payment.
-      // This would also show up via the signature check
-      if (reservedPaymentId != paymentId) {
-        return errAsync<PushPayment, PaymentCreationError>(
-          new PaymentCreationError(
-            `Mismatch between payment initiation and payment; reserved PaymentId ${reservedPaymentId} does not match PaymentId ${paymentId}`,
+        const gatewayRegistrationInfo =
+          gatewayRegistrationInfoMap.get(gatewayUrl);
+        if (gatewayRegistrationInfo == null) {
+          return errAsync(
+            new PaymentCreationError(
+              `No registration info for gateway with url ${gatewayUrl}. Cannot send funds for payment ${paymentId} with request id ${requestIdentifier}`,
+            ),
+          );
+        }
+
+        // Check the signature
+        const value = {
+          requestIdentifier: requestIdentifier,
+          paymentId: paymentId,
+          channelAddress: channelAddress,
+          recipientPublicIdentifier: toIdentifier,
+          amount: amount,
+          expirationDate: expirationDate,
+          requiredStake: requiredStake,
+          paymentToken: paymentToken,
+          metadata: metadata ?? "",
+        } as Record<string, unknown>;
+
+        const verifiedGatewayAccount = this.blockchainUtils.verifyTypedData(
+          paymentSigningDomain,
+          pushPaymentSigningTypes,
+          value,
+          gatewaySignature,
+        );
+
+        // Make sure that the verified account matches the gateway's published account adddress
+        if (verifiedGatewayAccount != gatewayRegistrationInfo.address) {
+          return errAsync(
+            new PaymentCreationError(
+              `Payment ${paymentId} with request id ${requestIdentifier} has an improper signature. Will not send funds!`,
+            ),
+          );
+        }
+
+        // Seems legit
+        return ResultUtils.combine([
+          this.paymentRepository.createPushPayment(
+            paymentId,
+            channelAddress,
+            toIdentifier,
+            amount,
+            expirationDate,
+            requiredStake,
+            paymentToken,
+            gatewayUrl,
+            metadata,
           ),
-        );
-      }
-
-      const gatewayRegistrationInfo =
-        gatewayRegistrationInfoMap.get(gatewayUrl);
-      if (gatewayRegistrationInfo == null) {
-        return errAsync<PushPayment, PaymentCreationError>(
-          new PaymentCreationError(
-            `No registration info for gateway with url ${gatewayUrl}. Cannot send funds for payment ${paymentId} with request id ${requestIdentifier}`,
-          ),
-        );
-      }
-
-      // Check the signature
-      const value = {
-        requestIdentifier: requestIdentifier,
-        paymentId: paymentId,
-        channelAddress: channelAddress,
-        recipientPublicIdentifier: counterPartyAccount,
-        amount: amount,
-        expirationDate: expirationDate,
-        requiredStake: requiredStake,
-        paymentToken: paymentToken,
-        metadata: metadata ?? "",
-      } as Record<string, unknown>;
-
-      const verifiedGatewayAccount = this.blockchainUtils.verifyTypedData(
-        paymentSigningDomain,
-        pushPaymentSigningTypes,
-        value,
-        gatewaySignature,
-      );
-
-      // Make sure that the verified account matches the gateway's published account adddress
-      if (verifiedGatewayAccount != gatewayRegistrationInfo.address) {
-        return errAsync<PushPayment, PaymentCreationError>(
-          new PaymentCreationError(
-            `Payment ${paymentId} with request id ${requestIdentifier} has an improper signature. Will not send funds!`,
-          ),
-        );
-      }
-
-      // Seems legit
-      return this.paymentRepository
-        .createPushPayment(
-          activeStateChannel.routerPublicIdentifier,
-          activeStateChannel.chainId,
-          counterPartyAccount,
-          amount,
-          expirationDate,
-          requiredStake,
-          paymentToken,
-          gatewayUrl,
-          metadata,
-        )
-        .map((payment) => {
+          this.contextProvider.getContext(),
+        ]).map(([payment, context]) => {
           // Send an event
           context.onPushPaymentSent.next(payment);
 
           return payment;
         });
-    });
+      });
   }
 
   /**
@@ -1138,12 +1227,13 @@ export class PaymentService implements IPaymentService {
       .map(() => {});
   }
 
-  public recoverPayments(
+  public repairPayments(
     paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
-    | VectorError
     | BlockchainUnavailableError
+    | ProxyError
+    | VectorError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
@@ -1155,22 +1245,44 @@ export class PaymentService implements IPaymentService {
       this.paymentRepository.getPaymentsByIds(paymentIds),
       this.contextProvider.getInitializedContext(),
     ])
-      .andThen((vals) => {
-        const [paymentsById, context] = vals;
-        const borkedPayments = new Array<Payment>();
-        // Sort out the payments that are borked. We are only worried about those.
-        for (const payment of paymentsById.values()) {
-          if (payment.state === EPaymentState.Borked) {
-            borkedPayments.push(payment);
+      .andThen(([paymentsById, context]) => {
+        // Pull out a list of gateway connectors for the payments
+        const payments = Array.from(paymentsById.values());
+        const gatewayUrls = payments.reduce((prev, cur) => {
+          if (!prev.includes(cur.gatewayUrl)) {
+            prev.push(cur.gatewayUrl);
           }
-        }
+          return prev;
+        }, new Array<GatewayUrl>());
 
-        // Now we have a list of borked payments. Let's try and recover them.
+        // Get the gateways
         return ResultUtils.combine(
-          borkedPayments.map((payment) => {
-            return this._recoverPayment(payment, context);
+          gatewayUrls.map((gatewayUrl) => {
+            return this.gatewayConnectorRepository.getGatewayProxy(gatewayUrl);
           }),
-        );
+        ).andThen((gatewayConnectorProxies) => {
+          // Let's try and repair the payments. Most of the time, the payment
+          // will be in the "borked" state, but not always. I'm going to allow
+          // repairs to be attempted at any state.
+          return ResultUtils.combine(
+            payments.map((payment) => {
+              // Get the gateway proxy for the payment
+              const gatewayConnector = gatewayConnectorProxies.find((proxy) => {
+                return proxy.gatewayUrl == payment.gatewayUrl;
+              });
+
+              // If the proxy exists, notify the proxy
+              if (gatewayConnector != null) {
+                gatewayConnector.notifyRepairRequested(payment).mapErr((e) => {
+                  this.logUtils.error(
+                    `Could not notify the gateway ${payment.gatewayUrl} about a repair request for payment ${payment.id}`,
+                  );
+                });
+              }
+              return this._recoverPayment(payment, context);
+            }),
+          );
+        });
       })
       .andThen(() => {
         return this.paymentRepository.getPaymentsByIds(paymentIds);
@@ -1572,6 +1684,258 @@ export class PaymentService implements IPaymentService {
     }
 
     return okAsync(payment);
+  }
+
+  protected _validatePullPayment(
+    gatewayUrl: GatewayUrl,
+    requestIdentifier: string,
+    channelAddress: EthereumContractAddress,
+    toIdentifier: PublicIdentifier,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
+    deltaTime: number,
+    requiredStake: BigNumberString,
+    paymentToken: EthereumContractAddress,
+    metadata: string | null,
+  ): ResultAsync<
+    void,
+    | PaymentCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
+  > {
+    if (requestIdentifier == "") {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, requestIdentifier must be a non-empty string. Received ${requestIdentifier}`,
+        ),
+      );
+    }
+
+    if (!this.validationUtils.validatePublicIdentifier(toIdentifier)) {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, toIdentifier must be a valid public identifier. Received ${toIdentifier}`,
+        ),
+      );
+    }
+
+    if (!this.validationUtils.validateEthereumAddress(channelAddress)) {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, channelAddress must be a valid Ethereum contract address. Received ${toIdentifier}`,
+        ),
+      );
+    }
+
+    // The deltaTime has to be at least 1 second
+    if (deltaTime < 1) {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, deltaTime must be 1 or more. Received ${deltaTime}`,
+        ),
+      );
+    }
+
+    // Make sure the deltaAmount is at least 1 wei
+    if (BigNumber.from(deltaAmount).lt(1)) {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, deltaAmount must be 1 or more. Received ${deltaAmount}`,
+        ),
+      );
+    }
+
+    // Make sure the required stake is positive, it can be 0
+    if (BigNumber.from(requiredStake).isNegative()) {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, requiredStake must be positive. Received ${requiredStake}`,
+        ),
+      );
+    }
+
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext(),
+      this.accountRepository.getBalanceByAsset(channelAddress, paymentToken),
+      this.blockchainTimeUtils.getBlockchainTimestamp(),
+      this.gatewayConnectorRepository
+        .getAuthorizedGateways()
+        .andThen((authorizedGateways) => {
+          // Make sure the gateway is authorized
+          if (authorizedGateways.get(gatewayUrl) == null) {
+            return errAsync(
+              new InvalidParametersError(
+                `When authorizing funds, gateway must be authorized! ${gatewayUrl} is not`,
+              ),
+            );
+          }
+
+          // Make sure the gateway is active
+          return this.gatewayConnectorRepository.getGatewayProxy(gatewayUrl);
+        })
+        .andThen((proxy) => {
+          if (!proxy.getConnectorActivationStatus()) {
+          }
+          return okAsync(undefined);
+        }),
+    ]).andThen(([config, context, balance, timestamp]) => {
+      // Make sure the channel actually exists
+      const activeStateChannel = context.activeStateChannels.find((val) => {
+        return val.channelAddress == channelAddress;
+      });
+
+      if (activeStateChannel == null) {
+        return errAsync(
+          new PaymentCreationError(
+            `Channel ID ${channelAddress} does not exist`,
+          ),
+        );
+      }
+
+      // Validate that sufficient tokens exist
+      const balanceNum = BigNumber.from(balance.freeAmount);
+      if (balanceNum.lt(totalAuthorized)) {
+        return errAsync(
+          new InsufficientBalanceError(
+            `User does not have enough of token ${paymentToken} available in channel ${channelAddress} for payment`,
+          ),
+        );
+      }
+
+      // Make sure the expirationDate is OK
+      if (expirationDate <= timestamp + config.defaultPaymentExpiryLength) {
+        return errAsync(
+          new InvalidParametersError(
+            `When authorizing funds, expirationDate must be at least 3 days from the current block time. ${timestamp} is the current block time, provided expiration date is ${expirationDate}`,
+          ),
+        );
+      }
+
+      return okAsync(undefined);
+    });
+  }
+
+  protected _validatePushPayment(
+    gatewayUrl: GatewayUrl,
+    requestIdentifier: string,
+    channelAddress: EthereumContractAddress,
+    toIdentifier: PublicIdentifier,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
+    paymentToken: EthereumContractAddress,
+    metadata: string | null,
+  ): ResultAsync<
+    void,
+    | PaymentCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
+    | BalancesUnavailableError
+    | InsufficientBalanceError
+    | PersistenceError
+    | ProxyError
+  > {
+    if (requestIdentifier == "") {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, requestIdentifier must be a non-empty string. Received ${requestIdentifier}`,
+        ),
+      );
+    }
+
+    if (!this.validationUtils.validatePublicIdentifier(toIdentifier)) {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, toIdentifier must be a valid public identifier. Received ${toIdentifier}`,
+        ),
+      );
+    }
+
+    if (!this.validationUtils.validateEthereumAddress(channelAddress)) {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, channelAddress must be a valid Ethereum contract address. Received ${toIdentifier}`,
+        ),
+      );
+    }
+
+    // Make sure the required stake is positive, it can be 0
+    if (BigNumber.from(requiredStake).isNegative()) {
+      return errAsync(
+        new InvalidParametersError(
+          `When authorizing funds, requiredStake must be positive. Received ${requiredStake}`,
+        ),
+      );
+    }
+
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext(),
+      this.accountRepository.getBalanceByAsset(channelAddress, paymentToken),
+      this.blockchainTimeUtils.getBlockchainTimestamp(),
+      this.gatewayConnectorRepository
+        .getAuthorizedGateways()
+        .andThen((authorizedGateways) => {
+          // Make sure the gateway is authorized
+          if (authorizedGateways.get(gatewayUrl) == null) {
+            return errAsync(
+              new InvalidParametersError(
+                `When authorizing funds, gateway must be authorized! ${gatewayUrl} is not`,
+              ),
+            );
+          }
+
+          // Make sure the gateway is active
+          return this.gatewayConnectorRepository.getGatewayProxy(gatewayUrl);
+        })
+        .andThen((proxy) => {
+          if (!proxy.getConnectorActivationStatus()) {
+          }
+          return okAsync(undefined);
+        }),
+    ]).andThen(([config, context, balance, timestamp]) => {
+      // Make sure the channel actually exists
+      const activeStateChannel = context.activeStateChannels.find((val) => {
+        return val.channelAddress == channelAddress;
+      });
+
+      if (activeStateChannel == null) {
+        return errAsync(
+          new PaymentCreationError(
+            `Channel ID ${channelAddress} does not exist`,
+          ),
+        );
+      }
+
+      // Validate that sufficient tokens exist
+      const balanceNum = BigNumber.from(balance.freeAmount);
+      if (balanceNum.lt(amount)) {
+        return errAsync(
+          new InsufficientBalanceError(
+            `User does not have enough of token ${paymentToken} available in channel ${channelAddress} for payment`,
+          ),
+        );
+      }
+
+      // Make sure the expirationDate is OK
+      if (expirationDate <= timestamp + config.defaultPaymentExpiryLength) {
+        return errAsync(
+          new InvalidParametersError(
+            `When authorizing funds, expirationDate must be at least 3 days from the current block time. ${timestamp} is the current block time, provided expiration date is ${expirationDate}`,
+          ),
+        );
+      }
+
+      return okAsync(undefined);
+    });
   }
 
   // Caculates balances and update the context after that

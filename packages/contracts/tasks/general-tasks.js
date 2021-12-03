@@ -1,4 +1,4 @@
-const {  HT, hAddress}  = require("./constants.js");
+const {  HT, hAddress, timelockAddress}  = require("./constants.js");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -23,6 +23,29 @@ task("sendhypertoken", "Send hypertoken to another account")
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
+task("sendEth", "Send ethereum another account")
+  .addParam("recipient", "Address of the recipient")
+  .addParam("amount", "Amount of Hypertoken to send")
+  .setAction(async (taskArgs) => {
+    const [owner] = await hre.ethers.getSigners();
+
+  const recipient = taskArgs.recipient;
+  const amount = taskArgs.amount;
+  const tx = await owner.sendTransaction({
+    to: recipient,
+    value: ethers.utils.parseEther(amount)
+  });
+  await tx.wait();
+  const balR = await owner.provider.getBalance(recipient);
+  const balS = await owner.provider.getBalance(owner.address);
+
+
+  console.log("Balance of sender:", balS.toString());
+  console.log("Balance of recipient:", balR.toString());
+});
+
+// This is a sample Hardhat task. To learn how to create your own go to
+// https://hardhat.org/guides/create-task.html
 task("hypertokenBalance", "Get the hypertoken balance of an address.")
   .addParam("address", "ethereum address of interest.")
   .setAction(async (taskArgs) => {
@@ -33,6 +56,18 @@ task("hypertokenBalance", "Get the hypertoken balance of an address.")
 
   const balance = await hypertoken.balanceOf(address);
   console.log("Balance of", address, "is", hre.ethers.utils.formatEther(balance));
+});
+
+// This is a sample Hardhat task. To learn how to create your own go to
+// https://hardhat.org/guides/create-task.html
+task("DAOBalance", "Get the hypertoken balance of the timelock of the DAO.")
+  .setAction(async (taskArgs) => {
+    const [owner] = await hre.ethers.getSigners();
+
+  const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, owner);
+
+  const balance = await hypertoken.balanceOf(timelockAddress());
+  console.log("DAO Balance is:", hre.ethers.utils.formatEther(balance));
 });
 
 // This is a sample Hardhat task. To learn how to create your own go to

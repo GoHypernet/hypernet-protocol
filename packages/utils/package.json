@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/utils",
-  "version": "0.4.7",
+  "version": "0.5.0",
   "description": "Utilities used by Hypernet Labs packages",
   "license": "ISC",
   "repository": {
@@ -31,15 +31,14 @@
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
     "generate-docs": "npx typedoc --options typedoc.json",
-    "test": "yarn build && yarn test:ci",
-    "test:ci": "jest --runInBand --coverage",
-    "test:watch": "jest --watch --color --detectOpenHandles",
-    "prepare": "yarn build"
+    "test": "echo \"No tests specified yet\" && exit 0",
+    "prepare": "yarn build",
+    "prepublish": "yarn build"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
     "@connext/vector-utils": "^0.2.5-beta.6",
-    "@hypernetlabs/objects": "^0.3.9",
+    "@hypernetlabs/objects": "^0.3.12",
     "axios": "^0.21.1",
     "delay": "^5.0.0",
     "inversify": "^5.1.1",

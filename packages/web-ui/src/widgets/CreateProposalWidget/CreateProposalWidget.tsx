@@ -3,7 +3,6 @@ import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IProposalCreateWidgetParams } from "@web-ui/interfaces";
 import { Form, Formik, FormikHelpers } from "formik";
 import React, { useEffect, useState, useMemo } from "react";
-import { useAlert } from "react-alert";
 import * as Yup from "yup";
 
 import {
@@ -28,9 +27,8 @@ interface IValues {
 const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   onProposalListNavigate,
 }: IProposalCreateWidgetParams) => {
-  const alert = useAlert();
-  const { coreProxy, UIData } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { coreProxy } = useStoreContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [accountAddress, setAccountAddress] = useState<EthereumAccountAddress>(
     EthereumAccountAddress(""),
   );
@@ -43,7 +41,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
       .map((_proposalThreshold) => {
         setProposalThreshold(_proposalThreshold);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
 
     coreProxy
       .getEthereumAccounts()
@@ -55,15 +53,10 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
           .map((power) => {
             setVotingPower(power);
           })
-          .mapErr(handleError);
+          .mapErr(handleCoreError);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   }, []);
-
-  const handleError = (err) => {
-    setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
-  };
 
   const handleCreatePrposalFormSubmit = async (
     values: IValues,
@@ -81,7 +74,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
         setLoading(false);
         onProposalListNavigate && onProposalListNavigate();
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   };
 
   const exceedsThreshold: boolean = useMemo(() => {
@@ -182,7 +175,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
 
             <GovernanceButton
               variant="contained"
-              size="large"
+              size="medium"
               form="CreateProposalForm"
               type="submit"
               fullWidth

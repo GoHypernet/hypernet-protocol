@@ -62,14 +62,14 @@ const Header: React.FC = () => {
         <Hidden mdDown>
           <img
             className={classes.logo}
-            src="https://res.cloudinary.com/dqueufbs7/image/upload/v1632907649/images/hpnlogo.png"
+            src="https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hpnlogo-purple.png"
             alt=""
           />
         </Hidden>
         <Hidden lgUp>
           <img
             className={classes.smallLogo}
-            src="https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/hypernet-logo-dark.svg"
+            src="https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypernet-logo-dark.svg"
             alt=""
           />
         </Hidden>

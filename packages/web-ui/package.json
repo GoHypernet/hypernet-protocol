@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/web-ui",
-  "version": "5.0.8",
+  "version": "5.0.14",
   "description": "Web ui react components for hypernet protocol",
   "license": "ISC",
   "repository": {
@@ -29,13 +29,14 @@
     "build": "yarn clean && yarn compile",
     "alias": "tsc-alias",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "prepublish": "yarn build",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "generate-docs": "npx typedoc --options typedoc.json",
     "test": "echo \"No tests specified yet\" && exit 0"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.3.9",
+    "@hypernetlabs/objects": "^0.3.12",
     "ethers": "5.4.7",
     "react-alert": "^7.0.2",
     "react-alert-template-basic": "^1.0.0",

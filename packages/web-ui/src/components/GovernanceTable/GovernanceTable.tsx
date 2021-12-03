@@ -73,7 +73,7 @@ export const GovernanceTable: React.FC<GovernanceTableProps> = (
       {title && (
         <Box className={classes.topWrapper}>
           <Box className={classes.titleWrapper}>
-            <Typography variant="h3">{title}</Typography>
+            <Typography variant="h6">{title}</Typography>
             {headerAction && (
               <GovernanceButton {...headerAction} size="medium" color="primary">
                 {headerAction.label}
@@ -188,18 +188,62 @@ export const GovernanceTable: React.FC<GovernanceTableProps> = (
           </MuiTable>
         </TableContainer>
       ) : (
-        rows.map((rowItems, index) => (
-          <GovernanceCard key={index} className={classes.mobileRowCard}>
-            {rowItems.map((rowItem, index) => (
-              <GovernanceBasicValueWithTitle
-                title={
-                  columns[index]?.mobileCellValue || columns[index]?.cellValue
-                }
-                value={rowItem.mobileCellValue || rowItem.cellValue}
-              />
-            ))}
-          </GovernanceCard>
-        ))
+        rows.map((rowItems, index) => {
+          const isExpanded = index === expandedRowIndex;
+
+          return (
+            <GovernanceCard key={index} className={classes.mobileRowCard}>
+              {rowItems
+                .filter((column) => !column.onlyVisibleInExpandedState)
+                .map((rowItem, index) => {
+                  const filteredColumns = columns.filter(
+                    (rowItem) => !rowItem.onlyVisibleInExpandedState,
+                  );
+                  return (
+                    <GovernanceBasicValueWithTitle
+                      title={
+                        filteredColumns[index]?.mobileCellValue ||
+                        filteredColumns[index]?.cellValue
+                      }
+                      value={rowItem.mobileCellValue || rowItem.cellValue}
+                    />
+                  );
+                })}
+
+              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                {rowItems
+                  .filter((column) => column.onlyVisibleInExpandedState)
+                  .map((rowItem, index) => {
+                    const filteredColumns = columns.filter(
+                      (rowItem) => rowItem.onlyVisibleInExpandedState,
+                    );
+                    return (
+                      <GovernanceBasicValueWithTitle
+                        title={
+                          filteredColumns[index]?.mobileCellValue ||
+                          filteredColumns[index]?.cellValue
+                        }
+                        value={rowItem.mobileCellValue || rowItem.cellValue}
+                      />
+                    );
+                  })}
+              </Collapse>
+
+              {isExpandable && (
+                <GovernanceButton
+                  className={classes.mobileExpandButton}
+                  fullWidth
+                  size="small"
+                  onClick={() => {
+                    handleExpandClick(index);
+                  }}
+                >
+                  {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </GovernanceButton>
+              )}
+            </GovernanceCard>
+          );
+        })
       )}
     </Box>
   );

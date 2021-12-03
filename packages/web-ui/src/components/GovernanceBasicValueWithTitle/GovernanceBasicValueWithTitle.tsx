@@ -15,8 +15,8 @@ export const GovernanceBasicValueWithTitle: React.FC<GovernanceBasicValueWithTit
 
     return (
       <Box className={classes.wrapper}>
-        <Typography variant="h6">{title}</Typography>
-        <Typography variant="h6">{value}</Typography>
+        <Typography variant="body2">{title}</Typography>
+        <Typography variant="body1">{value}</Typography>
       </Box>
     );
   };

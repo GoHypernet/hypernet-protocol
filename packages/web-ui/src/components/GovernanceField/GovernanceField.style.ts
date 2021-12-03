@@ -17,7 +17,7 @@ export const useStyles = makeStyles((theme) => ({
     padding: "12px 16px",
     color: theme.palette.text.primary,
     fontSize: EFontSize.BODY2,
-    border: `2px solid ${colors.GRAY200}`,
+    border: `2px solid ${colors.GRAY300}`,
 
     "&::placeholder": {
       /* Chrome, Firefox, Opera, Safari 10.1+ */

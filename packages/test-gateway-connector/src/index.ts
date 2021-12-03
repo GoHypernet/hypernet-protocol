@@ -7,7 +7,6 @@ import {
   IGatewayConnector,
   IInitiateSendFundsRequest,
   ISignedSendFundsRequest,
-  IResolutionResult,
   IResolveInsuranceRequest,
   ISignMessageRequest,
   IStateChannelRequest,
@@ -61,12 +60,22 @@ class TestGatewayConnector implements IGatewayConnector {
 
   protected wallet: ethers.Wallet;
 
-  async resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult> {
+  /**
+   * This method is currently unused, but left in here as a reference for
+   * how to actually do this. 
+   * TODO: create a button in the test gateway frontend to resolve
+   * the insurance payment
+   * @param paymentId
+   * @returns
+   */
+  protected async resolveInsurance(
+    paymentId: PaymentId,
+  ): Promise<IResolveInsuranceRequest> {
     // What the mediator needs to sign:
     // https://github.com/connext/transfers/blob/20f44307164cb245c075cf3723b09d8ff75901d4/tests/insurance/insurance.spec.ts#L399
 
     // Case: mediator decides to resolve payment in full (ie, the entire insurance payment)
-    const resolutionAmount = "1";
+    const resolutionAmount = BigNumberString("1");
 
     // 1) Construct the ABI snippet for the data we want to sign
     const resolverDataEncoding = ["tuple(uint256 amount, bytes32 UUID)"];
@@ -107,7 +116,7 @@ class TestGatewayConnector implements IGatewayConnector {
     const element = window.document.createElement("div");
     element.innerHTML = `
       <div style="text-align: center; display: flex; justify-content: center; flex-direction: column; background-color: #ffffff;">
-        <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1614648372/images/Screen_Shot_2021-03-02_at_04.14.05.png" width="100%" />
+        <img src="https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/galileo-mock-logo.png" width="100%" />
         <h2>Galileo gateway connector</h2>
         <div>
         <style>
@@ -288,6 +297,11 @@ class TestGatewayConnector implements IGatewayConnector {
   }
   public onPullPaymentCanceled(payment: PullPayment): void {
     console.log("Pull Payment Canceled");
+    console.log(payment);
+  }
+
+  public onRepairRequested(payment: PushPayment | PullPayment): void {
+    console.log("Repair Requested");
     console.log(payment);
   }
 

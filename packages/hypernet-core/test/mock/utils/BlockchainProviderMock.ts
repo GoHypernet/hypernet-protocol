@@ -8,6 +8,7 @@ import {
   InvalidParametersError,
   GovernanceSignerUnavailableError,
   EthereumContractAddress,
+  ProviderId,
 } from "@hypernetlabs/objects";
 import { routerChannelAddress, commonAmount, mockUtils } from "@mock/mocks";
 import { BigNumber, ethers } from "ethers";
@@ -89,5 +90,11 @@ export class BlockchainProviderMock implements IBlockchainProvider {
   public isMetamaskVal = true;
   public isMetamask(): boolean {
     return this.isMetamaskVal;
+  }
+
+  public supplyProviderId(
+    providerId: ProviderId,
+  ): ResultAsync<void, InvalidParametersError> {
+    return okAsync(undefined);
   }
 }

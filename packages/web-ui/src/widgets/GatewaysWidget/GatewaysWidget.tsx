@@ -13,24 +13,20 @@ import {
   List,
   ListItem,
 } from "@web-ui/components";
-import { useStoreContext } from "@web-ui/contexts";
 import GatewayInfoModalWidget from "@web-ui/widgets/GatewayInfoModalWidget";
+import GatewayDeauthorizationModalWidget from "@web-ui/widgets/GatewayDeauthorizationModalWidget";
 import { useGateways } from "@web-ui/hooks";
 import { IRenderParams } from "@web-ui/interfaces";
 import { useStyles } from "@web-ui/widgets/GatewaysWidget/GatewaysWidget.style";
+import { HYPERPAY_LOGO_URL } from "@web-ui/constants";
 
 interface IGatewaysWidget extends IRenderParams {}
 
 const GatewaysWidget: React.FC<IGatewaysWidget> = ({
   noLabel,
 }: IGatewaysWidget) => {
-  const {
-    gatewaysMap,
-    openGatewayIFrame,
-    deauthorizeGateway,
-    authorizeGateway,
-    loading,
-  } = useGateways();
+  const { gatewaysMap, openGatewayIFrame, authorizeGateway, loading } =
+    useGateways();
   const classes = useStyles();
 
   const [inputGatewayUrl, setInputGatewayUrl] = useState<GatewayUrl>(
@@ -39,13 +35,23 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
   const [selectedGatewayUrl, setSelectedGatewayUrl] = useState<GatewayUrl>(
     GatewayUrl(""),
   );
+  const [selectedDeauthorizedGatewayUrl, setSelectedDeauthorizedGatewayUrl] =
+    useState<GatewayUrl>(GatewayUrl(""));
 
   const openGatewayDetailsModal = (gatewayUrl) => {
     setSelectedGatewayUrl(gatewayUrl);
   };
 
+  const openGatewayDeauthorizationModal = (gatewayUrl) => {
+    setSelectedDeauthorizedGatewayUrl(gatewayUrl);
+  };
+
   const gatewayModalcloseCallback = () => {
     setSelectedGatewayUrl(GatewayUrl(""));
+  };
+
+  const gatewayDeauthorizationModalcloseCallback = () => {
+    setSelectedDeauthorizedGatewayUrl(GatewayUrl(""));
   };
 
   const renderGatewayAuthorization = (): ReactNode => {
@@ -114,6 +120,12 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
               closeCallback={gatewayModalcloseCallback}
             />
           )}
+          {selectedDeauthorizedGatewayUrl && (
+            <GatewayDeauthorizationModalWidget
+              gatewayUrl={selectedDeauthorizedGatewayUrl}
+              closeCallback={gatewayDeauthorizationModalcloseCallback}
+            />
+          )}
           <List>
             {[...gatewaysMap.keys()].map((gatewayUrl, index) => (
               <ListItem
@@ -138,6 +150,9 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
                         gatewaysMap.get(gatewayUrl) &&
                           openGatewayIFrame(gatewayUrl);
                       }}
+                      {...(gatewayUrl.includes("hyperpay") && {
+                        src: HYPERPAY_LOGO_URL,
+                      })}
                     >
                       {gatewaysMap.get(gatewayUrl) ? (
                         <FolderIcon />
@@ -151,12 +166,12 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
                   <Box>
                     <Tooltip
                       title={gatewayUrl}
-                      disableHoverListener={gatewayUrl.length <= 36}
+                      disableHoverListener={gatewayUrl.length <= 60}
                       placement="top"
                     >
                       <Typography variant="body2">
-                        {gatewayUrl.length > 36
-                          ? `${gatewayUrl.substr(0, 36)}...`
+                        {gatewayUrl.length > 60
+                          ? `${gatewayUrl.substr(0, 60)}...`
                           : gatewayUrl}
                       </Typography>
                     </Tooltip>
@@ -178,7 +193,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
                       size="small"
                       variant="text"
                       onClick={() => {
-                        deauthorizeGateway(gatewayUrl);
+                        openGatewayDeauthorizationModal(gatewayUrl);
                       }}
                     >
                       Deauthorize

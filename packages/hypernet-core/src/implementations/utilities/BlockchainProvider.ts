@@ -36,7 +36,7 @@ import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 // This is just a code of avoiding errors in mobile app.
 // An actuall non metamask provider set up should be implemented in this class.
 @injectable()
-export class EthersBlockchainProvider implements IBlockchainProvider {
+export class BlockchainProvider implements IBlockchainProvider {
   protected privateCredentialsPromiseResolve: (
     privateCredentials: PrivateCredentials,
   ) => void = () => null;
@@ -286,7 +286,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
             );
           })
             .andThen((providerId) => {
-              // Open the core iframe if metamas is not selected as provider
+              // Open the core iframe if metamask is not selected as provider
               if (providerId != "injected") {
                 context.onCoreIFrameDisplayRequested.next();
               }

@@ -49,7 +49,9 @@ import {
   EthereumContractAddress,
   ProviderId,
   TokenInformation,
-  RegistryTokenId,
+  RegistryModule,
+  BatchModuleContractError,
+  InvalidPaymentIdError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -435,6 +437,21 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public repairPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    void,
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+    | InvalidPaymentIdError
+    | ProxyError
+  > {
+    return this._createCall("repairPayments", paymentIds);
+  }
+
   public mintTestToken(
     amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError | ProxyError> {
@@ -779,10 +796,7 @@ export default class HypernetIFrameProxy
 
   public createRegistryEntry(
     registryName: string,
-    label: string,
-    recipientAddress: EthereumAccountAddress,
-    data: string,
-    tokenId: RegistryTokenId,
+    newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -793,10 +807,7 @@ export default class HypernetIFrameProxy
   > {
     return this._createCall("createRegistryEntry", {
       registryName,
-      label,
-      recipientAddress,
-      data,
-      tokenId,
+      newRegistryEntry,
     });
   }
 
@@ -855,7 +866,7 @@ export default class HypernetIFrameProxy
 
   public grantRegistrarRole(
     registryName: string,
-    address: EthereumAccountAddress,
+    address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
     | NonFungibleRegistryContractError
@@ -909,7 +920,7 @@ export default class HypernetIFrameProxy
   ): ResultAsync<void, InvalidParametersError | ProxyError> {
     return this._createCall("provideProviderId", providerId);
   }
-  
+
   public getTokenInformation(): ResultAsync<TokenInformation[], ProxyError> {
     return this._createCall("getTokenInformation", null);
   }
@@ -926,10 +937,6 @@ export default class HypernetIFrameProxy
     return this._createCall("getTokenInformationByAddress", tokenAddress);
   }
 
-  public getGovernanceChainId(): ResultAsync<ChainId, ProxyError> {
-    return this._createCall("getGovernanceChainId", null);
-  }
-
   public getRegistryEntryByOwnerAddress(
     registryName: string,
     ownerAddress: EthereumAccountAddress,
@@ -942,6 +949,29 @@ export default class HypernetIFrameProxy
       registryName,
       ownerAddress,
       index,
+    });
+  }
+
+  public getRegistryModules(): ResultAsync<
+    RegistryModule[],
+    RegistryFactoryContractError | ProxyError
+  > {
+    return this._createCall("getRegistryModules", null);
+  }
+
+  public createBatchRegistryEntry(
+    registryName: string,
+    newRegistryEntries: RegistryEntry[],
+  ): ResultAsync<
+    void,
+    | BatchModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | ProxyError
+  > {
+    return this._createCall("createBatchRegistryEntry", {
+      registryName,
+      newRegistryEntries,
     });
   }
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Box } from "@material-ui/core";
-import { useAlert } from "react-alert";
 
 import {
   GovernancePagination,
@@ -20,9 +19,8 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalCreationNavigate,
   onProposalDetailsNavigate,
 }: IProposalsWidgetParams) => {
-  const alert = useAlert();
   const { coreProxy } = useStoreContext();
-  const { loading, setLoading } = useLayoutContext();
+  const { setLoading, handleCoreError } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
     useState<boolean>(false);
@@ -32,6 +30,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
   useEffect(() => {
+    setLoading(true);
     coreProxy
       .getProposalsCount()
       .map((proposalCount) => {
@@ -39,24 +38,21 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
         if (!proposalCount) {
           setHasEmptyState(true);
         }
+        setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     coreProxy
       .getProposals(page, PROPOSALS_PER_PAGE)
       .map((proposals) => {
         setProposals(proposals);
+        setLoading(false);
       })
-      .mapErr(handleError);
+      .mapErr(handleCoreError);
   }, [page]);
-
-  const handleError = (err) => {
-    setLoading(false);
-    setHasEmptyState(true);
-    alert.error(err?.message || "Something went wrong!");
-  };
 
   return (
     <Box>
@@ -117,6 +113,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
           customPageOptions={{
             itemsPerPage: PROPOSALS_PER_PAGE,
             totalItems: proposalCount,
+            currentPage: page,
           }}
           onChange={(_, page) => {
             setPage(page);

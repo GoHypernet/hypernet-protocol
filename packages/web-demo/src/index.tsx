@@ -5,12 +5,16 @@ import HypernetWebIntegration, {
 
 import Spinner from "./assets/loading-spinner";
 
-const client: IHypernetWebIntegration = new HypernetWebIntegration();
+const client: IHypernetWebIntegration = new HypernetWebIntegration(
+  null,
+  null,
+  null,
+);
 
 // set image background styles
 const style = document.createElement("style");
 style.innerHTML = `body {
-  background-image: url(https://res.cloudinary.com/dqueufbs7/image/upload/v1614731973/images/image.png);
+  background-image: url(https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/galileo-dashboard-mock.png);
   height: 100%;
   background-repeat: no-repeat;
   background-size: cover;

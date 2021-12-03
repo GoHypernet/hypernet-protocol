@@ -37,25 +37,27 @@ export const CONNECTED_ACCOUNT_WIDGET = "connected-account-widget";
 export const CONNECT_WALLET_WIDGET_SELECTOR = "connect-wallet-widget";
 
 export const HYPERNET_PROTOCOL_LOGO_DARK_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/hypernet-protocol%20logo-dark.png";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypernet-protocol%20logo-dark.png";
 export const HYPER_TOKEN_LOGO_URL =
-  "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypertoken-logo.png";
 export const HYPER_TOKEN_LOGO_PURPLE_URL =
-  "https://res.cloudinary.com/dqueufbs7/image/upload/v1632909339/images/Screen_Shot_2021-09-29_at_12.52.03.png";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/protocol-logo-purple.png";
 export const HYPERNET_LOGO_DARK =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/hypernet-logo-dark.svg";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypernet-logo-dark.svg";
 export const HYPERNET_LOGO_LIGHT =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/hypernet-logo-light.svg";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypernet-logo-light.svg";
 export const AUTHENTICATION_IMAGE_URL =
-  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624393360/images/authentication.svg";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/authentication.svg";
 export const AUTHENTICATION_SUCCESS_IMAGE_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/success-with-flag-and-planet.png";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/success-with-flag-and-planet.png";
 export const WARNING_ALERT_SELECTOR = "hypernet-protocol-warning-alert";
 export const METAMASK_LOGO_IMAGE_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/metamask.svg";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/metamask.svg";
 export const WALLET_CONNECT_LOGO_IMAGE_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/wallet-connect.svg";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/wallet-connect.svg";
 export const WALLET_CONNECTION_SUCCESS_IMAGE_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/success.png";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/success.png";
 export const INSECURE_CONTENT_IMAGE_URL =
-  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624476851/images/Screen_Shot_2021-06-23_at_22.32.55.png";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/insecure-content.png";
+export const HYPERPAY_LOGO_URL =
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hyperpay-temp-logo.png";
