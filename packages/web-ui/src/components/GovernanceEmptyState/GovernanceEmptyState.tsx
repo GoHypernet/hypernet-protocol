@@ -20,7 +20,7 @@ export const GovernanceEmptyState: React.FC<IGovernanceEmptyState> = (
       {img || (
         <img
           width="120"
-          src="https://storage.googleapis.com/hypernetlabs-public-assets/hyper-kyc/identity-creation/hypernet-logo-dark.svg"
+          src="https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypernet-logo-dark.svg"
         />
       )}
 
