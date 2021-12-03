@@ -1,4 +1,22 @@
-# Hypernet Protocol Contracts
+# Hypernet Protocol Contracts package
+
+## Contents
+
+[contracts](/package/contracts/contract): Subdirectory containing all Hypernet Protocol smart contract impelementations. 
+
+[deployments](/package/contracts/deployments): Subdirectory containing deployment artifacts for all chains in which the Hypernet Protocol has been deployed to. 
+
+[scripts](/package/contracts/scripts): Hardhat [scripts](https://hardhat.org/guides/scripts.html) for deploying the contract stack. 
+
+[src](/package/contracts/src): Typscript definitions for UI elements.
+
+[tasks](/package/contracts/tasks): Hardhat [task](https://hardhat.org/guides/create-task.html) definitions. 
+
+[test](/package/contracts/test): Hardhat [unit tests](https://hardhat.org/guides/waffle-testing.html). 
+
+[hardhat.config.js](): [Configuration](https://hardhat.org/config/) file for the Hardhat smart contract development framework. 
+
+## Summary
 
 This package contains the Hypernet Protocol solidity contracts for the token, governance, and identity registries. 
 The [token](/packages/contracts/contracts/governance/Hypertoken.sol) is [EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and 
@@ -76,19 +94,19 @@ DAO: [`0x3353da0f24fCACd83832b09e9371a937195D2640`](https://rinkeby.etherscan.io
 
 Registry Factory: [`0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB`](https://rinkeby.etherscan.io/address/0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB)
 
-Hypernet Profiles: `0x6c355Ad248477eeDcadf1d6724154C6152C0edca`
+Hypernet Profiles: [`0x6c355Ad248477eeDcadf1d6724154C6152C0edca`](https://rinkeby.etherscan.io/address/0x6c355Ad248477eeDcadf1d6724154C6152C0edca)
 
-Gateways: `0x507D5F4E81db1c7fa078CBf1e59B37cC91640258`
+Gateways: [`0x507D5F4E81db1c7fa078CBf1e59B37cC91640258`](https://rinkeby.etherscan.io/address/0x507D5F4E81db1c7fa078CBf1e59B37cC91640258)
 
-Liquidity Providers: `0xc616c67f9c680E662103b26cEfFcC70a121CD5d5`
+Liquidity Providers: [`0xc616c67f9c680E662103b26cEfFcC70a121CD5d5`](https://rinkeby.etherscan.io/address/0xc616c67f9c680E662103b26cEfFcC70a121CD5d5)
 
-Payment Tokens: `0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D`
+Payment Tokens: [`0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D`](https://rinkeby.etherscan.io/address/0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D)
 
-Batch Module: `0x5B72838Fc364Ef73301E4ac32d2050B095666244`
+Batch Module: [`0x5B72838Fc364Ef73301E4ac32d2050B095666244`](https://rinkeby.etherscan.io/address/0x5B72838Fc364Ef73301E4ac32d2050B095666244)
 
-Lazy Mint Module: `0x66643a91fD95a8B41Ae673f1861589fb454DEe55`
+Lazy Mint Module: [`0x66643a91fD95a8B41Ae673f1861589fb454DEe55`](https://rinkeby.etherscan.io/address/0x66643a91fD95a8B41Ae673f1861589fb454DEe55)
 
-Merkle Module: `0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450`
+Merkle Module: [`0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450`](https://rinkeby.etherscan.io/address/0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450)
 
 ## Install dependencies
 
@@ -112,10 +130,21 @@ npx hardhat compile
 
 ## Environment Variables
 
-`ETH_PROVIDER_URL`: URL that hardhat will use for its RPC provider, if blank then localhost is assumed. 
+If can set the following environment variable in order to customize your hardhat environment for testing
+or deployment purposes. 
+
+`ETH_PROVIDER_URL`: URL that hardhat will use for its RPC provider, if blank then `localhost` is assumed. 
+
+```shell
+export ETH_PROVIDER_URL=https://station-hundred-assure-neighborhood.trycloudflare.com/http/
+``
 
 `MNEMONIC`: Mnemonic phrase that hardhat will use to generate accounts for use in scripts and tasks. If blank the 
 default is `test test test test test test test test test test test junk`.  
+
+```shell
+export MNEMONIC="candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
+```
 
 ## Hardhat network - full contract deployment
 
@@ -132,7 +161,7 @@ You can run the node on a custom port by adding the `--port flag`:
 npx hardhat node --port 8569
 ```
 
-Once the node is running, deploy the full Solidity contract stack to the Hardhat network:
+Once the node is running, deploy the full Solidity contract stack to the Hardhat network (be sure to set the target network):
 
 ```shell
 npx hardhat run scripts/hardhat-full-stack.js --network dev
