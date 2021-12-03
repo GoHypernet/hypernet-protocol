@@ -2,19 +2,19 @@
 
 ## Contents
 
-[contracts](/package/contracts/contract): Subdirectory containing all Hypernet Protocol smart contract impelementations. 
+[contracts](/packages/contracts/contract): Subdirectory containing all Hypernet Protocol smart contract impelementations. 
 
-[deployments](/package/contracts/deployments): Subdirectory containing deployment artifacts for all chains in which the Hypernet Protocol has been deployed to. 
+[deployments](/packages/contracts/deployments): Subdirectory containing deployment artifacts for all chains in which the Hypernet Protocol has been deployed to. 
 
-[scripts](/package/contracts/scripts): Hardhat [scripts](https://hardhat.org/guides/scripts.html) for deploying the contract stack. 
+[scripts](/packages/contracts/scripts): Hardhat [scripts](https://hardhat.org/guides/scripts.html) for deploying the contract stack. 
 
-[src](/package/contracts/src): Typscript definitions for UI elements.
+[src](/packages/contracts/src): Typscript definitions for UI elements.
 
-[tasks](/package/contracts/tasks): Hardhat [task](https://hardhat.org/guides/create-task.html) definitions. 
+[tasks](/packages/contracts/tasks): Hardhat [task](https://hardhat.org/guides/create-task.html) definitions. 
 
-[test](/package/contracts/test): Hardhat [unit tests](https://hardhat.org/guides/waffle-testing.html). 
+[test](/packages/contracts/test): Hardhat [unit tests](https://hardhat.org/guides/waffle-testing.html). 
 
-[hardhat.config.js](): [Configuration](https://hardhat.org/config/) file for the Hardhat smart contract development framework. 
+[hardhat.config.js](/packages/contracts/hardhat.config.js): [Configuration](https://hardhat.org/config/) file for the Hardhat smart contract development framework. 
 
 ## Summary
 
