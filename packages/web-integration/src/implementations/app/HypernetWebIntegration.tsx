@@ -143,7 +143,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     const closeButton = document.createElement("div");
     closeButton.id = "__hypernet-protocol-iframe-close-icon__";
     closeButton.innerHTML = `
-      <img id="__hypernet-protocol-iframe-close-img__" src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
+      <img id="__hypernet-protocol-iframe-close-img__" src="https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/Close-big.png" width="20" />
     `;
     iframeContainer.appendChild(closeButton);
 
