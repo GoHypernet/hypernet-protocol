@@ -121,7 +121,7 @@ or deployment purposes.
 
 ```shell
 export ETH_PROVIDER_URL=https://station-hundred-assure-neighborhood.trycloudflare.com/http/
-``
+```
 
 `MNEMONIC`: Mnemonic phrase that hardhat will use to generate accounts for use in scripts and tasks. If blank the 
 default is `test test test test test test test test test test test junk`.  
