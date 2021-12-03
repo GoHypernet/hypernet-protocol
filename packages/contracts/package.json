@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@atixlabs/hardhat-time-n-mine": "0.0.5",
-    "@hypernetlabs/objects": "^0.3.10",
+    "@hypernetlabs/objects": "^0.3.12",
     "@hypernetlabs/utils": "^0.4.9",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-solhint": "^2.0.0",
