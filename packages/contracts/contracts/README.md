@@ -9,7 +9,7 @@ for NFT-based accounts.
 
 Includes the EIP20 compatible token contract and the Governance DOA implementation.
 
-## [identity](/packages/contracts/contracts/governance)
+## [identity](/packages/contracts/contracts/identity)
 
 Contains the enumerable and non-enumerable implementations of the NFR as well as the 
 NFR factory contract.
