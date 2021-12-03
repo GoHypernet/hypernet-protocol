@@ -61,7 +61,8 @@ Each NFR can augment its registration logic (as well as add novel functionality)
 and thus extend an NFR's capability in an algorithmic fashion. For example, the a 
 [LazyMintModule.sol](/packages/contracts/contracts/modules/LazyMintModule.sol) contract offers a means to add lazy minting functionality 
 to an NFR, while the [MerkleModule.sol](/packages/contracts/contracts/modules/MerkleModule.sol) contract implements a mechanism to 
-fascilitate airdrop functionality. The `REGISTRAR_ROLE_ADMIN` can add and remove these modules from their NFR as needed. 
+fascilitate [airdrop](https://blog.openzeppelin.com/workshop-recap-building-an-nft-merkle-drop/) functionality. The `REGISTRAR_ROLE_ADMIN` 
+can add and remove these modules from their NFR as needed. 
 
 Lastly, the Hypernet NFR implements a native mechanism for registration by staking and ERC20-compatible token. By default, this feature is 
 disabled, but the `REGISTRAR_ROLE` can set `registrationToken` to an address of an EIP20-compatible token which will enable the feature. The 
