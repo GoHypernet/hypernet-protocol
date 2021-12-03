@@ -1,6 +1,11 @@
 ## Hardhat tasks
 
-Use the help tasks defined in `hardhat.config.js` to interact with the deployed contracts.
+This directory contains network constants and tasks definitions for use via the Hardhat CLI. In order to see all available 
+tasks available through the Hardhat CLI run:
+
+```shell
+npx hardhat help
+```
 
 Get Governance contract parameters:
 
