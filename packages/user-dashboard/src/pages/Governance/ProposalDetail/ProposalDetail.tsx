@@ -9,9 +9,12 @@ const ProposalDetail: React.FC = (props) => {
   const history = useHistory();
   const { handleError } = useLayoutContext();
   const { hypernetWebIntegration } = useStoreContext();
-  const { proposalId } = useParams<{ proposalId: string }>();
+  const { proposalId } = useParams<any>();
 
   useEffect(() => {
+    if (proposalId == null) {
+      return;
+    }
     hypernetWebIntegration.webUIClient
       .renderProposalDetailWidget({
         selector: "proposal-detail-page-wrapper",

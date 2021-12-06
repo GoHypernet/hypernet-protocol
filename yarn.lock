@@ -3027,6 +3027,17 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
+"@hypernetlabs/common-repositories@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/common-repositories/-/common-repositories-0.0.1.tgz#e68c2c27b043363ea139286b08fe3575173896b5"
+  integrity sha512-L7HDetYo1pP5yAmiRgKFFm+tHTc4sPqbxrl6rp7JWaqc2/Yb1dPpfigXgDHSDwzaugJNg/z3ugAPtQsQMjDkVg==
+  dependencies:
+    "@hypernetlabs/contracts" "^0.0.8"
+    "@hypernetlabs/objects" "^0.3.11"
+    ethers "^5.4.7"
+    inversify "^5.1.1"
+    neverthrow "^4.2.2"
+
 "@icons/material@^0.2.4":
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/@icons/material/-/material-0.2.4.tgz#e90c9f71768b3736e76d7dd6783fc6c2afa88bc8"
@@ -21277,7 +21288,7 @@ nested-error-stacks@^2.0.0, nested-error-stacks@^2.1.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.0.tgz#0fbdcf3e13fe4994781280524f8b96b0cdff9c61"
   integrity sha512-AO81vsIO1k1sM4Zrd6Hu7regmJN1NSiAja10gc4bX3F0wd+9rQmcuHQaHVQCYIEC8iFXnE+mavh23GOt7wBgug==
 
-neverthrow@^4.1.0, neverthrow@^4.1.1:
+neverthrow@^4.1.0, neverthrow@^4.1.1, neverthrow@^4.2.2:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/neverthrow/-/neverthrow-4.3.1.tgz#04c4c15e7f6fc45faad36885fa7a42b85f8f39ab"
   integrity sha512-+vxjSaiDWjAj6kR6KKW0YDuV6O4UCNWGAO8m8ITjFKPWcTmU1GVnL+J5TAUTKpPnUAHCKDxXpOHVaERid223Ww==

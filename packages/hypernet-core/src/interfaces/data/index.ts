@@ -7,4 +7,3 @@ export * from "@interfaces/data/IPaymentRepository";
 export * from "@interfaces/data/IRouterRepository";
 export * from "@interfaces/data/IGovernanceRepository";
 export * from "@interfaces/data/IRegistryRepository";
-export * from "@interfaces/data/ITokenInformationRepository";

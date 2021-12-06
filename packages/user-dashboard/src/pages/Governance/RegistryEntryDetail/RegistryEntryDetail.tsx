@@ -10,10 +10,12 @@ const RegistryEntryDetail: React.FC = () => {
   const history = useHistory();
   const { handleError } = useLayoutContext();
   const { hypernetWebIntegration } = useStoreContext();
-  const { registryName, entryTokenId } =
-    useParams<{ registryName: string; entryTokenId: string }>();
+  const { registryName, entryTokenId } = useParams<any>();
 
   useEffect(() => {
+    if (registryName == null || entryTokenId == null) {
+      return;
+    }
     hypernetWebIntegration.webUIClient
       .renderRegistryEntryDetailWidget({
         selector: "registry-entry-detail-page-wrapper",
