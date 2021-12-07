@@ -29,13 +29,13 @@ const Summary: React.FC = () => {
 
     hypernetWebIntegration.webUIClient
       .renderStateChannelsWidget({
-        selector: "public-identifier",
+        selector: "state-channels",
       })
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
       .renderPublicIdentifierWidget({
-        selector: "state-channels",
+        selector: "public-identifier",
       })
       .mapErr(handleError);
   }, []);

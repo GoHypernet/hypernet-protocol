@@ -1,10 +1,8 @@
 import {
   ActiveStateChannel,
-  ChainId,
   EthereumContractAddress,
-  PublicIdentifier,
 } from "@hypernetlabs/objects";
-import { Box, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import { useStoreContext } from "@web-ui/contexts";
 import { IRenderParams } from "@web-ui/interfaces";
 import { Form, Formik } from "formik";
@@ -54,37 +52,48 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
     };
 
     return (
-      <Box className={classes.wrapper}>
-        <Typography variant="body2" className={classes.label}>
-          Current Account Address
-        </Typography>
-        <Formik
-          enableReinitialize
-          initialValues={{
-            stateChannel: selectedStateChannelAddress,
-          }}
-          onSubmit={() => {}}
+      <Grid container spacing={1}>
+        <Grid
+          item
+          xs={12}
+          sm={12}
+          md={3}
+          lg={3}
+          className={classes.titleContainer}
         >
-          {({ handleSubmit }) => {
-            return (
-              <Form onSubmit={handleSubmit} className={classes.form}>
-                <GovernanceDialogSelectField
-                  required
-                  dialogTitle="Hypernet Account"
-                  name="stateChannel"
-                  type="select"
-                  options={stateChannels.map(({ channelAddress }) => ({
-                    primaryText: channelAddress,
-                    value: channelAddress,
-                  }))}
-                  fullWidth
-                  handleChange={handleChange}
-                />
-              </Form>
-            );
-          }}
-        </Formik>
-      </Box>
+          <Typography variant="body2">Hypernet Account Number</Typography>
+        </Grid>
+
+        <Grid item xs={12} sm={12} md={9} lg={9}>
+          <Formik
+            enableReinitialize
+            initialValues={{
+              stateChannel: selectedStateChannelAddress,
+            }}
+            onSubmit={() => {}}
+          >
+            {({ handleSubmit }) => {
+              return (
+                <Form onSubmit={handleSubmit} className={classes.form}>
+                  <GovernanceDialogSelectField
+                    required
+                    dialogTitle="Hypernet Account Number"
+                    name="stateChannel"
+                    type="select"
+                    options={stateChannels.map(({ channelAddress }) => ({
+                      primaryText: channelAddress,
+                      value: channelAddress,
+                    }))}
+                    fullWidth
+                    handleChange={handleChange}
+                    wrapperClassName={classes.dialogSelect}
+                  />
+                </Form>
+              );
+            }}
+          </Formik>
+        </Grid>
+      </Grid>
     );
   };
 
