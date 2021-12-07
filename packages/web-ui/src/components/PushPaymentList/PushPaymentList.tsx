@@ -24,8 +24,9 @@ import { useStyles } from "@web-ui/components/PushPaymentList/PushPaymentList.st
 interface IPushPaymentList {
   pushPayments: PushPayment[];
   publicIdentifier: PublicIdentifier;
-  onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
   tokenInformationList: TokenInformation[];
+  onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
+  repairPayment: (paymentId: PaymentId) => void;
 }
 
 const PUSH_PAYMENTS_PER_PAGE = 5;
@@ -127,8 +128,9 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
   const {
     pushPayments,
     publicIdentifier,
-    onAcceptPushPaymentClick,
     tokenInformationList,
+    onAcceptPushPaymentClick,
+    repairPayment,
   } = props;
   const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
@@ -239,17 +241,32 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: publicIdentifier === item.to &&
-              item.state === EPaymentState.Proposed && (
-                <GovernanceButton
-                  size="small"
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => onAcceptPushPaymentClick(item.id)}
-                >
-                  Accept
-                </GovernanceButton>
-              ),
+            cellValue: (
+              <>
+                {item.state !== EPaymentState.Finalized && (
+                  <GovernanceButton
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    className={classes.actionButton}
+                    onClick={() => repairPayment(item.id)}
+                  >
+                    Repair
+                  </GovernanceButton>
+                )}
+                {publicIdentifier === item.to &&
+                  item.state === EPaymentState.Proposed && (
+                    <GovernanceButton
+                      size="small"
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => onAcceptPushPaymentClick(item.id)}
+                    >
+                      Accept
+                    </GovernanceButton>
+                  )}
+              </>
+            ),
             tableCellProps: {
               align: "right",
             },

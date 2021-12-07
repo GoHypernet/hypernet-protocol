@@ -24,9 +24,10 @@ import { useStyles } from "@web-ui/components/PullPaymentList/PullPaymentList.st
 interface IPullPaymentList {
   pullPayments: PullPayment[];
   publicIdentifier: PublicIdentifier;
+  tokenInformationList: TokenInformation[];
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
-  tokenInformationList: TokenInformation[];
+  repairPayment: (paymentId: PaymentId) => void;
 }
 
 const PULL_PAYMENTS_PER_PAGE = 5;
@@ -131,6 +132,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     onAcceptPullPaymentClick,
     onPullFundClick,
     tokenInformationList,
+    repairPayment,
   } = props;
   const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
@@ -244,6 +246,17 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
           {
             cellValue: (
               <>
+                {item.state !== EPaymentState.Finalized && (
+                  <GovernanceButton
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    className={classes.actionButton}
+                    onClick={() => repairPayment(item.id)}
+                  >
+                    Repair
+                  </GovernanceButton>
+                )}
                 {item.state === EPaymentState.Proposed && (
                   <GovernanceButton
                     size="small"
