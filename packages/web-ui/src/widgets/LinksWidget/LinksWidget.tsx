@@ -263,8 +263,9 @@ const LinksWidget: React.FC<ILinksWidget> = ({
         />
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <PullPaymentList
+        <PullPaymentList    
           publicIdentifier={publicIdentifier}
+          tokenInformationList={tokenInformationList}
           pullPayments={getPullPayments()}
           onAcceptPullPaymentClick={acceptPayment}
           onPullFundClick={pullFunds}
