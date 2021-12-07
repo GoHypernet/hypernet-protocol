@@ -42,7 +42,7 @@ const PublicIdentifierWidget: React.FC<IPublicIdentifierWidget> = () => {
             <Box
               display="flex"
               alignItems="center"
-              style={{ wordBreak: "break-word" }}
+              className={classes.publicIdentiferContainer}
             >
               <Tooltip title="Online" placement="top">
                 <Box
