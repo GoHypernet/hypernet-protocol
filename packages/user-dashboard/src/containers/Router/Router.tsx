@@ -12,9 +12,12 @@ const Router: React.FC<IRouter> = ({ history }: IRouter) => {
   return (
     <Switch>
       {routes.map((route) => (
-        <Route key={route.path} path={route.path}>
-          {route.component}
-        </Route>
+        <Route
+          key={route.path}
+          path={route.path}
+          component={route.component}
+          exact
+        />
       ))}
     </Switch>
   );
