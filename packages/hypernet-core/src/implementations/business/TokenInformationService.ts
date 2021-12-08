@@ -4,9 +4,9 @@ import {
   ChainId,
 } from "@hypernetlabs/objects";
 import {
-  ITokenInformationRepository,
   ITokenInformationRepositoryType,
-} from "@interfaces/data";
+  ITokenInformationRepository,
+} from "@hypernetlabs/common-repositories";
 import { ITokenInformationService } from "@interfaces/business";
 import { inject } from "inversify";
 import { ResultAsync } from "neverthrow";
