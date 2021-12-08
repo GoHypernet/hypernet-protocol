@@ -3,6 +3,7 @@ import {
   PublicIdentifier,
   EPaymentState,
   PaymentId,
+  TokenInformation,
 } from "@hypernetlabs/objects";
 import { useStoreContext } from "@web-ui/contexts";
 import React, { useMemo, useState } from "react";
@@ -15,6 +16,7 @@ import {
   GovernanceEmptyState,
   GovernancePagination,
   extractDataByPage,
+  GovernancePaymentTokenCell,
 } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/components/PullPaymentList/PullPaymentList.style";
@@ -24,6 +26,7 @@ interface IPullPaymentList {
   publicIdentifier: PublicIdentifier;
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
+  tokenInformationList: TokenInformation[];
 }
 
 const PULL_PAYMENTS_PER_PAGE = 5;
@@ -127,6 +130,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     publicIdentifier,
     onAcceptPullPaymentClick,
     onPullFundClick,
+    tokenInformationList,
   } = props;
   const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
@@ -197,7 +201,12 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: item.paymentToken,
+            cellValue: (
+              <GovernancePaymentTokenCell
+                paymentTokenAddress={item.paymentToken}
+                tokenInformationList={tokenInformationList}
+              />
+            ),
             tableCellProps: {
               align: "left",
             },
@@ -265,7 +274,10 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
         ]);
         return acc;
       }, initialValue),
-    [JSON.stringify(paginatedPullPayments)],
+    [
+      JSON.stringify(paginatedPullPayments),
+      JSON.stringify(tokenInformationList),
+    ],
   );
 
   if (!loading && !rows.length) {
