@@ -1,8 +1,10 @@
 import { INonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/contracts";
 import { NonFungibleRegistryContractError } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { TokenInformationRepository } from "@implementations/data";
-import { ITokenInformationRepository } from "@interfaces/data";
+import {
+  TokenInformationRepository,
+  ITokenInformationRepository,
+} from "@hypernetlabs/common-repositories";
 import {
   tokenRegistryAddress,
   tokenRegistryId1,
@@ -15,14 +17,14 @@ import {
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
-import { IContractFactory } from "@interfaces/utilities/factory";
+import { INonFungibleRegistryContractFactory } from "@interfaces/utilities/factory";
 import { ConfigProviderMock } from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
 class TokenInformationRepositoryMocks {
-  public contractFactory = td.object<IContractFactory>();
+  public contractFactory = td.object<INonFungibleRegistryContractFactory>();
   public configProviderMock = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
   public contract =
@@ -55,11 +57,7 @@ class TokenInformationRepositoryMocks {
   }
 
   public factoryTokenInformationRepository(): ITokenInformationRepository {
-    return new TokenInformationRepository(
-      this.contractFactory,
-      this.configProviderMock,
-      this.logUtils,
-    );
+    return new TokenInformationRepository(this.contractFactory, this.logUtils);
   }
 }
 
@@ -70,7 +68,10 @@ describe("TokenInformationRepository tests", () => {
     const repo = mocks.factoryTokenInformationRepository();
 
     // Act
-    const result = await repo.initialize();
+    const result = await repo.initialize(
+      mocks.configProviderMock.config.governanceChainInformation
+        .tokenRegistryAddress,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -87,7 +88,10 @@ describe("TokenInformationRepository tests", () => {
     const repo = mocks.factoryTokenInformationRepository();
 
     // Act
-    const result = await repo.initialize();
+    const result = await repo.initialize(
+      mocks.configProviderMock.config.governanceChainInformation
+        .tokenRegistryAddress,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -106,7 +110,10 @@ describe("TokenInformationRepository tests", () => {
     const repo = mocks.factoryTokenInformationRepository();
 
     // Act
-    const result = await repo.initialize();
+    const result = await repo.initialize(
+      mocks.configProviderMock.config.governanceChainInformation
+        .tokenRegistryAddress,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -127,7 +134,10 @@ describe("TokenInformationRepository tests", () => {
     const repo = mocks.factoryTokenInformationRepository();
 
     // Act
-    const result = await repo.initialize();
+    const result = await repo.initialize(
+      mocks.configProviderMock.config.governanceChainInformation
+        .tokenRegistryAddress,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -142,9 +152,14 @@ describe("TokenInformationRepository tests", () => {
     const repo = mocks.factoryTokenInformationRepository();
 
     // Act
-    const result = await repo.initialize().andThen(() => {
-      return repo.getTokenInformation();
-    });
+    const result = await repo
+      .initialize(
+        mocks.configProviderMock.config.governanceChainInformation
+          .tokenRegistryAddress,
+      )
+      .andThen(() => {
+        return repo.getTokenInformation();
+      });
 
     // Assert
     expect(result).toBeDefined();
@@ -160,9 +175,14 @@ describe("TokenInformationRepository tests", () => {
     const repo = mocks.factoryTokenInformationRepository();
 
     // Act
-    const result = await repo.initialize().andThen(() => {
-      return repo.getTokenInformationForChain(chainId);
-    });
+    const result = await repo
+      .initialize(
+        mocks.configProviderMock.config.governanceChainInformation
+          .tokenRegistryAddress,
+      )
+      .andThen(() => {
+        return repo.getTokenInformationForChain(chainId);
+      });
 
     // Assert
     expect(result).toBeDefined();
@@ -178,9 +198,14 @@ describe("TokenInformationRepository tests", () => {
     const repo = mocks.factoryTokenInformationRepository();
 
     // Act
-    const result = await repo.initialize().andThen(() => {
-      return repo.getTokenInformationByAddress(hyperTokenAddress);
-    });
+    const result = await repo
+      .initialize(
+        mocks.configProviderMock.config.governanceChainInformation
+          .tokenRegistryAddress,
+      )
+      .andThen(() => {
+        return repo.getTokenInformationByAddress(hyperTokenAddress);
+      });
 
     // Assert
     expect(result).toBeDefined();

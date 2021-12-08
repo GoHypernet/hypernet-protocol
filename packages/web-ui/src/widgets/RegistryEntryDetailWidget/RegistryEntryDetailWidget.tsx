@@ -17,6 +17,7 @@ import {
   GovernanceEditableValueWithTitle,
   GovernanceValueWithTitle,
   GovernanceWidgetHeader,
+  IHeaderAction,
 } from "@web-ui/components";
 import { GovernanceTag, ETagColor } from "@web-ui/components/GovernanceTag";
 import { colors } from "@web-ui/theme";
@@ -117,10 +118,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
     return accountAddress === registryEntry?.owner;
   }, [accountAddress, registryEntry]);
 
-  const canBurnOrTransfer = useMemo(() => {
-    return isRegistrar || (isOwner && registry?.allowTransfers);
-  }, [isRegistrar, isOwner]);
-
   const canUpdateLabel = useMemo(() => {
     return isRegistrar || (isOwner && registry?.allowLabelChange);
   }, [isRegistrar, isOwner]);
@@ -128,6 +125,39 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   const canUpdateTokenURI = useMemo(() => {
     return isRegistrar || (isOwner && registry?.allowStorageUpdate);
   }, [isRegistrar, isOwner]);
+
+  const getHeaderActions: () => IHeaderAction[] = () => {
+    const canTransfer = useMemo(() => {
+      return isRegistrar || (isOwner && registry?.allowTransfers);
+    }, [isRegistrar, isOwner]);
+
+    const canBurn = useMemo(() => {
+      return isRegistrar || isOwner;
+    }, [isRegistrar, isOwner]);
+
+    let headerActions: IHeaderAction[] = [];
+
+    if (canBurn) {
+      headerActions.push({
+        label: "Burn Entry",
+        onClick: () => setBurnEntryModalOpen(true),
+        variant: "contained",
+        color: "secondary",
+        style: { backgroundColor: colors.RED700 },
+      });
+    }
+
+    if (canTransfer) {
+      headerActions.push({
+        label: "Transfer NFI",
+        onClick: () => setTransferIdentityModalOpen(true),
+        variant: "contained",
+        color: "primary",
+      });
+    }
+
+    return headerActions;
+  };
 
   return (
     <Box>
@@ -148,23 +178,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
             onRegistryEntryListNavigate?.(registryName);
           },
         }}
-        {...(canBurnOrTransfer && {
-          headerActions: [
-            {
-              label: "Burn Entry",
-              onClick: () => setBurnEntryModalOpen(true),
-              variant: "contained",
-              color: "secondary",
-              style: { backgroundColor: colors.RED700 },
-            },
-            {
-              label: "Transfer NFI",
-              onClick: () => setTransferIdentityModalOpen(true),
-              variant: "contained",
-              color: "primary",
-            },
-          ],
-        })}
+        headerActions={getHeaderActions()}
       />
       {registryEntry && (
         <GovernanceCard>

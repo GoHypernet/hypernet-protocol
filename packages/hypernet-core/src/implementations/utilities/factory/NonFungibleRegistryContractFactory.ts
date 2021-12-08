@@ -10,10 +10,10 @@ import {
   IBlockchainProvider,
   IBlockchainProviderType,
 } from "@interfaces/utilities";
-import { IContractFactory } from "@interfaces/utilities/factory";
+import { INonFungibleRegistryContractFactory } from "@interfaces/utilities/factory";
 
 @injectable()
-export class ContractFactory implements IContractFactory {
+export class NonFungibleRegistryContractFactory implements INonFungibleRegistryContractFactory {
   public constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,

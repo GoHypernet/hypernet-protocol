@@ -100,8 +100,11 @@ import {
   GovernanceRepository,
   RegistryRepository,
   GatewayRegistrationRepository,
-  TokenInformationRepository,
 } from "@implementations/data";
+import {
+  TokenInformationRepository,
+  ITokenInformationRepository,
+} from "@hypernetlabs/common-repositories";
 import {
   IBlockchainListener,
   IGatewayConnectorListener,
@@ -129,7 +132,6 @@ import {
   IGatewayRegistrationRepository,
   IGovernanceRepository,
   IRegistryRepository,
-  ITokenInformationRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, okAsync, Result, ResultAsync } from "neverthrow";
@@ -154,7 +156,7 @@ import {
   GatewayConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
-  ContractFactory,
+  NonFungibleRegistryContractFactory,
 } from "@implementations/utilities/factory";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
@@ -175,7 +177,7 @@ import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
   IGatewayConnectorProxyFactory,
-  IContractFactory,
+  INonFungibleRegistryContractFactory,
 } from "@interfaces/utilities/factory";
 
 /**
@@ -244,7 +246,7 @@ export class HypernetCore implements IHypernetCore {
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
-  protected contractFactory: IContractFactory;
+  protected nonFungibleRegistryContractFactory: INonFungibleRegistryContractFactory;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -416,7 +418,8 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
-    this.contractFactory = new ContractFactory(this.blockchainProvider);
+    this.nonFungibleRegistryContractFactory =
+      new NonFungibleRegistryContractFactory(this.blockchainProvider);
 
     this.browserNodeFactory = new BrowserNodeFactory(
       this.configProvider,
@@ -551,8 +554,7 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.tokenInformationRepository = new TokenInformationRepository(
-      this.contractFactory,
-      this.configProvider,
+      this.nonFungibleRegistryContractFactory,
       this.logUtils,
     );
 
@@ -896,102 +898,109 @@ export class HypernetCore implements IHypernetCore {
     this._initializeResult = this.blockchainProvider
       .initialize()
       .andThen(() => {
-        this.logUtils.debug("Getting Ethereum accounts");
-        return ResultUtils.combine([
-          this.contextProvider.getContext(),
-          this.accountRepository.getAccounts(),
-        ]);
-      })
-      .andThen((vals) => {
-        context = vals[0];
-        const accounts = vals[1];
-        context.account = accounts[0];
-        this.logUtils.debug(`Obtained accounts: ${accounts}`);
-        return this.contextProvider.setContext(context);
-      })
-      .andThen(() => {
-        return this.ceramicUtils.initialize();
-      })
-      .andThen(() => {
-        return ResultUtils.combine([
-          this.accountRepository.getPublicIdentifier(),
-          this.accountRepository.getActiveStateChannels(),
-          this.registryRepository.initializeReadOnly(),
-          this.registryRepository.initializeForWrite(),
-          this.governanceRepository.initializeReadOnly(),
-          this.governanceRepository.initializeForWrite(),
-          this.tokenInformationRepository.initialize(),
-        ]);
-      })
-      .andThen((vals) => {
-        const [publicIdentifier, activeStateChannels] = vals;
-
-        this.logUtils.debug(
-          `Obtained active state channels: ${activeStateChannels}`,
-        );
-
-        context.publicIdentifier = publicIdentifier;
-        context.activeStateChannels = activeStateChannels;
-
-        return this.contextProvider.setContext(context);
-      })
-      .andThen(() => {
-        // By doing some active initialization, we can avoid whole categories
-        // of errors occuring post-initialization (ie, runtime), which makes the
-        // whole thing more reliable in operation.
-        this.logUtils.debug("Initializing utilities");
-        this.logUtils.debug("Initializing services");
-        return this.gatewayConnectorService.initialize();
-      })
-      .andThen(() => {
-        this.logUtils.debug("Initializing API listeners");
-        // Initialize anything that wants an initialized context
-        return ResultUtils.combine([
-          this.vectorAPIListener.initialize(),
-          this.gatewayConnectorListener.initialize(),
-          this.messagingListener.initialize(),
-          this.blockchainListener.initialize(),
-        ]);
-      })
-      .andThen(() => {
-        this.logUtils.debug("Initialized all internal services");
-        return this.gatewayConnectorService.activateAuthorizedGateways();
-      })
-      // .andThen(() => {
-      //   // Claim control
-      //   return this.controlService.claimControl();
-      // })
-      .andThen(() => {
         // Get the config
         return this.configProvider.getConfig();
       })
       .andThen((config) => {
-        // If we are in debug mode, we'll print the registered transfers out.
-        if (config.debug) {
-          return this.browserNodeProvider
-            .getBrowserNode()
-            .andThen((browserNode) => {
-              return browserNode.getRegisteredTransfers(
-                config.governanceChainId,
-              );
+        this.logUtils.debug("Getting Ethereum accounts");
+        return (
+          ResultUtils.combine([
+            this.contextProvider.getContext(),
+            this.accountRepository.getAccounts(),
+          ])
+            .andThen((vals) => {
+              context = vals[0];
+              const accounts = vals[1];
+              context.account = accounts[0];
+              this.logUtils.debug(`Obtained accounts: ${accounts}`);
+              return this.contextProvider.setContext(context);
             })
-            .map((registeredTransfers) => {
-              this.logUtils.debug("Registered Transfers");
-              this.logUtils.debug(registeredTransfers);
-            });
-        }
-        return okAsync(undefined);
-      })
-      .map(() => {
-        if (this._initializePromiseResolve != null) {
-          this._initializePromiseResolve();
-        }
-        this.logUtils.debug(`Hypernet Protocol core initialized successfully`);
-        this._initialized = true;
-      })
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
+            .andThen(() => {
+              return this.ceramicUtils.initialize();
+            })
+            .andThen(() => {
+              return ResultUtils.combine([
+                this.accountRepository.getPublicIdentifier(),
+                this.accountRepository.getActiveStateChannels(),
+                this.registryRepository.initializeReadOnly(),
+                this.registryRepository.initializeForWrite(),
+                this.governanceRepository.initializeReadOnly(),
+                this.governanceRepository.initializeForWrite(),
+                this.tokenInformationRepository.initialize(
+                  config.governanceChainInformation.tokenRegistryAddress,
+                ),
+              ]);
+            })
+            .andThen((vals) => {
+              const [publicIdentifier, activeStateChannels] = vals;
+
+              this.logUtils.debug(
+                `Obtained active state channels: ${activeStateChannels}`,
+              );
+
+              context.publicIdentifier = publicIdentifier;
+              context.activeStateChannels = activeStateChannels;
+
+              return this.contextProvider.setContext(context);
+            })
+            .andThen(() => {
+              // By doing some active initialization, we can avoid whole categories
+              // of errors occuring post-initialization (ie, runtime), which makes the
+              // whole thing more reliable in operation.
+              this.logUtils.debug("Initializing utilities");
+              this.logUtils.debug("Initializing services");
+              return this.gatewayConnectorService.initialize();
+            })
+            .andThen(() => {
+              this.logUtils.debug("Initializing API listeners");
+              // Initialize anything that wants an initialized context
+              return ResultUtils.combine([
+                this.vectorAPIListener.initialize(),
+                this.gatewayConnectorListener.initialize(),
+                this.messagingListener.initialize(),
+                this.blockchainListener.initialize(),
+              ]);
+            })
+            .andThen(() => {
+              this.logUtils.debug("Initialized all internal services");
+              return this.gatewayConnectorService.activateAuthorizedGateways();
+            })
+            // .andThen(() => {
+            //   // Claim control
+            //   return this.controlService.claimControl();
+            // })
+
+            .andThen(() => {
+              // If we are in debug mode, we'll print the registered transfers out.
+              if (config.debug) {
+                return this.browserNodeProvider
+                  .getBrowserNode()
+                  .andThen((browserNode) => {
+                    return browserNode.getRegisteredTransfers(
+                      config.governanceChainId,
+                    );
+                  })
+                  .map((registeredTransfers) => {
+                    this.logUtils.debug("Registered Transfers");
+                    this.logUtils.debug(registeredTransfers);
+                  });
+              }
+              return okAsync(undefined);
+            })
+            .map(() => {
+              if (this._initializePromiseResolve != null) {
+                this._initializePromiseResolve();
+              }
+              this.logUtils.debug(
+                `Hypernet Protocol core initialized successfully`,
+              );
+              this._initialized = true;
+            })
+            .mapErr((e) => {
+              this.logUtils.error(e);
+              return e;
+            })
+        );
       });
 
     return this._initializeResult;
