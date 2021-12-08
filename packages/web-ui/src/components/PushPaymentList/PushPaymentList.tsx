@@ -26,7 +26,7 @@ interface IPushPaymentList {
   publicIdentifier: PublicIdentifier;
   tokenInformationList: TokenInformation[];
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  repairPayment: (paymentId: PaymentId) => void;
+  onRepairPaymentClick: (paymentId: PaymentId) => void;
 }
 
 const PUSH_PAYMENTS_PER_PAGE = 5;
@@ -130,7 +130,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
     publicIdentifier,
     tokenInformationList,
     onAcceptPushPaymentClick,
-    repairPayment,
+    onRepairPaymentClick,
   } = props;
   const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
@@ -249,7 +249,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
                     variant="outlined"
                     color="primary"
                     className={classes.actionButton}
-                    onClick={() => repairPayment(item.id)}
+                    onClick={() => onRepairPaymentClick(item.id)}
                   >
                     Repair
                   </GovernanceButton>

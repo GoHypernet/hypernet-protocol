@@ -271,7 +271,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           tokenInformationList={tokenInformationList}
           pushPayments={getPushPayments()}
           onAcceptPushPaymentClick={acceptPayment}
-          repairPayment={repairPayment}
+          onRepairPaymentClick={repairPayment}
         />
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
@@ -281,7 +281,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           pullPayments={getPullPayments()}
           onAcceptPullPaymentClick={acceptPayment}
           onPullFundClick={pullFunds}
-          repairPayment={repairPayment}
+          onRepairPaymentClick={repairPayment}
         />
       </TabPanel>
     </GovernanceCard>

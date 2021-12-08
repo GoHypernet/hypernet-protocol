@@ -27,7 +27,7 @@ interface IPullPaymentList {
   tokenInformationList: TokenInformation[];
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
-  repairPayment: (paymentId: PaymentId) => void;
+  onRepairPaymentClick: (paymentId: PaymentId) => void;
 }
 
 const PULL_PAYMENTS_PER_PAGE = 5;
@@ -132,7 +132,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     onAcceptPullPaymentClick,
     onPullFundClick,
     tokenInformationList,
-    repairPayment,
+    onRepairPaymentClick,
   } = props;
   const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
@@ -252,7 +252,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
                     variant="outlined"
                     color="primary"
                     className={classes.actionButton}
-                    onClick={() => repairPayment(item.id)}
+                    onClick={() => onRepairPaymentClick(item.id)}
                   >
                     Repair
                   </GovernanceButton>
