@@ -2,6 +2,7 @@ import {
   PushPayment,
   PullPayment,
   TokenInformation,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import { Box, AppBar, Switch, Typography, Tooltip } from "@material-ui/core";
 import {
@@ -163,7 +164,17 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     coreProxy
       .getTokenInformation()
       .map((tokenInformationList) => {
-        setTokenInformationList(tokenInformationList)
+        setTokenInformationList(tokenInformationList);
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
+  const repairPayment = (paymentId: PaymentId) => {
+    setLoading(true);
+    coreProxy
+      .repairPayments([paymentId])
+      .map(() => {
         setLoading(false);
       })
       .mapErr(handleCoreError);
@@ -260,15 +271,17 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           tokenInformationList={tokenInformationList}
           pushPayments={getPushPayments()}
           onAcceptPushPaymentClick={acceptPayment}
+          onRepairPaymentClick={repairPayment}
         />
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <PullPaymentList    
+        <PullPaymentList
           publicIdentifier={publicIdentifier}
           tokenInformationList={tokenInformationList}
           pullPayments={getPullPayments()}
           onAcceptPullPaymentClick={acceptPayment}
           onPullFundClick={pullFunds}
+          onRepairPaymentClick={repairPayment}
         />
       </TabPanel>
     </GovernanceCard>
