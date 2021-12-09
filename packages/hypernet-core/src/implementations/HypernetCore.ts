@@ -920,12 +920,21 @@ export class HypernetCore implements IHypernetCore {
             })
             .andThen(() => {
               return ResultUtils.combine([
+                this.registryRepository.initializeForWrite(),
+                this.governanceRepository.initializeForWrite(),
+              ])
+                .map(() => {})
+                .orElse((e) => {
+                  this.logUtils.error(e);
+                  return okAsync(undefined);
+                });
+            })
+            .andThen(() => {
+              return ResultUtils.combine([
                 this.accountRepository.getPublicIdentifier(),
                 this.accountRepository.getActiveStateChannels(),
                 this.registryRepository.initializeReadOnly(),
-                this.registryRepository.initializeForWrite(),
                 this.governanceRepository.initializeReadOnly(),
-                this.governanceRepository.initializeForWrite(),
                 this.tokenInformationRepository.initialize(
                   config.governanceChainInformation.tokenRegistryAddress,
                 ),

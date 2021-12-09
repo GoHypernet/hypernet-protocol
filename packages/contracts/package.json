@@ -1,7 +1,20 @@
 {
   "name": "@hypernetlabs/contracts",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo",
+    "!src",
+    "!test",
+    "!tasks",
+    "!scripts",
+    "!deployments",
+    "!contracts",
+    "!hardhat.config.js",
+    "!tsconfig.json"
+  ],
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "yarn clean && yarn compile",
