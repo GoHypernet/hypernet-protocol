@@ -3038,6 +3038,24 @@
     inversify "^5.1.1"
     neverthrow "^4.2.2"
 
+"@hypernetlabs/contracts@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/contracts/-/contracts-0.0.8.tgz#310ad76abc1c4d561ee93f0ba92309444b54a170"
+  integrity sha512-fYcJ5CcnUy2wps/GGpIXYHANZUnurULcEnWjujImBmp8O/Sw48GMVVqIDxTUC8jPe5MrUN+6gmibwd9hXjg8oA==
+  dependencies:
+    "@openzeppelin/contracts" "^4.3.0"
+    "@openzeppelin/contracts-upgradeable" "^4.3.2"
+    ethers "^5.4.7"
+    hardhat-contract-sizer "^2.0.3"
+
+"@hypernetlabs/gateway-connector@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/gateway-connector/-/gateway-connector-0.0.12.tgz#ad0778f44c78839be5afd3644027c6a66caf4a7f"
+  integrity sha512-mbJrh1LFvyi0GEwGPDM4dVSqaDDM4NF2h4mKO/bUPB8Xz6ryDVnIayE3fb/rLCsi6wt5OqHomutqHj+U7f8gyA==
+  dependencies:
+    "@hypernetlabs/objects" "^0.3.10"
+    ethers "^5.4.7"
+
 "@icons/material@^0.2.4":
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/@icons/material/-/material-0.2.4.tgz#e90c9f71768b3736e76d7dd6783fc6c2afa88bc8"

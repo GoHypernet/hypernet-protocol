@@ -201,6 +201,13 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
   >;
+  getRegistryEntryListByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");
