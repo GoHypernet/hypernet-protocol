@@ -193,4 +193,11 @@ export interface IRegistryService {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
   >;
+  getRegistryEntryListByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 }
