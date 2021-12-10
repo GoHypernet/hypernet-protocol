@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/web-integration",
-  "version": "0.6.8",
+  "version": "0.6.9",
   "description": "",
   "license": "ISC",
   "author": "",
@@ -9,7 +9,10 @@
   "files": [
     "dist",
     "!dist/test",
-    "!dist/tsconfig.tsbuildinfo"
+    "!dist/tsconfig.tsbuildinfo",
+    "!test",
+    "!src",
+    "!tsconfig.json"
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",

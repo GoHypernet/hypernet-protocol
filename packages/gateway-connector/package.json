@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/gateway-connector",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Package that defines how to write a Hypernet Gateway.",
   "license": "ISC",
   "repository": {
@@ -24,7 +24,10 @@
   "files": [
     "dist",
     "!dist/test",
-    "!dist/tsconfig.tsbuildinfo"
+    "!dist/tsconfig.tsbuildinfo",
+    "!test",
+    "!src",
+    "!tsconfig.json"
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
@@ -38,7 +41,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.3.12",
+    "@hypernetlabs/objects": "^0.3.13",
     "ethers": "^5.4.7"
   }
 }
