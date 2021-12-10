@@ -19,6 +19,7 @@ interface IGovernanceWidgetHeader {
   label?: string;
   description?: string | React.ReactNode;
   rightContent?: React.ReactNode;
+  bottomContent?: React.ReactNode;
   headerActions?: IHeaderAction[];
 }
 
@@ -27,52 +28,58 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
   label,
   description,
   rightContent,
+  bottomContent,
   headerActions = [],
 }: IGovernanceWidgetHeader) => {
   const classes = useStyles();
 
   return (
     <Box className={classes.wrapper}>
-      <Box className={classes.leftSection}>
-        {navigationLink && (
-          <Box
-            className={classes.navigationWrapper}
-            onClick={navigationLink.onClick}
-          >
-            <ArrowBackIcon className={classes.navigationIcon} />
-            <Typography
-              variant="subtitle2"
-              color="textPrimary"
-              className={classes.navigationLabel}
+      <Box className={classes.topSection}>
+        <Box className={classes.leftSection}>
+          {navigationLink && (
+            <Box
+              className={classes.navigationWrapper}
+              onClick={navigationLink.onClick}
             >
-              {navigationLink.label}
-            </Typography>
+              <ArrowBackIcon className={classes.navigationIcon} />
+              <Typography
+                variant="subtitle2"
+                color="textPrimary"
+                className={classes.navigationLabel}
+              >
+                {navigationLink.label}
+              </Typography>
+            </Box>
+          )}
+          <Typography variant="h1" className={classes.label}>
+            {label}
+          </Typography>
+          <Typography className={classes.description}>{description}</Typography>
+        </Box>
+        {(headerActions?.length || !!rightContent) && (
+          <Box className={classes.rightSection}>
+            <Box display="flex">
+              {headerActions.map((headerAction) => (
+                <Box className={classes.buttonWrapper}>
+                  <GovernanceButton
+                    color="primary"
+                    size="medium"
+                    {...headerAction}
+                  >
+                    {headerAction.label}
+                  </GovernanceButton>
+                </Box>
+              ))}
+            </Box>
+            {!!rightContent && (
+              <Box className={classes.rightSection}>{rightContent}</Box>
+            )}
           </Box>
         )}
-        <Typography variant="h1" className={classes.label}>
-          {label}
-        </Typography>
-        <Typography className={classes.description}>{description}</Typography>
       </Box>
-      {(headerActions?.length || rightContent) && (
-        <Box className={classes.rightSection}>
-          <Box display="flex">
-            {headerActions.map((headerAction) => (
-              <Box className={classes.buttonWrapper}>
-                <GovernanceButton
-                  color="primary"
-                  size="medium"
-                  {...headerAction}
-                >
-                  {headerAction.label}
-                </GovernanceButton>
-              </Box>
-            ))}
-          </Box>
-          {rightContent && (
-            <Box className={classes.rightSection}>{rightContent}</Box>
-          )}
-        </Box>
+      {!!bottomContent && (
+        <Box className={classes.bottomSection}>{bottomContent}</Box>
       )}
     </Box>
   );
