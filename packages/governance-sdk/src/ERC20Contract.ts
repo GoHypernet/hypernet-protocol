@@ -8,7 +8,7 @@ import {
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
-import { IERC20Contract } from "@contracts/IERC20Contract";
+import { IERC20Contract } from "@governance-sdk/IERC20Contract";
 
 export class ERC20Contract implements IERC20Contract {
   protected contract: ethers.Contract | null = null;

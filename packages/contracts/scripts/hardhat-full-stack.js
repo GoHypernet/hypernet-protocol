@@ -60,7 +60,7 @@ async function main() {
   );
   const tx1_reciept = await tx1.wait();
 
-  console.log("DAO has proposer role")
+  console.log("DAO has proposer role");
 
   // give the governor contract the Executor role in the timelock contract
   const tx2 = await timelock.grantRole(
@@ -119,24 +119,19 @@ async function main() {
     "UpgradeableRegistryFactory",
   );
   const factoryregistry = await FactoryRegistry.deploy(
-    timelock.address,
+    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    ["Hypernet Profiles", "Gateways", "Liquidity Providers", "Payment Tokens"],
     [
-        "Hypernet Profiles", 
-        "Gateways", 
-        "Liquidity Providers", 
-        "Payment Tokens"
+      "Customizable Web3 user profile tokens for the Hypernet Protocol.",
+      "Payment gateway signatures for the Hypernet Protocol payment network.",
+      "Liquidity provider metadata for the Hypernet Protocol payment network.",
+      "Officially supported payment tokens for the Hypernet Protocol payment network.",
     ],
     [
-        "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
-        "Payment gateway signatures for the Hypernet Protocol payment network.", 
-        "Liquidity provider metadata for the Hypernet Protocol payment network.", 
-        "Officially supported payment tokens for the Hypernet Protocol payment network."
-    ],
-    [
-        timelock.address, 
-        timelock.address, 
-        timelock.address, 
-        timelock.address
+      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     ],
     enumerableregistry.address,
     registry.address,
@@ -158,14 +153,20 @@ async function main() {
   const lazymintmodule = await LazyMintModule.deploy("Lazy Minting");
   const lazymintmodule_reciept = await lazymintmodule.deployTransaction.wait();
   console.log("Lazy Mint Module Address:", lazymintmodule.address);
-  console.log("Lazy Mint Module Gas Fee:", lazymintmodule_reciept.gasUsed.toString());
+  console.log(
+    "Lazy Mint Module Gas Fee:",
+    lazymintmodule_reciept.gasUsed.toString(),
+  );
 
   // deploy the Merkle Drop module
   const MerkleModule = await ethers.getContractFactory("MerkleModule");
   const merklemodule = await MerkleModule.deploy("Merkle Drop");
   const merklemodule_reciept = await merklemodule.deployTransaction.wait();
   console.log("Merkle Module Address:", merklemodule.address);
-  console.log("Merkle Module Gas Fee:", merklemodule_reciept.gasUsed.toString());
+  console.log(
+    "Merkle Module Gas Fee:",
+    merklemodule_reciept.gasUsed.toString(),
+  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
