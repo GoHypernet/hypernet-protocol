@@ -16,7 +16,7 @@
       "path": "../gateway-connector"
     },
     {
-      "path": "../contracts"
+      "path": "../governance-sdk"
     }
   ],
   "include": ["./src/**/*.ts"],

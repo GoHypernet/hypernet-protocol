@@ -7,7 +7,7 @@ import {
   NonFungibleRegistryEnumerableUpgradeableContract,
   BatchModuleContract,
   IBatchModuleContract,
-} from "@hypernetlabs/contracts";
+} from "@hypernetlabs/governance-sdk";
 import {
   BigNumberString,
   BlockchainUnavailableError,

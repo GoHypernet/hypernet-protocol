@@ -5,7 +5,7 @@ import {
   HypernetGovernorContract,
   RegistryFactoryContract,
   ERC20Contract,
-} from "@hypernetlabs/contracts";
+} from "@hypernetlabs/governance-sdk";
 import {
   BigNumberString,
   BlockchainUnavailableError,

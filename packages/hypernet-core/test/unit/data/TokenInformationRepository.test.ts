@@ -1,4 +1,4 @@
-import { INonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/contracts";
+import { INonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
 import { NonFungibleRegistryContractError } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import {
