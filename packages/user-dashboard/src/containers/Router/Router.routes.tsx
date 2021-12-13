@@ -32,10 +32,10 @@ export enum ROUTES {
   WITHDRAW = "/payments/withdraw",
   BALANCES = "/payments/balances",
   REGISTRIES = "/registries",
-  PROPOSALS = "/proposals",
   REGISTRY_DEFAIL = "/registries/:registryName",
   REGISTRY_ENTRY_LIST = "/registries/:registryName/entries",
   REGISTRY_ENTRY_DETAIL = "/registries/:registryName/entries/:entryTokenId",
+  PROPOSALS = "/proposals",
   PROPOSAL_DETAIL = "/proposals/:proposalId",
   PROPOSAL_CREATE = "/proposal-create",
   ROOT = "/",
@@ -74,16 +74,26 @@ export const routeConfig: IRouteConfig = {
       },
     },
   },
-  registries: {
-    path: ROUTES.REGISTRIES,
-    Component: RegistryList,
-    name: "Registries",
-    isHeaderItem: true,
-  },
   proposals: {
     path: ROUTES.PROPOSALS,
     Component: Proposals,
     name: "Governance",
+    isHeaderItem: true,
+  },
+  proposalDetail: {
+    path: ROUTES.PROPOSAL_DETAIL,
+    Component: ProposalDetail,
+    name: "Proposal Detail",
+  },
+  proposalCreate: {
+    path: ROUTES.PROPOSAL_CREATE,
+    Component: ProposalCreate,
+    name: "Proposal",
+  },
+  registries: {
+    path: ROUTES.REGISTRIES,
+    Component: RegistryList,
+    name: "Registries",
     isHeaderItem: true,
   },
   registryDetail: {
@@ -101,15 +111,5 @@ export const routeConfig: IRouteConfig = {
     path: ROUTES.REGISTRY_ENTRY_DETAIL,
     Component: RegistryEntryDetail,
     name: "Registry Entry Detail",
-  },
-  proposalDetail: {
-    path: ROUTES.PROPOSAL_DETAIL,
-    Component: ProposalDetail,
-    name: "Proposal Detail",
-  },
-  proposalCreate: {
-    path: ROUTES.PROPOSAL_CREATE,
-    Component: ProposalCreate,
-    name: "Proposal",
   },
 };

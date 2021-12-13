@@ -64,15 +64,12 @@ const Header: React.FC = () => {
     return Object.values(routeConfig).filter((item) => item?.isHeaderItem);
   }, []);
 
-  const isHeaderItemSelected = (path: string): boolean => {
-    if (
-      path === ROUTES.ROOT &&
-      (pathname.startsWith("/payments") || pathname === ROUTES.ROOT)
-    ) {
-      return true;
+  const isHeaderItemSelected = (itemPath: string): boolean => {
+    if (itemPath === ROUTES.ROOT) {
+      return pathname === ROUTES.ROOT || pathname.startsWith(ROUTES.PAYMENTS);
     }
 
-    return !!pathToRegexp(path).exec(pathname);
+    return !!pathToRegexp(itemPath).exec(pathname);
   };
 
   return (
