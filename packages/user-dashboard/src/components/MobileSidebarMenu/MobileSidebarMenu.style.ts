@@ -30,4 +30,7 @@ export const useStyles = makeStyles({
     cursor: "auto",
     marginLeft: "auto",
   },
+  walletConnectedLabel: {
+    margin: "8px 0",
+  },
 });

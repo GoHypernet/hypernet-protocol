@@ -92,7 +92,11 @@ const MobileSidebarMenu: React.FC = () => {
         onOpen={() => {}}
       >
         <Box className={classes.drawerContainer}>
-          <Typography variant="h6" color="textPrimary">
+          <Typography
+            variant="body2"
+            color="textPrimary"
+            className={classes.walletConnectedLabel}
+          >
             Wallet Connected
           </Typography>
           <Box id="connected-account-widget-wrapper-mobile" />
