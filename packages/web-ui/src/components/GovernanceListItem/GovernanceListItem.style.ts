@@ -8,7 +8,6 @@ export const useStyles = makeStyles(() => ({
     backgroundColor: colors.GRAY150,
     boxShadow: "unset",
     display: "flex",
-    width: "100%",
     marginBottom: 16,
   },
   number: {

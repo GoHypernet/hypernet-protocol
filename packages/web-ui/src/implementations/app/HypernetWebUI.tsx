@@ -146,6 +146,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     closeCallback?: () => void,
     modalStyle?: React.CSSProperties,
     hasTheme?: boolean,
+    hideLoadingSpinner?: boolean,
   ) {
     if (this.coreInstance == null) {
       throw new Error("core instance is required");
@@ -193,6 +194,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
                   closeCallback={closeCallback}
                   modalStyle={modalStyle}
                   isV2={hasTheme}
+                  hideLoadingSpinner={hideLoadingSpinner}
                 >
                   {component}
                 </MainContainer>
@@ -256,6 +258,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
             zIndex: 99999,
           },
           true,
+          config.hideLoadingSpinner,
         ),
         this._generateDomElement(
           config?.selector || CONNECT_WALLET_WIDGET_SELECTOR,
@@ -295,6 +298,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
           undefined,
           undefined,
           true,
+          config?.hideLoadingSpinner,
         ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
@@ -660,6 +664,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
           undefined,
           undefined,
           true,
+          config?.hideLoadingSpinner,
         ),
         this._generateDomElement(config?.selector || HYPERTOKEN_BALANCE_WIDGET),
       );
@@ -678,6 +683,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
           undefined,
           undefined,
           true,
+          config?.hideLoadingSpinner,
         ),
         this._generateDomElement(config?.selector || VOTING_POWER_WIDGET),
       );
@@ -695,6 +701,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
           undefined,
           undefined,
           true,
+          config?.hideLoadingSpinner,
         ),
         this._generateDomElement(config?.selector || CONNECTED_ACCOUNT_WIDGET),
       );

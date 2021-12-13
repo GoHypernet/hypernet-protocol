@@ -1,7 +1,7 @@
 import { colors } from "@hypernetlabs/web-ui";
 import { makeStyles } from "@material-ui/core";
 
-export const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles({
   iconButton: {
     color: colors.BLACK,
   },
@@ -11,16 +11,13 @@ export const useStyles = makeStyles((theme) => ({
   listItem: {
     padding: 16,
     borderRadius: 3,
-    // "&:hover": {
-    //   backgroundColor: colors.PURPLE100,
-    // },
   },
   activeListItem: {
     backgroundColor: colors.PURPLE100,
   },
   inactiveListItem: {},
   divider: { margin: "24px 0" },
-  drawerContainer: () => ({
+  drawerContainer: {
     cursor: "pointer",
     width: 400,
     display: "flex",
@@ -28,14 +25,9 @@ export const useStyles = makeStyles((theme) => ({
     height: "100%",
     overflowX: "hidden",
     padding: 16,
-  }),
+  },
   header: {
     cursor: "auto",
     marginLeft: "auto",
   },
-  headerIcon: {
-    fontSize: 24,
-    color: theme.palette.text.secondary,
-    cursor: "pointer",
-  },
-}));
+});
