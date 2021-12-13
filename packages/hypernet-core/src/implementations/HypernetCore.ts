@@ -919,9 +919,20 @@ export class HypernetCore implements IHypernetCore {
               return this.ceramicUtils.initialize();
             })
             .andThen(() => {
+              // Initialize governance provider with contracts
+              return ResultUtils.combine([
+                this.registryRepository.initializeReadOnly(),
+                this.governanceRepository.initializeReadOnly(),
+              ]);
+            })
+            .andThen(() => {
+              // Initialize governance signer with contracts
               return ResultUtils.combine([
                 this.registryRepository.initializeForWrite(),
                 this.governanceRepository.initializeForWrite(),
+                this.tokenInformationRepository.initialize(
+                  config.governanceChainInformation.tokenRegistryAddress,
+                ),
               ])
                 .map(() => {})
                 .orElse((e) => {
@@ -933,11 +944,6 @@ export class HypernetCore implements IHypernetCore {
               return ResultUtils.combine([
                 this.accountRepository.getPublicIdentifier(),
                 this.accountRepository.getActiveStateChannels(),
-                this.registryRepository.initializeReadOnly(),
-                this.governanceRepository.initializeReadOnly(),
-                this.tokenInformationRepository.initialize(
-                  config.governanceChainInformation.tokenRegistryAddress,
-                ),
               ]);
             })
             .andThen((vals) => {
@@ -1578,6 +1584,19 @@ export class HypernetCore implements IHypernetCore {
     return this.registryService.createBatchRegistryEntry(
       registryName,
       newRegistryEntries,
+    );
+  }
+
+  public getRegistryEntryListByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryService.getRegistryEntryListByOwnerAddress(
+      registryName,
+      ownerAddress,
     );
   }
 }

@@ -7,7 +7,7 @@ import {
   NonFungibleRegistryEnumerableUpgradeableContract,
   BatchModuleContract,
   IBatchModuleContract,
-} from "@hypernetlabs/contracts";
+} from "@hypernetlabs/governance-sdk";
 import {
   BigNumberString,
   BlockchainUnavailableError,
@@ -1150,6 +1150,49 @@ export class RegistryRepository implements IRegistryRepository {
         newRegistryEntries,
       );
     });
+  }
+
+  public getRegistryEntryListByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryFactoryContract
+      .nameToAddress(registryName)
+      .andThen((registryAddress) => {
+        if (this.provider == null) {
+          throw new Error("No provider available!");
+        }
+
+        // Call the NFI contract of that address
+        this.nonFungibleRegistryContract =
+          new NonFungibleRegistryEnumerableUpgradeableContract(
+            this.provider,
+            registryAddress,
+          );
+
+        return this.nonFungibleRegistryContract
+          .balanceOf(ownerAddress)
+          .andThen((numberOfTokens) => {
+            const RegistryEntryListResult: ResultAsync<RegistryEntry, any>[] =
+              [];
+            for (let index = 0; index < numberOfTokens; index++) {
+              RegistryEntryListResult.push(
+                this.nonFungibleRegistryContract
+                  .tokenOfOwnerByIndex(ownerAddress, index)
+                  .andThen((tokenId) => {
+                    return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+                      tokenId,
+                    );
+                  }),
+              );
+            }
+
+            return ResultUtils.combine(RegistryEntryListResult);
+          });
+      });
   }
 
   private getRegistryByIndex(

@@ -1,4 +1,4 @@
-import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/contracts";
+import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
 import {
   BlockchainUnavailableError,
   GatewayUrl,

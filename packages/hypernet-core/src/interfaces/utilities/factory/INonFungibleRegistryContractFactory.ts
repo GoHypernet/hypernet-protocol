@@ -1,4 +1,4 @@
-import { INonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/contracts";
+import { INonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
 import { EthereumContractAddress } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 

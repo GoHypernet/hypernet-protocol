@@ -51,7 +51,7 @@
       "path": "packages/storybook"
     },
     {
-      "path": "packages/contracts"
+      "path": "packages/governance-sdk"
     }
   ]
 }

@@ -5,8 +5,22 @@ import { colors, EFontWeight } from "@web-ui/theme";
 export const useStyles = makeStyles((theme) => ({
   wrapper: {
     display: "flex",
+    flexDirection: "column",
     alignItems: "flex-start",
     marginBottom: 24,
+  },
+  topSection: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  bottomSection: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
   },
   leftSection: {
     display: "flex",

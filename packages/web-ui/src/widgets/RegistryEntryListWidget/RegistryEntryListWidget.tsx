@@ -16,6 +16,7 @@ import {
   GovernanceEmptyState,
   GovernanceSwitch,
   IHeaderAction,
+  GovernanceSearchFilter,
 } from "@web-ui/components";
 import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import CreateBatchIdentityWidget from "@web-ui/widgets/CreateBatchIdentityWidget";
@@ -66,6 +67,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   }, []);
 
   const getRegistry = () => {
+    setLoading(true);
     coreProxy
       .getRegistryByName([registryName])
       .map((registryMap) => {
@@ -78,6 +80,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   };
 
   const getRegistryEntries = (pageNumber: number) => {
+    setLoading(true);
     coreProxy
       .getRegistryEntries(
         registryName,
@@ -90,6 +93,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
         setPage(pageNumber);
+        setLoading(false);
       })
       .mapErr(handleCoreError);
   };
@@ -136,6 +140,25 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     return headerActions;
   };
 
+  const onSearchClick = (value) => {
+    setLoading(true);
+    coreProxy
+      .getRegistryEntryListByOwnerAddress(
+        registryName,
+        EthereumAccountAddress(value),
+      )
+      .map((registryEntries) => {
+        setRegistryEntries(registryEntries);
+        setPage(1);
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
+  const onRestartClick = () => {
+    getRegistryEntries(1);
+  };
+
   return (
     <Box>
       <GovernanceWidgetHeader
@@ -147,15 +170,32 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           },
         }}
         headerActions={getHeaderActions()}
-        rightContent={
-          <Box display="flex" alignItems="center" marginTop={5}>
-            <Typography style={{ paddingRight: 5 }}>Reverse sorting</Typography>
-            <GovernanceSwitch
-              initialValue={reversedSortingEnabled}
-              onChange={(reversedSorting) =>
-                setReversedSortingEnabled(reversedSorting)
-              }
-            />
+        bottomContent={
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <Box>
+              <GovernanceSearchFilter
+                title="Search for owner address"
+                placeholder="Search for owner address"
+                onSearchClick={onSearchClick}
+                onRestartClick={onRestartClick}
+              />
+            </Box>
+            <Box display="flex" alignItems="center">
+              <Typography style={{ paddingRight: 5 }}>
+                Reverse sorting
+              </Typography>
+              <GovernanceSwitch
+                initialValue={reversedSortingEnabled}
+                onChange={(reversedSorting) =>
+                  setReversedSortingEnabled(reversedSorting)
+                }
+              />
+            </Box>
           </Box>
         }
       />

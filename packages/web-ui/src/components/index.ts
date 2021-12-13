@@ -52,3 +52,4 @@ export * from "./GovernanceAutocomplete";
 export * from "./GovernanceRadio";
 export * from "./GovernanceCheckbox";
 export * from "./GovernancePaymentTokenCell";
+export * from "./GovernanceSearchFilter";

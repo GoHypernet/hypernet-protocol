@@ -7,7 +7,7 @@ import {
 import { ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
-import { IBatchModuleContract } from "@contracts/IBatchModuleContract";
+import { IBatchModuleContract } from "@governance-sdk/IBatchModuleContract";
 
 export class BatchModuleContract implements IBatchModuleContract {
   protected contract: ethers.Contract | null = null;
