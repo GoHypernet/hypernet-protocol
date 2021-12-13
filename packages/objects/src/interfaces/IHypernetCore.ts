@@ -36,6 +36,7 @@ import {
   PaymentCreationError,
   InactiveGatewayError,
   BatchModuleContractError,
+  LazyMintModuleContractError,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -679,6 +680,20 @@ export interface IHypernetCore {
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  >;
+
+  lazyMintRegistryEntry(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | LazyMintModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | ProxyError
   >;
 
   /**

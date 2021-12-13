@@ -14,6 +14,7 @@ import {
   RegistryTokenId,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
 } from "@hypernetlabs/objects";
 import { IRegistryService } from "@interfaces/business";
 import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
@@ -310,6 +311,26 @@ export class RegistryService implements IRegistryService {
     return this.registryRepository.getRegistryEntryListByOwnerAddress(
       registryName,
       ownerAddress,
+    );
+  }
+
+  public lazyMintRegistryEntry(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | LazyMintModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+  > {
+    return this.registryRepository.lazyMintRegistryEntry(
+      registryName,
+      tokenId,
+      ownerAddress,
+      registrationData,
     );
   }
 }

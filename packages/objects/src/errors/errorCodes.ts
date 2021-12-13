@@ -35,6 +35,7 @@ const errorCodes = {
   VectorError: "34",
   InactiveGatewayError: "35",
   BatchModuleContractError: "36",
+  LazyMintModuleContractError: "37",
 };
 
 export default errorCodes;

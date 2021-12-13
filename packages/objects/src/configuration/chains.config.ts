@@ -26,6 +26,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"), // batchModuleAddress
+      EthereumContractAddress("0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"), // lazyMintModuleAddress
       [ProviderUrl("http://localhost:8545")],
     ),
   ],
@@ -48,6 +49,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"), // batchModuleAddress
+      EthereumContractAddress("0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"), // lazyMintModuleAddress
       [ProviderUrl("http://localhost:8545")],
     ),
   ],
@@ -70,6 +72,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // tokenRegistry
       EthereumContractAddress("0xCdFa906b330485021fD37d5E3Ceab4F11D5101c6"), // chainRegistry
       EthereumContractAddress("TODO"), // batchModuleAddress
+      EthereumContractAddress("TODO"), // lazyMintModuleAddress
       [ProviderUrl("https://eth-provider-dev.hypernetlabs.io")],
     ),
   ],
@@ -92,6 +95,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D"), // tokenRegistry
       EthereumContractAddress("TODO"), // chainRegistry
       EthereumContractAddress("TODO"), // batchModuleAddress
+      EthereumContractAddress("TODO"), // lazyMintModuleAddress
       [ProviderUrl("https://rinkeby.hypernet.foundation")],
     ),
   ],
@@ -114,6 +118,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // tokenRegistry
       EthereumContractAddress("TODO"), // chainRegistry
       EthereumContractAddress("TODO"), // batchModuleAddress
+      EthereumContractAddress("TODO"), // lazyMintModuleAddress
       [ProviderUrl("https://mainnet.hypernet.foundation")],
     ),
   ],

@@ -20,6 +20,7 @@ export class ChainInformation {
     public tokenRegistryAddress: EthereumContractAddress | null,
     public chainRegistryAddress: EthereumContractAddress | null,
     public batchModuleAddress: EthereumContractAddress | null,
+    public lazyMintModuleAddress: EthereumContractAddress | null,
     public providerUrls: ProviderUrl[],
   ) {}
 }
@@ -42,6 +43,7 @@ export class GovernanceChainInformation extends ChainInformation {
     public tokenRegistryAddress: EthereumContractAddress,
     public chainRegistryAddress: EthereumContractAddress,
     public batchModuleAddress: EthereumContractAddress,
+    public lazyMintModuleAddress: EthereumContractAddress,
     public providerUrls: ProviderUrl[],
   ) {
     super(
@@ -61,6 +63,7 @@ export class GovernanceChainInformation extends ChainInformation {
       tokenRegistryAddress,
       chainRegistryAddress,
       batchModuleAddress,
+      lazyMintModuleAddress,
       providerUrls,
     );
   }

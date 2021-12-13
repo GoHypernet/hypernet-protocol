@@ -52,6 +52,8 @@ import {
   RegistryModule,
   BatchModuleContractError,
   InvalidPaymentIdError,
+  LazyMintModuleContractError,
+  RegistryTokenId,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -985,6 +987,27 @@ export default class HypernetIFrameProxy
     return this._createCall("getRegistryEntryListByOwnerAddress", {
       registryName,
       ownerAddress,
+    });
+  }
+
+  public lazyMintRegistryEntry(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | LazyMintModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | ProxyError
+  > {
+    return this._createCall("lazyMintRegistryEntry", {
+      registryName,
+      tokenId,
+      ownerAddress,
+      registrationData,
     });
   }
 

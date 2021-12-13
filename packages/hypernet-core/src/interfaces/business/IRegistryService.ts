@@ -14,6 +14,7 @@ import {
   GovernanceSignerUnavailableError,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -199,5 +200,17 @@ export interface IRegistryService {
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
+  lazyMintRegistryEntry(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | LazyMintModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
   >;
 }

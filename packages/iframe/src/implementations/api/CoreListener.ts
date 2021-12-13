@@ -576,6 +576,23 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
+      lazyMintRegistryEntry: (
+        data: IIFrameCallData<{
+          registryName: string;
+          tokenId: RegistryTokenId;
+          ownerAddress: EthereumAccountAddress;
+          registrationData: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.lazyMintRegistryEntry(
+            data.data.registryName,
+            data.data.tokenId,
+            data.data.ownerAddress,
+            data.data.registrationData,
+          );
+        }, data.callId);
+      },
     });
   }
 

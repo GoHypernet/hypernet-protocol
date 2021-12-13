@@ -149,6 +149,10 @@ export const batchModuleContract = EthereumContractAddress(
   "batchModuleContract",
 );
 
+export const lizyMintModuleContract = EthereumContractAddress(
+  "lizyMintModuleContract",
+);
+
 export const governanceChainInformation = new GovernanceChainInformation(
   "Mock Chain",
   chainId,
@@ -166,6 +170,7 @@ export const governanceChainInformation = new GovernanceChainInformation(
   tokenRegistryAddress,
   chainRegistryAddress,
   batchModuleContract,
+  lizyMintModuleContract,
   [ProviderUrl("http://localhost:8545")],
 );
 

@@ -7,6 +7,8 @@ import {
   NonFungibleRegistryEnumerableUpgradeableContract,
   BatchModuleContract,
   IBatchModuleContract,
+  LazyMintModuleContract,
+  ILazyMintModuleContract,
 } from "@hypernetlabs/governance-sdk";
 import {
   BigNumberString,
@@ -26,8 +28,10 @@ import {
   RegistryTokenId,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
   RegistryModuleCapability,
   chainConfig,
+  Signature,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IRegistryRepository } from "@interfaces/data";
@@ -41,6 +45,7 @@ import {
   IConfigProvider,
   IConfigProviderType,
 } from "@interfaces/utilities";
+import { HypernetConfig } from "@interfaces/objects";
 
 @injectable()
 export class RegistryRepository implements IRegistryRepository {
@@ -53,6 +58,8 @@ export class RegistryRepository implements IRegistryRepository {
     {} as NonFungibleRegistryEnumerableUpgradeableContract;
   protected batchModuleContract: IBatchModuleContract =
     {} as BatchModuleContract;
+  protected lazyMintModuleContract: ILazyMintModuleContract =
+    {} as LazyMintModuleContract;
 
   constructor(
     @inject(IBlockchainProviderType)
@@ -164,6 +171,12 @@ export class RegistryRepository implements IRegistryRepository {
                       chainConfig.get(config.governanceChainId)
                         ?.batchModuleAddress,
                   ),
+                  registrarAddresses.some(
+                    (registrarAddress) =>
+                      EthereumContractAddress(registrarAddress) ===
+                      chainConfig.get(config.governanceChainId)
+                        ?.lazyMintModuleAddress,
+                  ),
                 );
 
                 registriesMap.set(
@@ -256,6 +269,12 @@ export class RegistryRepository implements IRegistryRepository {
                 (registrarAddress) =>
                   EthereumContractAddress(registrarAddress) ===
                   chainConfig.get(config.governanceChainId)?.batchModuleAddress,
+              ),
+              registrarAddresses.some(
+                (registrarAddress) =>
+                  EthereumContractAddress(registrarAddress) ===
+                  chainConfig.get(config.governanceChainId)
+                    ?.lazyMintModuleAddress,
               ),
             );
 
@@ -1152,6 +1171,61 @@ export class RegistryRepository implements IRegistryRepository {
     });
   }
 
+  public lazyMintRegistryEntry(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | LazyMintModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+    ]).andThen((vals) => {
+      const [registryMap] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
+
+      if (this.signer == null) {
+        return errAsync(
+          new LazyMintModuleContractError("LazyMinting requiers a signer."),
+        );
+      }
+
+      // hash the data
+      const hash = ethers.utils
+        .solidityKeccak256(
+          ["address", "string", "string", "uint256"],
+          [ownerAddress, "", registrationData, tokenId],
+        )
+        .toString();
+
+      return ResultAsync.fromPromise(
+        this.signer.signMessage(
+          ethers.utils.arrayify(hash),
+        ) as Promise<Signature>,
+        (e) => {
+          return e as BlockchainUnavailableError;
+        },
+      ).andThen((signature) => {
+        // TODO: Save signature in ceramic
+        return this.lazyMintModuleContract.lazyRegister(
+          registry.address,
+          signature,
+          tokenId,
+          ownerAddress,
+          registrationData,
+        );
+      });
+    });
+  }
+
   public getRegistryEntryListByOwnerAddress(
     registryName: string,
     ownerAddress: EthereumAccountAddress,
@@ -1257,6 +1331,12 @@ export class RegistryRepository implements IRegistryRepository {
               (registrarAddress) =>
                 EthereumContractAddress(registrarAddress) ===
                 chainConfig.get(config.governanceChainId)?.batchModuleAddress,
+            ),
+            registrarAddresses.some(
+              (registrarAddress) =>
+                EthereumContractAddress(registrarAddress) ===
+                chainConfig.get(config.governanceChainId)
+                  ?.lazyMintModuleAddress,
             ),
           );
 
@@ -1376,18 +1456,7 @@ export class RegistryRepository implements IRegistryRepository {
     ]).map(([config, provider]) => {
       this.provider = provider;
 
-      this.registryFactoryContract = new RegistryFactoryContract(
-        provider,
-        config.governanceChainInformation.registryFactoryAddress,
-      );
-      this.hypertokenContract = new ERC20Contract(
-        provider,
-        config.governanceChainInformation.hypertokenAddress,
-      );
-      this.batchModuleContract = new BatchModuleContract(
-        provider,
-        config.governanceChainInformation.batchModuleAddress,
-      );
+      return this.initializeContracts(config, provider);
     });
   }
 
@@ -1403,18 +1472,31 @@ export class RegistryRepository implements IRegistryRepository {
     ]).map(([config, signer]) => {
       this.signer = signer;
 
-      this.registryFactoryContract = new RegistryFactoryContract(
-        signer,
-        config.governanceChainInformation.registryFactoryAddress,
-      );
-      this.hypertokenContract = new ERC20Contract(
-        signer,
-        config.governanceChainInformation.hypertokenAddress,
-      );
-      this.batchModuleContract = new BatchModuleContract(
-        signer,
-        config.governanceChainInformation.batchModuleAddress,
-      );
+      return this.initializeContracts(config, signer);
     });
+  }
+
+  private initializeContracts(
+    config: HypernetConfig,
+    signerOrProvider:
+      | ethers.providers.JsonRpcSigner
+      | ethers.providers.Provider,
+  ): void {
+    this.registryFactoryContract = new RegistryFactoryContract(
+      signerOrProvider,
+      config.governanceChainInformation.registryFactoryAddress,
+    );
+    this.hypertokenContract = new ERC20Contract(
+      signerOrProvider,
+      config.governanceChainInformation.hypertokenAddress,
+    );
+    this.batchModuleContract = new BatchModuleContract(
+      signerOrProvider,
+      config.governanceChainInformation.batchModuleAddress,
+    );
+    this.lazyMintModuleContract = new LazyMintModuleContract(
+      signerOrProvider,
+      config.governanceChainInformation.lazyMintModuleAddress,
+    );
   }
 }

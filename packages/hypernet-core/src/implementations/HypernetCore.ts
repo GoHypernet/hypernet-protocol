@@ -59,6 +59,7 @@ import {
   InactiveGatewayError,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -1597,6 +1598,26 @@ export class HypernetCore implements IHypernetCore {
     return this.registryService.getRegistryEntryListByOwnerAddress(
       registryName,
       ownerAddress,
+    );
+  }
+
+  public lazyMintRegistryEntry(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | LazyMintModuleContractError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+  > {
+    return this.registryService.lazyMintRegistryEntry(
+      registryName,
+      tokenId,
+      ownerAddress,
+      registrationData,
     );
   }
 }

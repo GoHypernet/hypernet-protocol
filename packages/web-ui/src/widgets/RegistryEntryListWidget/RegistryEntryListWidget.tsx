@@ -37,12 +37,12 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   );
   const [reversedSortingEnabled, setReversedSortingEnabled] =
     useState<boolean>(false);
-
   const [createIdentityModalOpen, setCreateIdentityModalOpen] =
     useState<boolean>(false);
   const [createBatchIdentityModalOpen, setCreateBatchIdentityModalOpen] =
     useState<boolean>(false);
-
+  const [lazyMintModeEnabled, setLazyMintModeEnabled] =
+    useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
@@ -117,7 +117,22 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const canCreateNewBatchRegistryEntry =
       isRegistrar && registry?.modulesCapability.batchMintEnabled;
 
+    const canLazyMintRegistryEntry =
+      isRegistrar && registry?.modulesCapability.lazyMintEnabled;
+
     let headerActions: IHeaderAction[] = [];
+
+    if (canLazyMintRegistryEntry) {
+      headerActions.push({
+        label: "Lazy Mint Identity",
+        onClick: () => {
+          setCreateIdentityModalOpen(true);
+          setLazyMintModeEnabled(true);
+        },
+        variant: "contained",
+        color: "primary",
+      });
+    }
 
     if (canCreateNewBatchRegistryEntry) {
       headerActions.push({
@@ -131,7 +146,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     if (canCreateNewRegistryEntry) {
       headerActions.push({
         label: "Create New Identity",
-        onClick: () => setCreateIdentityModalOpen(true),
+        onClick: () => {
+          setCreateIdentityModalOpen(true);
+          setLazyMintModeEnabled(false);
+        },
         variant: "contained",
         color: "primary",
       });
@@ -157,6 +175,12 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const onRestartClick = () => {
     getRegistryEntries(1);
+  };
+
+  const handleIdentityCallback = () => {
+    getRegistry();
+    setLazyMintModeEnabled(false);
+    setCreateIdentityModalOpen(false);
   };
 
   return (
@@ -263,10 +287,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       )}
       {createIdentityModalOpen && (
         <CreateIdentityWidget
-          onCloseCallback={() => {
-            getRegistry();
-            setCreateIdentityModalOpen(false);
-          }}
+          onCloseCallback={handleIdentityCallback}
+          lazyMintModeEnabled={lazyMintModeEnabled}
           registryName={registryName}
           currentAccountAddress={accountAddress}
         />

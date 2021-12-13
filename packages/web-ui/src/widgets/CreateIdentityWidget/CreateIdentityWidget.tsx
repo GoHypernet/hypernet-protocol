@@ -20,6 +20,7 @@ interface ICreateIdentityWidget {
   onCloseCallback: () => void;
   registryName: string;
   currentAccountAddress: EthereumAccountAddress;
+  lazyMintModeEnabled?: boolean;
 }
 
 interface ICreateIdentityFormValues {
@@ -33,6 +34,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   onCloseCallback,
   registryName,
   currentAccountAddress,
+  lazyMintModeEnabled,
 }: ICreateIdentityWidget) => {
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
@@ -66,6 +68,27 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
       .mapErr(handleCoreError);
   };
 
+  const handlLazyMintIdentity = ({
+    recipientAddress,
+    tokenUri,
+    tokenId,
+  }: ICreateIdentityFormValues) => {
+    setLoading(true);
+
+    coreProxy
+      .lazyMintRegistryEntry(
+        registryName,
+        RegistryTokenId(Number(tokenId)),
+        EthereumAccountAddress(recipientAddress),
+        tokenUri,
+      )
+      .map(() => {
+        setLoading(false);
+        onCloseCallback();
+      })
+      .mapErr(handleCoreError);
+  };
+
   const handleGenerateTokenIdSwitchChange = (
     setFieldValue: (
       field: string,
@@ -87,7 +110,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
 
   return (
     <GovernanceDialog
-      title="Create a New Identity"
+      title={lazyMintModeEnabled ? "" : "Create a New Identity"}
       isOpen={true}
       onClose={onCloseCallback}
       content={
@@ -99,7 +122,11 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
               tokenUri: "",
               tokenId: Math.floor(Math.random() * 10000000000).toString(),
             }}
-            onSubmit={handleCreateIdentity}
+            onSubmit={(values) =>
+              lazyMintModeEnabled
+                ? handleCreateIdentity(values)
+                : handlLazyMintIdentity(values)
+            }
           >
             {({ handleSubmit, values, setFieldValue }) => {
               return (
@@ -121,12 +148,14 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                     type="input"
                     placeholder="Enter a number for your token"
                   />
-                  <GovernanceField
-                    title="Label"
-                    name="label"
-                    type="input"
-                    placeholder="Enter a label"
-                  />
+                  {!lazyMintModeEnabled && (
+                    <GovernanceField
+                      title="Label"
+                      name="label"
+                      type="input"
+                      placeholder="Enter a label"
+                    />
+                  )}
                   <GovernanceField
                     title="Recipient Address"
                     required
