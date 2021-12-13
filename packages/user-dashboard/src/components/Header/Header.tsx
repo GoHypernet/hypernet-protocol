@@ -16,7 +16,7 @@ import {
 } from "@user-dashboard/containers/Router/Router.routes";
 import { useStyles } from "@user-dashboard/components/Header/Header.style";
 
-import { useLayoutContext, useStoreContext } from "@web-integration/contexts";
+import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
 
 const Header: React.FC = () => {
   const classes = useStyles();

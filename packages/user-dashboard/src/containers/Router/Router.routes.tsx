@@ -10,7 +10,7 @@ import RegistryList from "@user-dashboard/pages/Governance/RegistryList";
 import RegistryEntryList from "@user-dashboard/pages/Governance/RegistryEntryList";
 import RegistryEntryDetail from "@user-dashboard/pages/Governance/RegistryEntryDetail";
 import RegistryDetail from "@user-dashboard/pages/Governance/RegistryDetail";
-import PaymentHistory from "@web-integration/pages/PaymentHistory";
+import PaymentHistory from "@user-dashboard/pages/PaymentHistory";
 
 export interface IRouteConfig {
   [x: string]: IRouteItem;
