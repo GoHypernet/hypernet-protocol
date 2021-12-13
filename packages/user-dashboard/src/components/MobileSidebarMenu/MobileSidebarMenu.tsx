@@ -9,15 +9,15 @@ import {
 } from "@material-ui/core";
 import { Menu as MenuIcon, Close as CloseIcon } from "@material-ui/icons";
 
-import { useStyles } from "@user-dashboard/components/MobileSidebarMenu/MobileSidebarMenu.style";
+import SidebarItem from "@user-dashboard/components/SidebarItem";
 import {
   IRouteConfig,
   IRouteItem,
   routeConfig,
 } from "@user-dashboard/containers/Router/Router.routes";
-import { useLayoutContext, useStoreContext } from "@web-integration/contexts";
-import { ISidebarItem } from "../Sidebar/Sidebar.interface";
-import SidebarItem from "../SidebarItem";
+import { ISidebarItem } from "@user-dashboard/components/SidebarItem/SidebarItem.interface";
+import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
+import { useStyles } from "@user-dashboard/components/MobileSidebarMenu/MobileSidebarMenu.style";
 
 const getSidebarItemText = ({ name, subRoutes, isHeaderItem }: IRouteItem) => {
   if (isHeaderItem || subRoutes?.length) {

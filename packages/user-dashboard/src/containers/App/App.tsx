@@ -16,7 +16,7 @@ import { BrowserRouter } from "react-router-dom";
 import { useStyles } from "./App.style";
 
 import Header from "@user-dashboard/components/Header";
-import Sidebar from "@web-integration/components/Sidebar";
+import Sidebar from "@user-dashboard/components/Sidebar";
 import Router from "@user-dashboard/containers/Router";
 import { useLayoutContext, StoreProvider } from "@user-dashboard/contexts";
 
@@ -37,7 +37,7 @@ const App: React.FC = () => {
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"), {
     noSsr: true,
   });
-  
+
   useEffect(() => {
     setLoading(true);
 

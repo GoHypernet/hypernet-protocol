@@ -1,23 +1,13 @@
-import React, { memo, useMemo, useState } from "react";
+import React, { memo, useMemo } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import { History } from "history";
-import {
-  List,
-  ListItem,
-  ListItemText,
-  Tooltip,
-  Collapse,
-  MenuItem,
-  withStyles,
-  Box,
-} from "@material-ui/core";
+import { ListItemText, Box } from "@material-ui/core";
 import { pathToRegexp } from "path-to-regexp";
 
 import {
   StyledListItem,
   useStyles,
 } from "@user-dashboard/components/SidebarItem/SidebarItem.style";
-import { ISidebarItem } from "../Sidebar/Sidebar.interface";
+import { ISidebarItem } from "@user-dashboard/components/SidebarItem/SidebarItem.interface";
 import { ROUTES } from "@user-dashboard/containers/Router/Router.routes";
 
 interface ISideBarItemProps extends ISidebarItem {}

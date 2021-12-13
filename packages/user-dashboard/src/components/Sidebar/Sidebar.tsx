@@ -1,14 +1,14 @@
 import React, { useMemo } from "react";
-
+import { useLocation } from "react-router";
 import { Box, List, Drawer } from "@material-ui/core";
-import { useStyles } from "./Sidebar.style";
+
 import {
   IRouteConfig,
   routeConfig,
-} from "@web-integration/containers/Router/Router.routes";
-import SidebarItem from "../SidebarItem";
-import { useLocation } from "react-router";
-import { ISidebarItem } from "./Sidebar.interface";
+} from "@user-dashboard/containers/Router/Router.routes";
+import SidebarItem from "@user-dashboard/components/SidebarItem";
+import { ISidebarItem } from "@user-dashboard/components/SidebarItem/SidebarItem.interface";
+import { useStyles } from "@user-dashboard/components/Sidebar/Sidebar.style";
 
 interface SidebarProps {}
 
