@@ -1,1 +1,1 @@
-export { default } from "./Gateways";
+export { default } from "@user-dashboard/pages/Gateways/Gateways";

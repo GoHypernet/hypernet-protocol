@@ -1,1 +1,1 @@
-export { default } from "@web-integration/pages/Governance/ProposalCreate/ProposalCreate";
+export { default } from "@user-dashboard/pages/Governance/ProposalCreate/ProposalCreate";

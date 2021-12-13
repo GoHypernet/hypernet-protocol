@@ -1,1 +1,1 @@
-export { default } from "@web-integration/pages/Governance/RegistryDetail/RegistryDetail";
+export { default } from "@user-dashboard/pages/Governance/RegistryDetail/RegistryDetail";
