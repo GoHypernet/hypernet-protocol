@@ -86,7 +86,7 @@ const MobileSidebarMenu: React.FC = () => {
 
       <SwipeableDrawer
         anchor="right"
-        PaperProps={{ style: { top: 60 } }}
+        PaperProps={{ className: classes.paper }}
         open={isSideBarOpen}
         onClose={handleCloseSidebar}
         onOpen={() => {}}

@@ -33,4 +33,7 @@ export const useStyles = makeStyles({
   walletConnectedLabel: {
     margin: "8px 0",
   },
+  paper: {
+    top: 60,
+  },
 });
