@@ -421,7 +421,6 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
     const NFIRecipient = taskArgs.recipient;
     const tokenid = taskArgs.tokenid;
 
-    const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(
       factoryAddress(),
       RF.abi,
@@ -435,9 +434,11 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
       accounts[0],
     );
 
+    const registrationTokenAddress = await registryHandle.registrationToken();
+    const registrationtoken = new hre.ethers.Contract(registrationTokenAddress, HT.abi, accounts[0]);
     // approve the transfer of tokens to the NFR
     const registrationFee = await registryHandle.registrationFee();
-    let tx = await hypertoken.approve(registryAddress, registrationFee);
+    let tx = await registrationtoken.approve(registryAddress, registrationFee);
     await tx.wait(3);
 
     // call registerByToken on the NFR
