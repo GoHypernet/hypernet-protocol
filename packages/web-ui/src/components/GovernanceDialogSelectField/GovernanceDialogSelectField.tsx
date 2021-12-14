@@ -24,6 +24,7 @@ export interface GovernanceDialogSelectFieldProps extends FieldAttributes<any> {
   title?: string;
   dialogTitle?: string;
   options?: IGovernanceDialogSelectFieldOption[];
+  wrapperClassName?: string;
 }
 
 export interface IGovernanceDialogSelectFieldOption {
@@ -36,7 +37,7 @@ export interface IGovernanceDialogSelectFieldOption {
 
 export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldProps> =
   (props: GovernanceDialogSelectFieldProps) => {
-    const { title, dialogTitle, required, options } = props;
+    const { title, dialogTitle, required, options, wrapperClassName } = props;
     const classes = useStyles({});
     const titleText = `${title}${required ? " *" : ""}`;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -47,7 +48,10 @@ export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldPr
 
     return (
       <>
-        <Box className={classes.wrapper} onClick={toggleDialogOpen}>
+        <Box
+          className={`${classes.wrapper} ${wrapperClassName}`}
+          onClick={toggleDialogOpen}
+        >
           {title && (
             <Typography
               variant="body1"

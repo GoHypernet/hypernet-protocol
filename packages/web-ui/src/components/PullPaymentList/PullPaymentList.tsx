@@ -3,6 +3,7 @@ import {
   PublicIdentifier,
   EPaymentState,
   PaymentId,
+  TokenInformation,
 } from "@hypernetlabs/objects";
 import { useStoreContext } from "@web-ui/contexts";
 import React, { useMemo, useState } from "react";
@@ -15,6 +16,7 @@ import {
   GovernanceEmptyState,
   GovernancePagination,
   extractDataByPage,
+  GovernancePaymentTokenCell,
 } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/components/PullPaymentList/PullPaymentList.style";
@@ -22,8 +24,10 @@ import { useStyles } from "@web-ui/components/PullPaymentList/PullPaymentList.st
 interface IPullPaymentList {
   pullPayments: PullPayment[];
   publicIdentifier: PublicIdentifier;
+  tokenInformationList: TokenInformation[];
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
+  onRepairPaymentClick: (paymentId: PaymentId) => void;
 }
 
 const PULL_PAYMENTS_PER_PAGE = 5;
@@ -127,6 +131,8 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     publicIdentifier,
     onAcceptPullPaymentClick,
     onPullFundClick,
+    tokenInformationList,
+    onRepairPaymentClick,
   } = props;
   const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
@@ -197,7 +203,12 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: item.paymentToken,
+            cellValue: (
+              <GovernancePaymentTokenCell
+                paymentTokenAddress={item.paymentToken}
+                tokenInformationList={tokenInformationList}
+              />
+            ),
             tableCellProps: {
               align: "left",
             },
@@ -235,6 +246,17 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
           {
             cellValue: (
               <>
+                {item.state !== EPaymentState.Finalized && (
+                  <GovernanceButton
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    className={classes.actionButton}
+                    onClick={() => onRepairPaymentClick(item.id)}
+                  >
+                    Repair
+                  </GovernanceButton>
+                )}
                 {item.state === EPaymentState.Proposed && (
                   <GovernanceButton
                     size="small"
@@ -265,7 +287,10 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
         ]);
         return acc;
       }, initialValue),
-    [JSON.stringify(paginatedPullPayments)],
+    [
+      JSON.stringify(paginatedPullPayments),
+      JSON.stringify(tokenInformationList),
+    ],
   );
 
   if (!loading && !rows.length) {

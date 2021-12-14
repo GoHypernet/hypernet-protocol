@@ -299,4 +299,17 @@ export class RegistryService implements IRegistryService {
       newRegistryEntries,
     );
   }
+
+  public getRegistryEntryListByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryRepository.getRegistryEntryListByOwnerAddress(
+      registryName,
+      ownerAddress,
+    );
+  }
 }

@@ -975,6 +975,19 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public getRegistryEntryListByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  > {
+    return this._createCall("getRegistryEntryListByOwnerAddress", {
+      registryName,
+      ownerAddress,
+    });
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

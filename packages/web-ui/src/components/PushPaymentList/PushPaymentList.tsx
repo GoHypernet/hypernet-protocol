@@ -3,6 +3,7 @@ import {
   PublicIdentifier,
   PaymentId,
   EPaymentState,
+  TokenInformation,
 } from "@hypernetlabs/objects";
 import { useStoreContext } from "@web-ui/contexts";
 import {
@@ -14,6 +15,7 @@ import {
   GovernanceEmptyState,
   GovernancePagination,
   extractDataByPage,
+  GovernancePaymentTokenCell,
 } from "@web-ui/components";
 import React, { useMemo, useState } from "react";
 import { useLinks } from "@web-ui/hooks";
@@ -22,7 +24,9 @@ import { useStyles } from "@web-ui/components/PushPaymentList/PushPaymentList.st
 interface IPushPaymentList {
   pushPayments: PushPayment[];
   publicIdentifier: PublicIdentifier;
+  tokenInformationList: TokenInformation[];
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
+  onRepairPaymentClick: (paymentId: PaymentId) => void;
 }
 
 const PUSH_PAYMENTS_PER_PAGE = 5;
@@ -121,7 +125,13 @@ const tableColumns: ITableCell[] = [
 export const PushPaymentList: React.FC<IPushPaymentList> = (
   props: IPushPaymentList,
 ) => {
-  const { pushPayments, publicIdentifier, onAcceptPushPaymentClick } = props;
+  const {
+    pushPayments,
+    publicIdentifier,
+    tokenInformationList,
+    onAcceptPushPaymentClick,
+    onRepairPaymentClick,
+  } = props;
   const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
   const { loading } = useLinks();
@@ -191,7 +201,12 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: item.paymentToken,
+            cellValue: (
+              <GovernancePaymentTokenCell
+                paymentTokenAddress={item.paymentToken}
+                tokenInformationList={tokenInformationList}
+              />
+            ),
             tableCellProps: {
               align: "left",
             },
@@ -226,17 +241,32 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: publicIdentifier === item.to &&
-              item.state === EPaymentState.Proposed && (
-                <GovernanceButton
-                  size="small"
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => onAcceptPushPaymentClick(item.id)}
-                >
-                  Accept
-                </GovernanceButton>
-              ),
+            cellValue: (
+              <>
+                {item.state !== EPaymentState.Finalized && (
+                  <GovernanceButton
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    className={classes.actionButton}
+                    onClick={() => onRepairPaymentClick(item.id)}
+                  >
+                    Repair
+                  </GovernanceButton>
+                )}
+                {publicIdentifier === item.to &&
+                  item.state === EPaymentState.Proposed && (
+                    <GovernanceButton
+                      size="small"
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => onAcceptPushPaymentClick(item.id)}
+                    >
+                      Accept
+                    </GovernanceButton>
+                  )}
+              </>
+            ),
             tableCellProps: {
               align: "right",
             },
@@ -244,7 +274,10 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
         ]);
         return acc;
       }, initialValue),
-    [JSON.stringify(paginatedPushPayments)],
+    [
+      JSON.stringify(paginatedPushPayments),
+      JSON.stringify(tokenInformationList),
+    ],
   );
 
   if (!loading && !rows.length) {

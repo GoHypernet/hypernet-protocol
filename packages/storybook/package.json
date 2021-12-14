@@ -15,7 +15,7 @@
     "storybook": "yarn start-storybook -p 9009"
   },
   "dependencies": {
-    "@hypernetlabs/web-ui": "^5.0.12",
+    "@hypernetlabs/web-ui": "^5.0.17",
     "@react-theming/storybook-addon": "^1.1.1",
     "@storybook/addon-essentials": "^6.3.7",
     "@storybook/react": "^6.3.7",

@@ -1,13 +1,25 @@
-import { PushPayment, PullPayment } from "@hypernetlabs/objects";
-import { Box, AppBar, Switch, Typography, Tooltip } from "@material-ui/core";
+import {
+  PushPayment,
+  PullPayment,
+  TokenInformation,
+  PaymentId,
+} from "@hypernetlabs/objects";
+import {
+  Box,
+  AppBar,
+  Switch,
+  Typography,
+  Tooltip,
+  useMediaQuery,
+} from "@material-ui/core";
 import {
   FilterList as FilterListIcon,
   Info as InfoIcon,
 } from "@material-ui/icons";
 
-import { useStoreContext } from "@web-ui/contexts";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRenderParams } from "@web-ui/interfaces";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 import { useStyles } from "@web-ui/widgets/LinksWidget/LinksWidget.style";
 import {
@@ -23,6 +35,7 @@ import {
   GovernanceButton,
 } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
+import { theme } from "@web-integration/components/SideFilter/SideFilter.style";
 
 interface ILinksWidget extends IRenderParams {}
 
@@ -44,10 +57,19 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   bodyStyle,
 }: ILinksWidget) => {
   const classes = useStyles();
-  const { viewUtils, dateUtils } = useStoreContext();
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"), {
+    noSsr: true,
+  });
+  const { coreProxy, viewUtils, dateUtils } = useStoreContext();
   const [tabValue, setTabValue] = useState<number>(0);
   const [isSideFilterOpen, setIsSideFilterOpen] = useState(false);
+  const [tokenInformationList, setTokenInformationList] = useState<
+    TokenInformation[]
+  >([]);
+
   const [filter, setFilter] = useState<ISideFilter>();
+  const { setLoading, handleCoreError } = useLayoutContext();
+
   const {
     links,
     publicIdentifier,
@@ -57,6 +79,10 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     paymentsAutoAccept,
     setPaymentsAutoAccept,
   } = useLinks();
+
+  useEffect(() => {
+    getTokenInformation();
+  }, []);
 
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
@@ -144,6 +170,27 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     }, new Array<PushPayment>());
   };
 
+  const getTokenInformation = () => {
+    setLoading(true);
+    coreProxy
+      .getTokenInformation()
+      .map((tokenInformationList) => {
+        setTokenInformationList(tokenInformationList);
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
+  const repairPayment = (paymentId: PaymentId) => {
+    setLoading(true);
+    coreProxy
+      .repairPayments([paymentId])
+      .map(() => {
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
   const getPullPayments = (): PullPayment[] => {
     return links.reduce((acc, link) => {
       const pullPayments = link.pullPayments.filter((pullPayment) => {
@@ -181,6 +228,9 @@ const LinksWidget: React.FC<ILinksWidget> = ({
 
   return (
     <GovernanceCard
+      {...(!isLargeScreen && {
+        className: classes.nakedCard,
+      })}
       title={
         <Box display="flex">
           <Typography variant="h6">Transaction History</Typography>
@@ -232,16 +282,20 @@ const LinksWidget: React.FC<ILinksWidget> = ({
       <TabPanel value={tabValue} index={0}>
         <PushPaymentList
           publicIdentifier={publicIdentifier}
+          tokenInformationList={tokenInformationList}
           pushPayments={getPushPayments()}
           onAcceptPushPaymentClick={acceptPayment}
+          onRepairPaymentClick={repairPayment}
         />
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
         <PullPaymentList
           publicIdentifier={publicIdentifier}
+          tokenInformationList={tokenInformationList}
           pullPayments={getPullPayments()}
           onAcceptPullPaymentClick={acceptPayment}
           onPullFundClick={pullFunds}
+          onRepairPaymentClick={repairPayment}
         />
       </TabPanel>
     </GovernanceCard>

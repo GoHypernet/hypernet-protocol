@@ -11,7 +11,7 @@ import { ResultUtils } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 
-import { INonFungibleRegistryEnumerableUpgradeableContract } from "@contracts/INonFungibleRegistryEnumerableUpgradeableContract";
+import { INonFungibleRegistryEnumerableUpgradeableContract } from "@governance-sdk/INonFungibleRegistryEnumerableUpgradeableContract";
 
 export class NonFungibleRegistryEnumerableUpgradeableContract
   implements INonFungibleRegistryEnumerableUpgradeableContract

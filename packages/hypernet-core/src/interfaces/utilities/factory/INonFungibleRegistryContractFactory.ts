@@ -1,11 +1,11 @@
-import { INonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/contracts";
+import { INonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
 import { EthereumContractAddress } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
-export interface IContractFactory {
+export interface INonFungibleRegistryContractFactory {
   factoryNonFungibleRegistryEnumerableUpgradeableContract(
     contractAddress: EthereumContractAddress,
   ): ResultAsync<INonFungibleRegistryEnumerableUpgradeableContract, never>;
 }
 
-export const IContractFactoryType = Symbol.for("IContractFactory");
+export const INonFungibleRegistryContractFactoryType = Symbol.for("INonFungibleRegistryContractFactory");

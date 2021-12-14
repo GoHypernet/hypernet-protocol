@@ -1,0 +1,33 @@
+{
+  "name": "@hypernetlabs/governance-sdk",
+  "version": "0.0.1",
+  "description": "SDK for governance contracts wrappers",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo",
+    "!src",
+    "!test",
+    "!tsconfig.json"
+  ],
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
+    "prepublish": "yarn build",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "lint": "eslint -c .eslintrc.js \"{src/server, test}/**/*.{js,ts,tsx}\" --quiet",
+    "lint:fix": "eslint -c .eslintrc.js \"{server, test}/**/*.{js,ts,tsx}\" --quiet --fix",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "dependencies": {
+    "@hypernetlabs/gateway-connector": "^0.0.12",
+    "@hypernetlabs/objects": "^0.3.12",
+    "@hypernetlabs/utils": "^0.5.0",
+    "ethers": "^5.4.7",
+    "neverthrow": "^4.1.1"
+  }
+}
