@@ -19,8 +19,8 @@ export const useStyles = makeStyles((theme) => ({
     borderBottom: `1px solid ${colors.GRAY300}`,
   },
   tableCell: {
-    fontWeight: EFontWeight.MEDIUM,
-    fontSize: EFontSize.H6,
+    fontWeight: EFontWeight.REGULAR,
+    fontSize: EFontSize.BODY2,
     borderBottom: `1px solid ${colors.GRAY150}`,
   },
   mobileRowCard: {
