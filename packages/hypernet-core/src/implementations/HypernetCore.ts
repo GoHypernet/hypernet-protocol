@@ -135,7 +135,7 @@ import {
   IRegistryRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
-import { ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
 import { StorageUtils } from "@implementations/data/utilities";
@@ -301,6 +301,13 @@ export class HypernetCore implements IHypernetCore {
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
   protected _initializePromiseResolve: (() => void) | null;
+
+  protected _governanceInitializePromise: Promise<void>;
+  protected _governanceInitializePromiseResolve: (() => void) | null;
+
+  protected _paymentsInitializePromise: Promise<void>;
+  protected _paymentsInitializePromiseResolve: (() => void) | null;
+
   protected _inControl: boolean;
 
   /**
@@ -645,27 +652,39 @@ export class HypernetCore implements IHypernetCore {
     this._initializePromise = new Promise((resolve) => {
       this._initializePromiseResolve = resolve;
     });
+
+    this._governanceInitializePromiseResolve = null;
+    this._governanceInitializePromise = new Promise((resolve) => {
+      this._governanceInitializePromiseResolve = resolve;
+    });
+
+    this._paymentsInitializePromiseResolve = null;
+    this._paymentsInitializePromise = new Promise((resolve) => {
+      this._paymentsInitializePromiseResolve = resolve;
+    });
   }
 
   /**
    * Returns the initialized status of this instance of Hypernet Core.
    */
+  // TODO: Hook it up with governance and payments initialize promises
   public initialized(): Result<boolean, never> {
     return ok(this._initialized);
   }
 
+  // TODO: Hook it up with governance and payments initialize promises
   public waitInitialized(): ResultAsync<void, never> {
     return ResultAsync.fromSafePromise(this._initializePromise);
   }
 
-  // TODO: add resolvers and return to public
-  private waitPaymentsInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._initializePromise);
+  // TODO: Make it public
+  private waitGovernanceInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._governanceInitializePromise);
   }
 
-  // TODO: add resolvers and return to public
-  private waitGovernanceInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._initializePromise);
+  // TODO: Make it public
+  private waitPaymentsInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._paymentsInitializePromise);
   }
 
   /**
@@ -912,17 +931,21 @@ export class HypernetCore implements IHypernetCore {
       false,
     );
 
-    // run both separatly
-    if (paymentsRequired == null && governanceRequired == null) {
-      this._initializeResult = this.initializeBlockchainProvider()
-        .andThen(() => {
-          initializeStatus.blockchainProviderInitialized = true;
+    this._initializeResult = this.blockchainProvider
+      .initialize()
+      .andThen(() => {
+        this.logUtils.debug(`Initializing Hypernet Protocol Core`);
+        initializeStatus.blockchainProviderInitialized = true;
 
+        // run both separatly
+        if (paymentsRequired == null && governanceRequired == null) {
           return ResultUtils.combine([
             this.initializeGovernance()
               .map(() => {
                 initializeStatus.governanceInitialized = true;
-                // resolve waitGovernanceInitialized
+                if (this._governanceInitializePromiseResolve != null) {
+                  this._governanceInitializePromiseResolve();
+                }
               })
               .orElse((e) => {
                 this.logUtils.error(e);
@@ -931,83 +954,131 @@ export class HypernetCore implements IHypernetCore {
             this.initializePayments()
               .map(() => {
                 initializeStatus.paymentsInitialized = true;
-                // resolve waitPaymentsInitialized
+                if (this._paymentsInitializePromiseResolve != null) {
+                  this._paymentsInitializePromiseResolve();
+                }
               })
               .orElse((e) => {
                 this.logUtils.error(e);
                 return okAsync(undefined);
               }),
-          ]);
-        })
-        .andThen(() => {
-          if (
-            initializeStatus.blockchainProviderInitialized == true &&
-            initializeStatus.governanceInitialized == true &&
-            initializeStatus.paymentsInitialized == true &&
-            this._initializePromiseResolve != null
-          ) {
-            this._initializePromiseResolve();
-          }
+          ])
+            .andThen(() => {
+              return okAsync(initializeStatus);
+            })
+            .orElse((e) => {
+              this.logUtils.error(e);
+              return okAsync(initializeStatus);
+            });
+        }
 
-          return okAsync(initializeStatus);
-        })
-        .orElse((e) => {
-          this.logUtils.error(e);
-          return okAsync(initializeStatus);
-        });
-      /* .map(() => {
-          if (
-            initializeStatus.blockchainProviderInitialized == true &&
-            initializeStatus.governanceInitialized == true &&
-            initializeStatus.governanceInitialized == true &&
-            this._initializePromiseResolve != null
-          )
-            this._initializePromiseResolve();
-        }); */
-    }
+        // run separatly with payments being required
+        if (paymentsRequired == true && governanceRequired == null) {
+          return ResultUtils.combine([
+            this.initializeGovernance()
+              .map(() => {
+                initializeStatus.governanceInitialized = true;
+                if (this._governanceInitializePromiseResolve != null) {
+                  this._governanceInitializePromiseResolve();
+                }
+              })
+              .orElse((e) => {
+                this.logUtils.error(e);
+                return okAsync(undefined);
+              }),
+            this.initializePayments().map(() => {
+              initializeStatus.paymentsInitialized = true;
+              if (this._paymentsInitializePromiseResolve != null) {
+                this._paymentsInitializePromiseResolve();
+              }
+            }),
+          ])
+            .andThen(() => {
+              return okAsync(initializeStatus);
+            })
+            .orElse((e) => {
+              this.logUtils.error(e);
+              return errAsync(e);
+            });
+        }
 
-    // run separatly with payments being required
-    if (paymentsRequired == true && governanceRequired == null) {
-    }
+        // run separatly with governance being required
+        if (paymentsRequired == null && governanceRequired == true) {
+          return ResultUtils.combine([
+            this.initializeGovernance().map(() => {
+              initializeStatus.governanceInitialized = true;
+              if (this._governanceInitializePromiseResolve != null) {
+                this._governanceInitializePromiseResolve();
+              }
+            }),
+            this.initializePayments()
+              .map(() => {
+                initializeStatus.paymentsInitialized = true;
+                if (this._paymentsInitializePromiseResolve != null) {
+                  this._paymentsInitializePromiseResolve();
+                }
+              })
+              .orElse((e) => {
+                this.logUtils.error(e);
+                return okAsync(undefined);
+              }),
+          ])
+            .andThen(() => {
+              return okAsync(initializeStatus);
+            })
+            .orElse((e) => {
+              this.logUtils.error(e);
+              return errAsync(e);
+            });
+        }
 
-    // run separatly with governance being required
-    if (paymentsRequired == null && governanceRequired == true) {
-    }
+        // run separatly with both being required
+        if (paymentsRequired == true && governanceRequired == true) {
+          return ResultUtils.combine([
+            this.initializeGovernance().map(() => {
+              initializeStatus.governanceInitialized = true;
+              if (this._governanceInitializePromiseResolve != null) {
+                this._governanceInitializePromiseResolve();
+              }
+            }),
+            this.initializePayments().map(() => {
+              initializeStatus.paymentsInitialized = true;
+              if (this._paymentsInitializePromiseResolve != null) {
+                this._paymentsInitializePromiseResolve();
+              }
+            }),
+          ])
+            .andThen(() => {
+              return okAsync(initializeStatus);
+            })
+            .orElse((e) => {
+              this.logUtils.error(e);
+              return errAsync(e);
+            });
+        }
 
-    // run separatly with both being required
-    if (paymentsRequired == true && governanceRequired == true) {
-    }
-
-    this.logUtils.debug(`Initializing Hypernet Protocol Core`);
-    this._initializeResult = this.initializeBlockchainProvider().andThen(() => {
-      return ResultUtils.combine([
-        this.initializeGovernance(),
-        this.initializePayments(),
-      ])
-        .andThen(() => {
-          if (this._initializePromiseResolve != null) {
-            this._initializePromiseResolve();
-          }
-          this.logUtils.debug(
-            `Hypernet Protocol core initialized successfully`,
-          );
-          this._initialized = true;
-          return okAsync(new InitializeStatus(true, true, true));
-        })
-        .mapErr((e) => {
-          this.logUtils.error(e);
-          return e;
-        });
-    });
+        // TODO: Trash
+        return ResultUtils.combine([
+          this.initializeGovernance(),
+          this.initializePayments(),
+        ])
+          .andThen(() => {
+            if (this._initializePromiseResolve != null) {
+              this._initializePromiseResolve();
+            }
+            this.logUtils.debug(
+              `Hypernet Protocol core initialized successfully`,
+            );
+            this._initialized = true;
+            return okAsync(new InitializeStatus(true, true, true));
+          })
+          .mapErr((e) => {
+            this.logUtils.error(e);
+            return e;
+          });
+      });
 
     return this._initializeResult;
-  }
-
-  private initializeBlockchainProvider(): ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError
-  > {
-    return this.blockchainProvider.initialize();
   }
 
   private initializeGovernance(): ResultAsync<
