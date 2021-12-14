@@ -59,6 +59,7 @@ import {
   InactiveGatewayError,
   RegistryModule,
   BatchModuleContractError,
+  InitializeStatus,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -278,7 +279,7 @@ export class HypernetCore implements IHypernetCore {
   protected blockchainListener: IBlockchainListener;
 
   protected _initializeResult: ResultAsync<
-    void,
+    InitializeStatus,
     | MessagingError
     | BlockchainUnavailableError
     | VectorError
@@ -657,6 +658,16 @@ export class HypernetCore implements IHypernetCore {
     return ResultAsync.fromSafePromise(this._initializePromise);
   }
 
+  // TODO: add resolvers and return to public
+  private waitPaymentsInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._initializePromise);
+  }
+
+  // TODO: add resolvers and return to public
+  private waitGovernanceInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._initializePromise);
+  }
+
   /**
    * Whether or not this instance of Hypernet Core is currently the one in control.
    */
@@ -868,8 +879,11 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public initialize(): ResultAsync<
-    void,
+  public initialize(
+    paymentsRequired: boolean = true,
+    governanceRequired: boolean = true,
+  ): ResultAsync<
+    InitializeStatus | any,
     | MessagingError
     | BlockchainUnavailableError
     | VectorError
@@ -892,133 +906,230 @@ export class HypernetCore implements IHypernetCore {
       return this._initializeResult;
     }
 
+    const initializeStatus: InitializeStatus = new InitializeStatus(
+      false,
+      false,
+      false,
+    );
+
+    // run both separatly
+    if (paymentsRequired == null && governanceRequired == null) {
+      this._initializeResult = this.initializeBlockchainProvider()
+        .andThen(() => {
+          initializeStatus.blockchainProviderInitialized = true;
+
+          return ResultUtils.combine([
+            this.initializeGovernance()
+              .map(() => {
+                initializeStatus.governanceInitialized = true;
+                // resolve waitGovernanceInitialized
+              })
+              .orElse((e) => {
+                this.logUtils.error(e);
+                return okAsync(undefined);
+              }),
+            this.initializePayments()
+              .map(() => {
+                initializeStatus.paymentsInitialized = true;
+                // resolve waitPaymentsInitialized
+              })
+              .orElse((e) => {
+                this.logUtils.error(e);
+                return okAsync(undefined);
+              }),
+          ]);
+        })
+        .andThen(() => {
+          if (
+            initializeStatus.blockchainProviderInitialized == true &&
+            initializeStatus.governanceInitialized == true &&
+            initializeStatus.paymentsInitialized == true &&
+            this._initializePromiseResolve != null
+          ) {
+            this._initializePromiseResolve();
+          }
+
+          return okAsync(initializeStatus);
+        })
+        .orElse((e) => {
+          this.logUtils.error(e);
+          return okAsync(initializeStatus);
+        });
+      /* .map(() => {
+          if (
+            initializeStatus.blockchainProviderInitialized == true &&
+            initializeStatus.governanceInitialized == true &&
+            initializeStatus.governanceInitialized == true &&
+            this._initializePromiseResolve != null
+          )
+            this._initializePromiseResolve();
+        }); */
+    }
+
+    // run separatly with payments being required
+    if (paymentsRequired == true && governanceRequired == null) {
+    }
+
+    // run separatly with governance being required
+    if (paymentsRequired == null && governanceRequired == true) {
+    }
+
+    // run separatly with both being required
+    if (paymentsRequired == true && governanceRequired == true) {
+    }
+
     this.logUtils.debug(`Initializing Hypernet Protocol Core`);
-
-    let context: HypernetContext;
-    this._initializeResult = this.blockchainProvider
-      .initialize()
-      .andThen(() => {
-        // Get the config
-        return this.configProvider.getConfig();
-      })
-      .andThen((config) => {
-        this.logUtils.debug("Getting Ethereum accounts");
-        return (
-          ResultUtils.combine([
-            this.contextProvider.getContext(),
-            this.accountRepository.getAccounts(),
-          ])
-            .andThen((vals) => {
-              context = vals[0];
-              const accounts = vals[1];
-              context.account = accounts[0];
-              this.logUtils.debug(`Obtained accounts: ${accounts}`);
-              return this.contextProvider.setContext(context);
-            })
-            .andThen(() => {
-              return this.ceramicUtils.initialize();
-            })
-            .andThen(() => {
-              // Initialize governance provider with contracts
-              return ResultUtils.combine([
-                this.registryRepository.initializeReadOnly(),
-                this.governanceRepository.initializeReadOnly(),
-              ]);
-            })
-            .andThen(() => {
-              // Initialize governance signer with contracts
-              return ResultUtils.combine([
-                this.registryRepository.initializeForWrite(),
-                this.governanceRepository.initializeForWrite(),
-                this.tokenInformationRepository.initialize(
-                  config.governanceChainInformation.tokenRegistryAddress,
-                ),
-              ])
-                .map(() => {})
-                .orElse((e) => {
-                  this.logUtils.error(e);
-                  return okAsync(undefined);
-                });
-            })
-            .andThen(() => {
-              return ResultUtils.combine([
-                this.accountRepository.getPublicIdentifier(),
-                this.accountRepository.getActiveStateChannels(),
-              ]);
-            })
-            .andThen((vals) => {
-              const [publicIdentifier, activeStateChannels] = vals;
-
-              this.logUtils.debug(
-                `Obtained active state channels: ${activeStateChannels}`,
-              );
-
-              context.publicIdentifier = publicIdentifier;
-              context.activeStateChannels = activeStateChannels;
-
-              return this.contextProvider.setContext(context);
-            })
-            .andThen(() => {
-              // By doing some active initialization, we can avoid whole categories
-              // of errors occuring post-initialization (ie, runtime), which makes the
-              // whole thing more reliable in operation.
-              this.logUtils.debug("Initializing utilities");
-              this.logUtils.debug("Initializing services");
-              return this.gatewayConnectorService.initialize();
-            })
-            .andThen(() => {
-              this.logUtils.debug("Initializing API listeners");
-              // Initialize anything that wants an initialized context
-              return ResultUtils.combine([
-                this.vectorAPIListener.initialize(),
-                this.gatewayConnectorListener.initialize(),
-                this.messagingListener.initialize(),
-                this.blockchainListener.initialize(),
-              ]);
-            })
-            .andThen(() => {
-              this.logUtils.debug("Initialized all internal services");
-              return this.gatewayConnectorService.activateAuthorizedGateways();
-            })
-            // .andThen(() => {
-            //   // Claim control
-            //   return this.controlService.claimControl();
-            // })
-
-            .andThen(() => {
-              // If we are in debug mode, we'll print the registered transfers out.
-              if (config.debug) {
-                return this.browserNodeProvider
-                  .getBrowserNode()
-                  .andThen((browserNode) => {
-                    return browserNode.getRegisteredTransfers(
-                      config.governanceChainId,
-                    );
-                  })
-                  .map((registeredTransfers) => {
-                    this.logUtils.debug("Registered Transfers");
-                    this.logUtils.debug(registeredTransfers);
-                  });
-              }
-              return okAsync(undefined);
-            })
-            .map(() => {
-              if (this._initializePromiseResolve != null) {
-                this._initializePromiseResolve();
-              }
-              this.logUtils.debug(
-                `Hypernet Protocol core initialized successfully`,
-              );
-              this._initialized = true;
-            })
-            .mapErr((e) => {
-              this.logUtils.error(e);
-              return e;
-            })
-        );
-      });
+    this._initializeResult = this.initializeBlockchainProvider().andThen(() => {
+      return ResultUtils.combine([
+        this.initializeGovernance(),
+        this.initializePayments(),
+      ])
+        .andThen(() => {
+          if (this._initializePromiseResolve != null) {
+            this._initializePromiseResolve();
+          }
+          this.logUtils.debug(
+            `Hypernet Protocol core initialized successfully`,
+          );
+          this._initialized = true;
+          return okAsync(new InitializeStatus(true, true, true));
+        })
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    });
 
     return this._initializeResult;
+  }
+
+  private initializeBlockchainProvider(): ResultAsync<
+    void,
+    BlockchainUnavailableError | InvalidParametersError
+  > {
+    return this.blockchainProvider.initialize();
+  }
+
+  private initializeGovernance(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
+    // Initialize governance provider with contracts
+    return ResultUtils.combine([
+      this.registryRepository.initializeReadOnly(),
+      this.governanceRepository.initializeReadOnly(),
+      this.registryRepository.initializeForWrite(),
+      this.governanceRepository.initializeForWrite(),
+    ]).map(() => {});
+  }
+
+  private initializePayments(): ResultAsync<
+    void,
+    | MessagingError
+    | BlockchainUnavailableError
+    | VectorError
+    | RouterChannelUnknownError
+    | GatewayConnectorError
+    | GatewayValidationError
+    | PersistenceError
+    | ProxyError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | InvalidPaymentIdError
+    | TransferResolutionError
+    | TransferCreationError
+    | PaymentStakeError
+    | PaymentFinalizeError
+    | NonFungibleRegistryContractError
+  > {
+    let context: HypernetContext;
+
+    return this.configProvider.getConfig().andThen((config) => {
+      return this.tokenInformationRepository
+        .initialize(config.governanceChainInformation.tokenRegistryAddress)
+        .orElse((e) => {
+          this.logUtils.error(e);
+          return okAsync(undefined);
+        })
+
+        .andThen(() => {
+          this.logUtils.debug("Getting Ethereum accounts");
+          return ResultUtils.combine([
+            this.contextProvider.getContext(),
+            this.accountRepository.getAccounts(),
+          ]);
+        })
+        .andThen((vals) => {
+          context = vals[0];
+          const accounts = vals[1];
+          context.account = accounts[0];
+          this.logUtils.debug(`Obtained accounts: ${accounts}`);
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return this.ceramicUtils.initialize();
+        })
+        .andThen(() => {
+          return ResultUtils.combine([
+            this.accountRepository.getPublicIdentifier(),
+            this.accountRepository.getActiveStateChannels(),
+          ]);
+        })
+        .andThen((vals) => {
+          const [publicIdentifier, activeStateChannels] = vals;
+
+          this.logUtils.debug(
+            `Obtained active state channels: ${activeStateChannels}`,
+          );
+
+          context.publicIdentifier = publicIdentifier;
+          context.activeStateChannels = activeStateChannels;
+
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          // By doing some active initialization, we can avoid whole categories
+          // of errors occuring post-initialization (ie, runtime), which makes the
+          // whole thing more reliable in operation.
+          this.logUtils.debug("Initializing utilities");
+          this.logUtils.debug("Initializing services");
+          return this.gatewayConnectorService.initialize();
+        })
+        .andThen(() => {
+          this.logUtils.debug("Initializing API listeners");
+          // Initialize anything that wants an initialized context
+          return ResultUtils.combine([
+            this.vectorAPIListener.initialize(),
+            this.gatewayConnectorListener.initialize(),
+            this.messagingListener.initialize(),
+            this.blockchainListener.initialize(),
+          ]);
+        })
+        .andThen(() => {
+          this.logUtils.debug("Initialized all internal services");
+          return this.gatewayConnectorService.activateAuthorizedGateways();
+        })
+
+        .andThen(() => {
+          // If we are in debug mode, we'll print the registered transfers out.
+          if (config.debug) {
+            return this.browserNodeProvider
+              .getBrowserNode()
+              .andThen((browserNode) => {
+                return browserNode.getRegisteredTransfers(
+                  config.governanceChainId,
+                );
+              })
+              .map((registeredTransfers) => {
+                this.logUtils.debug("Registered Transfers");
+                this.logUtils.debug(registeredTransfers);
+              });
+          }
+          return okAsync(undefined);
+        });
+    });
   }
 
   /**

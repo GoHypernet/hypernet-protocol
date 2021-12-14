@@ -59,6 +59,7 @@ import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
+import { InitializeStatus } from "@web-integration/InitializeStatus";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -88,8 +89,11 @@ export interface IHypernetCore {
    * hypernet core will be representing.
    * @param account The address that says who this instance of HypernetCore is representing.
    */
-  initialize(): ResultAsync<
-    void,
+  initialize(
+    paymentsRequired?: boolean,
+    governanceRequired?: boolean,
+  ): ResultAsync<
+    InitializeStatus,
     | MessagingError
     | BlockchainUnavailableError
     | VectorError

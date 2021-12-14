@@ -52,6 +52,7 @@ import {
   RegistryModule,
   BatchModuleContractError,
   InvalidPaymentIdError,
+  InitializeStatus,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -324,8 +325,11 @@ export default class HypernetIFrameProxy
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(): ResultAsync<
-    void,
+  public initialize(
+    paymentsRequired: boolean = true,
+    governanceRequired: boolean = true,
+  ): ResultAsync<
+    InitializeStatus,
     | MessagingError
     | BlockchainUnavailableError
     | VectorError

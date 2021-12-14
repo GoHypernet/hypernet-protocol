@@ -43,9 +43,17 @@ export class CoreListener extends ChildProxy implements ICoreListener {
   protected getModel(): Postmate.Model {
     // Fire up the Postmate model, and wrap up the core as the model
     return new Postmate.Model({
-      initialize: (data: IIFrameCallData<void>) => {
+      initialize: (
+        data: IIFrameCallData<{
+          paymentsRequired: boolean;
+          governanceRequired: boolean;
+        }>,
+      ) => {
         this.returnForModel(() => {
-          return this.core.initialize();
+          return this.core.initialize(
+            data.data.paymentsRequired,
+            data.data.governanceRequired,
+          );
         }, data.callId);
       },
       waitInitialized: (data: IIFrameCallData<void>) => {
