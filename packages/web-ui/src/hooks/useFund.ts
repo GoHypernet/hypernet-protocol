@@ -158,7 +158,7 @@ export function useFund(): IReducerStateReducer {
           ?.getTokenInformation()
           .map((tokenInformation: TokenInformation[]) => {
             const tokenInformationList = tokenInformation.filter(
-              (tokenInfo) => tokenInfo.chainId === governanceChainId,
+              (tokenInfo) => tokenInfo.chainId == governanceChainId,
             );
             // prepare balances
             setLoading(false);
