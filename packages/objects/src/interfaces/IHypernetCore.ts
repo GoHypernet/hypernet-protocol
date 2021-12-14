@@ -673,6 +673,14 @@ export interface IHypernetCore {
     | ProxyError
   >;
 
+  getRegistryEntryListByOwnerAddress(
+    registryName: string,
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  >;
+
   /**
    * Observables for seeing what's going on
    */

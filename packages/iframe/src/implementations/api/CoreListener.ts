@@ -563,6 +563,19 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
+      getRegistryEntryListByOwnerAddress: (
+        data: IIFrameCallData<{
+          registryName: string;
+          ownerAddress: EthereumAccountAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryEntryListByOwnerAddress(
+            data.data.registryName,
+            data.data.ownerAddress,
+          );
+        }, data.callId);
+      },
     });
   }
 

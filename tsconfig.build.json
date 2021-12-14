@@ -40,7 +40,7 @@
       "@objects/*": ["./*"],
       "@user-dashboard/*": ["./*"],
       "@storybook/*": ["./*"],
-      "@contracts/*": ["./*"]
+      "@governance-sdk/*": ["./*"]
     }
   }
 }
