@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "@hypernetlabs/gateway-connector": "^0.0.12",
-    "@hypernetlabs/objects": "^0.3.12",
-    "@hypernetlabs/utils": "^0.5.0",
+    "@hypernetlabs/objects": "^0.3.13",
+    "@hypernetlabs/utils": "^0.5.1",
     "ethers": "^5.4.7",
     "neverthrow": "^4.1.1"
   }
