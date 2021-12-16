@@ -61,3 +61,4 @@ export const INSECURE_CONTENT_IMAGE_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/insecure-content.png";
 export const HYPERPAY_LOGO_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hyperpay-temp-logo.png";
+export const LAUNCHPAD_PROD_URL = "https://launchpad.hypernet.foundation";
