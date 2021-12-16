@@ -862,14 +862,12 @@ export class RegistryRepository implements IRegistryRepository {
       // Means registration token is not a zero address
       if (BigNumber.from(registry.registrationToken).isZero() === false) {
         return this.nonFungibleRegistryContract
-          .registrationFee()
+          .registrationFeeBigNumber()
           .andThen((registrationFees) => {
             return this.tokenERC20Contract
-              .approve(
-                registry.address,
-                BigNumberString(registrationFees.toString()),
-              )
+              .approve(registry.address, registrationFees)
               .andThen(() => {
+                console.log("heyy");
                 return this.nonFungibleRegistryContract.registerByToken(
                   newRegistryEntry.owner,
                   newRegistryEntry.label,
@@ -900,19 +898,19 @@ export class RegistryRepository implements IRegistryRepository {
       this.configProvider.getConfig(),
     ]).andThen((vals) => {
       const [registrationFees, config] = vals;
-      if (this.provider == null) {
-        throw new Error("No provider available!");
+      if (this.signer == null) {
+        throw new Error("No signer available!");
       }
 
       this.tokenERC20Contract = new ERC20Contract(
-        this.provider,
+        this.signer,
         config.governanceChainInformation.hypertokenAddress,
       );
 
       return this.tokenERC20Contract
         .approve(
           this.registryFactoryContract.getContractAddress(),
-          BigNumberString(registrationFees.toString()),
+          registrationFees,
         )
         .andThen(() => {
           return this.registryFactoryContract.createRegistryByToken(

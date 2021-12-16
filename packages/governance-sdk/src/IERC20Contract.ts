@@ -1,6 +1,5 @@
 import {
   ERC20ContractError,
-  BigNumberString,
   EthereumContractAddress,
   EthereumAccountAddress,
 } from "@hypernetlabs/objects";
@@ -10,7 +9,7 @@ import { ResultAsync } from "neverthrow";
 export interface IERC20Contract {
   approve(
     registryAddress: EthereumContractAddress,
-    registrationFee: BigNumberString,
+    registrationFee: BigNumber,
   ): ResultAsync<void, ERC20ContractError>;
   delegate(
     delegateAddress: EthereumAccountAddress,
