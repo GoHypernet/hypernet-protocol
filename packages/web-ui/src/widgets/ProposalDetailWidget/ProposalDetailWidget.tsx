@@ -26,7 +26,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
-  const [blockNumber, setBlockNumber] = useState<number>(-1);
+  const [blockNumber, setBlockNumber] = useState<number>();
   const [accountAddress, setAccountAddress] =
     useState<EthereumAccountAddress>();
   const [supportStatus, setSupportStatus] = useState<EProposalVoteSupport>();
@@ -295,7 +295,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             Current Block
           </Typography>
           <Typography variant="body1" className={classes.sectionValue}>
-            {blockNumber > -1 && blockNumber}
+            {blockNumber}
           </Typography>
         </Box>
         <Box className={classes.sectionWrapper}>
