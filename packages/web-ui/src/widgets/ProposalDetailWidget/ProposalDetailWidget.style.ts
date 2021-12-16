@@ -3,14 +3,16 @@ import { makeStyles } from "@material-ui/core";
 import { colors, EFontWeight } from "@web-ui/theme";
 
 export const useStyles = makeStyles({
-  proposerSectionWrapper: {
+  sectionWrapper: {
     display: "flex",
     flexDirection: "row",
+    marginBottom: 4,
   },
-  proposerLabel: {
+  sectionLabel: {
     fontWeight: EFontWeight.MEDIUM,
+    minWidth: 100,
   },
-  proposerValue: {
+  sectionValue: {
     marginLeft: 16,
     color: colors.GREEN700,
   },
