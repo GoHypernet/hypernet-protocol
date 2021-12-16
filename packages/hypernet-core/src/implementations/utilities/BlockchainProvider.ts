@@ -193,12 +193,6 @@ export class BlockchainProvider implements IBlockchainProvider {
     });
   }
 
-  public getBlockNumber(): ResultAsync<number, BlockchainUnavailableError> {
-    return this.getProvider().map(async (provider) => {
-      return await provider.getBlockNumber();
-    });
-  }
-
   public supplyPrivateCredentials(
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError> {

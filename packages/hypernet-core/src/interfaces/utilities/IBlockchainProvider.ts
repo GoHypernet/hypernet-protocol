@@ -42,7 +42,6 @@ export interface IBlockchainProvider {
     ethers.providers.Block,
     BlockchainUnavailableError
   >;
-  getBlockNumber(): ResultAsync<number, BlockchainUnavailableError>;
   supplyPrivateCredentials(
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError>;

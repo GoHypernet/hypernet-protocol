@@ -77,10 +77,6 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     return okAsync({} as ethers.providers.Block);
   }
 
-  public getBlockNumber(): ResultAsync<number, BlockchainUnavailableError> {
-    return okAsync(1);
-  }
-
   public supplyPrivateCredentials(
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError> {
