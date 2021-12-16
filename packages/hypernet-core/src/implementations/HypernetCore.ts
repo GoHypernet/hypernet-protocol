@@ -60,6 +60,7 @@ import {
   RegistryModule,
   BatchModuleContractError,
   InitializeStatus,
+  CoreInitializationErrors,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -280,31 +281,17 @@ export class HypernetCore implements IHypernetCore {
 
   protected _initializeResult: ResultAsync<
     InitializeStatus,
-    | MessagingError
-    | BlockchainUnavailableError
-    | VectorError
-    | RouterChannelUnknownError
-    | GatewayConnectorError
-    | GatewayValidationError
-    | ProxyError
-    | PersistenceError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | InvalidPaymentIdError
-    | GovernanceSignerUnavailableError
-    | TransferResolutionError
-    | TransferCreationError
-    | PaymentStakeError
-    | PaymentFinalizeError
-    | NonFungibleRegistryContractError
+    CoreInitializationErrors
   > | null;
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
   protected _initializePromiseResolve: (() => void) | null;
 
+  protected _governanceInitialized: boolean;
   protected _governanceInitializePromise: Promise<void>;
   protected _governanceInitializePromiseResolve: (() => void) | null;
 
+  protected _paymentsInitialized: boolean;
   protected _paymentsInitializePromise: Promise<void>;
   protected _paymentsInitializePromiseResolve: (() => void) | null;
 
@@ -653,11 +640,13 @@ export class HypernetCore implements IHypernetCore {
       this._initializePromiseResolve = resolve;
     });
 
+    this._governanceInitialized = false;
     this._governanceInitializePromiseResolve = null;
     this._governanceInitializePromise = new Promise((resolve) => {
       this._governanceInitializePromiseResolve = resolve;
     });
 
+    this._paymentsInitialized = false;
     this._paymentsInitializePromiseResolve = null;
     this._paymentsInitializePromise = new Promise((resolve) => {
       this._paymentsInitializePromiseResolve = resolve;
@@ -667,23 +656,59 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Returns the initialized status of this instance of Hypernet Core.
    */
-  // TODO: Hook it up with governance and payments initialize promises
-  public initialized(): Result<boolean, never> {
-    return ok(this._initialized);
+  public initialized(): ResultAsync<boolean, never> {
+    return this.configProvider.getConfig().andThen((config) => {
+      if (
+        config.governanceRequired == true &&
+        config.paymentsRequired == true
+      ) {
+        return ok(this._governanceInitialized && this._paymentsInitialized);
+      } else {
+        return ok(this._governanceInitialized || this._paymentsInitialized);
+      }
+    });
   }
 
-  // TODO: Hook it up with governance and payments initialize promises
   public waitInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._initializePromise);
+    return this.configProvider.getConfig().andThen((config) => {
+      if (
+        config.governanceRequired == true &&
+        config.paymentsRequired == true
+      ) {
+        return ResultUtils.combine([
+          ResultAsync.fromSafePromise<void, never>(
+            this._governanceInitializePromise,
+          ),
+          ResultAsync.fromSafePromise<void, never>(
+            this._paymentsInitializePromise,
+          ),
+        ]).map(() => {});
+      } else {
+        return ResultUtils.race([
+          ResultAsync.fromSafePromise<void, never>(
+            this._governanceInitializePromise,
+          ),
+          ResultAsync.fromSafePromise<void, never>(
+            this._paymentsInitializePromise,
+          ),
+        ]).map(() => {});
+      }
+    });
   }
 
-  // TODO: Make it public
-  private waitGovernanceInitialized(): ResultAsync<void, never> {
+  public governanceInitialized(): Result<boolean, never> {
+    return ok(this._governanceInitialized);
+  }
+
+  public waitGovernanceInitialized(): ResultAsync<void, never> {
     return ResultAsync.fromSafePromise(this._governanceInitializePromise);
   }
 
-  // TODO: Make it public
-  private waitPaymentsInitialized(): ResultAsync<void, never> {
+  public paymentsInitialized(): Result<boolean, never> {
+    return ok(this._paymentsInitialized);
+  }
+
+  public waitPaymentsInitialized(): ResultAsync<void, never> {
     return ResultAsync.fromSafePromise(this._paymentsInitializePromise);
   }
 
@@ -898,185 +923,155 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public initialize(
-    paymentsRequired: boolean = true,
-    governanceRequired: boolean = true,
-  ): ResultAsync<
-    InitializeStatus | any,
-    | MessagingError
-    | BlockchainUnavailableError
-    | VectorError
-    | RouterChannelUnknownError
-    | GatewayConnectorError
-    | GatewayValidationError
-    | PersistenceError
-    | ProxyError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | InvalidPaymentIdError
-    | GovernanceSignerUnavailableError
-    | TransferResolutionError
-    | TransferCreationError
-    | PaymentStakeError
-    | PaymentFinalizeError
-    | NonFungibleRegistryContractError
-  > {
+  public initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors> {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }
 
-    const initializeStatus: InitializeStatus = new InitializeStatus(
-      false,
-      false,
-      false,
-    );
+    this._initializeResult = ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+      this.blockchainProvider.initialize(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      this.logUtils.debug(`Initializing Hypernet Protocol Core`);
 
-    this._initializeResult = this.blockchainProvider
-      .initialize()
-      .andThen(() => {
-        this.logUtils.debug(`Initializing Hypernet Protocol Core`);
-        initializeStatus.blockchainProviderInitialized = true;
-
-        // run both separatly
-        if (paymentsRequired == null && governanceRequired == null) {
-          return ResultUtils.combine([
-            this.initializeGovernance()
-              .map(() => {
-                initializeStatus.governanceInitialized = true;
-                if (this._governanceInitializePromiseResolve != null) {
-                  this._governanceInitializePromiseResolve();
-                }
-              })
-              .orElse((e) => {
-                this.logUtils.error(e);
-                return okAsync(undefined);
-              }),
-            this.initializePayments()
-              .map(() => {
-                initializeStatus.paymentsInitialized = true;
-                if (this._paymentsInitializePromiseResolve != null) {
-                  this._paymentsInitializePromiseResolve();
-                }
-              })
-              .orElse((e) => {
-                this.logUtils.error(e);
-                return okAsync(undefined);
-              }),
-          ])
-            .andThen(() => {
-              return okAsync(initializeStatus);
-            })
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return okAsync(initializeStatus);
-            });
-        }
-
-        // run separatly with payments being required
-        if (paymentsRequired == true && governanceRequired == null) {
-          return ResultUtils.combine([
-            this.initializeGovernance()
-              .map(() => {
-                initializeStatus.governanceInitialized = true;
-                if (this._governanceInitializePromiseResolve != null) {
-                  this._governanceInitializePromiseResolve();
-                }
-              })
-              .orElse((e) => {
-                this.logUtils.error(e);
-                return okAsync(undefined);
-              }),
-            this.initializePayments().map(() => {
-              initializeStatus.paymentsInitialized = true;
-              if (this._paymentsInitializePromiseResolve != null) {
-                this._paymentsInitializePromiseResolve();
-              }
-            }),
-          ])
-            .andThen(() => {
-              return okAsync(initializeStatus);
-            })
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return errAsync(e);
-            });
-        }
-
-        // run separatly with governance being required
-        if (paymentsRequired == null && governanceRequired == true) {
-          return ResultUtils.combine([
-            this.initializeGovernance().map(() => {
-              initializeStatus.governanceInitialized = true;
+      let initializationResponse: ResultAsync<void, CoreInitializationErrors>;
+      // run both separatly
+      if (
+        config.paymentsRequired == false &&
+        config.governanceRequired == false
+      ) {
+        initializationResponse = ResultUtils.combine([
+          this.initializeGovernance()
+            .map(() => {
+              context.governanceInitialized = true;
               if (this._governanceInitializePromiseResolve != null) {
                 this._governanceInitializePromiseResolve();
               }
-            }),
-            this.initializePayments()
-              .map(() => {
-                initializeStatus.paymentsInitialized = true;
-                if (this._paymentsInitializePromiseResolve != null) {
-                  this._paymentsInitializePromiseResolve();
-                }
-              })
-              .orElse((e) => {
-                this.logUtils.error(e);
-                return okAsync(undefined);
-              }),
-          ])
-            .andThen(() => {
-              return okAsync(initializeStatus);
             })
             .orElse((e) => {
               this.logUtils.error(e);
-              return errAsync(e);
-            });
-        }
-
-        // run separatly with both being required
-        if (paymentsRequired == true && governanceRequired == true) {
-          return ResultUtils.combine([
-            this.initializeGovernance().map(() => {
-              initializeStatus.governanceInitialized = true;
-              if (this._governanceInitializePromiseResolve != null) {
-                this._governanceInitializePromiseResolve();
-              }
+              return okAsync(undefined);
             }),
-            this.initializePayments().map(() => {
-              initializeStatus.paymentsInitialized = true;
+          this.initializePayments(config, context)
+            .map(() => {
+              context.paymentsInitialized = true;
               if (this._paymentsInitializePromiseResolve != null) {
                 this._paymentsInitializePromiseResolve();
               }
-            }),
-          ])
-            .andThen(() => {
-              return okAsync(initializeStatus);
             })
             .orElse((e) => {
               this.logUtils.error(e);
-              return errAsync(e);
-            });
-        }
-
-        // TODO: Trash
-        return ResultUtils.combine([
-          this.initializeGovernance(),
-          this.initializePayments(),
+              return okAsync(undefined);
+            }),
         ])
-          .andThen(() => {
-            if (this._initializePromiseResolve != null) {
-              this._initializePromiseResolve();
-            }
-            this.logUtils.debug(
-              `Hypernet Protocol core initialized successfully`,
-            );
-            this._initialized = true;
-            return okAsync(new InitializeStatus(true, true, true));
-          })
-          .mapErr((e) => {
+          .map(() => {})
+          .orElse((e) => {
             this.logUtils.error(e);
-            return e;
+            return okAsync(undefined);
           });
-      });
+      }
+
+      // run separatly with payments being required
+      else if (
+        config.paymentsRequired == true &&
+        config.governanceRequired == false
+      ) {
+        initializationResponse = ResultUtils.combine([
+          this.initializeGovernance()
+            .map(() => {
+              context.governanceInitialized = true;
+              if (this._governanceInitializePromiseResolve != null) {
+                this._governanceInitializePromiseResolve();
+              }
+            })
+            .orElse((e) => {
+              this.logUtils.error(e);
+              return okAsync(undefined);
+            }),
+          this.initializePayments(config, context).map(() => {
+            context.paymentsInitialized = true;
+            if (this._paymentsInitializePromiseResolve != null) {
+              this._paymentsInitializePromiseResolve();
+            }
+          }),
+        ])
+          .map(() => {})
+          .orElse((e) => {
+            this.logUtils.error(e);
+            return errAsync(e);
+          });
+      }
+
+      // run separatly with governance being required
+      else if (
+        config.paymentsRequired == false &&
+        config.governanceRequired == true
+      ) {
+        initializationResponse = ResultUtils.combine([
+          this.initializeGovernance().map(() => {
+            context.governanceInitialized = true;
+            if (this._governanceInitializePromiseResolve != null) {
+              this._governanceInitializePromiseResolve();
+            }
+          }),
+          this.initializePayments(config, context)
+            .map(() => {
+              context.paymentsInitialized = true;
+              if (this._paymentsInitializePromiseResolve != null) {
+                this._paymentsInitializePromiseResolve();
+              }
+            })
+            .orElse((e) => {
+              this.logUtils.error(e);
+              return okAsync(undefined);
+            }),
+        ])
+          .map(() => {})
+          .orElse((e) => {
+            this.logUtils.error(e);
+            return errAsync(e);
+          });
+      }
+
+      // run separatly with both being required (both paymentsRequired and governanceRequired are true)
+      else {
+        initializationResponse = ResultUtils.combine([
+          this.initializeGovernance().map(() => {
+            context.governanceInitialized = true;
+            if (this._governanceInitializePromiseResolve != null) {
+              this._governanceInitializePromiseResolve();
+            }
+          }),
+          this.initializePayments(config, context).map(() => {
+            context.paymentsInitialized = true;
+            if (this._paymentsInitializePromiseResolve != null) {
+              this._paymentsInitializePromiseResolve();
+            }
+          }),
+        ])
+          .map(() => {})
+          .orElse((e) => {
+            this.logUtils.error(e);
+            return errAsync(e);
+          });
+      }
+
+      return initializationResponse
+        .andThen(() => {
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return okAsync(
+            new InitializeStatus(
+              true,
+              context.paymentsInitialized,
+              context.governanceInitialized,
+            ),
+          );
+        });
+    });
 
     return this._initializeResult;
   }
@@ -1096,7 +1091,10 @@ export class HypernetCore implements IHypernetCore {
     ]).map(() => {});
   }
 
-  private initializePayments(): ResultAsync<
+  private initializePayments(
+    config: HypernetConfig,
+    context: HypernetContext,
+  ): ResultAsync<
     void,
     | MessagingError
     | BlockchainUnavailableError
@@ -1115,92 +1113,83 @@ export class HypernetCore implements IHypernetCore {
     | PaymentFinalizeError
     | NonFungibleRegistryContractError
   > {
-    let context: HypernetContext;
+    return this.tokenInformationRepository
+      .initialize(config.governanceChainInformation.tokenRegistryAddress)
+      .orElse((e) => {
+        this.logUtils.error(e);
+        return okAsync(undefined);
+      })
 
-    return this.configProvider.getConfig().andThen((config) => {
-      return this.tokenInformationRepository
-        .initialize(config.governanceChainInformation.tokenRegistryAddress)
-        .orElse((e) => {
-          this.logUtils.error(e);
-          return okAsync(undefined);
-        })
+      .andThen(() => {
+        this.logUtils.debug("Getting Ethereum accounts");
+        return this.accountRepository.getAccounts();
+      })
+      .andThen((accounts) => {
+        context.account = accounts[0];
+        this.logUtils.debug(`Obtained accounts: ${accounts}`);
+        return this.contextProvider.setContext(context);
+      })
+      .andThen(() => {
+        return this.ceramicUtils.initialize();
+      })
+      .andThen(() => {
+        return ResultUtils.combine([
+          this.accountRepository.getPublicIdentifier(),
+          this.accountRepository.getActiveStateChannels(),
+        ]);
+      })
+      .andThen((vals) => {
+        const [publicIdentifier, activeStateChannels] = vals;
 
-        .andThen(() => {
-          this.logUtils.debug("Getting Ethereum accounts");
-          return ResultUtils.combine([
-            this.contextProvider.getContext(),
-            this.accountRepository.getAccounts(),
-          ]);
-        })
-        .andThen((vals) => {
-          context = vals[0];
-          const accounts = vals[1];
-          context.account = accounts[0];
-          this.logUtils.debug(`Obtained accounts: ${accounts}`);
-          return this.contextProvider.setContext(context);
-        })
-        .andThen(() => {
-          return this.ceramicUtils.initialize();
-        })
-        .andThen(() => {
-          return ResultUtils.combine([
-            this.accountRepository.getPublicIdentifier(),
-            this.accountRepository.getActiveStateChannels(),
-          ]);
-        })
-        .andThen((vals) => {
-          const [publicIdentifier, activeStateChannels] = vals;
+        this.logUtils.debug(
+          `Obtained active state channels: ${activeStateChannels}`,
+        );
 
-          this.logUtils.debug(
-            `Obtained active state channels: ${activeStateChannels}`,
-          );
+        context.publicIdentifier = publicIdentifier;
+        context.activeStateChannels = activeStateChannels;
 
-          context.publicIdentifier = publicIdentifier;
-          context.activeStateChannels = activeStateChannels;
+        return this.contextProvider.setContext(context);
+      })
+      .andThen(() => {
+        // By doing some active initialization, we can avoid whole categories
+        // of errors occuring post-initialization (ie, runtime), which makes the
+        // whole thing more reliable in operation.
+        this.logUtils.debug("Initializing utilities");
+        this.logUtils.debug("Initializing services");
+        return this.gatewayConnectorService.initialize();
+      })
+      .andThen(() => {
+        this.logUtils.debug("Initializing API listeners");
+        // Initialize anything that wants an initialized context
+        return ResultUtils.combine([
+          this.vectorAPIListener.initialize(),
+          this.gatewayConnectorListener.initialize(),
+          this.messagingListener.initialize(),
+          this.blockchainListener.initialize(),
+        ]);
+      })
+      .andThen(() => {
+        this.logUtils.debug("Initialized all internal services");
+        return this.gatewayConnectorService.activateAuthorizedGateways();
+      })
 
-          return this.contextProvider.setContext(context);
-        })
-        .andThen(() => {
-          // By doing some active initialization, we can avoid whole categories
-          // of errors occuring post-initialization (ie, runtime), which makes the
-          // whole thing more reliable in operation.
-          this.logUtils.debug("Initializing utilities");
-          this.logUtils.debug("Initializing services");
-          return this.gatewayConnectorService.initialize();
-        })
-        .andThen(() => {
-          this.logUtils.debug("Initializing API listeners");
-          // Initialize anything that wants an initialized context
-          return ResultUtils.combine([
-            this.vectorAPIListener.initialize(),
-            this.gatewayConnectorListener.initialize(),
-            this.messagingListener.initialize(),
-            this.blockchainListener.initialize(),
-          ]);
-        })
-        .andThen(() => {
-          this.logUtils.debug("Initialized all internal services");
-          return this.gatewayConnectorService.activateAuthorizedGateways();
-        })
-
-        .andThen(() => {
-          // If we are in debug mode, we'll print the registered transfers out.
-          if (config.debug) {
-            return this.browserNodeProvider
-              .getBrowserNode()
-              .andThen((browserNode) => {
-                return browserNode.getRegisteredTransfers(
-                  config.governanceChainId,
-                );
-              })
-              .map((registeredTransfers) => {
-                this.logUtils.debug("Registered Transfers");
-                this.logUtils.debug(registeredTransfers);
-              });
-          }
-          return okAsync(undefined);
-        });
-    });
+      .andThen(() => {
+        // If we are in debug mode, we'll print the registered transfers out.
+        if (config.debug) {
+          return this.browserNodeProvider
+            .getBrowserNode()
+            .andThen((browserNode) => {
+              return browserNode.getRegisteredTransfers(
+                config.governanceChainId,
+              );
+            })
+            .map((registeredTransfers) => {
+              this.logUtils.debug("Registered Transfers");
+              this.logUtils.debug(registeredTransfers);
+            });
+        }
+        return okAsync(undefined);
+      });
   }
 
   /**

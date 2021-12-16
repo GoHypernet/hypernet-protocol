@@ -66,9 +66,17 @@ import { InitializeStatus } from "@web-integration/InitializeStatus";
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): Result<boolean, never>;
+  initialized(): ResultAsync<boolean, never>;
 
   waitInitialized(): ResultAsync<void, never>;
+
+  governanceInitialized(): Result<boolean, never>;
+
+  waitGovernanceInitialized(): ResultAsync<void, never>;
+
+  paymentsInitialized(): Result<boolean, never>;
+
+  waitPaymentsInitialized(): ResultAsync<void, never>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
@@ -89,10 +97,7 @@ export interface IHypernetCore {
    * hypernet core will be representing.
    * @param account The address that says who this instance of HypernetCore is representing.
    */
-  initialize(
-    paymentsRequired?: boolean,
-    governanceRequired?: boolean,
-  ): ResultAsync<
+  initialize(): ResultAsync<
     InitializeStatus,
     | MessagingError
     | BlockchainUnavailableError
