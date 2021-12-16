@@ -1198,6 +1198,10 @@ export class HypernetCore implements IHypernetCore {
       });
   }
 
+  public getBlockNumber(): ResultAsync<number, BlockchainUnavailableError> {
+    return this.blockchainProvider.getBlockNumber();
+  }
+
   public getProposals(
     pageNumber: number,
     pageSize: number,
