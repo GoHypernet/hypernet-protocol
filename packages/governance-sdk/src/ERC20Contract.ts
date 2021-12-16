@@ -28,7 +28,7 @@ export class ERC20Contract implements IERC20Contract {
 
   public approve(
     registryAddress: EthereumContractAddress,
-    registrationFee: BigNumberString,
+    registrationFee: BigNumber,
   ): ResultAsync<void, ERC20ContractError> {
     return ResultAsync.fromPromise(
       this.contract?.approve(

@@ -323,6 +323,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         // when burning, check if there is a registration fee tied to the token identity 
         if (identityStakes[tokenId].amount != 0) {
             // send the registration fee to the token burner
+            // don't set a registration token you do not control/trust, otherwise, this could be used for re-entrancy attack
             IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount);
             delete identityStakes[tokenId];
         }
