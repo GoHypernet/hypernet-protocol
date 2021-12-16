@@ -262,6 +262,23 @@ describe("BlockchainProvider tests", () => {
     expect(wrappedResponse).toBeInstanceOf(Ok);
   });
 
+
+  test("getBlockNumber returns a number", async () => {
+    // Arrange
+    const mocks = new BlockchainProviderMocks();
+    const blockchainProvider = mocks.factoryProvider();
+
+    // Act
+    await blockchainProvider.initialize();
+    const result = await blockchainProvider.getBlockNumber();
+    const wrappedResponse = result._unsafeUnwrap();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(wrappedResponse).toBeInstanceOf(Ok);
+  });
+
   test("supplyPrivateCredentials returns okAsync", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
