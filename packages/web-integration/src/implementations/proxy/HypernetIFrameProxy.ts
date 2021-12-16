@@ -805,6 +805,13 @@ export default class HypernetIFrameProxy
     return this._createCall("executeProposal", proposalId);
   }
 
+  public getBlockNumber(): ResultAsync<
+    number,
+    BlockchainUnavailableError | ProxyError
+  > {
+    return this._createCall("getBlockNumber", null);
+  }
+
   public getProposalsCount(): ResultAsync<
     number,
     HypernetGovernorContractError | ProxyError

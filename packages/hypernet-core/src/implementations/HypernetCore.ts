@@ -1369,6 +1369,12 @@ export class HypernetCore implements IHypernetCore {
       });
   }
 
+  public getBlockNumber(): ResultAsync<number, BlockchainUnavailableError> {
+    return this.blockchainProvider.getLatestBlock().map((block) => {
+      return block.number;
+    });
+  }
+
   public getProposals(
     pageNumber: number,
     pageSize: number,

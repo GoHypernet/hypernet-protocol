@@ -29,6 +29,7 @@ export interface IOnboardingFlowParams extends IRenderParams {
   gatewayName?: string;
   gatewayLogoUrl?: string;
   finalSuccessContent?: string;
+  launchpadUrl?: string;
 }
 
 export interface IRenderPaymentWidgetParams extends IRenderParams {

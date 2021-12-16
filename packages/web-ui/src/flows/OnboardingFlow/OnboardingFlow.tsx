@@ -33,6 +33,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     closeCallback = () => {},
     gatewayName,
     excludeCardWrapper,
+    launchpadUrl,
   } = props;
   const alert = useAlert();
   const { balances } = useBalances();
@@ -234,7 +235,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     <Box className={classes.container}>
       <Box width={480} margin="auto">
         {renderScreen()}
-        <ModalFooter />
+        <ModalFooter url={launchpadUrl} />
       </Box>
     </Box>
   );
