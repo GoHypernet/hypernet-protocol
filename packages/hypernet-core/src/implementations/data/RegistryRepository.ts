@@ -867,7 +867,6 @@ export class RegistryRepository implements IRegistryRepository {
             return this.tokenERC20Contract
               .approve(registry.address, registrationFees)
               .andThen(() => {
-                console.log("heyy");
                 return this.nonFungibleRegistryContract.registerByToken(
                   newRegistryEntry.owner,
                   newRegistryEntry.label,
