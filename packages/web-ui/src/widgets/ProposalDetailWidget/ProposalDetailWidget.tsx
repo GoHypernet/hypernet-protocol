@@ -26,12 +26,14 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
+  const [blockNumber, setBlockNumber] = useState<number>(-1);
   const [accountAddress, setAccountAddress] =
     useState<EthereumAccountAddress>();
   const [supportStatus, setSupportStatus] = useState<EProposalVoteSupport>();
 
   useEffect(() => {
     getProposalDetail();
+    getBlockNumber();
   }, []);
 
   const getProposalDetail = () => {
@@ -49,6 +51,17 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
       getProposalVotesReceipt(accounts[0]);
     });
+  };
+
+  const getBlockNumber = () => {
+    setLoading(true);
+
+    coreProxy
+      .getBlockNumber()
+      .map((blockNumber) => {
+        setBlockNumber(blockNumber);
+      })
+      .mapErr(handleCoreError);
   };
 
   const getProposalVotesReceipt = (account: EthereumAccountAddress) => {
@@ -269,12 +282,36 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         <Typography variant="h6" className={classes.proposalDetailsLabel}>
           Details:
         </Typography>
-        <Box className={classes.proposerSectionWrapper}>
-          <Typography variant="body1" className={classes.proposerLabel}>
+        <Box className={classes.sectionWrapper}>
+          <Typography variant="body1" className={classes.sectionLabel}>
             Proposer
           </Typography>
-          <Typography variant="body1" className={classes.proposerValue}>
+          <Typography variant="body1" className={classes.sectionValue}>
             {proposal?.originator}
+          </Typography>
+        </Box>
+        <Box className={classes.sectionWrapper}>
+          <Typography variant="body1" className={classes.sectionLabel}>
+            Current Block
+          </Typography>
+          <Typography variant="body1" className={classes.sectionValue}>
+            {blockNumber > -1 && blockNumber}
+          </Typography>
+        </Box>
+        <Box className={classes.sectionWrapper}>
+          <Typography variant="body1" className={classes.sectionLabel}>
+            Start Block
+          </Typography>
+          <Typography variant="body1" className={classes.sectionValue}>
+            {proposal?.startBlock}
+          </Typography>
+        </Box>
+        <Box className={classes.sectionWrapper}>
+          <Typography variant="body1" className={classes.sectionLabel}>
+            End Block
+          </Typography>
+          <Typography variant="body1" className={classes.sectionValue}>
+            {proposal?.endBlock}
           </Typography>
         </Box>
         <GovernanceMarkdown source={proposal?.description} />
