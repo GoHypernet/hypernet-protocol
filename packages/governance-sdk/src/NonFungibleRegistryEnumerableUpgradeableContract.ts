@@ -213,6 +213,21 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     });
   }
 
+  public registrationFeeBigNumber(): ResultAsync<
+    BigNumber,
+    NonFungibleRegistryContractError
+  > {
+    return ResultAsync.fromPromise(
+      this.contract?.registrationFee() as Promise<BigNumber>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call registrationFeeBigNumber()",
+          e,
+        );
+      },
+    );
+  }
+
   public burnAddress(): ResultAsync<
     EthereumAccountAddress,
     NonFungibleRegistryContractError

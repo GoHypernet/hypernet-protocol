@@ -39,7 +39,7 @@ export const CONNECT_WALLET_WIDGET_SELECTOR = "connect-wallet-widget";
 export const HYPERNET_PROTOCOL_LOGO_DARK_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypernet-protocol%20logo-dark.png";
 export const HYPER_TOKEN_LOGO_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypertoken-logo.png";
+  "https://ipfs.io/ipfs/QmeztCtCmeDg2jj2wcSKa9nwKdqLsSkZq3zfVMG84pocf6?filename=H.svg";
 export const HYPER_TOKEN_LOGO_PURPLE_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/protocol-logo-purple.png";
 export const HYPERNET_LOGO_DARK =

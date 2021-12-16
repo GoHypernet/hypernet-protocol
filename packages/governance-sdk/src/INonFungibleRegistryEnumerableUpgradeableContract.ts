@@ -39,6 +39,10 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     BigNumberString,
     NonFungibleRegistryContractError
   >;
+  registrationFeeBigNumber(): ResultAsync<
+    BigNumber,
+    NonFungibleRegistryContractError
+  >;
   burnAddress(): ResultAsync<
     EthereumAccountAddress,
     NonFungibleRegistryContractError
