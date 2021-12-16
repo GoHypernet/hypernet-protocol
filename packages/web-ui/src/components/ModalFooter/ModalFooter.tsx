@@ -1,9 +1,16 @@
 import React from "react";
 import { Box } from "@material-ui/core";
 import { GovernanceButton } from "@web-ui/components";
-import { useStyles } from "./ModalFooter.style";
+import { useStyles } from "@web-ui/components/ModalFooter/ModalFooter.style";
+import { LAUNCHPAD_PROD_URL } from "@web-ui/constants";
 
-export const ModalFooter: React.FC = () => {
+interface ModalFooterProps {
+  url?: string;
+}
+
+export const ModalFooter: React.FC<ModalFooterProps> = ({
+  url = LAUNCHPAD_PROD_URL,
+}: ModalFooterProps) => {
   const classes = useStyles();
   return (
     <Box className={classes.container}>
@@ -12,9 +19,7 @@ export const ModalFooter: React.FC = () => {
         color="primary"
         fullWidth
         onClick={() => {
-          window.open(
-            "https://hypernet-protocol-dashboard-dev.hypernetlabs.io",
-          );
+          window.open(url);
         }}
       >
         View your Hypernet Account.
