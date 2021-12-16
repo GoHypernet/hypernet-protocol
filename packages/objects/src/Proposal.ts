@@ -22,5 +22,7 @@ export class Proposal {
     public votesAbstain: number,
     public description: string,
     public proposalNumber: number | null,
+    public startBlock: number,
+    public endBlock: number,
   ) {}
 }
