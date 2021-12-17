@@ -1,5 +1,7 @@
 # Hypernet Governance
 
+## Introduction
+
 The Hypernet Protocol governance consists of contracts for the  token, Distributed Autonomous Organization (DAO). 
 The [token](/packages/contracts/contracts/governance/Hypertoken.sol) is [EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and 
 is limited to a total supploy of `100,000,000` with `18` decimal places of precision. The DAO is based on OpenZeppelin's 
@@ -25,3 +27,11 @@ of several registries that key for the functioning of the Hypernet Protocol ecos
 3. Liquidity Providers
 4. Payment Tokens
 5. Registry Modules
+
+## DAO Access and Usage
+
+Users can see all past and present proposals in the official Hypernet [launchpad dashboad](https://rinkeby.launchpad.hypernet.foundation/proposals). 
+Interacting with proposals requires that active account first posses a [Hypernet Profile NFI](/packages/contracts/contracts/identity/README.md#identity#hypernet-profiles). 
+Creating a new proposal requires that the initiating account posses an amount of Hypertoken equivalent to `_proposalThreshold` which is a public variable stored 
+by the DAO contract. For a given active proposal, users may vote for, against, or abstain. Each token in a user's balance counts as 1 vote. A vote will be 
+defeated if less than 4% of total votes do not participate. 
