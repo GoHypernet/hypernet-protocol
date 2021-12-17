@@ -99,10 +99,10 @@ describe("Governance", function () {
       [transferCalldata],
       proposalDescription,
     );
-    tx.wait();
+    await tx.wait();
 
     // fast forward 1 block to get the proposal into active state
-    hre.timeAndMine.mine(1);
+    hre.timeAndMine.mine(2);
 
     // check state of proposal, should be 1 for Active
     expect(await hypernetgovernor.state(proposalID)).to.equal(1);
@@ -119,7 +119,7 @@ describe("Governance", function () {
     );
 
     // fast forward 20 blocks to get past proposal deadline
-    hre.timeAndMine.mine(290);
+    hre.timeAndMine.mine(20);
 
     // check state of proposal, should be 4 for passed
     expect(await hypernetgovernor.state(proposalID)).to.equal(4);

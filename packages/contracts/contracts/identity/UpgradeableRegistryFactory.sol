@@ -26,9 +26,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     // extra array storage fascilitates paginated UI
     address[] public registries;
 
-    // array to store addresses of governance approved modules
-    address[] public modules;
-
     // enable registry discovery by human-readable name
     mapping (string => address) public nameToAddress;
 
@@ -101,35 +98,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev useful for paginated UIs
     function getNumberOfRegistries() public view returns (uint256 numReg) {
         numReg = registries.length;
-    }
-
-    /// @notice getNumberOfModules getter function for reading the number of modules
-    /// @dev useful for paginated UIs
-    function getNumberOfModules() public view returns (uint256 numModules) {
-        numModules = modules.length;
-    }
-
-    /// @notice addModule setter function for adding an approved module to the protocol
-    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
-    /// @param _module address of goverance approved module contract
-    function addModule(address _module) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to add module");
-        modules.push(_module);
-    }
-
-    /// @notice removeModule function for removing a module from the protocol's supported list
-    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
-    /// @param _index index module contract to remove from module list
-    function removeModule(uint _index) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to remove module");
-        require(_index < modules.length, "RegistryFactory: index must be less than module list length");
-
-        uint256 lastModuleIndex = modules.length - 1;
-        address lastModuleAddress = modules[lastModuleIndex];
-
-        // Move the last module to the slot of the to-delete token
-        modules[_index] = lastModuleAddress; 
-        modules.pop();
     }
 
     /// @notice setProfileRegistryAddress change the address of the profile registry contract

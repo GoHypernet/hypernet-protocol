@@ -166,36 +166,6 @@ describe("Registry Factory Unit Tests", function () {
     );
   });
 
-  it("Only admin can add or remove a module to the module list.", async function () {
-    // first deploy a module contract
-    const BatchModule = await ethers.getContractFactory("BatchModule");
-    batchmodule = await BatchModule.deploy("Batch Minting");
-    await batchmodule.deployTransaction.wait();
-
-    // can't add a module without admin role
-    await expectRevert(
-      registryfactory.connect(addr1).addModule(batchmodule.address),
-      "RegistryFactory: must have admin role to add module",
-    );
-
-    let tx = await registryfactory.addModule(batchmodule.address);
-    tx.wait();
-
-    expect(await registryfactory.getNumberOfModules()).to.equal(1);
-    expect(await registryfactory.modules(0)).to.equal(batchmodule.address);
-
-    // can't remove a module with admin role
-    await expectRevert(
-        registryfactory.connect(addr1).removeModule(0),
-        "RegistryFactory: must have admin role to remove module",
-    );
-
-    tx = await registryfactory.removeModule(0);
-    tx.wait();
-
-    expect(await registryfactory.getNumberOfModules()).to.equal(0);
-  });
-
   it("Only admin can set burn address.", async function () {
     // can't set burn address without the admin role
     await expectRevert(
