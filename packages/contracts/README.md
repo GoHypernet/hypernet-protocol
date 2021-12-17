@@ -4,7 +4,7 @@
 
 # Hypernet Protocol Contracts package
 
-## Directory Contents
+## Package Contents
 
 - [contracts](/packages/contracts/contracts): Subdirectory containing all Hypernet Protocol smart contract impelementations. 
 - [deployments](/packages/contracts/deployments): Subdirectory containing deployment artifacts for all chains in which the Hypernet Protocol has been deployed to. 
@@ -40,11 +40,6 @@ with additional or specialized functionality.
 ### [utils](/packages/contracts/contracts/utils)
 
 Contains various helper contracts including vesting contracts.
-
-## SECURITY NOTES:
-
-* [Known Timelock.sol contract vulnerability](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
-* [Initialization vulnerability](https://forum.openzeppelin.com/t/security-advisory-initialize-uups-implementation-contracts/15301)
 
 ## Deployment Addresses
 
@@ -120,3 +115,8 @@ Once the node is running, deploy the full Solidity contract stack to the Hardhat
 ```shell
 npx hardhat run scripts/hardhat-full-stack.js --network dev
 ```
+
+## SECURITY NOTES:
+
+* [Known Timelock.sol contract vulnerability](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
+* [Initialization vulnerability](https://forum.openzeppelin.com/t/security-advisory-initialize-uups-implementation-contracts/15301)
