@@ -22,11 +22,11 @@ updating various parameters in the protocol itself. Particularly, the DAO can ch
 period, the minimum proposal threshold, and the voting delay peroid. Additionally, the DAO is the `REGISTRAR` and `REGISTRAR_ROLE_ADMIN`
 of several registries that key for the functioning of the Hypernet Protocol ecosystem: 
 
-1. Hypernet Profiles
-2. Gateways
-3. Liquidity Providers
-4. Payment Tokens
-5. Registry Modules
+1. [Hypernet Profiles](/packages/contracts/contracts/identity/README.md#hypernet-profiles)
+2. [Gateways](/packages/contracts/contracts/identity/README.md#gateways)
+3. [Liquidity Providers](/packages/contracts/contracts/identity/README.md#liquidity-providers)
+4. [Payment Tokens](/packages/contracts/contracts/identity/README.md#payment-tokens)
+5. [Registry Modules](/packages/contracts/contracts/identity/README.md#registry-modules)
 
 ## DAO Access and Usage
 
