@@ -1,4 +1,4 @@
-# Hypernet ProtocolNFR-based Access
+# Hypernet Protocol NFR-based Access
 
 ## Summary 
 
