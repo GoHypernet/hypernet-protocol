@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@hypernetlabs/gateway-connector": "^0.0.12",
-    "@hypernetlabs/objects": "^0.3.13",
+    "@hypernetlabs/objects": "^0.3.14",
     "ethers": "^5.4.7",
     "neverthrow": "^4.1.1",
     "rxjs": "^6.6.6"

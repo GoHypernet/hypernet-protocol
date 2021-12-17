@@ -39,7 +39,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.3.13",
+    "@hypernetlabs/objects": "^0.3.14",
     "ethers": "5.4.7",
     "react-alert": "^7.0.2",
     "react-alert-template-basic": "^1.0.0",
