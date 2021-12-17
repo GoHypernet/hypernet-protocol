@@ -190,6 +190,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getGatewayRegistrationInfo(data.data);
         }, data.callId);
       },
+      getGatewayEntryList: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getGatewayEntryList();
+        }, data.callId);
+      },
       providePrivateCredentials: (
         data: IIFrameCallData<{
           privateKey: string | null;

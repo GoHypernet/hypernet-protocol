@@ -1128,6 +1128,13 @@ export class HypernetCore implements IHypernetCore {
       });
   }
 
+  public getGatewayEntryList(): ResultAsync<
+    Map<GatewayUrl, GatewayRegistrationInfo>,
+    NonFungibleRegistryContractError
+  > {
+    return this.gatewayRegistrationRepository.getGatewayEntryList();
+  }
+
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError | VectorError | BlockchainUnavailableError

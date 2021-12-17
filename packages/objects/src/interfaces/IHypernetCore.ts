@@ -345,6 +345,14 @@ export interface IHypernetCore {
     PersistenceError | VectorError | ProxyError
   >;
 
+  /**
+   * Returns a map of all gateways from the gateway registry
+   */
+  getGatewayEntryList(): ResultAsync<
+    Map<GatewayUrl, GatewayRegistrationInfo>,
+    NonFungibleRegistryContractError | ProxyError
+  >;
+
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
