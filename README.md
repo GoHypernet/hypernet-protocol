@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Hypernet-logo.svg" width="500">
+  <img src="/documentation/images/hypernet-protocol-black.svg" width="500">
 </p>
 
 # The Hypernet Protocol
@@ -24,17 +24,17 @@ have used a traditional payment service provider SDK.
 
 This monorepo contains several packages:
 
-- [hypernet-core](packages/hypernet-core): The core of the protocol. HNP is encapsulated into the HypernetCore class, which can be instantiated in a variety of ways.
-- [developer-ui](packages/developer-ui): An example package demonstrating how to consume the Hypernet Core SDK. It is also used for integration testing.
-- [contracts](packages/contracts): A package containing solidity contracts for Hypernet Protocol Governance, Hypertoken, and Non-Fungible Registy.
-- [iframe](packages/iframe): HypernetCore is designed to run in a browser, but that is a hostile environment. The iframe package is designed to host the running instance of HNC inside an iframe and expose an interface for cross-frame communication. The host window will communicate with the HNC via a proxy.
-- [gateway-connector](packages/gateway-connector): This package is designed for gateways that want to support the Hypernet Protocol. Gateways will need to publish an API and "connector" code that HNP clients will run. Payments sent via HNP are each moderated by a gateway, the connector allows the gateway to keep up to date with the payments the client is actually sending and recieving so that, should any disputes arrive, they can properly moderate the dispute. This package includes the OpenApi specification for the required API, as well as the typescript interface that their published connector must implement.
-- [gateway-iframe](packages/gateway-iframe): Gateway connectors are not allowed to run directly in the same window as HNC for security reasons, to prevent a rogue connector causing issues. gateway-iframe is the source for the iframe that will host the gateway connector. It is responsible for checking the signature of the connector and providing a cross-frame proxy interface to HNC. In production, this pacakge would be published somewhere like IPFS.
-- [web-demo](packages/web-demo): An example package demonstrating how to consume the Hypernet Core SDK.
-- [web-integration](packages/web-integration): This is the package that gateways would include on their actual website if they want to support HNP. This package will instantiate HNC in an iframe and provides a proxy interface to it for the gateway to interface with; from the gateway's POV it should be like working directly with a HypernetCore object. It also provides a number of pre-built UI widgets, along with easy utility functions, that make it trivial to display information from HNC on the gateway's website.
-- [mobile-integration](packages/mobile-integration): This is the mobile variant of web-integration. It is designed to run HNC in a WebView, and provides a proxy object for the host to work with.
-- [web-ui](packages/web-ui): The web-ui package contains all the ui components used by web-integration when using React.
-- [test-gateway](packages/test-gateway): This is an example of a gateway integration. It contains two parts- an example implementation of IGatewayConnector, and a simple NodeJS/Express server that hosts the required gateway API. This particular gateway connector implementation is used for integration testing of the overall system. Gateways looking to support the Hypernet Protocol should look closely at this package.
+- [hypernet-core](/packages/hypernet-core): The core of the protocol. HNP is encapsulated into the HypernetCore class, which can be instantiated in a variety of ways.
+- [developer-ui](/packages/developer-ui): An example package demonstrating how to consume the Hypernet Core SDK. It is also used for integration testing.
+- [contracts](/packages/contracts): A package containing solidity contracts for Hypernet Protocol Governance, Hypertoken, and Non-Fungible Registy.
+- [iframe](/packages/iframe): HypernetCore is designed to run in a browser, but that is a hostile environment. The iframe package is designed to host the running instance of HNC inside an iframe and expose an interface for cross-frame communication. The host window will communicate with the HNC via a proxy.
+- [gateway-connector](/packages/gateway-connector): This package is designed for gateways that want to support the Hypernet Protocol. Gateways will need to publish an API and "connector" code that HNP clients will run. Payments sent via HNP are each moderated by a gateway, the connector allows the gateway to keep up to date with the payments the client is actually sending and recieving so that, should any disputes arrive, they can properly moderate the dispute. This package includes the OpenApi specification for the required API, as well as the typescript interface that their published connector must implement.
+- [gateway-iframe](/packages/gateway-iframe): Gateway connectors are not allowed to run directly in the same window as HNC for security reasons, to prevent a rogue connector causing issues. gateway-iframe is the source for the iframe that will host the gateway connector. It is responsible for checking the signature of the connector and providing a cross-frame proxy interface to HNC. In production, this pacakge would be published somewhere like IPFS.
+- [web-demo](/packages/web-demo): An example package demonstrating how to consume the Hypernet Core SDK.
+- [web-integration](/packages/web-integration): This is the package that gateways would include on their actual website if they want to support HNP. This package will instantiate HNC in an iframe and provides a proxy interface to it for the gateway to interface with; from the gateway's POV it should be like working directly with a HypernetCore object. It also provides a number of pre-built UI widgets, along with easy utility functions, that make it trivial to display information from HNC on the gateway's website.
+- [mobile-integration](/packages/mobile-integration): This is the mobile variant of web-integration. It is designed to run HNC in a WebView, and provides a proxy object for the host to work with.
+- [web-ui](/packages/web-ui): The web-ui package contains all the ui components used by web-integration when using React.
+- [test-gateway](/packages/test-gateway): This is an example of a gateway integration. It contains two parts- an example implementation of IGatewayConnector, and a simple NodeJS/Express server that hosts the required gateway API. This particular gateway connector implementation is used for integration testing of the overall system. Gateways looking to support the Hypernet Protocol should look closely at this package.
 
 ## Purpose
 
