@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="/documentation/images/hypernet-protocol-black.svg" width="500">
+</p>
+
 # Hypernet Governance
 
 ## Summary

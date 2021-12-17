@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="/documentation/images/hypernet-protocol-black.svg" width="500">
+</p>
+
 # Hypernet Identity Registries
 
 ## Summary
@@ -35,7 +39,7 @@ of ownership of NFIs. This can be done if `REGISTRAR_ROLE` sets `allowTransfers`
 transfer an NFI on the owners behalf if the NFI owner gives approval to the `REGISTRAR_ROLE` through the `approve` function.
 
 Each NFR can augment its registration logic (as well as add novel functionality) through the use of external 
-[*modules*](/packages/contracts/contracts/modules). A module is a stateless external contract which can be given the `REGISTRAR_ROLE` 
+[*modules*](/packages/contracts/contracts/modules/README.md). A module is a stateless external contract which can be given the `REGISTRAR_ROLE` 
 and thus extend an NFR's capability in an algorithmic fashion. For example, the a 
 [LazyMintModule.sol](/packages/contracts/contracts/modules/LazyMintModule.sol) contract offers a means to add lazy minting functionality 
 to an NFR, while the [MerkleModule.sol](/packages/contracts/contracts/modules/MerkleModule.sol) contract implements a mechanism to 
