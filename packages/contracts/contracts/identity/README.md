@@ -1,6 +1,6 @@
 # Hypernet Identity Registries
 
-## Introduction
+## Summary
 
 One of the key aspects of the Hypernet Protocol is digital identity, both human and non-human. The primary identity data structure
 of the Hypernet Protocol is the Non-Fungible Registry (NFR); instances of which are deployed through the 
@@ -23,7 +23,7 @@ entries can have the same `tokenURI`, but they cannot have the same `label`. Lab
 which the registry is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is 
 (for instance when label is a URL). Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
 
-## Non Fungible Registry Roles and Minting Non Fungible Identities
+## Roles and Minting
 
 Each NFR has a `REGISTRAR_ROLE`, which can register new identities, a `REGISTRAR_ROLE_ADMIN` which can add and remove addresses from the 
 `REGISTRAR_ROLE` as well as update NFR parameters, and a `DEFAULT_ADMIN_ROLE` which can make modifications to which addresses have the 
@@ -53,7 +53,8 @@ of the token at the time of burning.
 ## Official Hypernet Protocol Non Fungible Registries
 
 The Hypernet Protocol instantiates several NFRs at protocol launch that are necessary for the secure functioning of payments, goverance, and identity 
-functionality. All NFRs in this list are managed by the Hypernet Protocol DAO. That is, all roles are occupied by the Hypernet DAO contract.
+functionality. All NFRs in this list are managed by the Hypernet Protocol [DAO](/packages/contracts/contracts/goverance/README.md). That is, all 
+[roles](#roles-and-minting) are occupied by the Hypernet DAO contract.
 
 ### Hypernet Profiles
 
