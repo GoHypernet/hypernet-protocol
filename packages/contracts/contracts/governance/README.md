@@ -20,7 +20,8 @@ This particular governance architecture has been adopted by a number of highly s
 successful in practice at adopting beneficial proposals to protocol upgrades while preventing
 [adversarial attacks](https://docs.uniswap.org/protocol/V2/concepts/governance/adversarial-circumstances).
 
-The Hypernet DAO is used for proposing and vetting (by the token holder community) new *Non-Fungible Registries (NFRs)*, which are deployed 
+The Hypernet DAO is used for proposing and vetting (by the token holder community) new 
+[Non-Fungible Registries](/packages/contracts/contracts/identity/README.md) (NFRs), which are deployed 
 through the [registry factory contract](/packages/contracts/contracts/identity/UpgradeableRegistryFactory.sol), and 
 updating various parameters in the protocol itself. Particularly, the DAO can change the length of a proposal's voting 
 period, the minimum proposal threshold, and the voting delay peroid. Additionally, the DAO is the `ADMIN`, `REGISTRAR_ROLE_ADMIN`, and `REGISTRAR`
