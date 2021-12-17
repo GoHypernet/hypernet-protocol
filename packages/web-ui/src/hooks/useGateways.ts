@@ -15,7 +15,10 @@ interface IState {
   gatewaysMap: Map<GatewayUrl, boolean>;
   openGatewayIFrame: (gatewayUrl: GatewayUrl) => void;
   deauthorizeGateway: (gatewayUrl: GatewayUrl) => void;
-  authorizeGateway: (gatewayUrl: GatewayUrl) => void;
+  authorizeGateway: (
+    gatewayUrl: GatewayUrl,
+    successCallback?: Function,
+  ) => void;
 }
 
 type Action =
@@ -118,12 +121,16 @@ export function useGateways(): IState {
       });
   }
 
-  function authorizeGateway(gatewayUrl: GatewayUrl) {
+  function authorizeGateway(
+    gatewayUrl: GatewayUrl,
+    successCallback?: Function,
+  ) {
     dispatch({ type: EActionTypes.FETCHING });
     coreProxy
       .authorizeGateway(gatewayUrl)
       .map(() => {
         alert.success(`Gateway ${gatewayUrl} authorized successfully`);
+        successCallback && successCallback();
         fetchData();
       })
       .mapErr((error) => {
