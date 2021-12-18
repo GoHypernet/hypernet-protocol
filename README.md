@@ -4,6 +4,8 @@
 
 # The Hypernet Protocol
 
+## Summary 
+
 The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based payments with a privacy-preserving,
 "non-fungible" identity registry. The combination of these two elements enables merchants to accept cyptocurrency
 payments in their traditional online platforms with minimal code intrusion and without specialized knowledge of web3
@@ -11,16 +13,6 @@ technology while also complying with various regulations regarding electronic fu
 Hypernet Protocol believe that a decentralized, blockchain-secured, community-driven payment/identity solution will
 revolutionize the cyber-infrastructure landscape and that it is broadly generalizable to various decentralized marketplaces
 and subscription-based services.
-
-A successful payment protocol must solve problems on both sides of the market. On the consumer side, users expect a
-payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol
-integrates Connext's [Vector](https://github.com/connext/vector) library to enable fast, secure, microtransactions,
-with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The
-Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements
-of their particular business, and tools to streamline software integration. Meeting these needs has led to the development
-light-weight developer abstraction layer. Developer's are isolated from the particulars of Layer 2 scaling protocols and
-are presented with a small set of function calls bundled together in an npm package that looks familiar to those who
-have used a traditional payment service provider SDK.
 
 This monorepo contains several packages:
 
@@ -47,7 +39,7 @@ As a developer or contributor to the Core, there are a few key concepts that nee
 
 Most payment protocols requires a central server infrastructure; Visa processes credit card transactions via mainframes; Stripe processes payments in their cloud.
 
-_Hypernet Core_ is peer to peer and serverless - mostly. Right now (as of Q4 2020), two clients communicate with each other via a central NATS messaging server, and payments are _routed_ (via the Vector protocol) via a _routing node_ to the end participant.
+_Hypernet Core_ is peer to peer and serverless - mostly. Right now (as of Q4 2021), two clients communicate with each other via a central NATS messaging server, and payments are _routed_ (via the Vector protocol) via a _routing node_ to the end participant.
 
 Though the routing node is an active participant in transfers, it has no knowledge of participant activity otherwise; it simply routes a payment from one person to another. Routing nodes never have custody of end user funds, and if they go (even permanently) offline, funds are not lost (though the end users that had active payment channels open will have to submit a blockchain transaction in order to claim their funds; more on that in the payment channels section!)
 
