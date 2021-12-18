@@ -95,7 +95,7 @@ const FundWidget: React.FC<IFundWidget> = ({
                 title="Token Selector"
                 name="tokenAddress"
                 options={tokenSelectorOptions.map((option) => ({
-                  primaryText: option.name,
+                  primaryText: `${option.name} Chain ID:${option.chainId}`,
                   value: option.address,
                 }))}
               />
