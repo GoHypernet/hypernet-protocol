@@ -26,7 +26,7 @@ Hypernet launchpad dashboard. The currently supported modules are as follows:
 
 ### Batch Minting
 
-This [module](/packages/contracts/contracts/modules/BatchModules.sol) allows for accounts occupying the `REGISTRAR_ROLE` to mint multiple 
+This [module](/packages/contracts/contracts/modules/BatchModule.sol) allows for accounts occupying the `REGISTRAR_ROLE` to mint multiple 
 NFIs in a single transaction, thereby reducing gas costs. The number of NFIs that can be minted in a single transaction is limited by the 
 gas limit of the layer 1 blockchain protocol. See the Hypernet Protocol unit tests for an 
 [example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L394) of how to interact with a contract using the batch minting 
