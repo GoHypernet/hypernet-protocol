@@ -1,4 +1,4 @@
-# `hypernet-core`
+# Hypernet Core Package
 
 ## Purpose
 
