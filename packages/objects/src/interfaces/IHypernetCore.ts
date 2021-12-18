@@ -640,6 +640,11 @@ export interface IHypernetCore {
   ): ResultAsync<void, InvalidParametersError | ProxyError>;
   getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
 
+  getBlockNumber(): ResultAsync<
+    number,
+    BlockchainUnavailableError | ProxyError
+  >;
+
   getTokenInformationForChain(
     chainId: ChainId,
   ): ResultAsync<TokenInformation[], ProxyError>;
