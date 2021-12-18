@@ -7,7 +7,7 @@
 ## Summary
 
 One of the key aspects of the Hypernet Protocol is digital identity, both human and non-human. The primary identity data structure
-of the Hypernet Protocol is the Non-Fungible Registry (NFR); instances of which are deployed through the 
+of the Hypernet Protocol is the *Non-Fungible Registry* (NFR); instances of which are deployed through the 
 [registry factory contract](/packages/contracts/contracts/identity/UpgradeableRegistryFactory.sol). The factory contract implements an 
 [upgradable beacon pattern](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UpgradeableBeacon) for deploying new NFRs in a gas-efficient 
 manner (~80% reduction in gas fees over naive implementation). Each new NFR stores its state in a proxy layer and function calls to that 
@@ -18,7 +18,7 @@ upon the creation of a new NFR.
 
 ## Functionality
 
-Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token standard and therefor has
+Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token (NFT) standard and therefor has
 all methods specified by the base standard specification. Additionally, the NFR has several customizable attributes. They can be deployed 
 [with](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol) or 
 [without](/packages/contracts/contracts/identity/NonFungibleRegistryUpgradeable.sol) the enumeration property and every entry is an ownable 

@@ -4,7 +4,7 @@
 
 # The Hypernet Protocol
 
-The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based payments with a privacy-preserving,  
+The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based payments with a privacy-preserving,
 "non-fungible" identity registry. The combination of these two elements enables merchants to accept cyptocurrency
 payments in their traditional online platforms with minimal code intrusion and without specialized knowledge of web3
 technology while also complying with various regulations regarding electronic funds transfer. The authors of the
