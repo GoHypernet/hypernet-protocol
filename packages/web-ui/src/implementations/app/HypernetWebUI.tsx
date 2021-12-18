@@ -495,6 +495,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
             finalSuccessContent={config.finalSuccessContent}
             closeCallback={config.closeCallback}
             excludeCardWrapper={config.excludeCardWrapper}
+            launchpadUrl={config.launchpadUrl}
           />,
           config.showInModal,
           config.closeCallback,
