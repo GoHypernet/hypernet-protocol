@@ -936,129 +936,50 @@ export class HypernetCore implements IHypernetCore {
       const [config, context] = vals;
       this.logUtils.debug(`Initializing Hypernet Protocol Core`);
 
-      let initializationResponse: ResultAsync<void, CoreInitializationErrors>;
-      // run both separatly
-      if (
-        config.paymentsRequired == false &&
-        config.governanceRequired == false
-      ) {
-        initializationResponse = ResultUtils.combine([
-          this.initializeGovernance()
-            .map(() => {
-              context.governanceInitialized = true;
-              if (this._governanceInitializePromiseResolve != null) {
-                this._governanceInitializePromiseResolve();
-              }
-            })
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return okAsync(undefined);
-            }),
-          this.initializePayments(config, context)
-            .map(() => {
-              context.paymentsInitialized = true;
-              if (this._paymentsInitializePromiseResolve != null) {
-                this._paymentsInitializePromiseResolve();
-              }
-            })
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return okAsync(undefined);
-            }),
-        ])
-          .map(() => {})
+      return ResultUtils.combine([
+        this.initializeGovernance()
+          .map(() => {
+            context.governanceInitialized = true;
+            if (this._governanceInitializePromiseResolve != null) {
+              this._governanceInitializePromiseResolve();
+            }
+          })
           .orElse((e) => {
             this.logUtils.error(e);
+            if (config.governanceRequired === true) {
+              return errAsync(e);
+            } else {
+              return okAsync(undefined);
+            }
+          }),
+        this.initializePayments(config, context)
+          .map(() => {
+            context.paymentsInitialized = true;
+            if (this._paymentsInitializePromiseResolve != null) {
+              this._paymentsInitializePromiseResolve();
+            }
+          })
+          .orElse((e) => {
+            this.logUtils.error(e);
+            if (config.paymentsRequired === true) {
+              return errAsync(e);
+            } else {
+              return okAsync(undefined);
+            }
+          }),
+      ])
+        .map(() => {})
+        .orElse((e) => {
+          this.logUtils.error(e);
+          if (
+            config.governanceRequired === false &&
+            config.paymentsRequired === false
+          ) {
             return okAsync(undefined);
-          });
-      }
-
-      // run separatly with payments being required
-      else if (
-        config.paymentsRequired == true &&
-        config.governanceRequired == false
-      ) {
-        initializationResponse = ResultUtils.combine([
-          this.initializeGovernance()
-            .map(() => {
-              context.governanceInitialized = true;
-              if (this._governanceInitializePromiseResolve != null) {
-                this._governanceInitializePromiseResolve();
-              }
-            })
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return okAsync(undefined);
-            }),
-          this.initializePayments(config, context).map(() => {
-            context.paymentsInitialized = true;
-            if (this._paymentsInitializePromiseResolve != null) {
-              this._paymentsInitializePromiseResolve();
-            }
-          }),
-        ])
-          .map(() => {})
-          .orElse((e) => {
-            this.logUtils.error(e);
+          } else {
             return errAsync(e);
-          });
-      }
-
-      // run separatly with governance being required
-      else if (
-        config.paymentsRequired == false &&
-        config.governanceRequired == true
-      ) {
-        initializationResponse = ResultUtils.combine([
-          this.initializeGovernance().map(() => {
-            context.governanceInitialized = true;
-            if (this._governanceInitializePromiseResolve != null) {
-              this._governanceInitializePromiseResolve();
-            }
-          }),
-          this.initializePayments(config, context)
-            .map(() => {
-              context.paymentsInitialized = true;
-              if (this._paymentsInitializePromiseResolve != null) {
-                this._paymentsInitializePromiseResolve();
-              }
-            })
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return okAsync(undefined);
-            }),
-        ])
-          .map(() => {})
-          .orElse((e) => {
-            this.logUtils.error(e);
-            return errAsync(e);
-          });
-      }
-
-      // run separatly with both being required (both paymentsRequired and governanceRequired are true)
-      else {
-        initializationResponse = ResultUtils.combine([
-          this.initializeGovernance().map(() => {
-            context.governanceInitialized = true;
-            if (this._governanceInitializePromiseResolve != null) {
-              this._governanceInitializePromiseResolve();
-            }
-          }),
-          this.initializePayments(config, context).map(() => {
-            context.paymentsInitialized = true;
-            if (this._paymentsInitializePromiseResolve != null) {
-              this._paymentsInitializePromiseResolve();
-            }
-          }),
-        ])
-          .map(() => {})
-          .orElse((e) => {
-            this.logUtils.error(e);
-            return errAsync(e);
-          });
-      }
-
-      return initializationResponse
+          }
+        })
         .andThen(() => {
           return this.contextProvider.setContext(context);
         })
@@ -1154,8 +1075,8 @@ export class HypernetCore implements IHypernetCore {
         // By doing some active initialization, we can avoid whole categories
         // of errors occuring post-initialization (ie, runtime), which makes the
         // whole thing more reliable in operation.
-        this.logUtils.debug("Initializing utilities");
-        this.logUtils.debug("Initializing services");
+        this.logUtils.debug("Initializing payments utilities");
+        this.logUtils.debug("Initializing payments services");
         return this.gatewayConnectorService.initialize();
       })
       .andThen(() => {
