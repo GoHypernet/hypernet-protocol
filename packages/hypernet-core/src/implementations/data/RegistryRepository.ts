@@ -1193,7 +1193,7 @@ export class RegistryRepository implements IRegistryRepository {
       });
   }
 
-  public getRegistryEntryListOfOwnerByLabel(
+  public getRegistryEntryListByLabel(
     registryName: string,
     label: string,
   ): ResultAsync<

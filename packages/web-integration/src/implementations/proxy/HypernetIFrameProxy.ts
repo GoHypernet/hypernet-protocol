@@ -995,14 +995,14 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public getRegistryEntryListOfOwnerByLabel(
+  public getRegistryEntryListByLabel(
     registryName: string,
     label: string,
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
-    return this._createCall("getRegistryEntryListOfOwnerByLabel", {
+    return this._createCall("getRegistryEntryListByLabel", {
       registryName,
       label,
     });

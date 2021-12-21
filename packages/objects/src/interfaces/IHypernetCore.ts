@@ -686,7 +686,7 @@ export interface IHypernetCore {
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
-  getRegistryEntryListOfOwnerByLabel(
+  getRegistryEntryListByLabel(
     registryName: string,
     label: string,
   ): ResultAsync<

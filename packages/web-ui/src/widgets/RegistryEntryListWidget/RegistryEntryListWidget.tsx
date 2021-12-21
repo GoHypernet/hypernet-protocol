@@ -167,7 +167,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByLabelClick = (value) => {
     setLoading(true);
     coreProxy
-      .getRegistryEntryListOfOwnerByLabel(
+      .getRegistryEntryListByLabel(
         registryName,
         value,
       )
