@@ -1215,30 +1215,27 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
-    if (this.provider == null) {
-      throw new Error("No provider available!");
-    }
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getGovernanceProvider(),
+    ]).andThen(([config, provider]) => {
+      this.provider = provider;
 
-    // Call the Hypernet profile registry contract
-    const hypernetProfileRegistryContract =
-      new NonFungibleRegistryEnumerableUpgradeableContract(
-        this.provider,
-        // this should come from chain config
-        EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"),
-      );
-
-    return hypernetProfileRegistryContract
-      .getRegistryEntryByLabel(username)
-      .andThen((registryEntry) => {
-        console.log("registryEntry", registryEntry);
-        return this.getRegistryEntryListByOwnerAddress(
-          registryName,
-          registryEntry.owner,
+      const hypernetProfileRegistryContract =
+        new NonFungibleRegistryEnumerableUpgradeableContract(
+          provider,
+          config.governanceChainInformation.gatewayRegistryAddress,
         );
-      })
-      .orElse(() => {
-        return okAsync([]);
-      });
+
+      return hypernetProfileRegistryContract
+        .getRegistryEntryByLabel(username)
+        .andThen((registryEntry) => {
+          return this.getRegistryEntryListByOwnerAddress(
+            registryName,
+            registryEntry.owner,
+          );
+        });
+    });
   }
 
   private getRegistryByIndex(

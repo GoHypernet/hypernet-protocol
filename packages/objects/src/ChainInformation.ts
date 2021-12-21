@@ -19,6 +19,7 @@ export class ChainInformation {
     public liquidityRegistryAddress: EthereumContractAddress | null,
     public tokenRegistryAddress: EthereumContractAddress | null,
     public chainRegistryAddress: EthereumContractAddress | null,
+    public hypernetProfileRegistryAddress: EthereumContractAddress | null,
     public batchModuleAddress: EthereumContractAddress | null,
     public providerUrls: ProviderUrl[],
   ) {}
@@ -41,6 +42,7 @@ export class GovernanceChainInformation extends ChainInformation {
     public liquidityRegistryAddress: EthereumContractAddress,
     public tokenRegistryAddress: EthereumContractAddress,
     public chainRegistryAddress: EthereumContractAddress,
+    public hypernetProfileRegistryAddress: EthereumContractAddress,
     public batchModuleAddress: EthereumContractAddress,
     public providerUrls: ProviderUrl[],
   ) {
@@ -60,6 +62,7 @@ export class GovernanceChainInformation extends ChainInformation {
       liquidityRegistryAddress,
       tokenRegistryAddress,
       chainRegistryAddress,
+      hypernetProfileRegistryAddress,
       batchModuleAddress,
       providerUrls,
     );
