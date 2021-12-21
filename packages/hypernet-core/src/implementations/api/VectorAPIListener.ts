@@ -1,3 +1,4 @@
+import { injectable } from "inversify";
 import {
   IHypernetOfferDetails,
   IHypernetPullPaymentDetails,
@@ -34,6 +35,7 @@ import {
 /**
  *
  */
+@injectable()
 export class VectorAPIListener implements IVectorListener {
   constructor(
     protected browserNodeProvider: IBrowserNodeProvider,

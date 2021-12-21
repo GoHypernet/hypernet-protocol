@@ -30,7 +30,9 @@ import {
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 import { IBrowserNode } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
+injectable();
 export class WrappedBrowserNode implements IBrowserNode {
   protected toVectorError: (e: unknown) => VectorError = (e) => {
     return new VectorError(e as Error);

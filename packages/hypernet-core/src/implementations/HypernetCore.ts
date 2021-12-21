@@ -138,6 +138,7 @@ import {
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
+import { Container, injectable } from "inversify";
 
 import { StorageUtils } from "@implementations/data/utilities";
 import {
@@ -174,6 +175,9 @@ import {
   ICeramicUtils,
   IMessagingProvider,
   IBlockchainTimeUtils,
+  IInjectionContainerType,
+  IPaymentIdUtilsType,
+  ILinkUtilsType,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -181,6 +185,14 @@ import {
   IGatewayConnectorProxyFactory,
   INonFungibleRegistryContractFactory,
 } from "@interfaces/utilities/factory";
+import {
+  utilitiesModule,
+  apiModule,
+  businessModule,
+  dataModule,
+  dataUtilitiesModule,
+  utilitiesFactoryModule,
+} from "@implementations/modules";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -303,6 +315,24 @@ export class HypernetCore implements IHypernetCore {
    * @param config optional config, defaults to localhost/dev config
    */
   constructor(config?: Partial<HypernetConfig>) {
+    // Set up the container
+    const container = new Container();
+
+    // Set up bindings
+    container.load(
+      utilitiesModule,
+      dataUtilitiesModule,
+      dataModule,
+      businessModule,
+      utilitiesFactoryModule,
+      apiModule,
+    );
+
+    // Bind the container to itself
+    container
+      .bind<Container>(IInjectionContainerType)
+      .toConstantValue(container);
+
     this._inControl = false;
 
     this.onControlClaimed = new Subject();

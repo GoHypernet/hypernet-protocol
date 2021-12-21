@@ -10,3 +10,5 @@ export interface ILinkUtils {
     payments: Payment[],
   ): ResultAsync<HypernetLink[], InvalidParametersError>;
 }
+
+export const ILinkUtilsType = Symbol.for("ILinkUtils");

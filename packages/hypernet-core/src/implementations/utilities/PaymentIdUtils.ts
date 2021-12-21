@@ -9,6 +9,7 @@ import { ethers } from "ethers";
 import { err, ok, Result } from "neverthrow";
 
 import { IPaymentIdUtils } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
 /**
  * An abstract class for creating & converting payment IDs, as well as verifying
@@ -19,6 +20,7 @@ import { IPaymentIdUtils } from "@interfaces/utilities";
  * characters 20-32: type  (encoded as ascii text --> hex)
  * characters 32-63: UUID  (encoded as hex)
  */
+injectable();
 export class PaymentIdUtils implements IPaymentIdUtils {
   /**
    * Returns an ascii representation of the domain portion of the paymentID string.

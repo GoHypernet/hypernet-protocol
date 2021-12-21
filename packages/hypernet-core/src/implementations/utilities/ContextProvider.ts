@@ -21,7 +21,9 @@ import {
   IContextProvider,
   IGatewayConnectorProxy,
 } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
+injectable();
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;
   protected _initializePromise: Promise<InitializedHypernetContext>;

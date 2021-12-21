@@ -33,7 +33,9 @@ import {
   IGatewayConnectorProxy,
   IContextProvider,
 } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
+injectable();
 export class GatewayConnectorProxy
   extends ParentProxy
   implements IGatewayConnectorProxy

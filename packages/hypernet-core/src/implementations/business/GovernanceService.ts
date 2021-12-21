@@ -11,9 +11,10 @@ import {
   IGovernanceRepository,
   IGovernanceRepositoryType,
 } from "@interfaces/data";
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 
+injectable();
 export class GovernanceService implements IGovernanceService {
   constructor(
     @inject(IGovernanceRepositoryType)

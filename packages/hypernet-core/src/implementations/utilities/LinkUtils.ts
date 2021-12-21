@@ -10,10 +10,12 @@ import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IContextProvider } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
+import { injectable } from "inversify";
 
 /**
  * Provides functions to go from a set of payments into a set of HypernetLinks, and similar.
  */
+injectable();
 export class LinkUtils implements ILinkUtils {
   constructor(protected contextProvider: IContextProvider) {}
   /**

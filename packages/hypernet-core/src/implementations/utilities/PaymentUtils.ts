@@ -38,6 +38,7 @@ import {
   IVectorUtils,
 } from "@interfaces/utilities";
 import { BigNumber } from "ethers";
+import { injectable } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { v4 as uuidv4 } from "uuid";
 
@@ -45,6 +46,7 @@ import { v4 as uuidv4 } from "uuid";
  * A class for creating Hypernet-Payment objects from Vector transfers, verifying information
  * about payment Ids, sorting transfers, and other related stuff.
  */
+injectable();
 export class PaymentUtils implements IPaymentUtils {
   /**
    * Return an instance of PaymentUtils.

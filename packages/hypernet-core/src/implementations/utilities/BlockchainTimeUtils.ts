@@ -9,7 +9,9 @@ import {
   IBlockchainProvider,
   IBlockchainTimeUtils,
 } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
+injectable();
 export class BlockchainTimeUtils implements IBlockchainTimeUtils {
   protected lastBlockchainCheck: UnixTimestamp | undefined;
   protected lastBlockchainTimestamp: UnixTimestamp | undefined;

@@ -11,6 +11,7 @@ import { HypernetConfig } from "@interfaces/objects";
 import { ResultAsync, okAsync } from "neverthrow";
 
 import { IConfigProvider } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
 declare const __IFRAME_SOURCE__: string;
 declare const __NATS_URL__: string;
@@ -19,6 +20,7 @@ declare const __VALIDATOR_IFRAME_URL__: string;
 declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
 
+injectable();
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
 

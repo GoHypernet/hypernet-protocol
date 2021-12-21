@@ -1,6 +1,8 @@
 import { EthereumAccountAddress } from "@hypernetlabs/objects";
+import { injectable } from "inversify";
 import sjcl from "sjcl";
 
+injectable();
 export class ChannelUtils {
   public static getChannelId(
     consumerAddress: EthereumAccountAddress,

@@ -2,6 +2,7 @@ import EventEmitter from "events";
 
 import { BlockTag, TransactionRequest } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
+import { injectable } from "inversify";
 
 interface ICeramicSendData {
   jsonrpc: string;
@@ -10,6 +11,7 @@ interface ICeramicSendData {
   params: unknown[];
 }
 
+injectable();
 export class CeramicEIP1193Bridge extends EventEmitter {
   constructor(
     protected readonly signer: ethers.Signer,

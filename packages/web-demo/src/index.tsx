@@ -8,6 +8,8 @@ import Spinner from "./assets/loading-spinner";
 const client: IHypernetWebIntegration = new HypernetWebIntegration(
   null,
   null,
+  true,
+  false,
   null,
 );
 

@@ -5,8 +5,10 @@ import {
 } from "@hypernetlabs/objects";
 import { IDevelopmentService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
+import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 
+injectable();
 export class DevelopmentService implements IDevelopmentService {
   constructor(protected accountRepo: IAccountsRepository) {}
 

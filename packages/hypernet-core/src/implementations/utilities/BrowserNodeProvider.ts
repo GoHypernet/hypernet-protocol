@@ -21,7 +21,9 @@ import {
   IBlockchainProvider,
 } from "@interfaces/utilities";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
+import { injectable } from "inversify";
 
+injectable();
 export class BrowserNodeProvider implements IBrowserNodeProvider {
   protected browserNodeResult: ResultAsync<
     IBrowserNode,

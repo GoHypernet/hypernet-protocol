@@ -52,3 +52,5 @@ export interface IGovernanceService {
     account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError>;
 }
+
+export const IGovernanceServiceType = Symbol.for("IGovernanceService");

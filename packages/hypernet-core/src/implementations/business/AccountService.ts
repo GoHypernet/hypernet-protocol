@@ -25,10 +25,12 @@ import {
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IContextProvider, IBlockchainProvider } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
 /**
  *
  */
+@injectable()
 export class AccountService implements IAccountService {
   constructor(
     protected accountRepository: IAccountsRepository,

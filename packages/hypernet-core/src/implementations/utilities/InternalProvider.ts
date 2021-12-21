@@ -8,7 +8,9 @@ import { ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 
 import { IInternalProvider } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
+injectable();
 export class InternalProvider implements IInternalProvider {
   protected providerInitializedPromiseResolve: () => void;
   protected providerPromise: Promise<void>;

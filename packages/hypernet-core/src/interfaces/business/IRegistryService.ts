@@ -201,3 +201,5 @@ export interface IRegistryService {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
 }
+
+export const IRegistryServiceType = Symbol.for("IRegistryService");

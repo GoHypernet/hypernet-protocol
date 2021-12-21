@@ -59,3 +59,5 @@ export interface IPaymentIdUtils {
     uuid: UUID,
   ): Result<PaymentId, InvalidParametersError>;
 }
+
+export const IPaymentIdUtilsType = Symbol.for("IPaymentIdUtils");

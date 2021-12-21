@@ -17,9 +17,10 @@ import {
 } from "@hypernetlabs/objects";
 import { IRegistryService } from "@interfaces/business";
 import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 
+injectable();
 export class RegistryService implements IRegistryService {
   constructor(
     @inject(IRegistryRepositoryType)

@@ -21,10 +21,12 @@ import {
   IVectorUtils,
   ILinkUtils,
 } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
 /**
  * Provides methods for retrieving Hypernet Links.
  */
+injectable();
 export class LinkRepository implements ILinkRepository {
   /**
    * Get an instance of the LinkRepository

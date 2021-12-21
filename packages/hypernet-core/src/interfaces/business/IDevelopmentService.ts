@@ -11,3 +11,5 @@ export interface IDevelopmentService {
     to: EthereumAccountAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
 }
+
+export const IDevelopmentServiceType = Symbol.for("IDevelopmentService");

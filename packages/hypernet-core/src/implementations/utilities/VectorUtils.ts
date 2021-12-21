@@ -55,11 +55,13 @@ import {
 } from "@interfaces/utilities";
 
 import "reflect-metadata";
+import { injectable } from "inversify";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
  * creating transfers, resolving them, & dealing the with router channel.
  */
+injectable();
 export class VectorUtils implements IVectorUtils {
   protected messageTransferTypeName = "MessageTransfer";
   protected insuranceTransferTypeName = "Insurance";

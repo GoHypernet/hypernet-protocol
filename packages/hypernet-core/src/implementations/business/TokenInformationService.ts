@@ -8,9 +8,10 @@ import {
   ITokenInformationRepository,
 } from "@hypernetlabs/common-repositories";
 import { ITokenInformationService } from "@interfaces/business";
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 
+injectable();
 export class TokenInformationService implements ITokenInformationService {
   constructor(
     @inject(ITokenInformationRepositoryType)

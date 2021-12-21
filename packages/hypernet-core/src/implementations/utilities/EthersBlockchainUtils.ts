@@ -24,7 +24,9 @@ import {
   IBlockchainUtils,
   IConfigProvider,
 } from "@interfaces/utilities";
+import { injectable } from "inversify";
 
+injectable();
 export class EthersBlockchainUtils implements IBlockchainUtils {
   protected erc20Abi: string[];
   constructor(

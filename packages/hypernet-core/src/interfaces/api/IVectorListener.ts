@@ -25,3 +25,5 @@ export interface IVectorListener {
     | TransferCreationError
   >;
 }
+
+export const IVectorListenerType = Symbol.for("IVectorListener");
