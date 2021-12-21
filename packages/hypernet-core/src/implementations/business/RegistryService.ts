@@ -313,16 +313,16 @@ export class RegistryService implements IRegistryService {
     );
   }
 
-  public getRegistryEntryListByLabel(
+  public getRegistryEntryListByUsername(
     registryName: string,
-    label: string,
+    username: string,
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
-    return this.registryRepository.getRegistryEntryListByLabel(
+    return this.registryRepository.getRegistryEntryListByUsername(
       registryName,
-      label,
+      username,
     );
   }
 }

@@ -1606,16 +1606,16 @@ export class HypernetCore implements IHypernetCore {
     );
   }
 
-  public getRegistryEntryListByLabel(
+  public getRegistryEntryListByUsername(
     registryName: string,
-    label: EthereumAccountAddress,
+    username: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
-    return this.registryService.getRegistryEntryListByLabel(
+    return this.registryService.getRegistryEntryListByUsername(
       registryName,
-      label,
+      username,
     );
   }
 }

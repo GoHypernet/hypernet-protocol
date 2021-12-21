@@ -28,7 +28,7 @@ const REGISTRY_ENTRIES_PER_PAGE = 3;
 
 enum ERegistryEntrySearchBy {
   OWNER_ADDRESS,
-  LABEL,
+  USERNAME,
 }
 
 const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
@@ -164,10 +164,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .mapErr(handleCoreError);
   };
 
-  const onSearchByLabelClick = (value) => {
+  const onSearchByUsernameClick = (value) => {
     setLoading(true);
     coreProxy
-      .getRegistryEntryListByLabel(
+      .getRegistryEntryListByUsername(
         registryName,
         value,
       )
@@ -216,17 +216,17 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
                           value: ERegistryEntrySearchBy.OWNER_ADDRESS,
                         },
                         {
-                          primaryText: "Label",
-                          value: ERegistryEntrySearchBy.LABEL,
+                          primaryText: "Username",
+                          value: ERegistryEntrySearchBy.USERNAME,
                         },
                       ]}
                     />
                     <Box className={classes.searchFilterWrapper}>
-                      {values.searchBy === ERegistryEntrySearchBy.LABEL ? (
+                      {values.searchBy === ERegistryEntrySearchBy.USERNAME ? (
                         <GovernanceSearchFilter
-                          title="Search by label"
-                          placeholder="Search by label"
-                          onSearchClick={onSearchByLabelClick}
+                          title="Search by username"
+                          placeholder="Search by username"
+                          onSearchClick={onSearchByUsernameClick}
                           onRestartClick={onRestartClick}
                         />
                       ) : (
