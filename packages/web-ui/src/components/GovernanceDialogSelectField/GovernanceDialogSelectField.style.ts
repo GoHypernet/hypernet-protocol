@@ -54,6 +54,10 @@ export const useStyles = makeStyles((theme) => ({
     padding: "12px 16px",
     borderRadius: 3,
     background: colors.GRAY100,
+    alignItems: "center",
+  },
+  smallFieldTextWrapper: {
+    padding: "4px 10px 4px 10px",
   },
   dialogCloseButton: {
     marginLeft: "auto",

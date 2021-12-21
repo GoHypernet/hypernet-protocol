@@ -1,3 +1,5 @@
+import React, { useEffect, useState, useMemo } from "react";
+import { Form, Formik } from "formik";
 import {
   ERegistrySortOrder,
   EthereumAccountAddress,
@@ -7,7 +9,6 @@ import {
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
-import React, { useEffect, useState, useMemo } from "react";
 
 import {
   GovernanceRegistryListItem,
@@ -17,17 +18,25 @@ import {
   GovernanceSwitch,
   IHeaderAction,
   GovernanceSearchFilter,
+  GovernanceDialogSelectField,
 } from "@web-ui/components";
 import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import CreateBatchIdentityWidget from "@web-ui/widgets/CreateBatchIdentityWidget";
+import { useStyles } from "@web-ui/widgets/RegistryEntryListWidget/RegistryEntryListWidget.style";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
+
+enum ERegistryEntrySearchBy {
+  OWNER_ADDRESS,
+  LABEL,
+}
 
 const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   onRegistryEntryDetailsNavigate,
   onRegistryListNavigate,
   registryName,
 }: IRegistryEntryListWidgetParams) => {
+  const classes = useStyles();
   const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
@@ -140,12 +149,27 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     return headerActions;
   };
 
-  const onSearchClick = (value) => {
+  const onSearchByOwnerAddressClick = (value) => {
     setLoading(true);
     coreProxy
       .getRegistryEntryListByOwnerAddress(
         registryName,
         EthereumAccountAddress(value),
+      )
+      .map((registryEntries) => {
+        setRegistryEntries(registryEntries);
+        setPage(1);
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
+  const onSearchByLabelClick = (value) => {
+    setLoading(true);
+    coreProxy
+      .getRegistryEntryListOfOwnerByLabel(
+        registryName,
+        value,
       )
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
@@ -171,22 +195,55 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         }}
         headerActions={getHeaderActions()}
         bottomContent={
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            width="100%"
-          >
-            <Box>
-              <GovernanceSearchFilter
-                title="Search for owner address"
-                placeholder="Search for owner address"
-                onSearchClick={onSearchClick}
-                onRestartClick={onRestartClick}
-              />
-            </Box>
-            <Box display="flex" alignItems="center">
-              <Typography style={{ paddingRight: 5 }}>
+          <Box className={classes.headerBottomContentWrapper}>
+            <Formik
+              initialValues={{
+                searchBy: ERegistryEntrySearchBy.OWNER_ADDRESS,
+              }}
+              onSubmit={() => {}}
+            >
+              {({ handleSubmit, values }) => {
+                return (
+                  <Form onSubmit={handleSubmit} className={classes.searchForm}>
+                    <GovernanceDialogSelectField
+                      title="Search By"
+                      size="small"
+                      name="searchBy"
+                      wrapperClassName={classes.searchBySelectWrapper}
+                      options={[
+                        {
+                          primaryText: "Owner Address",
+                          value: ERegistryEntrySearchBy.OWNER_ADDRESS,
+                        },
+                        {
+                          primaryText: "Label",
+                          value: ERegistryEntrySearchBy.LABEL,
+                        },
+                      ]}
+                    />
+                    <Box className={classes.searchFilterWrapper}>
+                      {values.searchBy === ERegistryEntrySearchBy.LABEL ? (
+                        <GovernanceSearchFilter
+                          title="Search by label"
+                          placeholder="Search by label"
+                          onSearchClick={onSearchByLabelClick}
+                          onRestartClick={onRestartClick}
+                        />
+                      ) : (
+                        <GovernanceSearchFilter
+                          title="Search by owner address"
+                          placeholder="Search by owner address"
+                          onSearchClick={onSearchByOwnerAddressClick}
+                          onRestartClick={onRestartClick}
+                        />
+                      )}
+                    </Box>
+                  </Form>
+                );
+              }}
+            </Formik>
+            <Box className={classes.sortWrapper}>
+              <Typography className={classes.reverseSortLabel}>
                 Reverse sorting
               </Typography>
               <GovernanceSwitch
