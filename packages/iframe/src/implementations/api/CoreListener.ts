@@ -53,6 +53,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.waitInitialized();
         }, data.callId);
       },
+      waitGovernanceInitialized: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.waitGovernanceInitialized();
+        }, data.callId);
+      },
+      waitPaymentsInitialized: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.waitPaymentsInitialized();
+        }, data.callId);
+      },
       getEthereumAccounts: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getEthereumAccounts();
@@ -602,6 +612,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     // to the parent when it is initialized; combining a few functions.
     this.core.waitInitialized().map(() => {
       parent.emit("initialized");
+    });
+
+    this.core.waitGovernanceInitialized().map(() => {
+      parent.emit("governanceInitialized");
+    });
+
+    this.core.waitPaymentsInitialized().map(() => {
+      parent.emit("paymentsInitialized");
     });
 
     // We are going to relay the RXJS events

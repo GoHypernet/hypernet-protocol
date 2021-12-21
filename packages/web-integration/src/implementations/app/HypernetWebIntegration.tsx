@@ -29,6 +29,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   constructor(
     iframeURL: string | null,
     governanceChainId: number | null,
+    governanceRequired: boolean | null,
+    paymentsRequired: boolean | null,
     debug: boolean | null,
   ) {
     let iframeURLWithSearchParams = new URL(iframeURL || this.iframeURL);
@@ -37,6 +39,20 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       iframeURLWithSearchParams.searchParams.append(
         "governanceChainId",
         governanceChainId.toString(),
+      );
+    }
+
+    if (governanceRequired != null) {
+      iframeURLWithSearchParams.searchParams.append(
+        "governanceRequired",
+        governanceRequired.toString(),
+      );
+    }
+
+    if (paymentsRequired != null) {
+      iframeURLWithSearchParams.searchParams.append(
+        "paymentsRequired",
+        paymentsRequired.toString(),
       );
     }
 
