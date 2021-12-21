@@ -29,9 +29,13 @@ which the registry is used for identity or authenticity verification in which th
 
 ## Roles and Minting
 
-Each NFR has a `REGISTRAR_ROLE`, which can register new identities, a `REGISTRAR_ROLE_ADMIN` which can add and remove addresses from the 
-`REGISTRAR_ROLE` as well as update NFR parameters, and a `DEFAULT_ADMIN_ROLE` which can make modifications to which addresses have the 
-`REGISTRAR_ROLE` and `REGISTRAR_ROLE_ADMIN`. Both of these roles are set up through the NFR constructor. Additionally, the 
+Every NFR defines the following roles:
+
+- `ADMIN`: super-user style account than can add and remove addresses from any other role (the Hypernet DAO is the admin of every NFR)
+- `REGISTRAR_ROLE_ADMIN`: can add and remove addresses from the `REGISTRAR_ROLE`
+- `REGISTRAR_ROLE`: can register new identities as well as update NFR parameters via the `setRegistryParameters` function
+
+All roles are set up through the NFR constructor/initializer which is called by the registry factory. Additionally, the 
 `REGISTRAR_ROLE` and the owner of an NFI have the option to update the information stored in the `tokenURI` after registration unless 
 `allowStorageUpdate` is set to `false` (which it is by default and can be updated by the `REGISTRAR_ROLE`). The same applies for the 
 token `label` through the `allowLabelChange` flag (which is false by default). In some cases, it can be useful to dissallow the transfer 
@@ -57,7 +61,7 @@ of the token at the time of burning.
 ## Official Hypernet Protocol Non Fungible Registries
 
 The Hypernet Protocol instantiates several NFRs at protocol launch that are necessary for the secure functioning of payments, goverance, and identity 
-functionality. All NFRs in this list are managed by the Hypernet Protocol [DAO](/packages/contracts/contracts/goverance/README.md). That is, all 
+functionality. All NFRs in this list are managed by the Hypernet Protocol [DAO](/packages/contracts/contracts/governance/README.md). That is, all 
 [roles](#roles-and-minting) are occupied by the Hypernet DAO contract.
 
 ### Hypernet Profiles
