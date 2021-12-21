@@ -200,4 +200,11 @@ export interface IRegistryService {
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
+  getRegistryEntryListOfOwnerByLabel(
+    registryName: string,
+    label: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 }

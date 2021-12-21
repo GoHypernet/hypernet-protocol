@@ -995,6 +995,19 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public getRegistryEntryListOfOwnerByLabel(
+    registryName: string,
+    label: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  > {
+    return this._createCall("getRegistryEntryListOfOwnerByLabel", {
+      registryName,
+      label,
+    });
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

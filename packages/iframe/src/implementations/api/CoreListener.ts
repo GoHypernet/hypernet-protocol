@@ -576,6 +576,19 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
+      getRegistryEntryListOfOwnerByLabel: (
+        data: IIFrameCallData<{
+          registryName: string;
+          label: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryEntryListOfOwnerByLabel(
+            data.data.registryName,
+            data.data.label,
+          );
+        }, data.callId);
+      },
       getBlockNumber: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getBlockNumber();

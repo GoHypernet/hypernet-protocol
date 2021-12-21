@@ -1186,25 +1186,72 @@ export class RegistryRepository implements IRegistryRepository {
             registryAddress,
           );
 
-        return this.nonFungibleRegistryContract
-          .balanceOf(ownerAddress)
-          .andThen((numberOfTokens) => {
-            const RegistryEntryListResult: ResultAsync<RegistryEntry, any>[] =
-              [];
-            for (let index = 0; index < numberOfTokens; index++) {
-              RegistryEntryListResult.push(
-                this.nonFungibleRegistryContract
-                  .tokenOfOwnerByIndex(ownerAddress, index)
-                  .andThen((tokenId) => {
-                    return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
-                      tokenId,
-                    );
-                  }),
-              );
-            }
+        return this.getRegistryEntriesByOwnerAddress(
+          this.nonFungibleRegistryContract,
+          ownerAddress,
+        );
+      });
+  }
 
-            return ResultUtils.combine(RegistryEntryListResult);
+  public getRegistryEntryListOfOwnerByLabel(
+    registryName: string,
+    label: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryFactoryContract
+      .nameToAddress(registryName)
+      .andThen((registryAddress) => {
+        if (this.provider == null) {
+          throw new Error("No provider available!");
+        }
+
+        // Call the NFI contract of that address
+        this.nonFungibleRegistryContract =
+          new NonFungibleRegistryEnumerableUpgradeableContract(
+            this.provider,
+            registryAddress,
+          );
+
+        return this.nonFungibleRegistryContract
+          .getRegistryEntryByLabel(label)
+          .andThen((registryEntry) => {
+            return this.getRegistryEntriesByOwnerAddress(
+              this.nonFungibleRegistryContract,
+              registryEntry.owner,
+            );
           });
+      });
+  }
+
+  private getRegistryEntriesByOwnerAddress(
+    contract: INonFungibleRegistryEnumerableUpgradeableContract,
+    ownerAddress: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return contract
+      .balanceOf(ownerAddress)
+      .andThen((numberOfTokens) => {
+        const RegistryEntryListResult: ResultAsync<RegistryEntry, any>[] = [];
+        for (let index = 0; index < numberOfTokens; index++) {
+          RegistryEntryListResult.push(
+            this.nonFungibleRegistryContract
+              .tokenOfOwnerByIndex(ownerAddress, index)
+              .andThen((tokenId) => {
+                return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+                  tokenId,
+                );
+              }),
+          );
+        }
+
+        return ResultUtils.combine(RegistryEntryListResult);
+      })
+      .orElse(() => {
+        return okAsync([]);
       });
   }
 
