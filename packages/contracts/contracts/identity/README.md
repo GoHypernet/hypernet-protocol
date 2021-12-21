@@ -67,7 +67,7 @@ functionality. All NFRs in this list are managed by the Hypernet Protocol [DAO](
 ### Hypernet Profiles
 
 The Hypernet Profile NFR is the primary registry of the Hypernet Protocol ecosystem. In order for an account to receive a NFI in any other NFR, that 
-address must first create NFI profile token in this registry. This is done by locking Hypertoken in the registry itself by approving the registry to 
+address must first create an NFI profile token in this registry. This is done by locking Hypertoken in the registry itself by approving the registry to 
 pull `registrationFee` amound of Hypertoken from the transaction initiator's account and then calling the `registryByToken` function. The `label` that 
 is claimed in this action becomes the unique username of the entity within the Hypernet Protocol ecosystem (this username can be traded with other 
 users or burned to reclaim some of the Hypertoken that was staked in its creation).
