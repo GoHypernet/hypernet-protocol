@@ -64,7 +64,7 @@ The Hypernet Protocol instantiates several NFRs at protocol launch that are nece
 functionality. All NFRs in this list are managed by the Hypernet Protocol [DAO](/packages/contracts/contracts/governance/README.md). That is, all 
 [roles](#roles-and-minting) are occupied by the Hypernet DAO contract.
 
-### Hypernet Profiles
+### [Hypernet Profiles](https://rinkeby.launchpad.hypernet.foundation/registries/Hypernet%20Profiles/entries)
 
 The Hypernet Profile NFR is the primary registry of the Hypernet Protocol ecosystem. In order for an account to receive a NFI in any other NFR, that 
 address must first create an NFI profile token in this registry. This is done by locking Hypertoken in the registry itself by approving the registry to 
@@ -72,7 +72,7 @@ pull `registrationFee` amound of Hypertoken from the transaction initiator's acc
 is claimed in this action becomes the unique username of the entity within the Hypernet Protocol ecosystem (this username can be traded with other 
 users or burned to reclaim some of the Hypertoken that was staked in its creation).
 
-### Gateways
+### [Gateways](https://rinkeby.launchpad.hypernet.foundation/registries/Gateways/entries)
 
 This NFR tracks official payment processing gateway providers. An NFI must be claimed in this registry for a payment processor, implemented on top of the 
 Hypernet Protocol, to function withing the Hypernet Protocol network. The `label` of an NFI in this registry denotes the publicly accessible URL which hosts 
@@ -83,7 +83,7 @@ the payment processor's iframe for interacting with the payment processor. Then 
 
 The owning wallet of a Gateways NFI can be different than that of the signing wallet denoted in the `tokenURI`. 
 
-### Liquidity Providers
+### [Liquidity Providers](https://rinkeby.launchpad.hypernet.foundation/registries/Liquidity%20Providers/entries)
 
 The Liquidity Providers registry provides a public list for discovering layer 2 liquidity providers and what Gateway providers they are officially doing 
 business with. The `label` of each NFI contains the routing identifier for the underlying Vector payment channel protocol. The `tokenURI` has the following 
@@ -92,7 +92,7 @@ json structure:
 - `supportedTokens`: array token addresses and chain id's of EIP20 compatible tokens supported by the liquidity provider
 - `allowedGateways`: array of URLs denoting Gateways the liquidity provider is willing to process transfers for. These URLs are the same as the labels used in the Gateways registry. 
 
-### Payment Tokens
+### [Payment Tokens](https://rinkeby.launchpad.hypernet.foundation/registries/Payment%20Tokens/entries)
 
 Not all EIP20 compatible token contracts expose the necessary metadata fields for safe interaction with the Hypernet Payment protocol. For example, the Wrapped Bitcoin
 contract on the Ethereum mainnet does not expose the decimals field; token decimals must the included as an offchain configuration which can inadvertenly lead to transaction sizes 
@@ -100,6 +100,7 @@ that are off by orders of magnitude. The `label` field in this registry takes th
 
 - `name`: Name to be displayed in Hypernet Protocol component library impelementations
 - `symbol`: Token symbol to be displayed in Hypernet Protocol component library impelementations
+- `chainId`: id of the network the token contract is deployed to
 - `address`: contract address where the token can be found given the chainid in the `label`
 - `nativeToken`: a special boolean field for indicating if the token is the native token of the chain denoted by the chainid
 - `erc20`: special boolean flag for indicating if all necessary functions are present for ERC20 compatibility (native tokens may or may not be ERC20 compliant)
@@ -108,7 +109,7 @@ that are off by orders of magnitude. The `label` field in this registry takes th
 
 All NFIs in this regsitry are owned by the Hypernet Protocol DAO. 
 
-### Registry Modules
+### [Registry Modules](https://rinkeby.launchpad.hypernet.foundation/registries/Registry%20Modules/entries)
 
 Hypernet Protocol NFRs can modify their functionality by adding external contracts to the `REGISTRAR_ROLE`. This can be a potentially dangerous modification, so the
 Registry Modules registry lists official contracts that are safe to use for modifying the functionality of a NFR deployment. The `label` field is the human-readable 
