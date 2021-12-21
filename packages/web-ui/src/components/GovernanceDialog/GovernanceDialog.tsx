@@ -41,7 +41,6 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
     setIsDialogOpen((open) => !open);
   };
 
-  console.log("rest", rest);
   return (
     <Dialog
       className={classes.dialog}

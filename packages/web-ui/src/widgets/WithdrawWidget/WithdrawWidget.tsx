@@ -77,7 +77,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
                 title="Token Selector"
                 name="tokenAddress"
                 options={tokenSelectorOptions.map((option) => ({
-                  primaryText: option.name,
+                  primaryText: `${option.name} Chain ID:${option.chainId}`,
                   value: option.address,
                 }))}
               />

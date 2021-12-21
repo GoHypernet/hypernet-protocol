@@ -54,6 +54,7 @@ import {
   InvalidPaymentIdError,
   LazyMintModuleContractError,
   RegistryTokenId,
+  InitializeStatus,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -67,6 +68,12 @@ export default class HypernetIFrameProxy
   protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
+  protected coreGovernanceInitialized = false;
+  protected waitGovernanceInitializedPromise: Promise<void>;
+  protected governanceInitializePromiseResolve: (() => void) | null;
+  protected corePaymentsInitialized = false;
+  protected waitPaymentsInitializedPromise: Promise<void>;
+  protected paymentsInitializePromiseResolve: (() => void) | null;
 
   constructor(
     protected element: HTMLElement | null,
@@ -111,6 +118,16 @@ export default class HypernetIFrameProxy
     this.onAccountChanged = new Subject();
     this.onGovernanceChainChanged = new Subject();
     this.onGovernanceAccountChanged = new Subject();
+
+    this.governanceInitializePromiseResolve = null;
+    this.waitGovernanceInitializedPromise = new Promise((resolve) => {
+      this.governanceInitializePromiseResolve = resolve;
+    });
+
+    this.paymentsInitializePromiseResolve = null;
+    this.waitPaymentsInitializedPromise = new Promise((resolve) => {
+      this.paymentsInitializePromiseResolve = resolve;
+    });
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -245,6 +262,28 @@ export default class HypernetIFrameProxy
           this.coreInitialized = true;
         });
 
+        // Setup a listener for the "governanceInitialized" event.
+        child.on("governanceInitialized", () => {
+          // Resolve waitGovernanceInitialized
+          if (this.governanceInitializePromiseResolve != null) {
+            this.governanceInitializePromiseResolve();
+          }
+
+          // And mark us as governance initialized
+          this.coreGovernanceInitialized = true;
+        });
+
+        // Setup a listener for the "paymentsInitialized" event.
+        child.on("paymentsInitialized", () => {
+          // Resolve waitGovernanceInitialized
+          if (this.paymentsInitializePromiseResolve != null) {
+            this.paymentsInitializePromiseResolve();
+          }
+
+          // And mark us as payments initialized
+          this.corePaymentsInitialized = true;
+        });
+
         child.on("onGatewayIFrameDisplayRequested", (data: GatewayUrl) => {
           this._displayCoreIFrame();
 
@@ -258,9 +297,6 @@ export default class HypernetIFrameProxy
         });
 
         child.on("onCoreIFrameDisplayRequested", () => {
-          console.log(
-            "recieved onCoreIFrameDisplayRequested in HypernetIFrameProxy",
-          );
           this._displayCoreIFrame();
 
           this.onCoreIFrameDisplayRequested.next();
@@ -294,19 +330,43 @@ export default class HypernetIFrameProxy
     throw new Error("Method not implemented.");
   }
 
-  public initialized(): Result<boolean, never> {
+  public initialized(): ResultAsync<boolean, never> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
-      return ok(false);
+      return okAsync(false);
     }
 
     // Return the current known status of coreInitialized. We request this
     // information as soon as the child is up.
-    return ok(this.coreInitialized);
+    return okAsync(this.coreInitialized);
   }
 
   public waitInitialized(): ResultAsync<void, never> {
     return ResultAsync.fromSafePromise(this.waitInitializedPromise);
+  }
+
+  public governanceInitialized(): Result<boolean, never> {
+    if (this.child == null) {
+      return ok(false);
+    }
+
+    return ok(this.coreGovernanceInitialized);
+  }
+
+  public waitGovernanceInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this.waitGovernanceInitializedPromise);
+  }
+
+  public paymentsInitialized(): Result<boolean, never> {
+    if (this.child == null) {
+      return ok(false);
+    }
+
+    return ok(this.corePaymentsInitialized);
+  }
+
+  public waitPaymentsInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this.waitPaymentsInitializedPromise);
   }
 
   public inControl(): Result<boolean, never> {
@@ -327,7 +387,7 @@ export default class HypernetIFrameProxy
   }
 
   public initialize(): ResultAsync<
-    void,
+    InitializeStatus,
     | MessagingError
     | BlockchainUnavailableError
     | VectorError
@@ -745,6 +805,13 @@ export default class HypernetIFrameProxy
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("executeProposal", proposalId);
+  }
+
+  public getBlockNumber(): ResultAsync<
+    number,
+    BlockchainUnavailableError | ProxyError
+  > {
+    return this._createCall("getBlockNumber", null);
   }
 
   public getProposalsCount(): ResultAsync<

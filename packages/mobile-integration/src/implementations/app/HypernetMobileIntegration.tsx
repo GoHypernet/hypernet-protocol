@@ -22,7 +22,13 @@ export default class HypernetMobileIntegration {
   public coreProxy: IHypernetCore = {} as IHypernetCore;
 
   constructor() {
-    this.webIntegrationInstance = new HypernetWebIntegration(null, null, null);
+    this.webIntegrationInstance = new HypernetWebIntegration(
+      null,
+      null,
+      true,
+      false,
+      null,
+    );
     this.webIntegrationInstance.getReady().map((coreProxy) => {
       this.coreProxy = coreProxy;
       if (window.ReactNativeWebView) {

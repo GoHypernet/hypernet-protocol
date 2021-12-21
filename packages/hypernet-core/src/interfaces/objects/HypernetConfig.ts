@@ -22,6 +22,8 @@ export class HypernetConfig {
     public gatewayDeauthorizationTimeout: number,
     public controlClaimSubject: string,
     public requireOnline: boolean,
+    public governanceRequired: boolean,
+    public paymentsRequired: boolean,
     public debug: boolean,
   ) {}
 }

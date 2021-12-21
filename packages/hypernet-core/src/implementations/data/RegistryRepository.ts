@@ -53,7 +53,7 @@ export class RegistryRepository implements IRegistryRepository {
   protected signer: ethers.providers.JsonRpcSigner | undefined;
   protected registryFactoryContract: IRegistryFactoryContract =
     {} as RegistryFactoryContract;
-  protected hypertokenContract: IERC20Contract = {} as ERC20Contract;
+  protected tokenERC20Contract: IERC20Contract = {} as ERC20Contract;
   protected nonFungibleRegistryContract: INonFungibleRegistryEnumerableUpgradeableContract =
     {} as NonFungibleRegistryEnumerableUpgradeableContract;
   protected batchModuleContract: IBatchModuleContract =
@@ -873,16 +873,18 @@ export class RegistryRepository implements IRegistryRepository {
           registry.address,
         );
 
+      this.tokenERC20Contract = new ERC20Contract(
+        this.signer,
+        registry.registrationToken,
+      );
+
       // Means registration token is not a zero address
       if (BigNumber.from(registry.registrationToken).isZero() === false) {
         return this.nonFungibleRegistryContract
-          .registrationFee()
+          .registrationFeeBigNumber()
           .andThen((registrationFees) => {
-            return this.hypertokenContract
-              .approve(
-                registry.address,
-                BigNumberString(registrationFees.toString()),
-              )
+            return this.tokenERC20Contract
+              .approve(registry.address, registrationFees)
               .andThen(() => {
                 return this.nonFungibleRegistryContract.registerByToken(
                   newRegistryEntry.owner,
@@ -909,23 +911,34 @@ export class RegistryRepository implements IRegistryRepository {
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
-    return this.registryFactoryContract
-      .registrationFee()
-      .andThen((registrationFees) => {
-        return this.hypertokenContract
-          .approve(
-            this.registryFactoryContract.getContractAddress(),
-            BigNumberString(registrationFees.toString()),
-          )
-          .andThen(() => {
-            return this.registryFactoryContract.createRegistryByToken(
-              name,
-              symbol,
-              registrarAddress,
-              enumerable,
-            );
-          });
-      });
+    return ResultUtils.combine([
+      this.registryFactoryContract.registrationFee(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [registrationFees, config] = vals;
+      if (this.signer == null) {
+        throw new Error("No signer available!");
+      }
+
+      this.tokenERC20Contract = new ERC20Contract(
+        this.signer,
+        config.governanceChainInformation.hypertokenAddress,
+      );
+
+      return this.tokenERC20Contract
+        .approve(
+          this.registryFactoryContract.getContractAddress(),
+          registrationFees,
+        )
+        .andThen(() => {
+          return this.registryFactoryContract.createRegistryByToken(
+            name,
+            symbol,
+            registrarAddress,
+            enumerable,
+          );
+        });
+    });
   }
 
   public grantRegistrarRole(

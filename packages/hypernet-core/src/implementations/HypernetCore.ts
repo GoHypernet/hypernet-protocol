@@ -60,6 +60,8 @@ import {
   RegistryModule,
   BatchModuleContractError,
   LazyMintModuleContractError,
+  InitializeStatus,
+  CoreInitializationErrors,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -135,7 +137,7 @@ import {
   IRegistryRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
-import { ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
 import { StorageUtils } from "@implementations/data/utilities";
@@ -279,28 +281,21 @@ export class HypernetCore implements IHypernetCore {
   protected blockchainListener: IBlockchainListener;
 
   protected _initializeResult: ResultAsync<
-    void,
-    | MessagingError
-    | BlockchainUnavailableError
-    | VectorError
-    | RouterChannelUnknownError
-    | GatewayConnectorError
-    | GatewayValidationError
-    | ProxyError
-    | PersistenceError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | InvalidPaymentIdError
-    | GovernanceSignerUnavailableError
-    | TransferResolutionError
-    | TransferCreationError
-    | PaymentStakeError
-    | PaymentFinalizeError
-    | NonFungibleRegistryContractError
+    InitializeStatus,
+    CoreInitializationErrors
   > | null;
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
   protected _initializePromiseResolve: (() => void) | null;
+
+  protected _governanceInitialized: boolean;
+  protected _governanceInitializePromise: Promise<void>;
+  protected _governanceInitializePromiseResolve: (() => void) | null;
+
+  protected _paymentsInitialized: boolean;
+  protected _paymentsInitializePromise: Promise<void>;
+  protected _paymentsInitializePromiseResolve: (() => void) | null;
+
   protected _inControl: boolean;
 
   /**
@@ -645,17 +640,77 @@ export class HypernetCore implements IHypernetCore {
     this._initializePromise = new Promise((resolve) => {
       this._initializePromiseResolve = resolve;
     });
+
+    this._governanceInitialized = false;
+    this._governanceInitializePromiseResolve = null;
+    this._governanceInitializePromise = new Promise((resolve) => {
+      this._governanceInitializePromiseResolve = resolve;
+    });
+
+    this._paymentsInitialized = false;
+    this._paymentsInitializePromiseResolve = null;
+    this._paymentsInitializePromise = new Promise((resolve) => {
+      this._paymentsInitializePromiseResolve = resolve;
+    });
   }
 
   /**
    * Returns the initialized status of this instance of Hypernet Core.
    */
-  public initialized(): Result<boolean, never> {
-    return ok(this._initialized);
+  public initialized(): ResultAsync<boolean, never> {
+    return this.configProvider.getConfig().andThen((config) => {
+      if (
+        config.governanceRequired == true &&
+        config.paymentsRequired == true
+      ) {
+        return ok(this._governanceInitialized && this._paymentsInitialized);
+      } else {
+        return ok(this._governanceInitialized || this._paymentsInitialized);
+      }
+    });
   }
 
   public waitInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._initializePromise);
+    return this.configProvider.getConfig().andThen((config) => {
+      if (
+        config.governanceRequired == true &&
+        config.paymentsRequired == true
+      ) {
+        return ResultUtils.combine([
+          ResultAsync.fromSafePromise<void, never>(
+            this._governanceInitializePromise,
+          ),
+          ResultAsync.fromSafePromise<void, never>(
+            this._paymentsInitializePromise,
+          ),
+        ]).map(() => {});
+      } else {
+        return ResultUtils.race([
+          ResultAsync.fromSafePromise<void, never>(
+            this._governanceInitializePromise,
+          ),
+          ResultAsync.fromSafePromise<void, never>(
+            this._paymentsInitializePromise,
+          ),
+        ]).map(() => {});
+      }
+    });
+  }
+
+  public governanceInitialized(): Result<boolean, never> {
+    return ok(this._governanceInitialized);
+  }
+
+  public waitGovernanceInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._governanceInitializePromise);
+  }
+
+  public paymentsInitialized(): Result<boolean, never> {
+    return ok(this._paymentsInitialized);
+  }
+
+  public waitPaymentsInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._paymentsInitializePromise);
   }
 
   /**
@@ -869,7 +924,99 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public initialize(): ResultAsync<
+  public initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+    if (this._initializeResult != null) {
+      return this._initializeResult;
+    }
+
+    this._initializeResult = ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+      this.blockchainProvider.initialize(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      this.logUtils.debug(`Initializing Hypernet Protocol Core`);
+
+      return ResultUtils.combine([
+        this.initializeGovernance()
+          .map(() => {
+            context.governanceInitialized = true;
+            if (this._governanceInitializePromiseResolve != null) {
+              this._governanceInitializePromiseResolve();
+            }
+          })
+          .orElse((e) => {
+            this.logUtils.error(e);
+            if (config.governanceRequired === true) {
+              return errAsync(e);
+            } else {
+              return okAsync(undefined);
+            }
+          }),
+        this.initializePayments(config, context)
+          .map(() => {
+            context.paymentsInitialized = true;
+            if (this._paymentsInitializePromiseResolve != null) {
+              this._paymentsInitializePromiseResolve();
+            }
+          })
+          .orElse((e) => {
+            this.logUtils.error(e);
+            if (config.paymentsRequired === true) {
+              return errAsync(e);
+            } else {
+              return okAsync(undefined);
+            }
+          }),
+      ])
+        .map(() => {})
+        .orElse((e) => {
+          this.logUtils.error(e);
+          if (
+            config.governanceRequired === false &&
+            config.paymentsRequired === false
+          ) {
+            return okAsync(undefined);
+          } else {
+            return errAsync(e);
+          }
+        })
+        .andThen(() => {
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return okAsync(
+            new InitializeStatus(
+              true,
+              context.paymentsInitialized,
+              context.governanceInitialized,
+            ),
+          );
+        });
+    });
+
+    return this._initializeResult;
+  }
+
+  private initializeGovernance(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
+    // Initialize governance provider with contracts
+    return ResultUtils.combine([
+      this.registryRepository.initializeReadOnly(),
+      this.governanceRepository.initializeReadOnly(),
+      this.registryRepository.initializeForWrite(),
+      this.governanceRepository.initializeForWrite(),
+    ]).map(() => {});
+  }
+
+  private initializePayments(
+    config: HypernetConfig,
+    context: HypernetContext,
+  ): ResultAsync<
     void,
     | MessagingError
     | BlockchainUnavailableError
@@ -882,144 +1029,89 @@ export class HypernetCore implements IHypernetCore {
     | InvalidPaymentError
     | InvalidParametersError
     | InvalidPaymentIdError
-    | GovernanceSignerUnavailableError
     | TransferResolutionError
     | TransferCreationError
     | PaymentStakeError
     | PaymentFinalizeError
     | NonFungibleRegistryContractError
   > {
-    if (this._initializeResult != null) {
-      return this._initializeResult;
-    }
-
-    this.logUtils.debug(`Initializing Hypernet Protocol Core`);
-
-    let context: HypernetContext;
-    this._initializeResult = this.blockchainProvider
-      .initialize()
-      .andThen(() => {
-        // Get the config
-        return this.configProvider.getConfig();
+    return this.tokenInformationRepository
+      .initialize(config.governanceChainInformation.tokenRegistryAddress)
+      .orElse((e) => {
+        this.logUtils.error(e);
+        return okAsync(undefined);
       })
-      .andThen((config) => {
+
+      .andThen(() => {
         this.logUtils.debug("Getting Ethereum accounts");
-        return (
-          ResultUtils.combine([
-            this.contextProvider.getContext(),
-            this.accountRepository.getAccounts(),
-          ])
-            .andThen((vals) => {
-              context = vals[0];
-              const accounts = vals[1];
-              context.account = accounts[0];
-              this.logUtils.debug(`Obtained accounts: ${accounts}`);
-              return this.contextProvider.setContext(context);
-            })
-            .andThen(() => {
-              return this.ceramicUtils.initialize();
-            })
-            .andThen(() => {
-              // Initialize governance provider with contracts
-              return ResultUtils.combine([
-                this.registryRepository.initializeReadOnly(),
-                this.governanceRepository.initializeReadOnly(),
-              ]);
-            })
-            .andThen(() => {
-              // Initialize governance signer with contracts
-              return ResultUtils.combine([
-                this.registryRepository.initializeForWrite(),
-                this.governanceRepository.initializeForWrite(),
-                this.tokenInformationRepository.initialize(
-                  config.governanceChainInformation.tokenRegistryAddress,
-                ),
-              ])
-                .map(() => {})
-                .orElse((e) => {
-                  this.logUtils.error(e);
-                  return okAsync(undefined);
-                });
-            })
-            .andThen(() => {
-              return ResultUtils.combine([
-                this.accountRepository.getPublicIdentifier(),
-                this.accountRepository.getActiveStateChannels(),
-              ]);
-            })
-            .andThen((vals) => {
-              const [publicIdentifier, activeStateChannels] = vals;
+        return this.accountRepository.getAccounts();
+      })
+      .andThen((accounts) => {
+        context.account = accounts[0];
+        this.logUtils.debug(`Obtained accounts: ${accounts}`);
+        return this.contextProvider.setContext(context);
+      })
+      .andThen(() => {
+        return this.ceramicUtils.initialize();
+      })
+      .andThen(() => {
+        return ResultUtils.combine([
+          this.accountRepository.getPublicIdentifier(),
+          this.accountRepository.getActiveStateChannels(),
+        ]);
+      })
+      .andThen((vals) => {
+        const [publicIdentifier, activeStateChannels] = vals;
 
-              this.logUtils.debug(
-                `Obtained active state channels: ${activeStateChannels}`,
-              );
-
-              context.publicIdentifier = publicIdentifier;
-              context.activeStateChannels = activeStateChannels;
-
-              return this.contextProvider.setContext(context);
-            })
-            .andThen(() => {
-              // By doing some active initialization, we can avoid whole categories
-              // of errors occuring post-initialization (ie, runtime), which makes the
-              // whole thing more reliable in operation.
-              this.logUtils.debug("Initializing utilities");
-              this.logUtils.debug("Initializing services");
-              return this.gatewayConnectorService.initialize();
-            })
-            .andThen(() => {
-              this.logUtils.debug("Initializing API listeners");
-              // Initialize anything that wants an initialized context
-              return ResultUtils.combine([
-                this.vectorAPIListener.initialize(),
-                this.gatewayConnectorListener.initialize(),
-                this.messagingListener.initialize(),
-                this.blockchainListener.initialize(),
-              ]);
-            })
-            .andThen(() => {
-              this.logUtils.debug("Initialized all internal services");
-              return this.gatewayConnectorService.activateAuthorizedGateways();
-            })
-            // .andThen(() => {
-            //   // Claim control
-            //   return this.controlService.claimControl();
-            // })
-
-            .andThen(() => {
-              // If we are in debug mode, we'll print the registered transfers out.
-              if (config.debug) {
-                return this.browserNodeProvider
-                  .getBrowserNode()
-                  .andThen((browserNode) => {
-                    return browserNode.getRegisteredTransfers(
-                      config.governanceChainId,
-                    );
-                  })
-                  .map((registeredTransfers) => {
-                    this.logUtils.debug("Registered Transfers");
-                    this.logUtils.debug(registeredTransfers);
-                  });
-              }
-              return okAsync(undefined);
-            })
-            .map(() => {
-              if (this._initializePromiseResolve != null) {
-                this._initializePromiseResolve();
-              }
-              this.logUtils.debug(
-                `Hypernet Protocol core initialized successfully`,
-              );
-              this._initialized = true;
-            })
-            .mapErr((e) => {
-              this.logUtils.error(e);
-              return e;
-            })
+        this.logUtils.debug(
+          `Obtained active state channels: ${activeStateChannels}`,
         );
-      });
 
-    return this._initializeResult;
+        context.publicIdentifier = publicIdentifier;
+        context.activeStateChannels = activeStateChannels;
+
+        return this.contextProvider.setContext(context);
+      })
+      .andThen(() => {
+        // By doing some active initialization, we can avoid whole categories
+        // of errors occuring post-initialization (ie, runtime), which makes the
+        // whole thing more reliable in operation.
+        this.logUtils.debug("Initializing payments utilities");
+        this.logUtils.debug("Initializing payments services");
+        return this.gatewayConnectorService.initialize();
+      })
+      .andThen(() => {
+        this.logUtils.debug("Initializing API listeners");
+        // Initialize anything that wants an initialized context
+        return ResultUtils.combine([
+          this.vectorAPIListener.initialize(),
+          this.gatewayConnectorListener.initialize(),
+          this.messagingListener.initialize(),
+          this.blockchainListener.initialize(),
+        ]);
+      })
+      .andThen(() => {
+        this.logUtils.debug("Initialized all internal services");
+        return this.gatewayConnectorService.activateAuthorizedGateways();
+      })
+
+      .andThen(() => {
+        // If we are in debug mode, we'll print the registered transfers out.
+        if (config.debug) {
+          return this.browserNodeProvider
+            .getBrowserNode()
+            .andThen((browserNode) => {
+              return browserNode.getRegisteredTransfers(
+                config.governanceChainId,
+              );
+            })
+            .map((registeredTransfers) => {
+              this.logUtils.debug("Registered Transfers");
+              this.logUtils.debug(registeredTransfers);
+            });
+        }
+        return okAsync(undefined);
+      });
   }
 
   /**
@@ -1197,6 +1289,12 @@ export class HypernetCore implements IHypernetCore {
         this.logUtils.error(e);
         return e;
       });
+  }
+
+  public getBlockNumber(): ResultAsync<number, BlockchainUnavailableError> {
+    return this.blockchainProvider.getLatestBlock().map((block) => {
+      return block.number;
+    });
   }
 
   public getProposals(

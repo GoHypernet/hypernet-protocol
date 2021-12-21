@@ -16,6 +16,6 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/web-integration": "^0.6.8"
+    "@hypernetlabs/web-integration": "^0.6.13"
   }
 }

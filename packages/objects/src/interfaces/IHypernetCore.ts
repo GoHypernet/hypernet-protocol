@@ -60,15 +60,24 @@ import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
+import { InitializeStatus } from "@web-integration/InitializeStatus";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): Result<boolean, never>;
+  initialized(): ResultAsync<boolean, never>;
 
   waitInitialized(): ResultAsync<void, never>;
+
+  governanceInitialized(): Result<boolean, never>;
+
+  waitGovernanceInitialized(): ResultAsync<void, never>;
+
+  paymentsInitialized(): Result<boolean, never>;
+
+  waitPaymentsInitialized(): ResultAsync<void, never>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
@@ -90,7 +99,7 @@ export interface IHypernetCore {
    * @param account The address that says who this instance of HypernetCore is representing.
    */
   initialize(): ResultAsync<
-    void,
+    InitializeStatus,
     | MessagingError
     | BlockchainUnavailableError
     | VectorError
@@ -640,6 +649,11 @@ export interface IHypernetCore {
     providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError | ProxyError>;
   getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
+
+  getBlockNumber(): ResultAsync<
+    number,
+    BlockchainUnavailableError | ProxyError
+  >;
 
   getTokenInformationForChain(
     chainId: ChainId,
