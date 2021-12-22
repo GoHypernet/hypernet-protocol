@@ -8,7 +8,7 @@
 
 The governance portion of the Hypernet Protocol consists of the [Hypertoken contract](/packages/contracts/contracts/governance/Hypertoken.sol) 
 and its associated [Distributed Autonomous Organization](/packages/contracts/contracts/governance/HypernetGovernor.sol) (DAO). 
-Hypertoken is [EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and is limited to a total supply of `100,000,000` with `18` decimal 
+Hypertoken (token symbol `H`) is [EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and is limited to a total supply of `100,000,000` with `18` decimal 
 places of precision. The DAO is based on OpenZeppelin's [Governor](https://docs.openzeppelin.com/contracts/4.x/governance) library which 
 is itself based on a reference implementation by [Compound Finance](https://compound.finance/docs/governance). Given below is a sequence 
 diagram for the proposal lifecycle. 
