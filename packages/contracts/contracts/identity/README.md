@@ -56,10 +56,10 @@ can add and remove these modules from their NFR as needed.
 
 ### Token-based registration
 
-Lastly, the Hypernet NFR implements a native mechanism for registration by staking and ERC20-compatible token. By default, this feature is 
+Lastly, the Hypernet NFR implements a native mechanism for registration by sending an EIP20-compatible token to the registry. By default, this feature is 
 disabled, but the `REGISTRAR_ROLE` can set `registrationToken` to an address of an EIP20-compatible token which will enable the feature. The 
 default registration fee is `1e18` (1 token assuming 18 decimal places) which can also be updated by the `REGISTRAR_ROLE`. In order to use this 
-feature, a participant will `approve` the NFR to spend `registrationFee` amount of `registrationToken` from their account. The NFR will 
+feature, a participant must `approve` the NFR to spend `registrationFee` amount of `registrationToken` from their account. The NFR will 
 record the registration token address used and fee amount and associate this staking fee with the NFI `tokenId`. Upon burning of the NFI, 
 any non-zero registration fee associated with the burned `tokenId` will be transfered to the account who burned the token, *not* the owner
 of the token at the time of burning. 
