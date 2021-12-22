@@ -38,7 +38,9 @@ the secure functioning of the Hypernet Protocol ecosystem (thus functioning as a
 ## DAO Access and Usage
 
 Users can see all past and present proposals in the official Hypernet [launchpad dashboard](https://rinkeby.launchpad.hypernet.foundation/proposals). 
-Interacting with proposals requires that active account first posses a [Hypernet Profile NFI](/packages/contracts/contracts/identity/README.md#hypernet-profiles). 
-Creating a new proposal requires that the initiating account posses an amount of Hypertoken equivalent to `_proposalThreshold` which is a public variable stored 
-by the DAO contract. For a given active proposal, users may vote for, against, or abstain. Each Hypertoken in a user's balance counts as 1 vote 
-(i.e. 100 Hypertoken = 100 votes). A vote will be defeated if less than 4% of total votes do not participate. 
+Interacting with proposals (i.e. creating a proposal, casting a vote, etc.) requires that the active account first posses a 
+[Hypernet Profile NFI](/packages/contracts/contracts/identity/README.md#hypernet-profiles). Creating a new proposal requires that 
+the initiating account posses an amount of Hypertoken equivalent to `_proposalThreshold` which is a public variable stored 
+by the DAO contract (the default threshold is `1,000,000 H`). For a given active proposal, users may vote for, against, or abstain. 
+Each Hypertoken in an account's balance counts as 1 vote (i.e. 100 Hypertoken = 100 votes). A proposal will be defeated if quorum is not 
+reached (quorum for the Hypernet DAO is 4% of the total token supply). 
