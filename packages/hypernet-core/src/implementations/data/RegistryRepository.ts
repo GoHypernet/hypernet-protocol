@@ -147,6 +147,7 @@ export class RegistryRepository implements IRegistryRepository {
                 this.nonFungibleRegistryContract.burnAddress(),
                 this.nonFungibleRegistryContract.burnFee(),
                 this.nonFungibleRegistryContract.primaryRegistry(),
+                this.getRegistryModules(),
               ]).map((vals) => {
                 const [
                   registrarAddresses,
@@ -161,21 +162,34 @@ export class RegistryRepository implements IRegistryRepository {
                   burnAddress,
                   burnFee,
                   primaryRegistry,
+                  registryModules,
                 ] = vals;
+
+                const batchModule = registryModules.find(
+                  (registryModule) =>
+                    registryModule.name ===
+                    config.governanceChainInformation.registryModulesNames
+                      .batchMintingModule,
+                );
+
+                const lazyMintModule = registryModules.find(
+                  (registryModule) =>
+                    registryModule.name ===
+                    config.governanceChainInformation.registryModulesNames
+                      .lazyMintingModule,
+                );
 
                 const modulesCapability = new RegistryModuleCapability(
                   registryAddress,
                   registrarAddresses.some(
                     (registrarAddress) =>
                       EthereumContractAddress(registrarAddress) ===
-                      chainConfig.get(config.governanceChainId)
-                        ?.batchModuleAddress,
+                      batchModule?.address,
                   ),
                   registrarAddresses.some(
                     (registrarAddress) =>
                       EthereumContractAddress(registrarAddress) ===
-                      chainConfig.get(config.governanceChainId)
-                        ?.lazyMintModuleAddress,
+                      lazyMintModule?.address,
                   ),
                 );
 
@@ -246,6 +260,7 @@ export class RegistryRepository implements IRegistryRepository {
             this.nonFungibleRegistryContract.burnAddress(),
             this.nonFungibleRegistryContract.burnFee(),
             this.nonFungibleRegistryContract.primaryRegistry(),
+            this.getRegistryModules(),
           ]).map((vals) => {
             const [
               registrarAddresses,
@@ -261,20 +276,34 @@ export class RegistryRepository implements IRegistryRepository {
               burnAddress,
               burnFee,
               primaryRegistry,
+              registryModules,
             ] = vals;
+
+            const batchModule = registryModules.find(
+              (registryModule) =>
+                registryModule.name ===
+                config.governanceChainInformation.registryModulesNames
+                  .batchMintingModule,
+            );
+
+            const lazyMintModule = registryModules.find(
+              (registryModule) =>
+                registryModule.name ===
+                config.governanceChainInformation.registryModulesNames
+                  .lazyMintingModule,
+            );
 
             const modulesCapability = new RegistryModuleCapability(
               registryAddress,
               registrarAddresses.some(
                 (registrarAddress) =>
                   EthereumContractAddress(registrarAddress) ===
-                  chainConfig.get(config.governanceChainId)?.batchModuleAddress,
+                  batchModule?.address,
               ),
               registrarAddresses.some(
                 (registrarAddress) =>
                   EthereumContractAddress(registrarAddress) ===
-                  chainConfig.get(config.governanceChainId)
-                    ?.lazyMintModuleAddress,
+                  lazyMintModule?.address,
               ),
             );
 
@@ -1123,25 +1152,62 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError
   > {
-    return this.getModulesAddresses().andThen((modulesAddresses) => {
-      const moduleListResult: ResultAsync<
-        RegistryModule,
-        RegistryFactoryContractError
-      >[] = [];
+    return this.configProvider.getConfig().andThen((config) => {
+      if (this.provider == null) {
+        throw new Error("No provider available!");
+      }
 
-      modulesAddresses.forEach((moduleAddress) => {
-        moduleListResult.push(
-          this.registryFactoryContract
-            .getModuleName(moduleAddress)
-            .map((moduleName) => {
-              return new RegistryModule(moduleName, moduleAddress);
-            }),
+      if (config.governanceChainInformation.modulesRegistryAddress == null) {
+        return errAsync(
+          new NonFungibleRegistryContractError(
+            "modulesRegistryAddress is not defined!",
+          ),
         );
-      });
+      }
 
-      return ResultUtils.combine(moduleListResult);
+      // Call the NFI contract of modules registry
+      this.nonFungibleRegistryContract =
+        new NonFungibleRegistryEnumerableUpgradeableContract(
+          this.provider,
+          config.governanceChainInformation.modulesRegistryAddress,
+        );
+
+      return this.nonFungibleRegistryContract
+        .totalSupply()
+        .andThen((totalCount) => {
+          const registryEntryListResult: ResultAsync<
+            RegistryEntry,
+            NonFungibleRegistryContractError
+          >[] = [];
+
+          for (let i = 0; i < totalCount; i++) {
+            registryEntryListResult.push(
+              this.nonFungibleRegistryContract
+                .tokenByIndex(i)
+                .andThen((tokenId) => {
+                  return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+                    tokenId,
+                  );
+                }),
+            );
+          }
+
+          return ResultUtils.combine(registryEntryListResult).map(
+            (registryEntries) => {
+              return registryEntries.reduce((acc, registryEntry) => {
+                acc.push({
+                  name: registryEntry.label,
+                  address: EthereumContractAddress(
+                    registryEntry.tokenURI as string,
+                  ),
+                });
+                return acc;
+              }, [] as RegistryModule[]);
+            },
+          );
+        });
     });
   }
 
@@ -1156,11 +1222,15 @@ export class RegistryRepository implements IRegistryRepository {
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
+      this.getRegistryModules(),
+      this.configProvider.getConfig(),
     ]).andThen((vals) => {
-      const [registryMap] = vals;
+      const [registryMap, registryModules, config] = vals;
       const registry = registryMap.get(registryName);
       if (registry == null) {
-        throw new Error("Registry not found!");
+        return errAsync(
+          new RegistryFactoryContractError("Registry not found!"),
+        );
       }
 
       if (
@@ -1176,6 +1246,32 @@ export class RegistryRepository implements IRegistryRepository {
           new BatchModuleContractError("BatchModule register wrong inputs."),
         );
       }
+
+      const batchModule = registryModules.find(
+        (registryModule) =>
+          registryModule.name ===
+          config.governanceChainInformation.registryModulesNames
+            .batchMintingModule,
+      );
+
+      if (batchModule?.address == null) {
+        return errAsync(
+          new BatchModuleContractError(
+            "BatchModule contract address is not defined!",
+          ),
+        );
+      }
+
+      if (this.signer == null) {
+        return errAsync(
+          new BatchModuleContractError("BatchRegister requiers a signer."),
+        );
+      }
+
+      this.batchModuleContract = new BatchModuleContract(
+        this.signer,
+        batchModule?.address,
+      );
 
       return this.batchModuleContract.batchRegister(
         registry.address,
@@ -1198,11 +1294,30 @@ export class RegistryRepository implements IRegistryRepository {
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
+      this.getRegistryModules(),
+      this.configProvider.getConfig(),
     ]).andThen((vals) => {
-      const [registryMap] = vals;
+      const [registryMap, registryModules, config] = vals;
       const registry = registryMap.get(registryName);
       if (registry == null) {
-        throw new Error("Registry not found!");
+        return errAsync(
+          new RegistryFactoryContractError("Registry not found!"),
+        );
+      }
+
+      const lazyMintingModule = registryModules.find(
+        (registryModule) =>
+          registryModule.name ===
+          config.governanceChainInformation.registryModulesNames
+            .lazyMintingModule,
+      );
+
+      if (lazyMintingModule?.address == null) {
+        return errAsync(
+          new LazyMintModuleContractError(
+            "LazyMintModule contract address is not defined!",
+          ),
+        );
       }
 
       if (this.signer == null) {
@@ -1210,6 +1325,11 @@ export class RegistryRepository implements IRegistryRepository {
           new LazyMintModuleContractError("LazyMinting requiers a signer."),
         );
       }
+
+      this.lazyMintModuleContract = new LazyMintModuleContract(
+        this.signer,
+        lazyMintingModule?.address,
+      );
 
       // hash the data
       const hash = ethers.utils
@@ -1320,6 +1440,7 @@ export class RegistryRepository implements IRegistryRepository {
           this.nonFungibleRegistryContract.burnAddress(),
           this.nonFungibleRegistryContract.burnFee(),
           this.nonFungibleRegistryContract.primaryRegistry(),
+          this.getRegistryModules(),
         ]).andThen((vals) => {
           const [
             registrarAddresses,
@@ -1336,20 +1457,34 @@ export class RegistryRepository implements IRegistryRepository {
             burnAddress,
             burnFee,
             primaryRegistry,
+            registryModules,
           ] = vals;
+
+          const batchModule = registryModules.find(
+            (registryModule) =>
+              registryModule.name ===
+              config.governanceChainInformation.registryModulesNames
+                .batchMintingModule,
+          );
+
+          const lazyMintModule = registryModules.find(
+            (registryModule) =>
+              registryModule.name ===
+              config.governanceChainInformation.registryModulesNames
+                .lazyMintingModule,
+          );
 
           const modulesCapability = new RegistryModuleCapability(
             registryAddress,
             registrarAddresses.some(
               (registrarAddress) =>
                 EthereumContractAddress(registrarAddress) ===
-                chainConfig.get(config.governanceChainId)?.batchModuleAddress,
+                batchModule?.address,
             ),
             registrarAddresses.some(
               (registrarAddress) =>
                 EthereumContractAddress(registrarAddress) ===
-                chainConfig.get(config.governanceChainId)
-                  ?.lazyMintModuleAddress,
+                lazyMintModule?.address,
             ),
           );
 
@@ -1424,26 +1559,6 @@ export class RegistryRepository implements IRegistryRepository {
       });
   }
 
-  private getModulesAddresses(): ResultAsync<
-    EthereumContractAddress[],
-    RegistryFactoryContractError
-  > {
-    return this.registryFactoryContract
-      .getNumberOfModules()
-      .andThen((totalCount) => {
-        const moduleListResult: ResultAsync<
-          EthereumContractAddress,
-          RegistryFactoryContractError
-        >[] = [];
-
-        for (let i = 0; i < totalCount; i++) {
-          moduleListResult.push(this.registryFactoryContract.modules(i));
-        }
-
-        return ResultUtils.combine(moduleListResult);
-      });
-  }
-
   private getSignerAddress(): ResultAsync<
     EthereumAccountAddress,
     BlockchainUnavailableError
@@ -1499,17 +1614,9 @@ export class RegistryRepository implements IRegistryRepository {
       signerOrProvider,
       config.governanceChainInformation.registryFactoryAddress,
     );
-    this.hypertokenContract = new ERC20Contract(
+    this.tokenERC20Contract = new ERC20Contract(
       signerOrProvider,
       config.governanceChainInformation.hypertokenAddress,
-    );
-    this.batchModuleContract = new BatchModuleContract(
-      signerOrProvider,
-      config.governanceChainInformation.batchModuleAddress,
-    );
-    this.lazyMintModuleContract = new LazyMintModuleContract(
-      signerOrProvider,
-      config.governanceChainInformation.lazyMintModuleAddress,
     );
   }
 }
