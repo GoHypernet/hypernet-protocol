@@ -21,7 +21,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4"), // parameterizedTransfer
       EthereumContractAddress("0xdDA6327139485221633A1FcD65f4aC932E60A2e1"), // hypernetGovernor
       EthereumContractAddress("0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"), // registryFactory
-      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // gatewayRegistry
+      EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // gatewayRegistry
       EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // liquidityRegistry
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry

@@ -568,6 +568,13 @@ export default class HypernetIFrameProxy
     return this._createCall("getGatewayRegistrationInfo", filter);
   }
 
+  public getGatewayEntryList(): ResultAsync<
+    Map<GatewayUrl, GatewayRegistrationInfo>,
+    NonFungibleRegistryContractError | ProxyError
+  > {
+    return this._createCall("getGatewayEntryList", null);
+  }
+
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
