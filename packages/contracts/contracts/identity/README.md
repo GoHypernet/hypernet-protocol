@@ -31,7 +31,7 @@ which the registry is used for identity or authenticity verification in which th
 
 Every NFR defines the following roles:
 
-- `ADMIN`: super-user style account than can add and remove addresses from any other role (the Hypernet DAO is the admin of every NFR)
+- `DEFAULT_ADMIN_ROLE`: super-user style account than can add and remove addresses from any other role (the Hypernet DAO is the admin of every NFR)
 - `REGISTRAR_ROLE_ADMIN`: can add and remove addresses from the `REGISTRAR_ROLE`
 - `REGISTRAR_ROLE`: can register new identities as well as update NFR parameters via the `setRegistryParameters` function
 
