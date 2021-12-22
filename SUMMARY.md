@@ -10,4 +10,5 @@
 
 ## For Developers
 
-- [Hypernet Core](/packages/hypernet-core/README.md)
+* [Contract Deployment Addresses](/packages/contracts/deployments.md)
+* [Hypernet Core](/packages/hypernet-core/README.md)
