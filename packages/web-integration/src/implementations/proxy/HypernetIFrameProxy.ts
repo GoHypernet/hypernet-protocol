@@ -1055,6 +1055,19 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public getRegistryEntryListByUsername(
+    registryName: string,
+    username: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  > {
+    return this._createCall("getRegistryEntryListByUsername", {
+      registryName,
+      username,
+    });
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

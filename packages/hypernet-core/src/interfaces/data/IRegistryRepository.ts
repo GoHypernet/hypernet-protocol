@@ -208,6 +208,13 @@ export interface IRegistryRepository {
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
+  getRegistryEntryListByUsername(
+    registryName: string,
+    username: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");
