@@ -137,6 +137,11 @@ export const tokenRegistryAddress = EthereumContractAddress(
 export const chainRegistryAddress = EthereumContractAddress(
   "chainRegistryAddress",
 );
+
+export const hypernetProfileRegistryAddress = EthereumContractAddress(
+  "hypernetProfileRegistryAddress",
+);
+
 export const hypernetGovernorAddress = EthereumContractAddress(
   "hypernetGovernorAddress",
 );
@@ -165,6 +170,7 @@ export const governanceChainInformation = new GovernanceChainInformation(
   liquidityRegistryAddress,
   tokenRegistryAddress,
   chainRegistryAddress,
+  hypernetProfileRegistryAddress,
   batchModuleContract,
   [ProviderUrl("http://localhost:8545")],
 );

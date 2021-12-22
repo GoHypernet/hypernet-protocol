@@ -200,4 +200,11 @@ export interface IRegistryService {
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
+  getRegistryEntryListByUsername(
+    registryName: string,
+    username: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 }

@@ -60,8 +60,10 @@ export class ConfigProvider implements IConfigProvider {
         ]), // storageAliases
       config?.gatewayDeauthorizationTimeout || 5 * 1000, // gatewayDeauthorizationTimeout
       config?.controlClaimSubject || "HypernetProtocolControlClaims",
-      config?.requireOnline || true, // requireOnline
-      config?.debug || __DEBUG__, // debug
+      config?.requireOnline == null ? true : config?.requireOnline, // requireOnline
+      config?.governanceRequired == null ? true : config?.governanceRequired, // governanceRequired
+      config?.paymentsRequired == null ? true : config?.paymentsRequired, // paymentsRequired
+      config?.debug == null ? __DEBUG__ : config?.debug, // debug
     );
 
     this.logUtils.debug("Using Configuration", this.config);

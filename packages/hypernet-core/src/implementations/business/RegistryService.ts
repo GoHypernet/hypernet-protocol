@@ -312,4 +312,17 @@ export class RegistryService implements IRegistryService {
       ownerAddress,
     );
   }
+
+  public getRegistryEntryListByUsername(
+    registryName: string,
+    username: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryRepository.getRegistryEntryListByUsername(
+      registryName,
+      username,
+    );
+  }
 }
