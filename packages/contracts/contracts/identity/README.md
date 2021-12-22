@@ -25,7 +25,7 @@ all methods specified by the base standard specification. Additionally, the NFR 
 token that has a corresponding `label` (seperate from the `tokenURI` or `tokenId`) that is unique within that specific NFR. That is, two 
 entries can have the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate lookups more easily for applications in 
 which the registry is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is 
-(for instance when label is a URL). Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
+(for instance when label is a URL). Entries in an NFR are referred to, within the protocol, as **Non-Fungible Identities** (NFIs). 
 
 ## Roles and Minting
 
