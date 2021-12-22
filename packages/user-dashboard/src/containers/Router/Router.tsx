@@ -1,26 +1,33 @@
-import * as H from "history";
 import React from "react";
 import { Route, Switch } from "react-router-dom";
 
-import { routes } from "@user-dashboard/containers/Router/Router.routes";
+import {
+  IRouteConfig,
+  routeConfig,
+} from "@user-dashboard/containers/Router/Router.routes";
 
-interface IRouter {
-  history?: H.History;
-}
+interface IRouter {}
 
-const Router: React.FC<IRouter> = ({ history }: IRouter) => {
+const addRoutes = (routeConfig: IRouteConfig) => {
   return (
-    <Switch>
-      {routes.map((route) => (
-        <Route
-          key={route.path}
-          path={route.path}
-          component={route.component}
-          exact
-        />
+    <>
+      {Object.values(routeConfig).map((route) => (
+        <>
+          <Route
+            key={route.path}
+            path={route.path}
+            component={route.Component}
+            exact
+          />
+          {route.subRoutes && addRoutes(route.subRoutes)}
+        </>
       ))}
-    </Switch>
+    </>
   );
+};
+
+const Router: React.FC<IRouter> = () => {
+  return <Switch>{addRoutes(routeConfig)}</Switch>;
 };
 
 export default Router;

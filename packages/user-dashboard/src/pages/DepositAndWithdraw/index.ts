@@ -1,1 +1,1 @@
-export { default } from "./DepositAndWithdraw";
+export { default } from "@user-dashboard/pages/DepositAndWithdraw/DepositAndWithdraw";
