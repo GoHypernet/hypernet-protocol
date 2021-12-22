@@ -54,6 +54,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     getRegistry();
@@ -151,6 +152,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const onSearchByOwnerAddressClick = (value) => {
     setLoading(true);
+    setSearchTerm(value);
     coreProxy
       .getRegistryEntryListByOwnerAddress(
         registryName,
@@ -161,25 +163,35 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         setPage(1);
         setLoading(false);
       })
-      .mapErr(handleCoreError);
+      .mapErr(handleSearchError);
   };
 
   const onSearchByUsernameClick = (value) => {
     setLoading(true);
+    setSearchTerm(value);
     coreProxy
-      .getRegistryEntryListByUsername(
-        registryName,
-        value,
-      )
+      .getRegistryEntryListByUsername(registryName, value)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
         setPage(1);
         setLoading(false);
       })
-      .mapErr(handleCoreError);
+      .mapErr(handleSearchError);
   };
 
+  const handleSearchError = (err: any) => {
+    console.error(err);
+    setRegistryEntries([]);
+    setLoading(false);
+  };
+
+  const hasEmptyFilterResult = useMemo(
+    () => searchTerm && !registryEntries.length,
+    [searchTerm, JSON.stringify(registryEntries)],
+  );
+
   const onRestartClick = () => {
+    setSearchTerm("");
     getRegistryEntries(1);
   };
 
@@ -256,14 +268,18 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           </Box>
         }
       />
-
       {hasEmptyState && (
         <GovernanceEmptyState
           title="No registiry entries found."
           description="Registiry entries submitted by community members will appear here."
         />
       )}
-
+      {hasEmptyFilterResult && (
+        <GovernanceEmptyState
+          title="No registiry entries found."
+          description="This filter/search returned no registry entries submitted by community members."
+        />
+      )}
       {registryEntries.map((registryEntry) => (
         <GovernanceRegistryListItem
           key={registryEntry.label}
@@ -306,7 +322,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           })}
         />
       ))}
-      {!!registry?.numberOfEntries && (
+      {!!registry?.numberOfEntries && !searchTerm && (
         <GovernancePagination
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,

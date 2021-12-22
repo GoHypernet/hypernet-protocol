@@ -1224,7 +1224,7 @@ export class RegistryRepository implements IRegistryRepository {
       const hypernetProfileRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          config.governanceChainInformation.gatewayRegistryAddress,
+          config.governanceChainInformation.hypernetProfileRegistryAddress,
         );
 
       return hypernetProfileRegistryContract
