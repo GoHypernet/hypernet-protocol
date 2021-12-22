@@ -29,7 +29,9 @@ which the registry is used for identity or authenticity verification in which th
 
 ## Roles and Minting
 
-Every NFR defines the following roles:
+### Enumerable roles
+
+Every NFR defines the following enumerated roles:
 
 - `DEFAULT_ADMIN_ROLE`: super-user style account than can add and remove addresses from any other role (the Hypernet DAO is the admin of every NFR)
 - `REGISTRAR_ROLE_ADMIN`: can add and remove addresses from the `REGISTRAR_ROLE`
@@ -42,6 +44,8 @@ token `label` through the `allowLabelChange` flag (which is false by default). I
 of ownership of NFIs. This can be done if `REGISTRAR_ROLE` sets `allowTransfers` to `false`. In this case, the `REGISTRAR_ROLE` can still 
 transfer an NFI on the owners behalf if the NFI owner gives approval to the `REGISTRAR_ROLE` through the `approve` function.
 
+### Extending registry functionality 
+
 Each NFR can augment its registration logic (as well as add novel functionality) through the use of external 
 [*modules*](/packages/contracts/contracts/modules/README.md). A module is a stateless external contract which can be given the `REGISTRAR_ROLE` 
 and thus extend an NFR's capability in an algorithmic fashion. For example, the a 
@@ -49,6 +53,8 @@ and thus extend an NFR's capability in an algorithmic fashion. For example, the 
 to an NFR, while the [MerkleModule.sol](/packages/contracts/contracts/modules/MerkleModule.sol) contract implements a mechanism to 
 fascilitate [airdrop](https://blog.openzeppelin.com/workshop-recap-building-an-nft-merkle-drop/) functionality. The `REGISTRAR_ROLE_ADMIN` 
 can add and remove these modules from their NFR as needed. 
+
+### Token-based registration
 
 Lastly, the Hypernet NFR implements a native mechanism for registration by staking and ERC20-compatible token. By default, this feature is 
 disabled, but the `REGISTRAR_ROLE` can set `registrationToken` to an address of an EIP20-compatible token which will enable the feature. The 
