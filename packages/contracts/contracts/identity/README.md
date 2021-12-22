@@ -7,7 +7,7 @@
 ## Summary
 
 One of the key aspects of the Hypernet Protocol is digital identity, both human and non-human. The primary identity data structure
-of the Hypernet Protocol is the *Non-Fungible Registry* (NFR); instances of which are deployed through the 
+of the Hypernet Protocol is the **Non-Fungible Registry** (NFR); instances of which are deployed through the 
 [registry factory contract](/packages/contracts/contracts/identity/UpgradeableRegistryFactory.sol). The factory contract implements an 
 [upgradable beacon pattern](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UpgradeableBeacon) for deploying new NFRs in a gas-efficient 
 manner (~80% reduction in gas fees over naive implementation). Each new NFR stores its state in a proxy layer and function calls to that 
@@ -64,7 +64,7 @@ record the registration token address used and fee amount and associate this sta
 any non-zero registration fee associated with the burned `tokenId` will be transfered to the account who burned the token, *not* the owner
 of the token at the time of burning. 
 
-## Official Hypernet Protocol Non Fungible Registries
+## Official Hypernet Protocol Non-Fungible Registries
 
 The Hypernet Protocol instantiates several NFRs at protocol launch that are necessary for the secure functioning of payments, goverance, and identity 
 functionality. All NFRs in this list are managed by the Hypernet Protocol [DAO](/packages/contracts/contracts/governance/README.md). That is, all 
