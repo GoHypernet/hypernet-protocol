@@ -45,7 +45,7 @@ by the DAO contract (the default threshold is `1,000,000 H`). For a given active
 Each Hypertoken in an account's balance counts as 1 vote (i.e. 100 Hypertoken = 100 votes). A proposal will be defeated if quorum is not 
 reached (quorum for the Hypernet DAO is 4% of the total token supply). 
 
-## Treasury Managment
+## Treasury Management
 
 The Hypernet DAO [timelock](/packages/contracts/deployments.md) contract is the default 
 [`burnAddress`](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol#L68) of all 
