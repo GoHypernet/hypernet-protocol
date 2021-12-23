@@ -36,6 +36,7 @@ import {
   PaymentCreationError,
   InactiveGatewayError,
   BatchModuleContractError,
+  CoreInitializationErrors,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -70,6 +71,10 @@ export interface IHypernetCore {
 
   waitInitialized(): ResultAsync<void, never>;
 
+  registriesInitialized(): Result<boolean, never>;
+
+  waitRegistriesInitialized(): ResultAsync<void, never>;
+
   governanceInitialized(): Result<boolean, never>;
 
   waitGovernanceInitialized(): ResultAsync<void, never>;
@@ -97,26 +102,27 @@ export interface IHypernetCore {
    * hypernet core will be representing.
    * @param account The address that says who this instance of HypernetCore is representing.
    */
-  initialize(): ResultAsync<
-    InitializeStatus,
-    | MessagingError
-    | BlockchainUnavailableError
-    | VectorError
-    | RouterChannelUnknownError
-    | GatewayConnectorError
-    | GatewayValidationError
-    | PersistenceError
-    | ProxyError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | InvalidPaymentIdError
+  initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors>;
+
+  initializeRegistries(): ResultAsync<
+    void,
     | GovernanceSignerUnavailableError
-    | TransferResolutionError
-    | TransferCreationError
-    | PaymentStakeError
-    | PaymentFinalizeError
-    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | ProxyError
   >;
+
+  initializeGovernance(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | ProxyError
+  >;
+
+  initializePayments(): ResultAsync<void, CoreInitializationErrors>;
+
+  getInitializationStatus(): ResultAsync<InitializeStatus, ProxyError>;
 
   /**
    * Gets the public id of the Hypernet Core user account. If the core is not initialized,

@@ -1,7 +1,9 @@
 import HypernetWebIntegration, {
   ChainId,
+  IHypernetCore,
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
+import { ResultAsync } from "neverthrow";
 import {
   ResultMessage,
   EResultStatus,
@@ -11,14 +13,14 @@ import {
 } from "@hypernetlabs/web-ui";
 import { Box, useMediaQuery, useTheme } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { BrowserRouter } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
 import { useStyles } from "./App.style";
 
 import Header from "@user-dashboard/components/Header";
 import Sidebar from "@user-dashboard/components/Sidebar";
 import Router from "@user-dashboard/containers/Router";
 import { useLayoutContext, StoreProvider } from "@user-dashboard/contexts";
+import { ROUTES } from "@user-dashboard/containers/Router/Router.routes";
 
 declare const __CORE_IFRAME_SOURCE__: string;
 declare const __GOVERNANCE_CHAIN_ID__: string;
@@ -36,20 +38,35 @@ const App: React.FC = () => {
   const classes = useStyles();
   const [coreReady, setCoreReady] = useState<boolean>(false);
   const theme = useTheme();
+  const { pathname } = useLocation();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"), {
     noSsr: true,
   });
 
   useEffect(() => {
     setLoading(true);
+    let readyResult: ResultAsync<IHypernetCore, Error>;
 
-    integration
-      .getReady()
-      .map((coreProxy) => {
+    if (pathname === ROUTES.ROOT || pathname.includes(ROUTES.PAYMENTS)) {
+      readyResult = integration.getPaymentsReady();
+    } else if (pathname.includes(ROUTES.REGISTRIES)) {
+      readyResult = integration.getRegistriesReady();
+    } else if (
+      pathname.includes(ROUTES.PROPOSALS) ||
+      pathname.includes(ROUTES.PROPOSAL_CREATE)
+    ) {
+      readyResult = integration.getGovernanceReady();
+    } else {
+      readyResult = integration.getReady();
+    }
+
+    readyResult
+      .map(() => {
         setLoading(false);
         setCoreReady(true);
       })
       .mapErr((e) => {
+        setLoading(false);
         setResultMessage(
           new ResultMessage(
             EResultStatus.FAILURE,
@@ -57,19 +74,17 @@ const App: React.FC = () => {
           ),
         );
       });
-  }, []);
+  }, [pathname]);
 
   return (
     <StoreProvider hypernetWebIntegration={integration}>
       <ThemeProvider theme={true ? lightTheme : darkTheme}>
         <Box className={classes.appWrapper}>
-          <BrowserRouter>
-            <Header />
-            <Box className={classes.bodyWrapper}>
-              {isLargeScreen && <Sidebar />}
-              {coreReady && <Router />}
-            </Box>
-          </BrowserRouter>
+          <Header />
+          <Box className={classes.bodyWrapper}>
+            {isLargeScreen && <Sidebar />}
+            {coreReady && <Router />}
+          </Box>
         </Box>
       </ThemeProvider>
     </StoreProvider>

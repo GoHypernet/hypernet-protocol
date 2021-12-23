@@ -7,6 +7,7 @@ import {
   PullPayment,
   PushPayment,
   EthereumAccountAddress,
+  InitializeStatus,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -284,8 +285,7 @@ export class ContextProviderMock implements IContextProvider {
         null,
         [activeStateChannel],
         false,
-        false,
-        false,
+        new InitializeStatus(false, false, false, false),
         this.onControlClaimed,
         this.onControlYielded,
         this.onPushPaymentSent,
@@ -332,8 +332,7 @@ export class ContextProviderMock implements IContextProvider {
         publicIdentifier,
         [activeStateChannel],
         true,
-        true,
-        true,
+        new InitializeStatus(true, true, true, true),
         this.onControlClaimed,
         this.onControlYielded,
         this.onPushPaymentSent,
