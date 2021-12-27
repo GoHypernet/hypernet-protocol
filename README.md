@@ -6,15 +6,15 @@
 
 ## Summary 
 
-The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based payments with a privacy-preserving,
-"non-fungible" identity registry framework. The combination of these two elements enables merchants to accept cyptocurrency
-payments in their traditional online platforms with minimal code intrusion and without specialized knowledge of Web3
-technology while also complying with various regulations regarding electronic funds transfer. The authors of the
-Hypernet Protocol believe that a decentralized, blockchain-secured, community-driven payment and identity solution will
-revolutionize the cyber-infrastructure landscape and that it is broadly generalizable to various decentralized marketplaces
-and subscription-based services.
+The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based [payments](/digital-payments.md) with a privacy-preserving, 
+[sybil-resistant](https://en.wikipedia.org/wiki/Sybil_attack), "non-fungible" [identity registry framework](/packages/contracts/contracts/identity/README.md). 
+The combination of these two elements enables merchants to accept cyptocurrency payments in their traditional online 
+platforms with minimal code intrusion and without specialized knowledge of Web3 technology while also complying with 
+various regulations regarding electronic funds transfer. The authors of the Hypernet Protocol believe that a decentralized, 
+blockchain-secured, community-driven payment and identity solution will revolutionize the cyber-infrastructure landscape and 
+that it is broadly generalizable to various decentralized marketplaces and subscription-based services.
 
-This monorepo contains several packages:
+The Hypernet Protocol monorepo contains several packages:
 
 - [Hypernet Core](/packages/hypernet-core): The core of the protocol. HNP is encapsulated into the HypernetCore class, which can be instantiated in a variety of ways.
 - [Contracts](/packages/contracts): A package containing solidity contracts for Hypernet Protocol Governance, Hypertoken, and Non-Fungible Registy.
