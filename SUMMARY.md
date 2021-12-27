@@ -10,6 +10,7 @@
 
 ## For Developers
 
+* [Getting Started](/getting-started.md)
 * [Contract Deployment Addresses](/packages/contracts/deployments.md)
 * [Hypernet Core](/packages/hypernet-core/README.md)
 * [Contracts](/packages/contracts/README.md)
