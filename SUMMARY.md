@@ -12,3 +12,6 @@
 
 * [Contract Deployment Addresses](/packages/contracts/deployments.md)
 * [Hypernet Core](/packages/hypernet-core/README.md)
+* [Contracts](/packages/contracts/README.md)
+* [IFrame](/packages/iframe/README.md)
+* [Payment Gateway Connector](/packages/gateway-connector/README.md)
