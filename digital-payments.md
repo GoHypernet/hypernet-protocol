@@ -63,7 +63,7 @@ overview on layer 2 in general. Pay particular attention to the section on "Chan
 Hypernet Core specifically uses the payment channel framework developed by Connext called "Vector". In-progress documentation and a quick start guide on 
 Vector can be found at the below link.
 
-- [Connext - Vector](https://connext.github.io/vector/)
+- [Connext - Vector](https://github.com/connext/vector)
 
 ### Definitions & Key Terms
 
