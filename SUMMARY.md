@@ -15,3 +15,8 @@
 * [Contracts](/packages/contracts/README.md)
 * [IFrame](/packages/iframe/README.md)
 * [Payment Gateway Connector](/packages/gateway-connector/README.md)
+* [Payment Gateway IFrame](/packages/gateway-iframe/README.md)
+* [Web Integration](/packages/web-demo/README.md)
+* [Mobile Integration](/packages/mobile-integration/README.md)
+* [Web UI](/packages/web-ui/README.md)
+* [Test Payment Gateway](/packages/test-gateway/README.md)
