@@ -42,6 +42,18 @@ export enum ROUTES {
 }
 
 export const routeConfig: IRouteConfig = {
+  registries: {
+    path: ROUTES.REGISTRIES,
+    Component: RegistryList,
+    name: "Registries",
+    isHeaderItem: true,
+  },
+  proposals: {
+    path: ROUTES.PROPOSALS,
+    Component: Proposals,
+    name: "Governance",
+    isHeaderItem: true,
+  },
   payments: {
     path: ROUTES.ROOT,
     Component: PaymentHistory,
@@ -74,12 +86,6 @@ export const routeConfig: IRouteConfig = {
       },
     },
   },
-  proposals: {
-    path: ROUTES.PROPOSALS,
-    Component: Proposals,
-    name: "Governance",
-    isHeaderItem: true,
-  },
   proposalDetail: {
     path: ROUTES.PROPOSAL_DETAIL,
     Component: ProposalDetail,
@@ -89,12 +95,6 @@ export const routeConfig: IRouteConfig = {
     path: ROUTES.PROPOSAL_CREATE,
     Component: ProposalCreate,
     name: "Proposal",
-  },
-  registries: {
-    path: ROUTES.REGISTRIES,
-    Component: RegistryList,
-    name: "Registries",
-    isHeaderItem: true,
   },
   registryDetail: {
     path: ROUTES.REGISTRY_DEFAIL,
