@@ -11,6 +11,7 @@ interface IMainContainer {
   closeCallback?: () => void;
   modalStyle?: React.CSSProperties;
   isV2?: boolean;
+  hideLoadingSpinner?: boolean;
 }
 
 const MainContainer: React.FC<IMainContainer> = ({
@@ -19,17 +20,15 @@ const MainContainer: React.FC<IMainContainer> = ({
   closeCallback,
   modalStyle,
   isV2,
+  hideLoadingSpinner,
 }: IMainContainer) => {
   const classes = useStyles();
 
   return (
     <>
-      <LoadingSpinner />
+      {!hideLoadingSpinner && <LoadingSpinner />}
       {withModal ? (
-        <Modal
-          closeCallback={closeCallback}
-          modalStyle={modalStyle}
-        >
+        <Modal closeCallback={closeCallback} modalStyle={modalStyle}>
           {children}
         </Modal>
       ) : isV2 ? (

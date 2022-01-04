@@ -1282,6 +1282,36 @@ export class RegistryRepository implements IRegistryRepository {
       });
   }
 
+  public getRegistryEntryListByUsername(
+    registryName: string,
+    username: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getGovernanceProvider(),
+    ]).andThen(([config, provider]) => {
+      this.provider = provider;
+
+      const hypernetProfileRegistryContract =
+        new NonFungibleRegistryEnumerableUpgradeableContract(
+          provider,
+          config.governanceChainInformation.hypernetProfileRegistryAddress,
+        );
+
+      return hypernetProfileRegistryContract
+        .getRegistryEntryByLabel(username)
+        .andThen((registryEntry) => {
+          return this.getRegistryEntryListByOwnerAddress(
+            registryName,
+            registryEntry.owner,
+          );
+        });
+    });
+  }
+
   private getRegistryByIndex(
     index: number,
   ): ResultAsync<
@@ -1499,7 +1529,7 @@ export class RegistryRepository implements IRegistryRepository {
       signerOrProvider,
       config.governanceChainInformation.registryFactoryAddress,
     );
-    this.hypertokenContract = new ERC20Contract(
+    this.tokenERC20Contract = new ERC20Contract(
       signerOrProvider,
       config.governanceChainInformation.hypertokenAddress,
     );

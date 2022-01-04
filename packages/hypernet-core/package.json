@@ -53,7 +53,7 @@
     "@hypernetlabs/common-repositories": "^0.0.1",
     "@hypernetlabs/governance-sdk": "^0.0.1",
     "@hypernetlabs/gateway-connector": "^0.0.12",
-    "@hypernetlabs/objects": "^0.3.13",
+    "@hypernetlabs/objects": "^0.3.14",
     "@hypernetlabs/utils": "^0.5.1",
     "@walletconnect/web3-provider": "^1.5.2",
     "class-transformer": "^0.3.2",

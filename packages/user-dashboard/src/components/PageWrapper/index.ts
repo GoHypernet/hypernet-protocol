@@ -1,1 +1,1 @@
-export { default } from "./PageWrapper";
+export { default } from "@user-dashboard/components/PageWrapper/PageWrapper";

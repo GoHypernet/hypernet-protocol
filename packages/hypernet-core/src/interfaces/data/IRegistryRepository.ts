@@ -221,6 +221,13 @@ export interface IRegistryRepository {
     | NonFungibleRegistryContractError
     | BlockchainUnavailableError
   >;
+  getRegistryEntryListByUsername(
+    registryName: string,
+    username: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");

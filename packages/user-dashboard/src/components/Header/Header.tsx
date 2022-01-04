@@ -6,13 +6,17 @@ import {
   useTheme,
 } from "@material-ui/core";
 import { pathToRegexp } from "path-to-regexp";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import MobileOthersMenu from "@user-dashboard/components/MobileOthersMenu";
 
+import MobileSidebarMenu from "@user-dashboard/components/MobileSidebarMenu";
+import {
+  ROUTES,
+  routeConfig,
+} from "@user-dashboard/containers/Router/Router.routes";
 import { useStyles } from "@user-dashboard/components/Header/Header.style";
-import { routes } from "@user-dashboard/containers/Router/Router.routes";
-import { useLayoutContext, useStoreContext } from "@web-integration/contexts";
+
+import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
 
 const Header: React.FC = () => {
   const classes = useStyles();
@@ -31,6 +35,7 @@ const Header: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderVotingPowerWidget({
         selector: "voting-power-widget-wrapper",
+        hideLoadingSpinner: true,
       })
       .mapErr(handleError);
   }, []);
@@ -39,6 +44,7 @@ const Header: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderHypertokenBalanceWidget({
         selector: "hypertoken-balance-widget-wrapper",
+        hideLoadingSpinner: true,
       })
       .mapErr(handleError);
   }, []);
@@ -48,17 +54,29 @@ const Header: React.FC = () => {
       hypernetWebIntegration.webUIClient
         .renderConnectedAccountWidget({
           selector: "connected-account-widget-wrapper",
+          hideLoadingSpinner: true,
         })
         .mapErr(handleError);
     }
   }, [isLargeScreen]);
 
-  const isPathMatchRequestedUrl: (path: string) => boolean = (path: string) =>
-    !!pathToRegexp(path).exec(pathname);
+  const headerItems = useMemo(() => {
+    return Object.values(routeConfig).filter((item) => item?.isHeaderItem);
+  }, []);
+
+  const isHeaderItemSelected = (itemPath: string): boolean => {
+    if (itemPath === ROUTES.ROOT) {
+      return pathname === ROUTES.ROOT || pathname.startsWith(ROUTES.PAYMENTS);
+    }
+
+    return !!pathToRegexp(itemPath).exec(pathname);
+  };
 
   return (
     <Box className={classes.headerWrapper}>
-      <Box className={classes.logoWrapper}>
+      <Box
+        {...(isLargeScreen && { className: classes.largeScreenLogoWrapper })}
+      >
         <Hidden mdDown>
           <img
             className={classes.logo}
@@ -76,23 +94,21 @@ const Header: React.FC = () => {
       </Box>
       <Hidden smDown>
         <Box className={classes.menuWrapper}>
-          {routes.map((route, index) =>
-            route.isHeaderItem ? (
-              <Box
-                className={`${classes.menuItem} ${
-                  isPathMatchRequestedUrl(route.path)
-                    ? classes.activeMenuItem
-                    : classes.inactiveMenuItem
-                }`}
-                key={index}
-                onClick={() => {
-                  history.push(route.path);
-                }}
-              >
-                <Typography variant="body2">{route.name}</Typography>
-              </Box>
-            ) : null,
-          )}
+          {headerItems.map((route, index) => (
+            <Box
+              className={`${classes.menuItem} ${
+                isHeaderItemSelected(route.path)
+                  ? classes.activeMenuItem
+                  : classes.inactiveMenuItem
+              }`}
+              key={index}
+              onClick={() => {
+                history.push(route.path);
+              }}
+            >
+              <Typography variant="body2">{route.name}</Typography>
+            </Box>
+          ))}
         </Box>
       </Hidden>
       <Box className={classes.rightContent}>
@@ -111,7 +127,7 @@ const Header: React.FC = () => {
             id="connected-account-widget-wrapper"
           />
         ) : (
-          <MobileOthersMenu />
+          <MobileSidebarMenu />
         )}
       </Box>
     </Box>

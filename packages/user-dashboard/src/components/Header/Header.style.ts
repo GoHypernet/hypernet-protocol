@@ -8,9 +8,14 @@ export const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
     color: colors.WHITE,
-    justifyContent: "space-between",
+    position: "sticky",
+    top: 0,
+    zIndex: 99999,
   },
-  logoWrapper: {},
+  largeScreenLogoWrapper: {
+    minWidth: 240,
+    height: 40,
+  },
   logo: {
     height: 40,
   },
@@ -19,7 +24,6 @@ export const useStyles = makeStyles({
   },
   menuWrapper: {
     display: "flex",
-    margin: "0 auto",
     height: 40,
     marginBottom: -16,
   },
@@ -46,6 +50,7 @@ export const useStyles = makeStyles({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    marginLeft: "auto",
   },
   widgetWrapper: {
     marginRight: 15,

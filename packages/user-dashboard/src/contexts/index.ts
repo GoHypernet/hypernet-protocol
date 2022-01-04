@@ -1,2 +1,2 @@
-export * from "./Store";
-export * from "./Layout";
+export * from "@user-dashboard/contexts/Store";
+export * from "@user-dashboard/contexts/Layout";

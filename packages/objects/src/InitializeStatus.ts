@@ -1,7 +1,8 @@
 export class InitializeStatus {
   constructor(
     public blockchainProviderInitialized: boolean,
-    public paymentsInitialized: boolean,
+    public registriesInitialized: boolean,
     public governanceInitialized: boolean,
+    public paymentsInitialized: boolean,
   ) {}
 }

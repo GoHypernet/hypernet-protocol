@@ -16,6 +16,7 @@ export interface IRenderParams {
   excludeCardWrapper?: boolean;
   bodyStyle?: React.CSSProperties;
   closeCallback?: () => void;
+  hideLoadingSpinner?: boolean;
 }
 
 export interface IConnectorAuthorizationFlowParams extends IRenderParams {
