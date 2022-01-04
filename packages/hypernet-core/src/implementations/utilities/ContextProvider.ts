@@ -9,6 +9,7 @@ import {
   ActiveStateChannel,
   ChainId,
   EthereumAccountAddress,
+  InitializeStatus,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -71,8 +72,7 @@ export class ContextProvider implements IContextProvider {
       null,
       null,
       false,
-      false,
-      false,
+      new InitializeStatus(false, false, false, false),
       onControlClaimed,
       onControlYielded,
       onPushPaymentSent,
@@ -143,8 +143,7 @@ export class ContextProvider implements IContextProvider {
           PublicIdentifier(this.context.publicIdentifier || ""),
           this.context.activeStateChannels || [],
           this.context.inControl,
-          this.context.governanceInitialized,
-          this.context.paymentsInitialized,
+          this.context.initializeStatus,
           this.context.onControlClaimed,
           this.context.onControlYielded,
           this.context.onPushPaymentSent,

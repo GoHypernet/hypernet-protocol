@@ -53,6 +53,8 @@ import {
   BatchModuleContractError,
   InvalidPaymentIdError,
   InitializeStatus,
+  CoreInitializationErrors,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -66,6 +68,9 @@ export default class HypernetIFrameProxy
   protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
+  protected coreRegistriesInitialized = false;
+  protected waitRegistriesInitializedPromise: Promise<void>;
+  protected registriesInitializePromiseResolve: (() => void) | null;
   protected coreGovernanceInitialized = false;
   protected waitGovernanceInitializedPromise: Promise<void>;
   protected governanceInitializePromiseResolve: (() => void) | null;
@@ -116,6 +121,11 @@ export default class HypernetIFrameProxy
     this.onAccountChanged = new Subject();
     this.onGovernanceChainChanged = new Subject();
     this.onGovernanceAccountChanged = new Subject();
+
+    this.registriesInitializePromiseResolve = null;
+    this.waitRegistriesInitializedPromise = new Promise((resolve) => {
+      this.registriesInitializePromiseResolve = resolve;
+    });
 
     this.governanceInitializePromiseResolve = null;
     this.waitGovernanceInitializedPromise = new Promise((resolve) => {
@@ -260,6 +270,17 @@ export default class HypernetIFrameProxy
           this.coreInitialized = true;
         });
 
+        // Setup a listener for the "registriesInitialized" event.
+        child.on("registriesInitialized", () => {
+          // Resolve waitRegistriesInitialized
+          if (this.registriesInitializePromiseResolve != null) {
+            this.registriesInitializePromiseResolve();
+          }
+
+          // And mark us as registries initialized
+          this.coreRegistriesInitialized = true;
+        });
+
         // Setup a listener for the "governanceInitialized" event.
         child.on("governanceInitialized", () => {
           // Resolve waitGovernanceInitialized
@@ -343,6 +364,18 @@ export default class HypernetIFrameProxy
     return ResultAsync.fromSafePromise(this.waitInitializedPromise);
   }
 
+  public registriesInitialized(): Result<boolean, never> {
+    if (this.child == null) {
+      return ok(false);
+    }
+
+    return ok(this.coreRegistriesInitialized);
+  }
+
+  public waitRegistriesInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this.waitRegistriesInitializedPromise);
+  }
+
   public governanceInitialized(): Result<boolean, never> {
     if (this.child == null) {
       return ok(false);
@@ -384,17 +417,36 @@ export default class HypernetIFrameProxy
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(): ResultAsync<
-    InitializeStatus,
-    | MessagingError
+  public initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+    return this._createCall("initialize", null);
+  }
+
+  public initializeRegistries(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
-    | VectorError
-    | RouterChannelUnknownError
-    | GatewayConnectorError
-    | GatewayValidationError
+    | InvalidParametersError
     | ProxyError
   > {
-    return this._createCall("initialize", null);
+    return this._createCall("initializeRegistries", null);
+  }
+
+  public getInitializationStatus(): ResultAsync<InitializeStatus, ProxyError> {
+    return this._createCall("getInitializationStatus", null);
+  }
+
+  public initializeGovernance(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | ProxyError
+  > {
+    return this._createCall("initializeGovernance", null);
+  }
+
+  public initializePayments(): ResultAsync<void, CoreInitializationErrors> {
+    return this._createCall("initializePayments", null);
   }
 
   public getPublicIdentifier(): ResultAsync<PublicIdentifier, ProxyError> {
