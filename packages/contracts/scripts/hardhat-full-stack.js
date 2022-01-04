@@ -60,7 +60,7 @@ async function main() {
   );
   const tx1_reciept = await tx1.wait();
 
-  console.log("DAO has proposer role")
+  console.log("DAO has proposer role");
 
   // give the governor contract the Executor role in the timelock contract
   const tx2 = await timelock.grantRole(
@@ -120,23 +120,20 @@ async function main() {
   );
   const factoryregistry = await FactoryRegistry.deploy(
     timelock.address,
+    ["Hypernet Profiles", "Gateways", "Liquidity Providers", "Payment Tokens", "Registry Modules"],
     [
-        "Hypernet Profiles", 
-        "Gateways", 
-        "Liquidity Providers", 
-        "Payment Tokens"
+      "Customizable Web3 user profile tokens for the Hypernet Protocol.",
+      "Payment gateway signatures for the Hypernet Protocol payment network.",
+      "Liquidity provider metadata for the Hypernet Protocol payment network.",
+      "Officially supported payment tokens for the Hypernet Protocol payment network.",
+      "Official modules for extending Hypernet registry functionality.",
     ],
     [
-        "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
-        "Payment gateway signatures for the Hypernet Protocol payment network.", 
-        "Liquidity provider metadata for the Hypernet Protocol payment network.", 
-        "Officially supported payment tokens for the Hypernet Protocol payment network."
-    ],
-    [
-        timelock.address, 
-        timelock.address, 
-        timelock.address, 
-        timelock.address
+      timelock.address,
+      timelock.address,
+      timelock.address,
+      timelock.address,
+      timelock.address,
     ],
     enumerableregistry.address,
     registry.address,
