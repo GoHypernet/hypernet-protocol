@@ -688,7 +688,7 @@ export interface IHypernetCore {
 
   getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError | ProxyError
+    NonFungibleRegistryContractError | ProxyError
   >;
 
   createBatchRegistryEntry(

@@ -281,7 +281,7 @@ export class RegistryService implements IRegistryService {
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError
   > {
     return this.registryRepository.getRegistryModules();
   }

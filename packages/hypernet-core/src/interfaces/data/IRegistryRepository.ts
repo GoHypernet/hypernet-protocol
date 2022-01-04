@@ -191,7 +191,7 @@ export interface IRegistryRepository {
   >;
   getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError
   >;
   createBatchRegistryEntry(
     registryName: string,

@@ -1717,7 +1717,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError
   > {
     return this.registryService.getRegistryModules();
   }

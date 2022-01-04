@@ -1082,7 +1082,7 @@ export default class HypernetIFrameProxy
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError | ProxyError
+    NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryModules", null);
   }
