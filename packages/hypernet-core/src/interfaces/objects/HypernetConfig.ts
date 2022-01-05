@@ -5,6 +5,8 @@ import {
   SchemaUrl,
   GovernanceChainInformation,
 } from "@hypernetlabs/objects";
+import { DataModel } from "@glazed/datamodel";
+import type { ModelData } from "@glazed/types";
 
 export class HypernetConfig {
   constructor(
@@ -18,7 +20,7 @@ export class HypernetConfig {
     public authUrl: string,
     public gatewayIframeUrl: string,
     public ceramicNodeUrl: string,
-    public ceramicDataModel: any,
+    public ceramicDataModel: ModelData<string>,
     public gatewayDeauthorizationTimeout: number,
     public controlClaimSubject: string,
     public requireOnline: boolean,

@@ -25,6 +25,6 @@
     "dockerize": "docker build -t hypernetlabs/eth-provider:local eth-provider && docker build --build-arg CHAIN_ID_ARG=1369 -t hypernetlabs/eth-provider:development eth-provider",
     "docker-push": "docker push hypernetlabs/eth-provider:local && docker push hypernetlabs/eth-provider:development",
     "test": "echo \"No tests specified yet\" && exit 0",
-    "deploy-create-ceramic-model": "yarn ts-node eth-provider/create-ceramic-model.ts"
+    "deploy-create-ceramic-model": "yarn ts-node ceramic/create-ceramic-model.ts"
   }
 }

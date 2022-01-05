@@ -58,6 +58,7 @@ export class ConfigProvider implements IConfigProvider {
           [AuthorizedGatewaysSchema.title]:
             "ceramic://k3y52l7qbv1fryi3az9mgiugaxh6jsny0jua15ztop9em6xx3p4wqx1g39fclpnuo",
         },
+        tiles: {},
       }, // ceramicDataModel
       config?.gatewayDeauthorizationTimeout || 5 * 1000, // gatewayDeauthorizationTimeout
       config?.controlClaimSubject || "HypernetProtocolControlClaims",
