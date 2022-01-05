@@ -1,12 +1,9 @@
 import {
   ChainId,
-  DefinitionName,
   ChainInformation,
-  SchemaUrl,
   GovernanceChainInformation,
 } from "@hypernetlabs/objects";
-import { DataModel } from "@glazed/datamodel";
-import type { ModelData } from "@glazed/types";
+import { ModelData } from "@glazed/types";
 
 export class HypernetConfig {
   constructor(
