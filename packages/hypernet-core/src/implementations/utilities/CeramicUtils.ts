@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { CeramicApi } from "@ceramicnetwork/common";
 import CeramicClient from "@ceramicnetwork/http-client";
-import { TileDocument } from "@ceramicnetwork/stream-tile";
-import { IDX } from "@ceramicstudio/idx";
-import { createDefinition, publishSchema } from "@ceramicstudio/idx-tools";
+import { DIDDataStore } from "@glazed/did-datastore";
 import {
   PersistenceError,
   BlockchainUnavailableError,
-  AuthorizedGatewaysSchema,
   VectorError,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -27,7 +24,6 @@ import {
   ICeramicUtils,
   IConfigProvider,
   IContextProvider,
-  ISchemaWithName,
   IRecordWithDataKey,
   IBrowserNodeProvider,
   IConfigProviderType,
@@ -37,10 +33,10 @@ import {
 
 @injectable()
 export class CeramicUtils implements ICeramicUtils {
-  protected ceramic: CeramicApi | null = null;
-  protected authProvider: Ed25519Provider | null = null;
+  protected ceramic: CeramicClient | null = null;
+  protected didAuthProvider: Ed25519Provider | null = null;
   protected didResolver: Resolver | null = null;
-  protected idx: IDX | null = null;
+  protected didDataStore: DIDDataStore | null = null;
   protected initializeResult: ResultAsync<
     void,
     PersistenceError | VectorError | BlockchainUnavailableError
@@ -54,78 +50,21 @@ export class CeramicUtils implements ICeramicUtils {
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
-  public initialize(): ResultAsync<
+  public initialize(
+    accountAddress?: EthereumAccountAddress,
+  ): ResultAsync<
     void,
     PersistenceError | VectorError | BlockchainUnavailableError
   > {
     if (this.initializeResult == null) {
-      this.initializeResult = this._authenticateUser();
+      this.initializeResult = this._authenticateUser(accountAddress);
     }
 
     return this.initializeResult;
   }
 
-  // This is used to create a difinition derived from a schema, and it shouldn't be called in run time
-  public initiateDefinitions(): ResultAsync<
-    TileDocument[],
-    PersistenceError | VectorError | BlockchainUnavailableError
-  > {
-    return this.initialize().andThen(() => {
-      if (this.ceramic == null || this.idx == null) {
-        throw new Error("Something went wrong while initializing Ceramic!");
-      }
-
-      const promisesOfPublishSchema: ResultAsync<
-        ISchemaWithName,
-        PersistenceError | VectorError | BlockchainUnavailableError
-      >[] = [];
-
-      const promisesOfCreateDifnition: ResultAsync<
-        TileDocument,
-        PersistenceError | VectorError | BlockchainUnavailableError
-      >[] = [];
-
-      const schemas = [AuthorizedGatewaysSchema];
-      for (const schema of schemas) {
-        promisesOfPublishSchema.push(
-          ResultAsync.fromPromise(
-            publishSchema(this.ceramic, {
-              content: schema,
-              name: schema.title,
-            }),
-            (e) => new PersistenceError("publishSchema failed", e),
-          ).map((res) => {
-            return {
-              name: schema.title,
-              schema: res,
-            };
-          }),
-        );
-      }
-
-      return ResultUtils.combine(promisesOfPublishSchema).andThen(
-        (publishedSchemas) => {
-          for (const publishedSchema of publishedSchemas) {
-            promisesOfCreateDifnition.push(
-              ResultAsync.fromPromise(
-                createDefinition(this.ceramic as CeramicApi, {
-                  name: publishedSchema.name,
-                  description: publishedSchema.name,
-                  schema: publishedSchema.schema.commitId.toUrl(),
-                }),
-                (e) => new PersistenceError("createDefinition failed", e),
-              ),
-            );
-          }
-
-          return ResultUtils.combine(promisesOfCreateDifnition);
-        },
-      );
-    });
-  }
-
   public writeRecord<T>(
-    aliasName: string,
+    key: string,
     content: T,
   ): ResultAsync<
     void,
@@ -135,19 +74,19 @@ export class CeramicUtils implements ICeramicUtils {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
     return this.initializeResult.andThen(() => {
-      if (this.idx == null) {
+      if (this.didDataStore == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
 
       return ResultAsync.fromPromise(
-        this.idx.set(aliasName, { data: content }),
-        (e) => new PersistenceError("idx.set failed", e),
+        this.didDataStore.set(key, { data: content }),
+        (e) => new PersistenceError("didDataStore.set failed", e),
       ).map(() => {});
     });
   }
 
   public readRecord<T>(
-    aliasName: string,
+    key: string,
   ): ResultAsync<
     T | null,
     PersistenceError | VectorError | BlockchainUnavailableError
@@ -156,12 +95,12 @@ export class CeramicUtils implements ICeramicUtils {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
     return this.initializeResult.andThen(() => {
-      if (this.idx == null) {
+      if (this.didDataStore == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
 
       return ResultAsync.fromPromise(
-        this.idx.get<IRecordWithDataKey<T>>(aliasName),
+        this.didDataStore.get(key) as Promise<IRecordWithDataKey<T>>,
         (e) => new PersistenceError("idx.get failed", e),
       ).map((record) => {
         return record?.data || null;
@@ -170,7 +109,7 @@ export class CeramicUtils implements ICeramicUtils {
   }
 
   public removeRecord(
-    aliasName: string,
+    key: string,
   ): ResultAsync<
     void,
     PersistenceError | VectorError | BlockchainUnavailableError
@@ -179,18 +118,20 @@ export class CeramicUtils implements ICeramicUtils {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
     return this.initializeResult.andThen(() => {
-      if (this.idx == null) {
+      if (this.didDataStore == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
 
       return ResultAsync.fromPromise(
-        this.idx.remove(aliasName),
+        this.didDataStore.remove(key),
         (e) => new PersistenceError("idx.remove failed", e),
       );
     });
   }
 
-  private _authenticateUser(): ResultAsync<
+  private _authenticateUser(
+    accountAddress?: EthereumAccountAddress,
+  ): ResultAsync<
     void,
     PersistenceError | VectorError | BlockchainUnavailableError
   > {
@@ -198,9 +139,11 @@ export class CeramicUtils implements ICeramicUtils {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
-      this.getProviderSeed(),
+      accountAddress
+        ? okAsync(CryptoUtils.randomBytes(32, accountAddress))
+        : this.getProviderSeed(),
     ]).andThen((vals) => {
-      const [config, context, providerSeed] = vals;
+      const [config, context, seed] = vals;
 
       if (context.account == null) {
         throw new Error(
@@ -216,11 +159,11 @@ export class CeramicUtils implements ICeramicUtils {
       this.ceramic = new CeramicClient(config.ceramicNodeUrl);
 
       // Create a KeyDID provider
-      this.authProvider = new Ed25519Provider(providerSeed);
+      this.didAuthProvider = new Ed25519Provider(seed);
 
       // Set DID instance on the client
       this.ceramic.did = new DID({
-        provider: this.authProvider,
+        provider: this.didAuthProvider,
         resolver: KeyDidResolver.getResolver(),
       });
 
@@ -235,15 +178,11 @@ export class CeramicUtils implements ICeramicUtils {
           );
           context.onCeramicAuthenticationSucceeded.next();
 
-          const aliases: Record<string, string> = {};
-          for (const [key, value] of config.storageAliases) {
-            aliases[key] = value;
-          }
-
-          this.idx = new IDX({
+          this.didDataStore = new DIDDataStore({
             ceramic: this.ceramic!,
-            aliases: aliases,
+            model: config.ceramicDataModel,
           });
+
           return okAsync(undefined);
         })
         .mapErr((e) => {

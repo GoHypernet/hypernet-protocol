@@ -43,7 +43,7 @@ export enum ROUTES {
 
 export const routeConfig: IRouteConfig = {
   registries: {
-    path: ROUTES.REGISTRIES,
+    path: ROUTES.ROOT,
     Component: RegistryList,
     name: "Registries",
     isHeaderItem: true,
@@ -55,7 +55,7 @@ export const routeConfig: IRouteConfig = {
     isHeaderItem: true,
   },
   payments: {
-    path: ROUTES.ROOT,
+    path: ROUTES.PAYMENTS,
     Component: PaymentHistory,
     name: "Payments",
     isHeaderItem: true,

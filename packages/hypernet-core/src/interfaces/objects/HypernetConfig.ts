@@ -18,7 +18,7 @@ export class HypernetConfig {
     public authUrl: string,
     public gatewayIframeUrl: string,
     public ceramicNodeUrl: string,
-    public storageAliases: Map<DefinitionName, SchemaUrl>,
+    public ceramicDataModel: any,
     public gatewayDeauthorizationTimeout: number,
     public controlClaimSubject: string,
     public requireOnline: boolean,

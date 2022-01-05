@@ -158,6 +158,7 @@ import {
   GatewayConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
+  CeramicUtilsFactory,
   NonFungibleRegistryContractFactory,
 } from "@implementations/utilities/factory";
 import { IStorageUtils } from "@interfaces/data/utilities";
@@ -178,6 +179,7 @@ import {
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
+  ICeramicUtilsFactory,
   IGatewayConnectorProxyFactory,
   INonFungibleRegistryContractFactory,
 } from "@interfaces/utilities/factory";
@@ -249,6 +251,7 @@ export class HypernetCore implements IHypernetCore {
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
   protected nonFungibleRegistryContractFactory: INonFungibleRegistryContractFactory;
+  protected ceramicUtilsFactory: ICeramicUtilsFactory;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -437,6 +440,13 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
       this.localStorageUtils,
       this.browserNodeFactory,
+    );
+
+    this.ceramicUtilsFactory = new CeramicUtilsFactory(
+      this.configProvider,
+      this.contextProvider,
+      this.browserNodeProvider,
+      this.logUtils,
     );
 
     this.ceramicUtils = new CeramicUtils(
