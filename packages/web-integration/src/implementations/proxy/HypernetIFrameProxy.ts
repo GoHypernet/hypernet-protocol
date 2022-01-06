@@ -53,6 +53,7 @@ import {
   BatchModuleContractError,
   InvalidPaymentIdError,
   InitializeStatus,
+  IPFSUnavailableError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -659,6 +660,15 @@ export default class HypernetIFrameProxy
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("getProposalDetails", proposalId);
+  }
+
+  public getProposalDescription(
+    descriptionHash: string,
+  ): ResultAsync<
+    string,
+    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+  > {
+    return this._createCall("getProposalDescription", descriptionHash);
   }
 
   public castVote(

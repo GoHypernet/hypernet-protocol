@@ -35,3 +35,4 @@ export * from "@objects/errors/TransferResolutionError";
 export * from "@objects/errors/VectorError";
 export * from "@objects/errors/BatchModuleContractError";
 export * from "@objects/errors/CoreInitializationErrors";
+export * from "@objects/errors/IPFSUnavailableError";

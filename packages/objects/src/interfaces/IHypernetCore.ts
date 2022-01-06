@@ -36,6 +36,7 @@ import {
   PaymentCreationError,
   InactiveGatewayError,
   BatchModuleContractError,
+  IPFSUnavailableError,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -412,7 +413,10 @@ export interface IHypernetCore {
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
+  ): ResultAsync<
+    Proposal,
+    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+  >;
 
   delegateVote(
     delegateAddress: EthereumAccountAddress,
@@ -422,6 +426,13 @@ export interface IHypernetCore {
   getProposalDetails(
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
+
+  getProposalDescription(
+    descriptionHash: string,
+  ): ResultAsync<
+    string,
+    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+  >;
 
   castVote(
     proposalId: string,
