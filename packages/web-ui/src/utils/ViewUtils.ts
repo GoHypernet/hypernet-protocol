@@ -112,6 +112,22 @@ export class ViewUtils implements IViewUtils {
       ),
     ];
   }
+  public getProposalName(description: string): string {
+    const seperatorIndex = description.lastIndexOf(":");
+    const proposalName = description.substring(0, seperatorIndex);
+
+    return proposalName;
+  }
+
+  public getProposalDescriptionHash(description: string): string {
+    const seperatorIndex = description.lastIndexOf(":");
+    const descriptionHash = description.substring(
+      seperatorIndex + 1,
+      description.length,
+    );
+
+    return descriptionHash;
+  }
 
   private _factoryPaymentStatusViewModel(
     state: EPaymentState,

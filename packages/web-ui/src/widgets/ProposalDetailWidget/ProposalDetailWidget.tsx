@@ -23,13 +23,14 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   proposalId,
 }: IProposalDetailWidgetParams) => {
   const classes = useStyles();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
   const [blockNumber, setBlockNumber] = useState<number>();
   const [accountAddress, setAccountAddress] =
     useState<EthereumAccountAddress>();
   const [supportStatus, setSupportStatus] = useState<EProposalVoteSupport>();
+  const [proposalDescription, setProposalDescription] = useState<string>();
 
   useEffect(() => {
     getProposalDetail();
@@ -46,6 +47,15 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         .getProposalDetails(proposalId)
         .map((proposal) => {
           setProposal(proposal);
+          const descriptionHash = viewUtils.getProposalDescriptionHash(
+            proposal.description,
+          );
+          coreProxy
+            .getProposalDescription(descriptionHash)
+            .map((description) => {
+              setProposalDescription(description);
+            })
+            .mapErr(handleCoreError);
         })
         .mapErr(handleCoreError);
 
@@ -314,7 +324,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             {proposal?.endBlock}
           </Typography>
         </Box>
-        <GovernanceMarkdown source={proposal?.description} />
+        <GovernanceMarkdown source={proposalDescription} />
       </Box>
     </Box>
   );

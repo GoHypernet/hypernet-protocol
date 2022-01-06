@@ -19,7 +19,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalCreationNavigate,
   onProposalDetailsNavigate,
 }: IProposalsWidgetParams) => {
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
@@ -93,21 +93,25 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
         />
       )}
 
-      {proposals.map((proposal) => (
-        <GovernanceProposalListItem
-          onClick={() =>
-            onProposalDetailsNavigate && onProposalDetailsNavigate(proposal.id)
-          }
-          key={proposal.id}
-          number={
-            proposal.proposalNumber != null
-              ? (proposal.proposalNumber + 1).toString()
-              : "-"
-          }
-          title={proposal.description}
-          status={proposal.state}
-        />
-      ))}
+      {proposals.map((proposal) => {
+        const proposalName = viewUtils.getProposalName(proposal.description);
+        return (
+          <GovernanceProposalListItem
+            onClick={() =>
+              onProposalDetailsNavigate &&
+              onProposalDetailsNavigate(proposal.id)
+            }
+            key={proposal.id}
+            number={
+              proposal.proposalNumber != null
+                ? (proposal.proposalNumber + 1).toString()
+                : "-"
+            }
+            title={proposalName}
+            status={proposal.state}
+          />
+        );
+      })}
       {!!proposalCount && (
         <GovernancePagination
           customPageOptions={{
