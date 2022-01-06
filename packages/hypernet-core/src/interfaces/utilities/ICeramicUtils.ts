@@ -1,18 +1,16 @@
-import { TileDocument } from "@ceramicnetwork/stream-tile";
 import {
   BlockchainUnavailableError,
   PersistenceError,
   VectorError,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface ICeramicUtils {
-  initialize(): ResultAsync<
+  initialize(
+    accountAddress?: EthereumAccountAddress,
+  ): ResultAsync<
     void,
-    PersistenceError | VectorError | BlockchainUnavailableError
-  >;
-  initiateDefinitions(): ResultAsync<
-    TileDocument[],
     PersistenceError | VectorError | BlockchainUnavailableError
   >;
   writeRecord<T>(
@@ -34,11 +32,6 @@ export interface ICeramicUtils {
     void,
     PersistenceError | VectorError | BlockchainUnavailableError
   >;
-}
-
-export interface ISchemaWithName {
-  name: string;
-  schema: TileDocument;
 }
 
 export interface IRecordWithDataKey<T> {

@@ -49,15 +49,17 @@ export class ConfigProvider implements IConfigProvider {
       config?.authUrl || __AUTH_URL__, // authUrl
       config?.gatewayIframeUrl || __VALIDATOR_IFRAME_URL__, // gatewayIframeUrl
       config?.ceramicNodeUrl || __CERAMIC_NODE_URL__, // ceramicNodeUrl,
-      config?.storageAliases ||
-        new Map([
-          [
-            DefinitionName(AuthorizedGatewaysSchema.title),
-            SchemaUrl(
-              "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
-            ),
-          ],
-        ]), // storageAliases
+      config?.ceramicDataModel || {
+        definitions: {
+          [AuthorizedGatewaysSchema.title]:
+            "kjzl6cwe1jw147sl129srofw2tmyw8ln80janj1he23vp95bly1zahc9mdkpzw5",
+        },
+        schemas: {
+          [AuthorizedGatewaysSchema.title]:
+            "ceramic://k3y52l7qbv1fryi3az9mgiugaxh6jsny0jua15ztop9em6xx3p4wqx1g39fclpnuo",
+        },
+        tiles: {},
+      }, // ceramicDataModel
       config?.gatewayDeauthorizationTimeout || 5 * 1000, // gatewayDeauthorizationTimeout
       config?.controlClaimSubject || "HypernetProtocolControlClaims",
       config?.requireOnline == null ? true : config?.requireOnline, // requireOnline
