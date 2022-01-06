@@ -9,12 +9,14 @@ import {
   ContextProviderMock,
   BrowserNodeProviderMock,
 } from "@mock/utils";
+import { IDIDDataStoreProvider } from "@interfaces/utilities";
 
 class CeramicUtilsMocks {
   public blockchainProvider = new BlockchainProviderMock();
   public configProvider = new ConfigProviderMock();
   public contextProviderMock = new ContextProviderMock();
   public browserNodeProviderMock = new BrowserNodeProviderMock();
+  public didDataStoreProvider = td.object<IDIDDataStoreProvider>();
   public logUtils = td.object<ILogUtils>();
 
   constructor() {
@@ -25,9 +27,8 @@ class CeramicUtilsMocks {
 
   public factoryRepository(): ICeramicUtils {
     return new CeramicUtils(
-      this.configProvider,
       this.contextProviderMock,
-      this.browserNodeProviderMock,
+      this.didDataStoreProvider,
       this.logUtils,
     );
   }

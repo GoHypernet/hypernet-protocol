@@ -59,6 +59,7 @@ export * from "@objects/RegistryModule";
 export * from "@objects/RegistryModuleCapability";
 export * from "@objects/InitializeStatus";
 export * from "@objects/RegistryModulesNames";
+export * from "@objects/LazyMintingSignature";
 
 export * from "@objects/errors";
 export * from "@objects/interfaces";

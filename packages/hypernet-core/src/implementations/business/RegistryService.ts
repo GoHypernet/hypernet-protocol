@@ -15,6 +15,8 @@ import {
   RegistryModule,
   BatchModuleContractError,
   LazyMintModuleContractError,
+  PersistenceError,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { IRegistryService } from "@interfaces/business";
 import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
@@ -325,6 +327,9 @@ export class RegistryService implements IRegistryService {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
   > {
     return this.registryRepository.lazyMintRegistryEntry(
       registryName,

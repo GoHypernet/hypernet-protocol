@@ -721,6 +721,9 @@ export interface IHypernetCore {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
     | ProxyError
   >;
 

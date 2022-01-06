@@ -154,12 +154,12 @@ import {
   CeramicUtils,
   MessagingProvider,
   BlockchainTimeUtils,
+  DIDDataStoreProvider,
 } from "@implementations/utilities";
 import {
   GatewayConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
-  CeramicUtilsFactory,
   NonFungibleRegistryContractFactory,
 } from "@implementations/utilities/factory";
 import { IStorageUtils } from "@interfaces/data/utilities";
@@ -176,11 +176,11 @@ import {
   ICeramicUtils,
   IMessagingProvider,
   IBlockchainTimeUtils,
+  IDIDDataStoreProvider,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
-  ICeramicUtilsFactory,
   IGatewayConnectorProxyFactory,
   INonFungibleRegistryContractFactory,
 } from "@interfaces/utilities/factory";
@@ -252,7 +252,7 @@ export class HypernetCore implements IHypernetCore {
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
   protected nonFungibleRegistryContractFactory: INonFungibleRegistryContractFactory;
-  protected ceramicUtilsFactory: ICeramicUtilsFactory;
+  protected didDataStoreProvider: IDIDDataStoreProvider;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -443,7 +443,7 @@ export class HypernetCore implements IHypernetCore {
       this.browserNodeFactory,
     );
 
-    this.ceramicUtilsFactory = new CeramicUtilsFactory(
+    this.didDataStoreProvider = new DIDDataStoreProvider(
       this.configProvider,
       this.contextProvider,
       this.browserNodeProvider,
@@ -451,9 +451,8 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.ceramicUtils = new CeramicUtils(
-      this.configProvider,
       this.contextProvider,
-      this.browserNodeProvider,
+      this.didDataStoreProvider,
       this.logUtils,
     );
 
@@ -560,6 +559,7 @@ export class HypernetCore implements IHypernetCore {
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
       this.configProvider,
+      this.didDataStoreProvider,
       this.logUtils,
     );
 
@@ -1771,6 +1771,9 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
   > {
     return this.registryService.lazyMintRegistryEntry(
       registryName,

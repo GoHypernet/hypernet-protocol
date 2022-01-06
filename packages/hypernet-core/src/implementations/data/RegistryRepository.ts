@@ -11,7 +11,6 @@ import {
   ILazyMintModuleContract,
 } from "@hypernetlabs/governance-sdk";
 import {
-  BigNumberString,
   BlockchainUnavailableError,
   ERC20ContractError,
   ERegistrySortOrder,
@@ -30,8 +29,11 @@ import {
   BatchModuleContractError,
   LazyMintModuleContractError,
   RegistryModuleCapability,
-  chainConfig,
   Signature,
+  LazyMintingSignatureSchema,
+  PersistenceError,
+  VectorError,
+  LazyMintingSignature,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IRegistryRepository } from "@interfaces/data";
@@ -44,6 +46,8 @@ import {
   IBlockchainProviderType,
   IConfigProvider,
   IConfigProviderType,
+  IDIDDataStoreProvider,
+  IDIDDataStoreProviderType,
 } from "@interfaces/utilities";
 import { HypernetConfig } from "@interfaces/objects";
 
@@ -65,6 +69,8 @@ export class RegistryRepository implements IRegistryRepository {
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IDIDDataStoreProviderType)
+    protected didDataStoreProvider: IDIDDataStoreProvider,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -1291,13 +1297,17 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
       this.getRegistryModules(),
       this.configProvider.getConfig(),
+      this.getSignerAddress(),
     ]).andThen((vals) => {
-      const [registryMap, registryModules, config] = vals;
+      const [registryMap, registryModules, config, signerAddress] = vals;
       const registry = registryMap.get(registryName);
       if (registry == null) {
         return errAsync(
@@ -1326,6 +1336,14 @@ export class RegistryRepository implements IRegistryRepository {
         );
       }
 
+      if (registry.registrarAddresses.includes(signerAddress) === false) {
+        return errAsync(
+          new RegistryPermissionError(
+            "You don't have permission to update registry entry token uri",
+          ),
+        );
+      }
+
       this.lazyMintModuleContract = new LazyMintModuleContract(
         this.signer,
         lazyMintingModule?.address,
@@ -1347,14 +1365,37 @@ export class RegistryRepository implements IRegistryRepository {
           return e as BlockchainUnavailableError;
         },
       ).andThen((signature) => {
-        // TODO: Save signature in ceramic
-        return this.lazyMintModuleContract.lazyRegister(
-          registry.address,
-          signature,
-          tokenId,
-          ownerAddress,
-          registrationData,
-        );
+        // Save signature in ceramic didStore
+        return this.didDataStoreProvider
+          .initializeDIDDataStoreProvider()
+          .andThen((didDataStore) => {
+            return ResultAsync.fromPromise(
+              didDataStore.get(LazyMintingSignatureSchema.title),
+              (e) => new PersistenceError("didDataStore.get failed", e),
+            ).andThen((prevSignatureData) => {
+              return ResultAsync.fromPromise(
+                didDataStore.set(LazyMintingSignatureSchema.title, {
+                  data: [
+                    ...(prevSignatureData ? prevSignatureData.data : []),
+                    new LazyMintingSignature(
+                      signature,
+                      signerAddress,
+                      ownerAddress,
+                    ),
+                  ],
+                }),
+                (e) => new PersistenceError("didDataStore.set failed", e),
+              ).andThen(() => {
+                return this.lazyMintModuleContract.lazyRegister(
+                  registry.address,
+                  signature,
+                  tokenId,
+                  ownerAddress,
+                  registrationData,
+                );
+              });
+            });
+          });
       });
     });
   }

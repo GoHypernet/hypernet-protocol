@@ -16,6 +16,8 @@ import {
   RegistryModule,
   BatchModuleContractError,
   LazyMintModuleContractError,
+  PersistenceError,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -220,6 +222,9 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
   >;
   getRegistryEntryListByUsername(
     registryName: string,
