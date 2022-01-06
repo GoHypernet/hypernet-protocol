@@ -38,7 +38,7 @@ const config: Config.InitialOptions = {
     __NATS_URL__: "ws://localhost:4221",
     __AUTH_URL__: "http://localhost:5040",
     __VALIDATOR_IFRAME_URL__: "http://localhost:5005",
-    __CERAMIC_NODE_URL__: "https://ceramic-clay.3boxlabs.com",
+    __CERAMIC_NODE_URL__: "https://clay.ceramic.hypernet.foundation",
     __GOVERNANCE_CHAIN_ID__: "1337",
     __DEBUG__: true,
   },

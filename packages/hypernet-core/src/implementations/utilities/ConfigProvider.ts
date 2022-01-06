@@ -53,15 +53,15 @@ export class ConfigProvider implements IConfigProvider {
       config?.ceramicDataModel || {
         definitions: {
           [AuthorizedGatewaysSchema.title]:
-            "kjzl6cwe1jw147sl129srofw2tmyw8ln80janj1he23vp95bly1zahc9mdkpzw5",
+            "kjzl6cwe1jw148xm690vbhrn5fwiiqjm4kmvnb8jzhktzdh3tcztzwuxoi8hl5n",
           [LazyMintingSignatureSchema.title]:
-            "kjzl6cwe1jw14az6nog27ll89z5ibd6zryg0pam3l8jofu13im8wadi3h42o1di",
+            "kjzl6cwe1jw149w5y2jco0iwlsinh9eqr1tcvke8g2vc8fuqnc27c03slt32xdg",
         },
         schemas: {
           [AuthorizedGatewaysSchema.title]:
-            "ceramic://k3y52l7qbv1fryi3az9mgiugaxh6jsny0jua15ztop9em6xx3p4wqx1g39fclpnuo",
+            "ceramic://k3y52l7qbv1frycmgeghbfxd4qqh718tp4s2fd7wnmz5vhy7f3lvhcvl1w2lggglc",
           [LazyMintingSignatureSchema.title]:
-            "ceramic://k3y52l7qbv1frxx68byiza4rpiawkwufwmc76e1e074y7jy7vsi99nm9c3sw2ophc",
+            "ceramic://k3y52l7qbv1frxidmfxooh1msxevtqxv027zwc9t6bn9gcr6uytgr22snsj7lqxog",
         },
         tiles: {},
       }, // ceramicDataModel
