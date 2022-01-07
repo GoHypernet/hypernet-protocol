@@ -48,9 +48,34 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.initialize();
         }, data.callId);
       },
+      initializeRegistries: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.initializeRegistries();
+        }, data.callId);
+      },
+      initializeGovernance: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.initializeGovernance();
+        }, data.callId);
+      },
+      initializePayments: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.initializePayments();
+        }, data.callId);
+      },
+      getInitializationStatus: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getInitializationStatus();
+        }, data.callId);
+      },
       waitInitialized: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.waitInitialized();
+        }, data.callId);
+      },
+      waitRegistriesInitialized: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.waitRegistriesInitialized();
         }, data.callId);
       },
       waitGovernanceInitialized: (data: IIFrameCallData<void>) => {
@@ -622,6 +647,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     // to the parent when it is initialized; combining a few functions.
     this.core.waitInitialized().map(() => {
       parent.emit("initialized");
+    });
+
+    this.core.waitRegistriesInitialized().map(() => {
+      parent.emit("registriesInitialized");
     });
 
     this.core.waitGovernanceInitialized().map(() => {

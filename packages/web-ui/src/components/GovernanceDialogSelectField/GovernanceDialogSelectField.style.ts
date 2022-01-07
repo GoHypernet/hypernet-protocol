@@ -7,6 +7,7 @@ export const useStyles = makeStyles((theme) => ({
     marginBottom: 24,
     cursor: "pointer",
     textAlign: "left",
+    wordBreak: "break-word",
   }),
   dialogTitle: {
     display: "flex",
