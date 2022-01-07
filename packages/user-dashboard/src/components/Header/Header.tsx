@@ -65,8 +65,8 @@ const Header: React.FC = () => {
   }, []);
 
   const isHeaderItemSelected = (itemPath: string): boolean => {
-    if (itemPath === ROUTES.ROOT) {
-      return pathname === ROUTES.ROOT || pathname.startsWith(ROUTES.PAYMENTS);
+    if (itemPath === ROUTES.PAYMENTS) {
+      return pathname.startsWith(ROUTES.PAYMENTS);
     }
 
     return !!pathToRegexp(itemPath).exec(pathname);
