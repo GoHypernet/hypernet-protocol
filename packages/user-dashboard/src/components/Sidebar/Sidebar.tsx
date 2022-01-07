@@ -5,6 +5,7 @@ import { Box, List, Drawer } from "@material-ui/core";
 import {
   IRouteConfig,
   routeConfig,
+  ROUTES,
 } from "@user-dashboard/containers/Router/Router.routes";
 import SidebarItem from "@user-dashboard/components/SidebarItem";
 import { ISidebarItem } from "@user-dashboard/components/SidebarItem/SidebarItem.interface";
@@ -29,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = (props: SidebarProps) => {
   const location = useLocation();
 
   const sideBarConfig: ISidebarItem[] = useMemo(() => {
-    if (location.pathname.startsWith("/payment") || location.pathname == "/") {
+    if (location.pathname.startsWith(ROUTES.PAYMENTS)) {
       return getSidebarConfig(routeConfig.payments.subRoutes);
     }
 
