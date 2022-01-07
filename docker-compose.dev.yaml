@@ -315,4 +315,4 @@ services:
     volumes:
       - ./.ipfs/ipfs0:/data/ipfs
       - ./.ipfs/export:/export
-      - ./packages/development/ipfs-provider/config.js:/config.js
+      - ./packages/development/ipfs-provider/config.js:/config.json
