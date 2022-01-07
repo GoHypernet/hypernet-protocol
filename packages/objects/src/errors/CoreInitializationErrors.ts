@@ -15,6 +15,7 @@ import { TransferCreationError } from "@objects/errors/TransferCreationError";
 import { PaymentStakeError } from "@objects/errors/PaymentStakeError";
 import { PaymentFinalizeError } from "@objects/errors/PaymentFinalizeError";
 import { NonFungibleRegistryContractError } from "@objects/errors/NonFungibleRegistryContractError";
+import { IPFSUnavailableError } from "@objects/errors/IPFSUnavailableError";
 
 export type CoreInitializationErrors =
   | MessagingError
@@ -33,4 +34,5 @@ export type CoreInitializationErrors =
   | TransferCreationError
   | PaymentStakeError
   | PaymentFinalizeError
-  | NonFungibleRegistryContractError;
+  | NonFungibleRegistryContractError
+  | IPFSUnavailableError;

@@ -1055,6 +1055,7 @@ export class HypernetCore implements IHypernetCore {
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | IPFSUnavailableError
   > {
     // Initialize governance contracts
     return ResultUtils.combine([
@@ -1067,6 +1068,7 @@ export class HypernetCore implements IHypernetCore {
       }
 
       return ResultUtils.combine([
+        this.ipfsUtils.initialize(),
         this.governanceRepository.initializeReadOnly(),
         this.governanceRepository.initializeForWrite(),
       ]).andThen(() => {

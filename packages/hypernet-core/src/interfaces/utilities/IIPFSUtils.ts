@@ -22,10 +22,7 @@ export interface ToFile {
  * to communicate with a remote IPFS node.
  */
 export interface IIPFSUtils {
-  initialize(): ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError
-  >;
+  initialize(): ResultAsync<void, IPFSUnavailableError>;
   getHttpClient(): ResultAsync<IPFSHTTPClient, IPFSUnavailableError>;
   getGatewayUrl(): ResultAsync<string, IPFSUnavailableError>;
   setGatewayUrl(gatewayUrl: string): void;

@@ -1,14 +1,9 @@
-import {
-  InvalidParametersError,
-  BlockchainUnavailableError,
-  IPFSUnavailableError,
-} from "@hypernetlabs/objects";
+import { IPFSUnavailableError } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
   ILocalStorageUtilsType,
   ILogUtils,
   ILogUtilsType,
-  ResultUtils,
 } from "@hypernetlabs/utils";
 import { inject } from "inversify";
 import { ResultAsync } from "neverthrow";
@@ -38,10 +33,8 @@ export interface ToFile {
  * to save files and retrieve them from the same node or any other configured gateway.
  */
 export class IPFSUtils implements IIPFSUtils {
-  protected initializeResult: ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError
-  > | null = null;
+  protected initializeResult: ResultAsync<void, IPFSUnavailableError> | null =
+    null;
 
   protected httpClient: IPFSHTTPClient | null = null;
 
@@ -58,10 +51,7 @@ export class IPFSUtils implements IIPFSUtils {
 
   private initialized = false;
 
-  public initialize(): ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError
-  > {
+  public initialize(): ResultAsync<void, IPFSUnavailableError> {
     if (this.initializeResult == null) {
       this.logUtils.debug("Initializing IPFSProvider");
 
