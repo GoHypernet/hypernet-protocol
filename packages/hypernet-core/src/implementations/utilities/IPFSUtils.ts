@@ -11,7 +11,7 @@ import {
   ResultUtils,
 } from "@hypernetlabs/utils";
 import { inject } from "inversify";
-import { okAsync, ResultAsync } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 import { IPFSHTTPClient, create } from "ipfs-http-client";
 
 import {
@@ -77,26 +77,20 @@ export class IPFSUtils implements IIPFSUtils {
           // TODO: add IPFS API Url to config and use here.
           const ipfs = create({ url: "http://localhost:5021" });
 
-          const ipfsVersionPromise = ResultAsync.fromPromise(
-            ipfs.version(),
-            (e) => {
-              this.logUtils.error("Failure during IPFS initialization");
-              this.logUtils.error(e);
+          return ResultAsync.fromPromise(ipfs.version(), (e) => {
+            this.logUtils.error("Failure during IPFS initialization");
+            this.logUtils.error(e);
 
-              throw new IPFSUnavailableError(
-                "Failure during IPFS IPFS initialization",
-              );
-            },
-          );
-
-          return ResultUtils.combine([okAsync(ipfs), ipfsVersionPromise]);
-        })
-        .map(([ipfs, ipfsVersion]) => {
-          if (ipfsVersion) {
-            this.logUtils.log("IPFS initialized");
-            this.httpClient = ipfs;
-            this.initialized = true;
-          }
+            throw new IPFSUnavailableError(
+              "Failure during IPFS initialization",
+            );
+          }).map((ipfsVersion) => {
+            if (ipfsVersion) {
+              this.logUtils.log("IPFS initialized");
+              this.httpClient = ipfs;
+              this.initialized = true;
+            }
+          });
         });
     }
     return this.initializeResult;
@@ -178,14 +172,19 @@ export class IPFSUtils implements IIPFSUtils {
         this.logUtils.error(e);
         throw new IPFSUnavailableError("Failure during saving file to IPFS.");
       },
-    ).map((addResult) => {
-      return addResult.cid.toString();
+    ).andThen((addResult) => {
+      const cid = addResult.cid.toString();
+      // Content added with saveFile() (which by default also becomes pinned), is not
+      // added to MFS. Any content can be lazily referenced from MFS with copyFile().
+      return this.copyFile(cid, file?.path).map(() => {
+        return cid;
+      });
     });
   }
 
   /**
    * Gets the related file with the given cid.
-   * @param file
+   * @param cid
    * @returns A ResultAsync containing response
    */
   public getFile(cid: string): ResultAsync<Response, IPFSUnavailableError> {
@@ -198,7 +197,35 @@ export class IPFSUtils implements IIPFSUtils {
     return ResultAsync.fromPromise(fetch(fileUrl), (e) => {
       this.logUtils.error("Failure during getting file from IPFS");
       this.logUtils.error(e);
-      throw new IPFSUnavailableError("Failed to get file from IPFS.");
+      throw new IPFSUnavailableError("Failure during getting file from IPFS");
     });
+  }
+
+  /**
+   * Copies files from one location to another.
+   * @param cid
+   * @param destination optional
+   */
+  public copyFile(
+    cid: string,
+    destination?: string,
+  ): ResultAsync<void, IPFSUnavailableError> {
+    if (this.initializeResult == null || this.httpClient == null) {
+      throw new IPFSUnavailableError("Must call IPFSUtils.initialize() first");
+    }
+    const fromPath = `/ipfs/${cid}`;
+    let toPath = destination || cid;
+
+    if (toPath.charAt(0) !== "/") {
+      toPath = "/" + toPath;
+    }
+
+    return ResultAsync.fromPromise(
+      this.httpClient.files.cp(fromPath, toPath),
+      (e) => {
+        this.logUtils.error(e);
+        throw new IPFSUnavailableError("Failure during copying file in IPFS");
+      },
+    );
   }
 }
