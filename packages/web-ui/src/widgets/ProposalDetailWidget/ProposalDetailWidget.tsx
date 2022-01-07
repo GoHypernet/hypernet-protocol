@@ -16,6 +16,7 @@ import {
   GovernanceStatusTag,
   GovernanceButton,
 } from "@web-ui/components";
+import { hasProposalDescriptionHash } from "@web-ui/widgets/ProposalsWidget/ProposalsWidget";
 import { useStyles } from "@web-ui/widgets/ProposalDetailWidget/ProposalDetailWidget.style";
 
 const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
@@ -30,7 +31,11 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const [accountAddress, setAccountAddress] =
     useState<EthereumAccountAddress>();
   const [supportStatus, setSupportStatus] = useState<EProposalVoteSupport>();
-  const [proposalDescription, setProposalDescription] = useState<string>();
+  const [proposalDescriptionFromIPFS, setProposalDescriptionFromIPFS] =
+    useState<string>();
+
+  // This is set to true for some existing proposals in rinkeby.
+  const [showRawDescription, setShowRawDescription] = useState<boolean>();
 
   useEffect(() => {
     getProposalDetail();
@@ -47,13 +52,19 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         .getProposalDetails(proposalId)
         .map((proposal) => {
           setProposal(proposal);
+
+          if (!hasProposalDescriptionHash(proposal.description)) {
+            setShowRawDescription(true);
+            return;
+          }
+
           const descriptionHash = viewUtils.getProposalDescriptionHash(
             proposal.description,
           );
           coreProxy
             .getProposalDescription(descriptionHash)
             .map((description) => {
-              setProposalDescription(description);
+              setProposalDescriptionFromIPFS(description);
             })
             .mapErr(handleCoreError);
         })
@@ -324,7 +335,13 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             {proposal?.endBlock}
           </Typography>
         </Box>
-        <GovernanceMarkdown source={proposalDescription} />
+        <GovernanceMarkdown
+          source={
+            showRawDescription
+              ? proposal?.description
+              : proposalDescriptionFromIPFS
+          }
+        />
       </Box>
     </Box>
   );

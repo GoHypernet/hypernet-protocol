@@ -15,6 +15,11 @@ import DelegateVotesWidget from "@web-ui/widgets/DelegateVotesWidget";
 
 const PROPOSALS_PER_PAGE = 10;
 
+// This check is used for some existing proposals in rinkeby.
+export const hasProposalDescriptionHash = (proposalDescription: string) => {
+  return proposalDescription.includes(":Qm");
+};
+
 const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalCreationNavigate,
   onProposalDetailsNavigate,
@@ -94,7 +99,9 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
       )}
 
       {proposals.map((proposal) => {
-        const proposalName = viewUtils.getProposalName(proposal.description);
+        const proposalName = hasProposalDescriptionHash(proposal.description)
+          ? viewUtils.getProposalName(proposal.description)
+          : proposal.description;
         return (
           <GovernanceProposalListItem
             onClick={() =>
