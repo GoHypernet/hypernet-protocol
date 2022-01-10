@@ -315,4 +315,8 @@ services:
     volumes:
       - ./.ipfs/ipfs0:/data/ipfs
       - ./.ipfs/export:/export
-      - ./packages/development/ipfs-provider/config.js:/config.json
+      - ./packages/development/ipfs-provider/start_ipfs:/start_ipfs
+    entrypoint: ["/sbin/tini", "--", "/start_ipfs"]
+    command: ["daemon", "--migrate=true", "--agent-version-suffix=docker"]
+    environment:
+      ACCESS_CONTROL_ALLOW_ORIGIN: "[\"*\"]"
