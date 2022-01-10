@@ -17,9 +17,9 @@
 
 ## Mumbai 
 
-- Registry Factory: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://rinkeby.etherscan.io/address/0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB)
-- Hypernet Profiles: [`0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17`](https://rinkeby.etherscan.io/address/0x6c355Ad248477eeDcadf1d6724154C6152C0edca)
-- Registry Modules: [`0x9a35a007F08809DED1452C78338CCddbEaa1CEE3`](https://rinkeby.etherscan.io/address/0x6c355Ad248477eeDcadf1d6724154C6152C0edca)
-- Batch Module: [`0x5dbAe4cB356905bdC202B943e1D6386606BAF50d`](https://rinkeby.etherscan.io/address/0x5B72838Fc364Ef73301E4ac32d2050B095666244)
-- Lazy Mint Module: [`0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf`](https://rinkeby.etherscan.io/address/0x66643a91fD95a8B41Ae673f1861589fb454DEe55)
-- Merkle Module: [`0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3`](https://rinkeby.etherscan.io/address/0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450)
+- Registry Factory: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://mumbai.polygonscan.com/address/0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899)
+- Hypernet Profiles: [`0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17`](https://mumbai.polygonscan.com/address/0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17)
+- Registry Modules: [`0x9a35a007F08809DED1452C78338CCddbEaa1CEE3`](https://mumbai.polygonscan.com/address/0x9a35a007F08809DED1452C78338CCddbEaa1CEE3)
+- Batch Module: [`0x5dbAe4cB356905bdC202B943e1D6386606BAF50d`](https://mumbai.polygonscan.com/address/0x5dbAe4cB356905bdC202B943e1D6386606BAF50d)
+- Lazy Mint Module: [`0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf`](https://mumbai.polygonscan.com/address/0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf)
+- Merkle Module: [`0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3`](https://mumbai.polygonscan.com/address/0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3)
