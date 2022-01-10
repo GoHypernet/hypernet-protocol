@@ -4,6 +4,8 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
+// const { NFR } = require("/tasks/constants.js");
+const { NFR} = require("../tasks/constants.js");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -18,6 +20,7 @@ async function main() {
   console.log("RPC URL:", hre.network.config.url);
 
   const hypernetidaddress = "0xC1B2875d2dde88fd4889Be7499176e61C8a5aF6c";
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   // deploy enumerable registry contract
   const EnumerableRegistry = await ethers.getContractFactory(
@@ -49,22 +52,25 @@ async function main() {
     "UpgradeableRegistryFactory",
   );
   const factoryregistry = await FactoryRegistry.deploy(
-    hypernetidaddress,
+    owner.address,
     [
-        "Hypernet Profiles", 
+        "Hypernet Profiles",
+        "Registry Modules",
         "Hypernet.ID"
     ],
     [
-        "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
+        "Customizable Web3 user profile tokens for the Hypernet Protocol.",
+        "Official modules for extending Hypernet registry functionality.",
         "Pseudo-anonymous identity verification for the web3 metaverse."
     ],
     [
-        hypernetidaddress, 
+        owner.address, 
+        owner.address,
         hypernetidaddress
     ],
     enumerableregistry.address,
     registry.address,
-    hypertoken.address,
+    zeroAddress,
   );
   const factory_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);
@@ -90,6 +96,52 @@ async function main() {
   const merklemodule_reciept = await merklemodule.deployTransaction.wait();
   console.log("Merkle Module Address:", merklemodule.address);
   console.log("Merkle Module Gas Fee:", merklemodule_reciept.gasUsed.toString());
+
+  // register the deployer wallet so it can recieve NFIs
+  const profilesAddress = await factoryregistry.nameToAddress("Hypernet Profiles");
+  const profilesHandle = new hre.ethers.Contract(
+    profilesAddress,
+    NFR.abi,
+    owner,
+  );
+
+  const registrationTx = await profilesHandle.register(owner.address, "Deployer Account", "", 9205545327);
+  const registrationRcpt = await registrationTx.wait();
+  console.log("Deployer Account Register Gas Fee:", registrationRcpt.gasUsed.toString());
+
+  // register the Hypernet.ID account so it can also register and recieve NFIs
+  const registrationHIDTx = await profilesHandle.register(owner.address, "Hypernet.ID Account", "", 6940495172);
+  const registrationHIDRcpt = await registrationHIDTx.wait();
+  console.log("Hypernet.ID Account Register Gas Fee:", registrationHIDRcpt.gasUsed.toString());
+
+  // give the Hypernet.ID account the REGISTRAR role in Hypernet Profiles registry
+  const hidAdminTx = await profilesHandle.grantRole(
+      profilesHandle.REGISTRAR_ROLE(),
+      hypernetidaddress,
+    );
+  const hidAdminRcpt = await hidAdminTx.wait();
+  console.log("Hypernet.ID address has registrar role");
+  console.log("Access Control Gas Fee:", hidAdminRcpt.gasUsed.toString());
+
+  // update the Registry Modules registry
+  const registryModulesAddress = await factoryregistry.nameToAddress("Registry Modules");
+  const registryModulesHandle = new hre.ethers.Contract(
+    registryModulesAddress,
+    NFR.abi,
+    owner,
+  );
+
+  const batchRegTx = await registryModulesHandle.register(owner.address, "Batch Minting", `${batchmodule.address}`, 1);
+  const batchRegRcpt = await batchRegTx.wait();
+  console.log("Batch Module Register Gas Fee:", batchRegRcpt.gasUsed.toString());
+
+  const lazyMintRegTx = await registryModulesHandle.register(owner.address, "Lazy Minting", `${lazymintmodule.address}`, 2);
+  const lazyMintRegRcpt = await lazyMintRegTx.wait();
+  console.log("Lazy Mint Module Register Gas Fee:", lazyMintRegRcpt.gasUsed.toString());
+  
+  const merkleDropRegTx = await registryModulesHandle.register(owner.address, "Merkle Drop", `${merklemodule.address}`, 3);
+  const merkleDropRegRcpt = await merkleDropRegTx.wait();
+  console.log("Merkle Drop Module Register Gas Fee:", merkleDropRegRcpt.gasUsed.toString());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -52,7 +52,7 @@ const factoryAddress = function () {
   } else if (hre.hardhatArguments.network == "rinkeby") {
     return "0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB"
   } else {
-    return "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
+    return "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
   }
 };
 
