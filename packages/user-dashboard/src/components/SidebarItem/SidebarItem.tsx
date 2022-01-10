@@ -12,8 +12,6 @@ import { ROUTES } from "@user-dashboard/containers/Router/Router.routes";
 
 interface ISideBarItemProps extends ISidebarItem {}
 
-const paymentHistory = "/payments/payment-history";
-
 const SidebarItem: React.FC<ISideBarItemProps> = (props: ISideBarItemProps) => {
   const { text, path, subItems = [] } = props;
   const history = useHistory();
@@ -21,7 +19,7 @@ const SidebarItem: React.FC<ISideBarItemProps> = (props: ISideBarItemProps) => {
   const { pathname } = useLocation();
 
   const isSelected = useMemo(() => {
-    if (pathname === ROUTES.ROOT) {
+    if (pathname === ROUTES.PAYMENTS) {
       return path === ROUTES.PAYMENT_HISTORY;
     }
 
