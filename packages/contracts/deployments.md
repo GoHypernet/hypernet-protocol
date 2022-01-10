@@ -19,7 +19,8 @@ Ethereum test network that is based on Proof-of-Authority. Maintained by the Get
 
 ## Mumbai 
 
-Polygon test network that connects with Ethereum's Goërli Testnet.
+Polygon test network that connects with Ethereum's Goërli Testnet. Metamask network settings can be found 
+[here](https://docs.polygon.technology/docs/develop/metamask/config-polygon-on-metamask/).
 
 - Registry Factory: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://mumbai.polygonscan.com/address/0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899)
 - Hypernet Profiles: [`0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17`](https://mumbai.polygonscan.com/address/0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17)
@@ -30,7 +31,8 @@ Polygon test network that connects with Ethereum's Goërli Testnet.
 
 ## Fuji
 
-Avalanche test network that replicates the functionality of the Avalanche mainnet. 
+Avalanche test network that replicates the functionality of the Avalanche mainnet. Metamask settings can be found 
+[here](https://docs.avax.network/build/tutorials/smart-contracts/deploy-a-smart-contract-on-avalanche-using-remix-and-metamask/#fuji-testnet-settings).
 
 - Registry Factory: [`0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`](https://testnet.avascan.info/blockchain/c/address/0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a)
 - Hypernet Profiles: [`0xf51499e303E6Af9895147a170C6b2Cd9e407a868`](https://testnet.avascan.info/blockchain/c/address/0xf51499e303E6Af9895147a170C6b2Cd9e407a868)
