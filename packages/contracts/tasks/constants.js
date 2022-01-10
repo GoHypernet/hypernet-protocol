@@ -14,6 +14,8 @@ const hAddress = function () {
     return "0x6D4eE7f794103672490830e15308A99eB7a89024"
   } else if (hre.hardhatArguments.network == "mumbai") {
     return ""
+  } else if (hre.hardhatArguments.network == "fuji") {
+    return ""
   } else {
     return "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
   }
@@ -28,6 +30,8 @@ const govAddress = function () {
   } else if (hre.hardhatArguments.network == "rinkeby") {
     return "0x3353da0f24fCACd83832b09e9371a937195D2640"
   } else if (hre.hardhatArguments.network == "mumbai") {
+    return ""
+  } else if (hre.hardhatArguments.network == "fuji") {
     return ""
   } else {
     return "0xdDA6327139485221633A1FcD65f4aC932E60A2e1";
@@ -44,6 +48,8 @@ const timelockAddress = function () {
     return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
   } else if (hre.hardhatArguments.network == "mumbai") {
     return ""
+  } else if (hre.hardhatArguments.network == "fuji") {
+    return ""
   } else {
     return "0xeec918d74c746167564401103096D45BbD494B74";
   }
@@ -59,6 +65,8 @@ const factoryAddress = function () {
     return "0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB"
   } else if (hre.hardhatArguments.network == "mumbai") {
     return "0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899"
+  } else if (hre.hardhatArguments.network == "fuji") {
+    return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
   } else {
     return "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
   }
