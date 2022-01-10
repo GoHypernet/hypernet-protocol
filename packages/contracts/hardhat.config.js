@@ -77,6 +77,8 @@ module.exports = {
         accounts: { mnemonic },
         chainId: 80001,
         url: urlOverride || "https://rpc-mumbai.maticvigil.com",
+        gas: 6000000,
+        gasPrice: 8000000000
     },
     fuji: { // avalanche testnet
         accounts: { mnemonic },

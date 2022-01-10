@@ -104,7 +104,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _hypernetProfileRegistry address of ERC721 token to use as profile contract
     function setProfileRegistryAddress(address _hypernetProfileRegistry) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         hypernetProfileRegistry = _hypernetProfileRegistry;
     }
 
@@ -112,7 +112,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationToken address of ERC20 token burned during registration
     function setRegistrationToken(address _registrationToken) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         registrationToken = _registrationToken;
     }
 
@@ -120,7 +120,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationFee burn fee amount
     function setRegistrationFee(uint256 _registrationFee) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         require(registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
         registrationFee = _registrationFee;
     }
@@ -129,7 +129,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _burnAddress address where creation fee is to be sent
     function setBurnAddress(address _burnAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         burnAddress = _burnAddress;
     }
 

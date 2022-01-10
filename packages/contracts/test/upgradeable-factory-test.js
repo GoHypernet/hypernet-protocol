@@ -155,7 +155,7 @@ describe("Registry Factory Unit Tests", function () {
     // can't set registration token with admin role
     await expectRevert(
       registryfactory.connect(addr1).setRegistrationToken(hypertoken.address),
-      "RegistryFactory: must have admin role to create a registry",
+      "RegistryFactory: must have admin role to set parameters",
     );
 
     let tx = await registryfactory.setRegistrationToken(hypertoken.address);
@@ -170,7 +170,7 @@ describe("Registry Factory Unit Tests", function () {
     // can't set burn address without the admin role
     await expectRevert(
       registryfactory.connect(addr1).setBurnAddress(registryfactory.address),
-      "RegistryFactory: must have admin role to create a registry",
+      "RegistryFactory: must have admin role to set parameters",
     );
 
     let tx = await registryfactory.setBurnAddress(registryfactory.address);
@@ -186,7 +186,7 @@ describe("Registry Factory Unit Tests", function () {
       registryfactory
         .connect(addr1)
         .setRegistrationFee(ethers.utils.parseEther("100")),
-      "RegistryFactory: must have admin role to create a registry",
+      "RegistryFactory: must have admin role to set parameters",
     );
 
     let fee = ethers.utils.parseEther("100");
