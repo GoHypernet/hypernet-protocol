@@ -33,6 +33,7 @@ contract NonFungibleRegistryUpgradeable is
         uint256[]  _registrationFee;
         address[] _burnAddress;
         uint256[] _burnFee;
+        string[] _baseURI;
     }
 
     // DFDL schema definition for metadata stored in tokenURI
@@ -81,6 +82,11 @@ contract NonFungibleRegistryUpgradeable is
     // flag used in conjunction with merkleRoot, if true then the merkleRoot can no 
     // longer be updated by the REGISTRAR_ROLE
     bool public frozen;
+
+    // base URI for computing {tokenURI}. If set, the resulting URI for each
+    // token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+    // by default, can be overriden in child contracts.
+    string public baseURI;
 
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
@@ -157,6 +163,7 @@ contract NonFungibleRegistryUpgradeable is
             "NonFungibleRegistry: burnFee must be le 10000.");
             burnFee = params._burnFee[0]; 
         }
+        if (params._baseURI.length > 0) { baseURI = params._baseURI[0]; }
     }
 
     /// @notice setMerkleRoot enable or disable requirement for pre-registration
@@ -219,9 +226,9 @@ contract NonFungibleRegistryUpgradeable is
     function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
-
         // user must approve the registry to collect the registration fee from their wallet
-        IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee);
+        require(IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee), "NonFungibleRegistry: token transfer failed.");
+
         _createLabeledToken(to, label, registrationData, tokenId);
 
         uint256 burnAmount = registrationFee * burnFee / 10000;
@@ -321,7 +328,7 @@ contract NonFungibleRegistryUpgradeable is
         if (identityStakes[tokenId].amount != 0) {
             // send the registration fee to the token burner, not the token owner
             // do not set a registration token you do not control/trust, this could be used as for re-entrancy attack
-            IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount);
+            require(IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount), "NonFungibleRegistry: token transfer failed.");
             delete identityStakes[tokenId];
         }
     }
@@ -359,6 +366,10 @@ contract NonFungibleRegistryUpgradeable is
         returns (string memory) 
     {
         return ERC721URIStorageUpgradeable.tokenURI(tokenId);
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
     }
 
     function _beforeTokenTransfer(

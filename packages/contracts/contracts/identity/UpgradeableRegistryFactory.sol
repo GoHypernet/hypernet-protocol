@@ -156,9 +156,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     function createRegistryByToken(string memory _name, string memory _symbol, address _registrar, bool _enumerable) external {
         require(_preRegistered(_msgSender()), "RegistryFactory: caller must have a Hypernet Profile.");
         require(registrationToken != address(0), "RegistryFactory: registration by token not enabled.");
-
         // user must call approve first
-        IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), burnAddress, registrationFee);
+        require(IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), burnAddress, registrationFee), "RegistryFactory: token transfer failed.");
+
         if (_enumerable) {
             _createEnumerableRegistry(_name, _symbol, _registrar);
         } else {

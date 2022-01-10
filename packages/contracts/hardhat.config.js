@@ -60,10 +60,20 @@ module.exports = {
       },
       url: "https://eth-provider-dev.hypernetlabs.io",
     },
-    rinkeby: {
+    rinkeby: { // ethereum tesnet
       accounts: { mnemonic },
       chainId: 4,
       url: urlOverride || "http://localhost:8545",
+    },
+    mumbai: { // polygon testnet
+        accounts: { mnemonic },
+        chainId: 80001,
+        url: urlOverride || "https://rpc-mumbai.maticvigil.com",
+    },
+    fuji: { // avalanche testnet
+        accounts: { mnemonic },
+        chainId: 43113,
+        url: urlOverride || "https://api.avax-test.network/ext/bc/C/rpc",
     },
   },
   gasReporter: {

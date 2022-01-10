@@ -81,5 +81,10 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
+task("account", "Prints the first account", async (taskArgs, hre) => {
+    const [account] = await hre.ethers.getSigners();
 
+    let accountBalance = await account.getBalance();
+    console.log(account.address, "balance:", hre.ethers.utils.formatEther(accountBalance));
+  });
 
