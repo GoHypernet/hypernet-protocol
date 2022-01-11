@@ -3,6 +3,7 @@ import {
   Proposal,
   EthereumAccountAddress,
   EProposalVoteSupport,
+  IpfsCID,
 } from "@hypernetlabs/objects";
 import { Box, Typography, Grid } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -62,7 +63,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             proposal.description,
           );
           coreProxy
-            .getProposalDescription(descriptionHash)
+            .getProposalDescription(IpfsCID(descriptionHash))
             .map((description) => {
               setProposalDescriptionFromIPFS(description);
             })

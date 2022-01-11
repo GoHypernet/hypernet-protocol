@@ -19,6 +19,7 @@ import {
   GovernanceSignerUnavailableError,
   InvalidParametersError,
   IPFSUnavailableError,
+  IpfsCID,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGovernanceRepository } from "@interfaces/data";
@@ -168,7 +169,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   }
 
   public getProposalDescription(
-    descriptionHash: string,
+    descriptionHash: IpfsCID,
   ): ResultAsync<string, IPFSUnavailableError | HypernetGovernorContractError> {
     return this.ipfsUtils.getFile(descriptionHash).andThen((res) => {
       return ResultAsync.fromPromise(res.text(), (e) => {
@@ -317,7 +318,7 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   private saveProposalDescriptionToIPFS(
     description: string,
-  ): ResultAsync<string, IPFSUnavailableError> {
+  ): ResultAsync<IpfsCID, IPFSUnavailableError> {
     return this.ipfsUtils.saveFile({ content: description });
   }
 }

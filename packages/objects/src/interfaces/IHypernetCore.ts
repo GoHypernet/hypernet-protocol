@@ -61,6 +61,7 @@ import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
+import { IpfsCID } from "@objects/IpfsCID";
 import { InitializeStatus } from "@web-integration/InitializeStatus";
 
 /**
@@ -435,7 +436,7 @@ export interface IHypernetCore {
   ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   getProposalDescription(
-    descriptionHash: string,
+    descriptionHash: IpfsCID,
   ): ResultAsync<
     string,
     IPFSUnavailableError | HypernetGovernorContractError | ProxyError

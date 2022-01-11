@@ -1,4 +1,4 @@
-import { IPFSUnavailableError } from "@hypernetlabs/objects";
+import { IpfsCID, IPFSUnavailableError } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
   ILocalStorageUtilsType,
@@ -6,7 +6,7 @@ import {
   ILogUtilsType,
 } from "@hypernetlabs/utils";
 import { inject } from "inversify";
-import { ResultAsync } from "neverthrow";
+import { ResultAsync, errAsync } from "neverthrow";
 import { IPFSHTTPClient, create } from "ipfs-http-client";
 
 import {
@@ -23,9 +23,7 @@ import {
 export class IPFSUtils implements IIPFSUtils {
   protected initializeResult: ResultAsync<void, IPFSUnavailableError> | null =
     null;
-
   protected httpClient: IPFSHTTPClient | null = null;
-
   protected gatewayUrl: string | null = null;
 
   constructor(
@@ -36,8 +34,6 @@ export class IPFSUtils implements IIPFSUtils {
     protected logUtils: ILogUtils,
   ) {}
 
-  private initialized = false;
-
   public initialize(): ResultAsync<void, IPFSUnavailableError> {
     if (this.initializeResult == null) {
       this.logUtils.debug("Initializing IPFSUtils");
@@ -45,13 +41,13 @@ export class IPFSUtils implements IIPFSUtils {
       this.initializeResult = this.configProvider
         .getConfig()
         .andThen((config) => {
-          this.gatewayUrl = config.ipfsGatewayUrl;
-
           const storedGatewayUrl =
             this.localStorageUtils.getItem("IPFSGatewayUrl");
 
           if (storedGatewayUrl) {
             this.gatewayUrl = storedGatewayUrl;
+          } else {
+            this.gatewayUrl = config.ipfsGatewayUrl;
           }
 
           const ipfs = create({
@@ -62,15 +58,13 @@ export class IPFSUtils implements IIPFSUtils {
             this.logUtils.error("Failure during IPFS initialization");
             this.logUtils.error(e);
 
-            throw new IPFSUnavailableError(
+            return new IPFSUnavailableError(
               "Failure during IPFS initialization",
+              e,
             );
-          }).map((ipfsVersion) => {
-            if (ipfsVersion) {
-              this.logUtils.log("IPFS initialized");
-              this.httpClient = ipfs;
-              this.initialized = true;
-            }
+          }).map(() => {
+            this.logUtils.log("IPFS initialized");
+            this.httpClient = ipfs;
           });
         });
     }
@@ -82,9 +76,11 @@ export class IPFSUtils implements IIPFSUtils {
    * @returns A ResultAsync containing IPFSHTTPClient
    */
   public getHttpClient(): ResultAsync<IPFSHTTPClient, IPFSUnavailableError> {
-    if (this.initializeResult == null) {
-      throw new Error(
-        "Must call IPFSUtils.initialize() first before you can call getHttpClient()",
+    if (this.initializeResult == null || this.httpClient == null) {
+      return errAsync(
+        new IPFSUnavailableError(
+          "Must call IPFSUtils.initialize() first before you can call getHttpClient()",
+        ),
       );
     }
 
@@ -93,10 +89,12 @@ export class IPFSUtils implements IIPFSUtils {
         return this.httpClient as IPFSHTTPClient;
       })
       .orElse((e) => {
-        this.logUtils.error("Failure during getHttpClient() function call");
         this.logUtils.error(e);
-        throw new IPFSUnavailableError(
-          "Initialization unsuccessful, you should not have called getHttpClient()",
+        return errAsync(
+          new IPFSUnavailableError(
+            "You should not have called getHttpClient()",
+            e,
+          ),
         );
       });
   }
@@ -107,8 +105,10 @@ export class IPFSUtils implements IIPFSUtils {
    */
   public getGatewayUrl(): ResultAsync<string, IPFSUnavailableError> {
     if (this.initializeResult == null) {
-      throw new IPFSUnavailableError(
-        "Must call IPFSUtils.initialize() first before you can call getGatewayUrl()",
+      return errAsync(
+        new IPFSUnavailableError(
+          "Must call IPFSUtils.initialize() first before you can call getGatewayUrl()",
+        ),
       );
     }
 
@@ -117,10 +117,12 @@ export class IPFSUtils implements IIPFSUtils {
         return this.gatewayUrl as string;
       })
       .orElse((e) => {
-        this.logUtils.error("Failure during getGatewayUrl() function call");
         this.logUtils.error(e);
-        throw new IPFSUnavailableError(
-          "Initialization unsuccessful, you should not have called getGatewayUrl()",
+        return errAsync(
+          new IPFSUnavailableError(
+            "You should not have called getGatewayUrl()",
+            e,
+          ),
         );
       });
   }
@@ -137,11 +139,13 @@ export class IPFSUtils implements IIPFSUtils {
   /**
    * Saves file to IPFS and returns a cid.
    * @param file
-   * @returns A ResultAsync containing cid as a string
+   * @returns A ResultAsync containing IpfsCID
    */
-  public saveFile(file: ToFile): ResultAsync<string, IPFSUnavailableError> {
+  public saveFile(file: ToFile): ResultAsync<IpfsCID, IPFSUnavailableError> {
     if (this.initializeResult == null || this.httpClient == null) {
-      throw new IPFSUnavailableError("Must call IPFSUtils.initialize() first");
+      return errAsync(
+        new IPFSUnavailableError("Must call IPFSUtils.initialize() first"),
+      );
     }
 
     return ResultAsync.fromPromise(
@@ -149,12 +153,11 @@ export class IPFSUtils implements IIPFSUtils {
         progress: (prog) => this.logUtils.log(`IPFS received: ${prog}`),
       }),
       (e) => {
-        this.logUtils.error("Failure during saving file to IPFS");
         this.logUtils.error(e);
-        throw new IPFSUnavailableError("Failure during saving file to IPFS.");
+        return new IPFSUnavailableError("Failure during saving file to IPFS.");
       },
     ).andThen((addResult) => {
-      const cid = addResult.cid.toString();
+      const cid = IpfsCID(addResult.cid.toString());
       // Content added with saveFile() (which by default also becomes pinned), is not
       // added to MFS. Any content can be lazily referenced from MFS with copyFile().
       return this.copyFile(cid, file?.path).map(() => {
@@ -165,10 +168,10 @@ export class IPFSUtils implements IIPFSUtils {
 
   /**
    * Gets the related file with the given cid.
-   * @param cid
+   * @param IpfsCID
    * @returns A ResultAsync containing response
    */
-  public getFile(cid: string): ResultAsync<Response, IPFSUnavailableError> {
+  public getFile(cid: IpfsCID): ResultAsync<Response, IPFSUnavailableError> {
     if (this.initializeResult == null || this.gatewayUrl == null) {
       throw new IPFSUnavailableError("Must call IPFSUtils.initialize() first");
     }
@@ -176,7 +179,6 @@ export class IPFSUtils implements IIPFSUtils {
     const fileUrl = `${this.gatewayUrl}/ipfs/${cid}`;
 
     return ResultAsync.fromPromise(fetch(fileUrl), (e) => {
-      this.logUtils.error("Failure during getting file from IPFS");
       this.logUtils.error(e);
       throw new IPFSUnavailableError("Failure during getting file from IPFS");
     });
@@ -184,11 +186,11 @@ export class IPFSUtils implements IIPFSUtils {
 
   /**
    * Copies files from one location to another.
-   * @param cid
+   * @param IpfsCID
    * @param destination optional
    */
   public copyFile(
-    cid: string,
+    cid: IpfsCID,
     destination?: string,
   ): ResultAsync<void, IPFSUnavailableError> {
     if (this.initializeResult == null || this.httpClient == null) {
@@ -205,7 +207,7 @@ export class IPFSUtils implements IIPFSUtils {
       this.httpClient.files.cp(fromPath, toPath),
       (e) => {
         this.logUtils.error(e);
-        throw new IPFSUnavailableError("Failure during copying file in IPFS");
+        return new IPFSUnavailableError("Failure during copying file in IPFS");
       },
     );
   }

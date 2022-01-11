@@ -1,4 +1,4 @@
-import { IPFSUnavailableError } from "@hypernetlabs/objects";
+import { IpfsCID, IPFSUnavailableError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { IPFSHTTPClient } from "ipfs-http-client";
 
@@ -22,8 +22,12 @@ export interface IIPFSUtils {
   getHttpClient(): ResultAsync<IPFSHTTPClient, IPFSUnavailableError>;
   getGatewayUrl(): ResultAsync<string, IPFSUnavailableError>;
   setGatewayUrl(gatewayUrl: string): void;
-  saveFile(file: ToFile): ResultAsync<string, IPFSUnavailableError>;
-  getFile(cid: string): ResultAsync<Response, IPFSUnavailableError>;
+  saveFile(file: ToFile): ResultAsync<IpfsCID, IPFSUnavailableError>;
+  getFile(cid: IpfsCID): ResultAsync<Response, IPFSUnavailableError>;
+  copyFile(
+    cid: IpfsCID,
+    destination?: string,
+  ): ResultAsync<void, IPFSUnavailableError>;
 }
 
 export const IIPFSUtilsType = Symbol.for("IIPFSUtils");
