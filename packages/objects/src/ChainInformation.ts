@@ -1,6 +1,8 @@
 import { ChainId } from "@objects/ChainId";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { ProviderUrl } from "@objects/ProviderUrl";
+import { IPFSApiUrl } from "@objects/IPFSApiUrl";
+import { IPFSGatewayUrl } from "@objects/IPFSGatewayUrl";
 
 export class ChainInformation {
   constructor(
@@ -22,6 +24,8 @@ export class ChainInformation {
     public hypernetProfileRegistryAddress: EthereumContractAddress | null,
     public batchModuleAddress: EthereumContractAddress | null,
     public providerUrls: ProviderUrl[],
+    public ipfsApiUrl: IPFSApiUrl,
+    public ipfsGatewayUrl: IPFSGatewayUrl,
   ) {}
 }
 
@@ -45,6 +49,8 @@ export class GovernanceChainInformation extends ChainInformation {
     public hypernetProfileRegistryAddress: EthereumContractAddress,
     public batchModuleAddress: EthereumContractAddress,
     public providerUrls: ProviderUrl[],
+    public ipfsApiUrl: IPFSApiUrl,
+    public ipfsGatewayUrl: IPFSGatewayUrl,
   ) {
     super(
       name,
@@ -65,6 +71,8 @@ export class GovernanceChainInformation extends ChainInformation {
       hypernetProfileRegistryAddress,
       batchModuleAddress,
       providerUrls,
+      ipfsApiUrl,
+      ipfsGatewayUrl,
     );
   }
 }

@@ -61,11 +61,13 @@ export class IPFSUtils implements IIPFSUtils {
           const storedGatewayUrl =
             this.localStorageUtils.getItem("IPFSGatewayUrl");
 
-          // TODO: add IPFS Gateway Url to config and use here.
-          this.gatewayUrl = storedGatewayUrl || "http://localhost:8088";
+          this.gatewayUrl =
+            storedGatewayUrl ||
+            config.governanceChainInformation.ipfsGatewayUrl;
 
-          // TODO: add IPFS API Url to config and use here.
-          const ipfs = create({ url: "http://localhost:5021" });
+          const ipfs = create({
+            url: config.governanceChainInformation.ipfsApiUrl,
+          });
 
           return ResultAsync.fromPromise(ipfs.version(), (e) => {
             this.logUtils.error("Failure during IPFS initialization");

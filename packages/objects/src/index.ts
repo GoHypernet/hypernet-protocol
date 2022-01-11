@@ -58,6 +58,8 @@ export * from "@objects/ProviderId";
 export * from "@objects/RegistryModule";
 export * from "@objects/RegistryModuleCapability";
 export * from "@objects/InitializeStatus";
+export * from "@objects/IPFSApiUrl";
+export * from "@objects/IPFSGatewayUrl";
 
 export * from "@objects/errors";
 export * from "@objects/interfaces";
