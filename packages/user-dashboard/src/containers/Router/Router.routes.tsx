@@ -39,7 +39,7 @@ export enum ROUTES {
   PROPOSALS = "/proposals",
   PROPOSAL_DETAIL = "/proposals/:proposalId",
   PROPOSAL_CREATE = "/proposals/create",
-  LAZY_MINTING_REQUEST = "/registries/lazy-minting-requests",
+  LAZY_MINTING_REQUEST = "/lazy-minting-requests",
   ROOT = "/",
 }
 
