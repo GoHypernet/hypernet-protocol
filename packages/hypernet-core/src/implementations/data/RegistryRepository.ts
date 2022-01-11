@@ -1276,7 +1276,7 @@ export class RegistryRepository implements IRegistryRepository {
 
         if (this.signer == null) {
           return errAsync(
-            new BatchModuleContractError("BatchRegister requiers a signer."),
+            new BatchModuleContractError("BatchRegister requires a signer."),
           );
         }
 
@@ -1321,7 +1321,7 @@ export class RegistryRepository implements IRegistryRepository {
 
       if (this.signer == null) {
         return errAsync(
-          new BlockchainUnavailableError("Method requiers a signer."),
+          new BlockchainUnavailableError("Method requires a signer."),
         );
       }
 
@@ -1406,7 +1406,7 @@ export class RegistryRepository implements IRegistryRepository {
               ) {
                 return errAsync(
                   new InvalidParametersError(
-                    "lazyMintingSignature object is not exist in did store!",
+                    "lazyMintingSignature object does not exist in did store!",
                   ),
                 );
               }
@@ -1414,7 +1414,7 @@ export class RegistryRepository implements IRegistryRepository {
               if (this.signer == null) {
                 return errAsync(
                   new LazyMintModuleContractError(
-                    "LazyMinting requiers a signer.",
+                    "LazyMinting requires a signer.",
                   ),
                 );
               }
