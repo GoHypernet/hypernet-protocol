@@ -38,7 +38,7 @@ export enum ROUTES {
   REGISTRY_ENTRY_DETAIL = "/registries/:registryName/entries/:entryTokenId",
   PROPOSALS = "/proposals",
   PROPOSAL_DETAIL = "/proposals/:proposalId",
-  PROPOSAL_CREATE = "/proposals/create",
+  PROPOSAL_CREATE = "/proposal-create",
   LAZY_MINTING_REQUEST = "/lazy-minting-requests",
   ROOT = "/",
 }
