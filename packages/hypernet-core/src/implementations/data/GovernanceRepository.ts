@@ -174,7 +174,10 @@ export class GovernanceRepository implements IGovernanceRepository {
     return this.ipfsUtils.getFile(descriptionHash).andThen((res) => {
       return ResultAsync.fromPromise(res.text(), (e) => {
         this.logUtils.error(e);
-        throw new Error("Failed to parse proposal");
+        return new IPFSUnavailableError(
+          "Failed to parse proposal description from IPFS",
+          e,
+        );
       });
     });
   }
