@@ -84,19 +84,9 @@ export class IPFSUtils implements IIPFSUtils {
       );
     }
 
-    return this.initializeResult
-      .map(() => {
-        return this.httpClient as IPFSHTTPClient;
-      })
-      .orElse((e) => {
-        this.logUtils.error(e);
-        return errAsync(
-          new IPFSUnavailableError(
-            "You should not have called getHttpClient()",
-            e,
-          ),
-        );
-      });
+    return this.initializeResult.map(() => {
+      return this.httpClient as IPFSHTTPClient;
+    });
   }
 
   /**
@@ -104,7 +94,7 @@ export class IPFSUtils implements IIPFSUtils {
    * @returns A ResultAsync containing gateway url as a string
    */
   public getGatewayUrl(): ResultAsync<string, IPFSUnavailableError> {
-    if (this.initializeResult == null) {
+    if (this.initializeResult == null || this.gatewayUrl == null) {
       return errAsync(
         new IPFSUnavailableError(
           "Must call IPFSUtils.initialize() first before you can call getGatewayUrl()",
@@ -112,19 +102,9 @@ export class IPFSUtils implements IIPFSUtils {
       );
     }
 
-    return this.initializeResult
-      .map(() => {
-        return this.gatewayUrl as string;
-      })
-      .orElse((e) => {
-        this.logUtils.error(e);
-        return errAsync(
-          new IPFSUnavailableError(
-            "You should not have called getGatewayUrl()",
-            e,
-          ),
-        );
-      });
+    return this.initializeResult.map(() => {
+      return this.gatewayUrl as string;
+    });
   }
 
   /**
