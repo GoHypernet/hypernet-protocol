@@ -1,4 +1,4 @@
-import { IPFSGatewayUrl, IPFSUnavailableError } from "@hypernetlabs/objects";
+import { IPFSUnavailableError } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
   ILocalStorageUtilsType,
@@ -26,7 +26,7 @@ export class IPFSUtils implements IIPFSUtils {
 
   protected httpClient: IPFSHTTPClient | null = null;
 
-  protected gatewayUrl: IPFSGatewayUrl | null = null;
+  protected gatewayUrl: string | null = null;
 
   constructor(
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
@@ -45,17 +45,17 @@ export class IPFSUtils implements IIPFSUtils {
       this.initializeResult = this.configProvider
         .getConfig()
         .andThen((config) => {
-          this.gatewayUrl = config.governanceChainInformation.ipfsGatewayUrl;
+          this.gatewayUrl = config.ipfsGatewayUrl;
 
           const storedGatewayUrl =
             this.localStorageUtils.getItem("IPFSGatewayUrl");
 
           if (storedGatewayUrl) {
-            this.gatewayUrl = IPFSGatewayUrl(storedGatewayUrl);
+            this.gatewayUrl = storedGatewayUrl;
           }
 
           const ipfs = create({
-            url: config.governanceChainInformation.ipfsApiUrl,
+          url: config.ipfsApiUrl,
           });
 
           return ResultAsync.fromPromise(ipfs.version(), (e) => {
@@ -103,9 +103,9 @@ export class IPFSUtils implements IIPFSUtils {
 
   /**
    * Returns IPFS gateway url which could be from local storage or the default one from config.
-   * @returns A ResultAsync containing gateway url as a IPFSGatewayUrl
+   * @returns A ResultAsync containing gateway url as a string
    */
-  public getGatewayUrl(): ResultAsync<IPFSGatewayUrl, IPFSUnavailableError> {
+  public getGatewayUrl(): ResultAsync<string, IPFSUnavailableError> {
     if (this.initializeResult == null) {
       throw new IPFSUnavailableError(
         "Must call IPFSUtils.initialize() first before you can call getGatewayUrl()",
@@ -114,7 +114,7 @@ export class IPFSUtils implements IIPFSUtils {
 
     return this.initializeResult
       .map(() => {
-        return this.gatewayUrl as IPFSGatewayUrl;
+        return this.gatewayUrl as string;
       })
       .orElse((e) => {
         this.logUtils.error("Failure during getGatewayUrl() function call");
@@ -127,9 +127,9 @@ export class IPFSUtils implements IIPFSUtils {
 
   /**
    * Sets gateway url to the value passed and updates local storage for the further initializations.
-   * @param gatewayUrl IPFSGatewayUrl
+   * @param gatewayUrl
    */
-  public setGatewayUrl(gatewayUrl: IPFSGatewayUrl) {
+  public setGatewayUrl(gatewayUrl: string) {
     this.gatewayUrl = gatewayUrl;
     this.localStorageUtils.setItem("IPFSGatewayUrl", gatewayUrl);
   }

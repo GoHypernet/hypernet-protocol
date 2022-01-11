@@ -5,8 +5,6 @@ import {
 } from "@objects/ChainInformation";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { ProviderUrl } from "@objects/ProviderUrl";
-import { IPFSApiUrl } from "@objects/IPFSApiUrl";
-import { IPFSGatewayUrl } from "@objects/IPFSGatewayUrl";
 
 export const chainConfig = new Map<ChainId, ChainInformation>([
   [
@@ -30,8 +28,6 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
       EthereumContractAddress("0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"), // batchModuleAddress
       [ProviderUrl("http://localhost:8545")],
-      IPFSApiUrl("http://localhost:5021"),
-      IPFSGatewayUrl("http://localhost:8088")
     ),
   ],
   [
@@ -55,8 +51,6 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
       EthereumContractAddress("0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"), // batchModuleAddress
       [ProviderUrl("http://localhost:8545")],
-      IPFSApiUrl("http://localhost:5021"),
-      IPFSGatewayUrl("http://localhost:8088")
     ),
   ],
   [
@@ -80,8 +74,6 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
       EthereumContractAddress("TODO"), // batchModuleAddress
       [ProviderUrl("https://eth-provider-dev.hypernetlabs.io")],
-      IPFSApiUrl("https://ipfs.hypernet.foundation"),
-      IPFSGatewayUrl("https://ipfs.gateway.hypernet.foundation")
     ),
   ],
   [
@@ -105,8 +97,6 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x6c355Ad248477eeDcadf1d6724154C6152C0edca"), // hypernetProfileRegistry
       EthereumContractAddress("TODO"), // batchModuleAddress
       [ProviderUrl("https://rinkeby.hypernet.foundation")],
-      IPFSApiUrl("https://ipfs.hypernet.foundation"),
-      IPFSGatewayUrl("https://ipfs.gateway.hypernet.foundation")
     ),
   ],
   [
@@ -130,8 +120,6 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("T0D0"), // hypernetProfileRegistry
       EthereumContractAddress("TODO"), // batchModuleAddress
       [ProviderUrl("https://mainnet.hypernet.foundation")],
-      IPFSApiUrl("https://ipfs.hypernet.foundation"),
-      IPFSGatewayUrl("https://ipfs.gateway.hypernet.foundation")
     ),
   ],
 ]);

@@ -18,6 +18,8 @@ declare const __AUTH_URL__: string;
 declare const __VALIDATOR_IFRAME_URL__: string;
 declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
+declare const __IPFS_API_URL__: string;
+declare const __IPFS_GATEWAY_URL__: string;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -65,6 +67,8 @@ export class ConfigProvider implements IConfigProvider {
       config?.requireOnline == null ? true : config?.requireOnline, // requireOnline
       config?.governanceRequired == null ? true : config?.governanceRequired, // governanceRequired
       config?.paymentsRequired == null ? true : config?.paymentsRequired, // paymentsRequired
+      config?.ipfsApiUrl || __IPFS_API_URL__,
+      config?.ipfsGatewayUrl || __IPFS_GATEWAY_URL__,
       config?.debug == null ? __DEBUG__ : config?.debug, // debug
     );
 
