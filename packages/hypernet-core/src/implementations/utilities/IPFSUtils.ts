@@ -173,14 +173,16 @@ export class IPFSUtils implements IIPFSUtils {
    */
   public getFile(cid: IpfsCID): ResultAsync<Response, IPFSUnavailableError> {
     if (this.initializeResult == null || this.gatewayUrl == null) {
-      throw new IPFSUnavailableError("Must call IPFSUtils.initialize() first");
+      return errAsync(
+        new IPFSUnavailableError("Must call IPFSUtils.initialize() first"),
+      );
     }
 
     const fileUrl = `${this.gatewayUrl}/ipfs/${cid}`;
 
     return ResultAsync.fromPromise(fetch(fileUrl), (e) => {
       this.logUtils.error(e);
-      throw new IPFSUnavailableError("Failure during getting file from IPFS");
+      return new IPFSUnavailableError("Failure during getting file from IPFS");
     });
   }
 
@@ -194,7 +196,9 @@ export class IPFSUtils implements IIPFSUtils {
     destination?: string,
   ): ResultAsync<void, IPFSUnavailableError> {
     if (this.initializeResult == null || this.httpClient == null) {
-      throw new IPFSUnavailableError("Must call IPFSUtils.initialize() first");
+      return errAsync(
+        new IPFSUnavailableError("Must call IPFSUtils.initialize() first"),
+      );
     }
     const fromPath = `/ipfs/${cid}`;
     let toPath = destination || cid;
