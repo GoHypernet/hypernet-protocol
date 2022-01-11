@@ -491,7 +491,6 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.ipfsUtils = new IPFSUtils(
-      this.contextProvider,
       this.configProvider,
       this.localStorageUtils,
       this.logUtils,
