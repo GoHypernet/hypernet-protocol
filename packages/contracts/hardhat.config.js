@@ -52,7 +52,7 @@ module.exports = {
         mnemonic,
       },
       chainId: 31337,
-      url: 'http://127.0.0.1:8545'
+      url: "http://127.0.0.1:8569",
     },
     DevNet: {
       accounts: {

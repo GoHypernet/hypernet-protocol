@@ -23,6 +23,7 @@ const REGISTIRES_PER_PAGE = 3;
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryEntryListNavigate,
   onRegistryDetailNavigate,
+  onLazyMintRequestsNavigate,
 }: IRegistryListWidgetParams) => {
   const { coreProxy } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
@@ -106,6 +107,13 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
         label="Registries"
         headerActions={[
           {
+            label: "Lazy Minting Requests",
+            onClick: () =>
+              onLazyMintRequestsNavigate && onLazyMintRequestsNavigate(),
+            variant: "outlined",
+            color: "primary",
+          },
+          {
             label: "Create New Registry",
             onClick: () => setCreateRegistryModalOpen(true),
             variant: "contained",
@@ -153,7 +161,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.numberOfEntries.toString(),
             },
             {
-              fieldTitle: "First Registrar Addresses",
+              fieldTitle: "Registrar Addresses",
               fieldValue: registry.registrarAddresses.join("-"),
             },
           ]}

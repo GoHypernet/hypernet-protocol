@@ -20,6 +20,9 @@ const RegistryList: React.FC = () => {
         onRegistryDetailNavigate: (registryName: string) => {
           history.push(`/registries/${registryName}`);
         },
+        onLazyMintRequestsNavigate: () => {
+          history.push(`/registries/lazy-minting-requests`);
+        },
       })
       .mapErr(handleError);
   }, []);

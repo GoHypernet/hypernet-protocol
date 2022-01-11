@@ -62,6 +62,7 @@ import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
 import { InitializeStatus } from "@web-integration/InitializeStatus";
+import { LazyMintingSignature } from "@web-integration/LazyMintingSignature";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -710,14 +711,13 @@ export interface IHypernetCore {
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
-  lazyMintRegistryEntry(
+  submitLazyMintSignature(
     registryName: string,
     tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
   ): ResultAsync<
     void,
-    | LazyMintModuleContractError
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | BlockchainUnavailableError
@@ -733,6 +733,31 @@ export interface IHypernetCore {
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  >;
+
+  retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError | ProxyError
+  >;
+
+  executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+    | ProxyError
+  >;
+
+  revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
   >;
 
   /**

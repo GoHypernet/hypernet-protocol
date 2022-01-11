@@ -18,6 +18,7 @@ import {
   LazyMintModuleContractError,
   PersistenceError,
   VectorError,
+  LazyMintingSignature,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -211,14 +212,13 @@ export interface IRegistryRepository {
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
-  lazyMintRegistryEntry(
+  submitLazyMintSignature(
     registryName: string,
     tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
   ): ResultAsync<
     void,
-    | LazyMintModuleContractError
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | BlockchainUnavailableError
@@ -232,6 +232,27 @@ export interface IRegistryRepository {
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
+  retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError
+  >;
+  executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+  >;
+  revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
   >;
 }
 
