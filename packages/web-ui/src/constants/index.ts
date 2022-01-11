@@ -35,6 +35,8 @@ export const HYPERTOKEN_BALANCE_WIDGET = "hypertoken-balance-widget";
 export const VOTING_POWER_WIDGET = "voting-power-widget";
 export const CONNECTED_ACCOUNT_WIDGET = "connected-account-widget";
 export const CONNECT_WALLET_WIDGET_SELECTOR = "connect-wallet-widget";
+export const REGISTRY_LAZY_MINTING_REQUESTS_WIDGET_ID_SELECTOR =
+  "hypernet-protocol-registry-lazy-minting-requests-widget";
 
 export const HYPERNET_PROTOCOL_LOGO_DARK_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypernet-protocol%20logo-dark.png";

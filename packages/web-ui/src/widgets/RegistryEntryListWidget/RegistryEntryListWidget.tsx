@@ -55,19 +55,22 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [registryFetched, setRegistryFetched] = useState<boolean>(false);
 
   useEffect(() => {
     getRegistry();
   }, []);
 
   useEffect(() => {
-    if (registry?.numberOfEntries) {
+    if (registry?.numberOfEntries && registryFetched) {
       getRegistryEntries(page);
     }
   }, [registry?.numberOfEntries, page, REGISTRY_ENTRIES_PER_PAGE]);
 
   useEffect(() => {
-    getRegistryEntries(1);
+    if (registryFetched) {
+      getRegistryEntries(1);
+    }
   }, [reversedSortingEnabled]);
 
   useEffect(() => {
@@ -82,6 +85,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .getRegistryByName([registryName])
       .map((registryMap) => {
         const registry = registryMap.get(registryName);
+        setRegistryFetched(true);
         setRegistry(registry);
         setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
@@ -127,12 +131,12 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const canCreateNewBatchRegistryEntry =
       isRegistrar && registry?.modulesCapability.batchMintEnabled;
 
-    const canLazyMintRegistryEntry =
+    const cansubmitLazyMintSignature =
       isRegistrar && registry?.modulesCapability.lazyMintEnabled;
 
     let headerActions: IHeaderAction[] = [];
 
-    if (canLazyMintRegistryEntry) {
+    if (cansubmitLazyMintSignature) {
       headerActions.push({
         label: "Lazy Mint Identity",
         onClick: () => {

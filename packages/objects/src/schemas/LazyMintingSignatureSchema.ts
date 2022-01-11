@@ -10,9 +10,9 @@ export const LazyMintingSignatureSchema = {
         type: "object",
         title: "RegistrarSignatureItem",
         properties: {
-          registrarAddress: {
+          registryAddress: {
             type: "string",
-            title: "registrarAddress",
+            title: "registryAddress",
             maxLength: 500,
           },
           mintingSignature: {
@@ -20,9 +20,29 @@ export const LazyMintingSignatureSchema = {
             title: "mintingSignature",
             maxLength: 1000,
           },
-          accountAddress: {
+          tokenId: {
+            type: "number",
+            title: "tokenId",
+            maxLength: 500,
+          },
+          ownerAccountAddress: {
             type: "string",
-            title: "accountAddress",
+            title: "ownerAccountAddress",
+            maxLength: 500,
+          },
+          registrationData: {
+            type: "string",
+            title: "registrationData",
+            maxLength: 500,
+          },
+          registrarAddress: {
+            type: "string",
+            title: "registrarAddress",
+            maxLength: 500,
+          },
+          tokenClaimed: {
+            type: "boolean",
+            title: "tokenClaimed",
             maxLength: 500,
           },
         },

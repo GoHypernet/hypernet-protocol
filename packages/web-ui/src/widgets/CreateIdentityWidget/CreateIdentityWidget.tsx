@@ -76,7 +76,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
     setLoading(true);
 
     coreProxy
-      .lazyMintRegistryEntry(
+      .submitLazyMintSignature(
         registryName,
         RegistryTokenId(Number(tokenId)),
         EthereumAccountAddress(recipientAddress),
@@ -124,8 +124,8 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
             }}
             onSubmit={(values) =>
               lazyMintModeEnabled
-                ? handleCreateIdentity(values)
-                : handlLazyMintIdentity(values)
+                ? handlLazyMintIdentity(values)
+                : handleCreateIdentity(values)
             }
           >
             {({ handleSubmit, values, setFieldValue }) => {

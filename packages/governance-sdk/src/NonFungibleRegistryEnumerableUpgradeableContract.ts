@@ -39,30 +39,49 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     BigNumber,
     NonFungibleRegistryContractError
   > {
-    return ResultAsync.fromPromise(
-      this.contract?.getRoleMemberCount(
-        this.contract?.REGISTRAR_ROLE(), // Get the registrar role addresses numbers
-      ) as Promise<BigNumber>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call getRoleMemberCount REGISTRAR_ROLE",
-          e,
-        );
-      },
-    );
+    return this.getRegistrarRole().andThen((registrarRole) => {
+      return ResultAsync.fromPromise(
+        this.contract?.getRoleMemberCount(
+          registrarRole, // Get the registrar role addresses numbers
+        ) as Promise<BigNumber>,
+        (e) => {
+          return new NonFungibleRegistryContractError(
+            "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+            e,
+          );
+        },
+      );
+    });
   }
 
   public getRegistrarRoleMember(
     index?: number,
   ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
+    return this.getRegistrarRole().andThen((registrarRole) => {
+      return ResultAsync.fromPromise(
+        this.contract?.getRoleMember(
+          registrarRole,
+          index || 0,
+        ) as Promise<EthereumAccountAddress>,
+        (e) => {
+          return new NonFungibleRegistryContractError(
+            "Unable to call getRoleMember REGISTRAR_ROLE",
+            e,
+          );
+        },
+      );
+    });
+  }
+
+  private getRegistrarRole(): ResultAsync<
+    ethers.providers.TransactionResponse,
+    NonFungibleRegistryContractError
+  > {
     return ResultAsync.fromPromise(
-      this.contract?.getRoleMember(
-        this.contract?.REGISTRAR_ROLE(),
-        index || 0,
-      ) as Promise<EthereumAccountAddress>,
+      this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call getRoleMember REGISTRAR_ROLE",
+          "Unable to call REGISTRAR_ROLE",
           e,
         );
       },
@@ -73,30 +92,49 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     BigNumber,
     NonFungibleRegistryContractError
   > {
-    return ResultAsync.fromPromise(
-      this.contract?.getRoleMemberCount(
-        this.contract?.REGISTRAR_ROLE_ADMIN(), // Get the registrar role addresses numbers
-      ) as Promise<BigNumber>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call getRegistrarRoleAdminMemberCount REGISTRAR_ROLE_ADMIN",
-          e,
-        );
-      },
-    );
+    return this.getRegistrarRoleAdmin().andThen((registrarRoleAdmin) => {
+      return ResultAsync.fromPromise(
+        this.contract?.getRoleMemberCount(
+          registrarRoleAdmin, // Get the registrar role admin addresses numbers
+        ) as Promise<BigNumber>,
+        (e) => {
+          return new NonFungibleRegistryContractError(
+            "Unable to call getRegistrarRoleAdminMemberCount REGISTRAR_ROLE_ADMIN",
+            e,
+          );
+        },
+      );
+    });
   }
 
   public getRegistrarRoleAdminMember(
     index?: number,
   ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
+    return this.getRegistrarRoleAdmin().andThen((registrarRoleAdmin) => {
+      return ResultAsync.fromPromise(
+        this.contract?.getRoleMember(
+          registrarRoleAdmin,
+          index || 0,
+        ) as Promise<EthereumAccountAddress>,
+        (e) => {
+          return new NonFungibleRegistryContractError(
+            "Unable to call getRegistrarRoleAdminMember REGISTRAR_ROLE_ADMIN",
+            e,
+          );
+        },
+      );
+    });
+  }
+
+  private getRegistrarRoleAdmin(): ResultAsync<
+    ethers.providers.TransactionResponse,
+    NonFungibleRegistryContractError
+  > {
     return ResultAsync.fromPromise(
-      this.contract?.getRoleMember(
-        this.contract?.REGISTRAR_ROLE_ADMIN(),
-        index || 0,
-      ) as Promise<EthereumAccountAddress>,
+      this.contract?.REGISTRAR_ROLE_ADMIN() as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call getRegistrarRoleAdminMember REGISTRAR_ROLE_ADMIN",
+          "Unable to call REGISTRAR_ROLE_ADMIN",
           e,
         );
       },
@@ -546,15 +584,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public grantRole(
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call REGISTRAR_ROLE",
-          e,
-        );
-      },
-    )
+    return this.getRegistrarRole()
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
           this.contract?.grantRole(
@@ -577,21 +607,13 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           );
         });
       })
-      .map((val) => {});
+      .map(() => {});
   }
 
   public revokeRole(
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call REGISTRAR_ROLE",
-          e,
-        );
-      },
-    )
+    return this.getRegistrarRole()
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
           this.contract?.revokeRole(
@@ -620,15 +642,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public renounceRole(
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call REGISTRAR_ROLE",
-          e,
-        );
-      },
-    )
+    return this.getRegistrarRole()
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
           this.contract?.renounceRole(

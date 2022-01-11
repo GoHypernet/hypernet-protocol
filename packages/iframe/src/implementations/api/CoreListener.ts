@@ -20,6 +20,7 @@ import {
   RegistryTokenId,
   ProviderId,
   RegistryEntry,
+  LazyMintingSignature,
 } from "@hypernetlabs/objects";
 import {
   IIFrameCallData,
@@ -616,23 +617,6 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
-      lazyMintRegistryEntry: (
-        data: IIFrameCallData<{
-          registryName: string;
-          tokenId: RegistryTokenId;
-          ownerAddress: EthereumAccountAddress;
-          registrationData: string;
-        }>,
-      ) => {
-        this.returnForModel(() => {
-          return this.core.lazyMintRegistryEntry(
-            data.data.registryName,
-            data.data.tokenId,
-            data.data.ownerAddress,
-            data.data.registrationData,
-          );
-        }, data.callId);
-      },
       getBlockNumber: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getBlockNumber();
@@ -649,6 +633,38 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.registryName,
             data.data.username,
           );
+        }, data.callId);
+      },
+      submitLazyMintSignature: (
+        data: IIFrameCallData<{
+          registryName: string;
+          tokenId: RegistryTokenId;
+          ownerAddress: EthereumAccountAddress;
+          registrationData: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.submitLazyMintSignature(
+            data.data.registryName,
+            data.data.tokenId,
+            data.data.ownerAddress,
+            data.data.registrationData,
+          );
+        }, data.callId);
+      },
+      retrieveLazyMintingSignatures: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.retrieveLazyMintingSignatures();
+        }, data.callId);
+      },
+      executeLazyMint: (data: IIFrameCallData<LazyMintingSignature>) => {
+        this.returnForModel(() => {
+          return this.core.executeLazyMint(data.data);
+        }, data.callId);
+      },
+      revokeLazyMintSignature: (data: IIFrameCallData<LazyMintingSignature>) => {
+        this.returnForModel(() => {
+          return this.core.revokeLazyMintSignature(data.data);
         }, data.callId);
       },
     });
