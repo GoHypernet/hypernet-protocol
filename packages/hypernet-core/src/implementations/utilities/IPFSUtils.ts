@@ -55,7 +55,7 @@ export class IPFSUtils implements IIPFSUtils {
           }
 
           const ipfs = create({
-          url: config.ipfsApiUrl,
+            url: config.ipfsApiUrl,
           });
 
           return ResultAsync.fromPromise(ipfs.version(), (e) => {
