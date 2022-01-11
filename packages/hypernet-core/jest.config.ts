@@ -39,6 +39,8 @@ const config: Config.InitialOptions = {
     __AUTH_URL__: "http://localhost:5040",
     __VALIDATOR_IFRAME_URL__: "http://localhost:5005",
     __CERAMIC_NODE_URL__: "https://ceramic-clay.3boxlabs.com",
+    __IPFS_API_URL__: "http://localhost:5021",
+    __IPFS_GATEWAY_URL__: "http://localhost:8088",
     __GOVERNANCE_CHAIN_ID__: "1337",
     __DEBUG__: true,
   },
