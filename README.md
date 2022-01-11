@@ -115,7 +115,7 @@ individual package from the packages directory if necessary.
 
 1. Switch to correct version of Node:
 
-   `nvm install 12 && nvm alias default 12`
+   `nvm install 14.15.1 && nvm alias default 14.15.1`
 
 2. Install packages:
 
