@@ -9,6 +9,7 @@
     "@openzeppelin/hardhat-upgrades": "^1.10.0",
     "@openzeppelin/test-helpers": "^0.5.13",
     "chai": "^4.3.4",
+    "csvtojson": "^2.0.10",
     "ethereum-waffle": "^3.4.0",
     "hardhat": "^2.6.0",
     "hardhat-gas-reporter": "^1.0.4",

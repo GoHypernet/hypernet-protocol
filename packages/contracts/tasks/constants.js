@@ -1,7 +1,8 @@
-const HT = require("../deployments/rinkeby/governance/Hypertoken.sol/Hypertoken.json");
-const HG = require("../deployments/rinkeby/governance/HypernetGovernor.sol/HypernetGovernor.json");
-const RF = require("../deployments/rinkeby/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
-const NFR = require("../deployments/rinkeby/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
+const HT = require("../deployments/fuji/governance/Hypertoken.sol/Hypertoken.json");
+const HG = require("../deployments/fuji/governance/HypernetGovernor.sol/HypernetGovernor.json");
+const RF = require("../deployments/fuji/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
+const NFR = require("../deployments/fuji/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
+const BM = require("../deployments/fuji/modules/BatchModule.sol/BatchModule.json");
 
 // define some dynamic imports
 const hAddress = function () {
@@ -77,6 +78,7 @@ module.exports = {
   HG,
   RF,
   NFR,
+  BM,
   govAddress,
   timelockAddress,
   factoryAddress,
