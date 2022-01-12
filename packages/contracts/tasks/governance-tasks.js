@@ -364,6 +364,50 @@ task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance
     console.log("Description Hash:", descriptionHash.toString());
 });
 
+task("proposeRegistryEntryStorageUpdate", "Propose an update to a NonFungibleIdentity's tokenURI.")
+  .addParam("registry", "Name of target Registry where NFI is to be entered.")
+  .addParam("data", "Data to be written to NFI tokenURI.")
+  .addParam("tokenid", "Target NFI tokenid")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const registryName = taskArgs.registry;
+    const NFIData = taskArgs.data;
+    const tokenid = taskArgs.tokenid;
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
+
+    // lookup address for target registry
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    // construct proposal
+    const proposalDescription = `${registryName}(${tokenid}).updateRegistration(${NFIData})`; 
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = registryHandle.interface.encodeFunctionData(
+      "updateRegistration",
+      [tokenid, NFIData],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [registryAddress],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+    // propose a new registry
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [registryAddress],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    const tx_reciept = await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description:", proposalDescription);
+    console.log("Description Hash:", descriptionHash.toString());
+});
+
 task("proposePaymentToken", "Propose a new Payment Token for the Hypernet Protocol.")
   .addParam("name", "Name of the Payment token to display in the UI.")
   .addParam("symbol", "Token symbol.")

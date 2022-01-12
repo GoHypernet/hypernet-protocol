@@ -124,18 +124,21 @@ async function main() {
         "Hypernet Profiles", 
         "Gateways", 
         "Liquidity Providers", 
-        "Payment Tokens"
+        "Payment Tokens",
+        "Registry Modules"
     ],
     [
         "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
         "Payment gateway signatures for the Hypernet Protocol payment network.", 
         "Liquidity provider metadata for the Hypernet Protocol payment network.", 
-        "Officially supported payment tokens for the Hypernet Protocol payment network."
+        "Officially supported payment tokens for the Hypernet Protocol payment network.",
+        "Official modules for extending Hypernet registry functionality."
     ],
     [
         timelock.address, 
         timelock.address, 
         timelock.address, 
+        timelock.address,
         timelock.address
     ],
     enumerableregistry.address,
