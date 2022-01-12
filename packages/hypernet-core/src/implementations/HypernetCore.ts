@@ -1018,6 +1018,7 @@ export class HypernetCore implements IHypernetCore {
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | IPFSUnavailableError
   > {
     // Initialize registries contracts
     return ResultUtils.combine([

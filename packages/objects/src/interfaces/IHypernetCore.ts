@@ -113,6 +113,7 @@ export interface IHypernetCore {
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | IPFSUnavailableError
     | ProxyError
   >;
 
