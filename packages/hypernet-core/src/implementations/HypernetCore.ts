@@ -63,6 +63,7 @@ import {
   InitializeStatus,
   CoreInitializationErrors,
   LazyMintingSignature,
+  IPFSUnavailableError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -156,6 +157,7 @@ import {
   MessagingProvider,
   BlockchainTimeUtils,
   DIDDataStoreProvider,
+  IPFSUtils,
 } from "@implementations/utilities";
 import {
   GatewayConnectorProxyFactory,
@@ -178,6 +180,7 @@ import {
   IMessagingProvider,
   IBlockchainTimeUtils,
   IDIDDataStoreProvider,
+  IIPFSUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -247,6 +250,7 @@ export class HypernetCore implements IHypernetCore {
   protected vectorUtils: IVectorUtils;
   protected paymentUtils: IPaymentUtils;
   protected ceramicUtils: ICeramicUtils;
+  protected ipfsUtils: IIPFSUtils;
 
   // Factories
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
@@ -487,6 +491,12 @@ export class HypernetCore implements IHypernetCore {
       this.timeUtils,
     );
 
+    this.ipfsUtils = new IPFSUtils(
+      this.configProvider,
+      this.localStorageUtils,
+      this.logUtils,
+    );
+
     this.messagingProvider = new MessagingProvider(
       this.configProvider,
       this.contextProvider,
@@ -555,6 +565,7 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.configProvider,
       this.logUtils,
+      this.ipfsUtils,
     );
 
     this.registryRepository = new RegistryRepository(
@@ -1046,6 +1057,7 @@ export class HypernetCore implements IHypernetCore {
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | IPFSUnavailableError
   > {
     // Initialize governance contracts
     return ResultUtils.combine([
@@ -1058,6 +1070,7 @@ export class HypernetCore implements IHypernetCore {
       }
 
       return ResultUtils.combine([
+        this.ipfsUtils.initialize(),
         this.governanceRepository.initializeReadOnly(),
         this.governanceRepository.initializeForWrite(),
       ]).andThen(() => {
@@ -1372,7 +1385,10 @@ export class HypernetCore implements IHypernetCore {
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<
+    Proposal,
+    IPFSUnavailableError | HypernetGovernorContractError
+  > {
     return this.governanceService.createProposal(
       name,
       symbol,
@@ -1392,6 +1408,12 @@ export class HypernetCore implements IHypernetCore {
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.getProposalDetails(proposalId);
+  }
+
+  public getProposalDescription(
+    descriptionHash: string,
+  ): ResultAsync<string, IPFSUnavailableError | HypernetGovernorContractError> {
+    return this.governanceService.getProposalDescription(descriptionHash);
   }
 
   public castVote(

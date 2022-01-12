@@ -1,53 +1,5 @@
 const { HT, RF, NFR, factoryAddress, hAddress } = require("./constants.js");
 
-task("numberOfModules", "Get the number of available modules.")
-  .setAction(async (taskArgs) => {
-    const accounts = await hre.ethers.getSigners();
-
-    const factoryHandle = new hre.ethers.Contract(
-      factoryAddress(),
-      RF.abi,
-      accounts[0],
-    );
-
-    const numModules = await factoryHandle.getNumberOfModules();
-    console.log("Number of Official Modules:", numModules.toString());
-  });
-
-  task("getModuleName", "Get the name of a Module at a given index.")
-  .addParam("index", "Index of the module in the registry factory array.")
-  .setAction(async (taskArgs) => {
-    const accounts = await hre.ethers.getSigners();
-    const index = taskArgs.index; 
-
-    const factoryHandle = new hre.ethers.Contract(
-      factoryAddress(),
-      RF.abi,
-      accounts[0],
-    );
-
-    const moduleAddress = await factoryHandle.modules(index);
-    const moduleABI = [
-        {
-        "inputs": [],
-        "name": "name",
-        "outputs": [
-          {
-            "internalType": "string",
-            "name": "",
-            "type": "string"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ];
-    const moduleHandle = new hre.ethers.Contract(moduleAddress, moduleABI, accounts[0]); 
-    const name = await moduleHandle.name();
-    console.log("Module Address:", moduleAddress);
-    console.log("Number of Official Modules:", name);
-  });
-
 task("createRegistryByToken", "Creates a registry by burning token.")
   .addParam("name", "Name of the target registry.")
   .addParam("symbol", "Symbol to give to the registry.")

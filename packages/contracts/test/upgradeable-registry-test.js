@@ -207,9 +207,9 @@ describe("Registry with No Enumeration", function () {
     // construct call data via ABI encoding
     let tooBig = abiCoder.encode(
       [
-        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
       ],
-      [[[], [], [], [], [], [], [], [10001]]],
+      [[[], [], [], [], [], [], [], [10001], []]],
     );
 
     // primary registry must implement the ERC721 interface
@@ -266,9 +266,9 @@ describe("Registry with No Enumeration", function () {
     // construct call data via ABI encoding
     let params = abiCoder.encode(
       [
-        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
       ],
-      [[[], [], [true], [], [], [], [], []]],
+      [[[], [], [true], [], [], [], [], [], []]],
     );
 
     // only REGISTRAR_ROLE can update registry parameters
@@ -294,6 +294,46 @@ describe("Registry with No Enumeration", function () {
     );
   });
 
+  it("Check baseURI functionality.", async function () {
+    const label = "logo";
+    const registrationData = "QmcSagSyQEjs1DhBkvLestLe2HZ2F9dWccdJW1fQCFTYcw";
+    const baseURI = "ipfs://"
+
+    let tx = await registry.register(
+      addr1.address,
+      label,
+      registrationData,
+      1,
+    );
+    tx.wait();
+
+    // when baseURI is not set, the tokenURI is just the registration data
+    tx.wait();
+    expect(await registry.tokenURI(1)).to.equal(
+        registrationData,
+    );
+
+    const abiCoder = ethers.utils.defaultAbiCoder;
+
+    // construct call data via ABI encoding
+    let params = abiCoder.encode(
+      [
+        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
+      ],
+      [[[], [], [], [], [], [], [], [], [baseURI]]],
+    );
+
+    // enable label updating
+    tx = await registry.setRegistryParameters(params);
+    tx.wait();
+
+    // when baseURI is set, the tokenURI is the baseURI + registration data
+    tx.wait();
+    expect(await registry.tokenURI(1)).to.equal(
+        `${baseURI}${registrationData}`,
+    );
+  });
+
   it("Check transfer permissions.", async function () {
     const label = "dummy";
     const registrationData = "dummy";
@@ -307,9 +347,9 @@ describe("Registry with No Enumeration", function () {
     // construct call data via ABI encoding
     let params = abiCoder.encode(
       [
-        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
       ],
-      [[[], [], [], [false], [], [], [], []]],
+      [[[], [], [], [false], [], [], [], [], []]],
     );
 
     // registrar disables transfers in the registry
@@ -364,9 +404,9 @@ describe("Registry with No Enumeration", function () {
     // construct call data via ABI encoding
     let params = abiCoder.encode(
       [
-        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
       ],
-      [[[], [], [], [], [hypertoken.address], [], [], []]],
+      [[[], [], [], [], [hypertoken.address], [], [], [], []]],
     );
 
     // registrar now sets the registration token to enable token-based registration

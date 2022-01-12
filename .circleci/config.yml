@@ -75,7 +75,7 @@ workflows:
           context: Development
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: "--build-arg IFRAME_SOURCE=https://vector-iframe-dev.hypernetlabs.io --build-arg VALIDATOR_IFRAME_URL=https://gateway.hypernet.foundation --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg CERAMIC_NODE_URL=https://clay.ceramic.hypernet.foundation --build-arg BUILD_ENV=PROD"
+          extra-build-args: "--build-arg IFRAME_SOURCE=https://vector-iframe-dev.hypernetlabs.io --build-arg VALIDATOR_IFRAME_URL=https://gateway.hypernet.foundation --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg CERAMIC_NODE_URL=https://clay.ceramic.hypernet.foundation --build-arg IPFS_API_URL=https://ipfs.hypernet.foundation --build-arg IPFS_GATEWAY_URL=https://ipfs.gateway.hypernet.foundation --build-arg BUILD_ENV=PROD"
       - gcr/add-image-tag:
           name: Tag Latest Core Iframe
           image: hypernetlabs/hypernet-protocol-core-iframe
@@ -152,7 +152,7 @@ workflows:
           context: Hypernet Foundation
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: "--build-arg IFRAME_SOURCE=https://vector.hypernet.foundation --build-arg VALIDATOR_IFRAME_URL=https://gateway.hypernet.foundation --build-arg NATS_URL=ws://nats.hypernet.foundation:4221 --build-arg AUTH_URL=https://auth.hypernet.foundation --build-arg CERAMIC_NODE_URL=https://clay.ceramic.hypernet.foundation --build-arg BUILD_ENV=PROD"
+          extra-build-args: "--build-arg IFRAME_SOURCE=https://vector.hypernet.foundation --build-arg VALIDATOR_IFRAME_URL=https://gateway.hypernet.foundation --build-arg NATS_URL=ws://nats.hypernet.foundation:4221 --build-arg AUTH_URL=https://auth.hypernet.foundation --build-arg CERAMIC_NODE_URL=https://clay.ceramic.hypernet.foundation --build-arg IPFS_API_URL=https://ipfs.hypernet.foundation --build-arg IPFS_GATEWAY_URL=https://ipfs.gateway.hypernet.foundation --build-arg BUILD_ENV=PROD"
       - gcr/add-image-tag:
           name: Tag Stable Core Iframe
           image: core-iframe

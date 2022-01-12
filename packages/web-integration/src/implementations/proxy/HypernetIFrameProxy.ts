@@ -55,6 +55,7 @@ import {
   LazyMintModuleContractError,
   RegistryTokenId,
   InitializeStatus,
+  IPFSUnavailableError,
   CoreInitializationErrors,
   GovernanceSignerUnavailableError,
   LazyMintingSignature,
@@ -714,6 +715,15 @@ export default class HypernetIFrameProxy
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("getProposalDetails", proposalId);
+  }
+
+  public getProposalDescription(
+    descriptionHash: string,
+  ): ResultAsync<
+    string,
+    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+  > {
+    return this._createCall("getProposalDescription", descriptionHash);
   }
 
   public castVote(

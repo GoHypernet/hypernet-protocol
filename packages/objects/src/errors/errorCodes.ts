@@ -36,6 +36,7 @@ const errorCodes = {
   InactiveGatewayError: "35",
   BatchModuleContractError: "36",
   LazyMintModuleContractError: "37",
+  IPFSUnavailableError: "38",
 };
 
 export default errorCodes;

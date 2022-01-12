@@ -5,6 +5,7 @@ import {
   HypernetGovernorContractError,
   ERC20ContractError,
   EthereumAccountAddress,
+  IPFSUnavailableError,
 } from "@hypernetlabs/objects";
 import { IGovernanceService } from "@interfaces/business";
 import {
@@ -39,7 +40,10 @@ export class GovernanceService implements IGovernanceService {
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<
+    Proposal,
+    IPFSUnavailableError | HypernetGovernorContractError
+  > {
     return this.governanceRepository.createProposal(
       name,
       symbol,
@@ -59,6 +63,12 @@ export class GovernanceService implements IGovernanceService {
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.getProposalDetails(proposalId);
+  }
+
+  public getProposalDescription(
+    descriptionHash: string,
+  ): ResultAsync<string, IPFSUnavailableError | HypernetGovernorContractError> {
+    return this.governanceRepository.getProposalDescription(descriptionHash);
   }
 
   public castVote(
