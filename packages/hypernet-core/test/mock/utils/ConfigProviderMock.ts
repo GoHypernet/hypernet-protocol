@@ -50,6 +50,8 @@ export class ConfigProviderMock implements IConfigProvider {
         false, // requireOnline
         true,
         true,
+        "ipfsApiUrl",
+        "ipfsGatewayUrl",
         false, // debug is off for testing
       );
   }
