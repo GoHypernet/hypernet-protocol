@@ -246,7 +246,6 @@ task("listRegistryEntries", "Prints all NFI entries for the specified registry."
    const labelArr = jsonObj.map((row) => row.LABEL);
    if ((indexArr.length === idArr.length) && (uriArr.length === recipArr.length) && (indexArr.length === recipArr.length)) {
        let tx = await batchModuleHandle.batchRegister(recipArr, labelArr, uriArr, idArr, targetRegistryAddress);
-    console.log(labelArr)
    } else {
        console.log("Arrays are different lengths.")
        console.log(indexArr.length)
