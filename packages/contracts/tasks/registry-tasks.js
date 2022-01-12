@@ -75,8 +75,10 @@ task("registryParameters", "Prints NFR  parameters.")
     const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
+    const baseURI = await registryHandle.baseURI();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
+    console.log("Base URI:", baseURI);
     console.log("Registry Address:", registryAddress);
     console.log("Registrar:", registrarAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
@@ -98,6 +100,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
   .addParam("registrationfee", "Amount of registration token needed to create an NFI")
   .addParam("burnaddress","Address where burned tokens will be sent")
   .addParam("burnfee", "percentage of registration token to burn (<=10000)")
+  .addParam("baseuri", "Optional string to append to all registry tokenURIs")
   .setAction(async (taskArgs) => {
     const name = taskArgs.name;
     const schema = (taskArgs.schema.length ? [taskArgs.schema]: []);
@@ -108,6 +111,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     const registrationfee = (taskArgs.registrationfee.length ? [taskArgs.registrationfee]: []);
     const burnaddress = (taskArgs.burnaddress.length ? [taskArgs.burnaddress]: []);
     const burnfee = (taskArgs.burnfee.length ? [taskArgs.burnfee]: []);
+    const baseURI = (taskArgs.baseuri.length ? [taskArgs.baseuri]: []);
 
     const accounts = await hre.ethers.getSigners();
 
@@ -128,7 +132,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     // construct call data via ABI encoding
     let params = abiCoder.encode(
         [
-          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
         ],
         [
             [
@@ -139,7 +143,8 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
             registrationtoken, 
             registrationfee, 
             burnaddress, 
-            burnfee
+            burnfee,
+            baseURI
             ]
         ],
       );
@@ -160,8 +165,10 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
+    const prefix = await registryHandle.baseURI();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
+    console.log("Base URI:", prefix);
     console.log("Registry Address:", registryAddress);
     console.log("Registrar:", registrarAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
