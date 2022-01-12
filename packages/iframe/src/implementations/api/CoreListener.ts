@@ -20,6 +20,7 @@ import {
   RegistryTokenId,
   ProviderId,
   RegistryEntry,
+  IpfsCID,
 } from "@hypernetlabs/objects";
 import {
   IIFrameCallData,
@@ -289,6 +290,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getProposalDetails: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
           return this.core.getProposalDetails(data.data);
+        }, data.callId);
+      },
+      getProposalDescription: (data: IIFrameCallData<IpfsCID>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalDescription(data.data);
         }, data.callId);
       },
       castVote: (

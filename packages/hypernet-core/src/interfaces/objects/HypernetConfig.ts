@@ -23,6 +23,8 @@ export class HypernetConfig {
     public requireOnline: boolean,
     public governanceRequired: boolean,
     public paymentsRequired: boolean,
+    public ipfsApiUrl: string,
+    public ipfsGatewayUrl: string,
     public debug: boolean,
   ) {}
 }

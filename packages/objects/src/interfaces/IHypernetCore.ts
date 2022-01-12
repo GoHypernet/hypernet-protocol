@@ -36,6 +36,7 @@ import {
   PaymentCreationError,
   InactiveGatewayError,
   BatchModuleContractError,
+  IPFSUnavailableError,
   CoreInitializationErrors,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
@@ -60,6 +61,7 @@ import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
+import { IpfsCID } from "@objects/IpfsCID";
 import { InitializeStatus } from "@web-integration/InitializeStatus";
 
 /**
@@ -117,6 +119,7 @@ export interface IHypernetCore {
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | IPFSUnavailableError
     | ProxyError
   >;
 
@@ -418,7 +421,10 @@ export interface IHypernetCore {
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
+  ): ResultAsync<
+    Proposal,
+    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+  >;
 
   delegateVote(
     delegateAddress: EthereumAccountAddress,
@@ -428,6 +434,13 @@ export interface IHypernetCore {
   getProposalDetails(
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
+
+  getProposalDescription(
+    descriptionHash: IpfsCID,
+  ): ResultAsync<
+    string,
+    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+  >;
 
   castVote(
     proposalId: string,

@@ -25,3 +25,4 @@ build/
 out/linecounter.json
 out/linecounter.txt
 packages/test-gateway/src/connector.js
+*.ipfs
