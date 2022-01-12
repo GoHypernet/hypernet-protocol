@@ -4,7 +4,10 @@ import { DID } from "dids";
 import CeramicClient from "@ceramicnetwork/http-client";
 import { ModelManager } from "@glazed/devtools";
 import { CryptoUtils } from "@hypernetlabs/utils";
-import { AuthorizedGatewaysSchema } from "@hypernetlabs/objects";
+import {
+  AuthorizedGatewaysSchema,
+  LazyMintingSignatureSchema,
+} from "@hypernetlabs/objects";
 
 const providerSeed = CryptoUtils.randomBytes(
   32,
@@ -12,7 +15,7 @@ const providerSeed = CryptoUtils.randomBytes(
 );
 console.log("providerSeed", providerSeed);
 
-const ceramic = new CeramicClient("https://ceramic-clay.3boxlabs.com");
+const ceramic = new CeramicClient("https://clay.ceramic.hypernet.foundation");
 
 const authProvider = new Ed25519Provider(providerSeed);
 
@@ -29,12 +32,12 @@ const authenticateDid = async () => {
 };
 
 const createSchemaAndDefinition = async () => {
-  const schemas = [AuthorizedGatewaysSchema];
+  const schemas = [AuthorizedGatewaysSchema, LazyMintingSignatureSchema];
 
   for (let index = 0; index < schemas.length; index++) {
     const schema = schemas[index];
 
-    const schemaID = await manager.createSchema(schema.title, schema);
+    const schemaID = await manager.createSchema(schema.title, schema as any);
 
     await manager.createDefinition(schema.title, {
       name: schema.title,

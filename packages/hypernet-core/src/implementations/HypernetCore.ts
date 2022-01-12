@@ -59,8 +59,10 @@ import {
   InactiveGatewayError,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
   InitializeStatus,
   CoreInitializationErrors,
+  LazyMintingSignature,
   IPFSUnavailableError,
 } from "@hypernetlabs/objects";
 import {
@@ -154,13 +156,13 @@ import {
   CeramicUtils,
   MessagingProvider,
   BlockchainTimeUtils,
+  DIDDataStoreProvider,
   IPFSUtils,
 } from "@implementations/utilities";
 import {
   GatewayConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
-  CeramicUtilsFactory,
   NonFungibleRegistryContractFactory,
 } from "@implementations/utilities/factory";
 import { IStorageUtils } from "@interfaces/data/utilities";
@@ -177,12 +179,12 @@ import {
   ICeramicUtils,
   IMessagingProvider,
   IBlockchainTimeUtils,
+  IDIDDataStoreProvider,
   IIPFSUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
-  ICeramicUtilsFactory,
   IGatewayConnectorProxyFactory,
   INonFungibleRegistryContractFactory,
 } from "@interfaces/utilities/factory";
@@ -255,7 +257,7 @@ export class HypernetCore implements IHypernetCore {
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
   protected nonFungibleRegistryContractFactory: INonFungibleRegistryContractFactory;
-  protected ceramicUtilsFactory: ICeramicUtilsFactory;
+  protected didDataStoreProvider: IDIDDataStoreProvider;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -446,7 +448,7 @@ export class HypernetCore implements IHypernetCore {
       this.browserNodeFactory,
     );
 
-    this.ceramicUtilsFactory = new CeramicUtilsFactory(
+    this.didDataStoreProvider = new DIDDataStoreProvider(
       this.configProvider,
       this.contextProvider,
       this.browserNodeProvider,
@@ -454,9 +456,8 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.ceramicUtils = new CeramicUtils(
-      this.configProvider,
       this.contextProvider,
-      this.browserNodeProvider,
+      this.didDataStoreProvider,
       this.logUtils,
     );
 
@@ -570,6 +571,7 @@ export class HypernetCore implements IHypernetCore {
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
       this.configProvider,
+      this.didDataStoreProvider,
       this.logUtils,
     );
 
@@ -1016,6 +1018,7 @@ export class HypernetCore implements IHypernetCore {
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | IPFSUnavailableError
   > {
     // Initialize registries contracts
     return ResultUtils.combine([
@@ -1031,6 +1034,7 @@ export class HypernetCore implements IHypernetCore {
       return ResultUtils.combine([
         this.registryRepository.initializeReadOnly(),
         this.registryRepository.initializeForWrite(),
+        this.initializeGovernance(),
       ]).andThen(() => {
         if (this._registriesInitializePromiseResolve != null) {
           this._registriesInitializePromiseResolve();
@@ -1748,7 +1752,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError
   > {
     return this.registryService.getRegistryModules();
   }
@@ -1792,5 +1796,57 @@ export class HypernetCore implements IHypernetCore {
       registryName,
       username,
     );
+  }
+
+  public submitLazyMintSignature(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
+  > {
+    return this.registryService.submitLazyMintSignature(
+      registryName,
+      tokenId,
+      ownerAddress,
+      registrationData,
+    );
+  }
+
+  public retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError
+  > {
+    return this.registryService.retrieveLazyMintingSignatures();
+  }
+
+  public executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+  > {
+    return this.registryService.executeLazyMint(lazyMintingSignature);
+  }
+
+  public revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
+    return this.registryService.revokeLazyMintSignature(lazyMintingSignature);
   }
 }

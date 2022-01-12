@@ -20,6 +20,7 @@ import {
   RegistryTokenId,
   ProviderId,
   RegistryEntry,
+  LazyMintingSignature,
   IpfsCID,
 } from "@hypernetlabs/objects";
 import {
@@ -622,6 +623,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
+      getBlockNumber: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getBlockNumber();
+        }, data.callId);
+      },
       getRegistryEntryListByUsername: (
         data: IIFrameCallData<{
           registryName: string;
@@ -635,9 +641,36 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
-      getBlockNumber: (data: IIFrameCallData<void>) => {
+      submitLazyMintSignature: (
+        data: IIFrameCallData<{
+          registryName: string;
+          tokenId: RegistryTokenId;
+          ownerAddress: EthereumAccountAddress;
+          registrationData: string;
+        }>,
+      ) => {
         this.returnForModel(() => {
-          return this.core.getBlockNumber();
+          return this.core.submitLazyMintSignature(
+            data.data.registryName,
+            data.data.tokenId,
+            data.data.ownerAddress,
+            data.data.registrationData,
+          );
+        }, data.callId);
+      },
+      retrieveLazyMintingSignatures: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.retrieveLazyMintingSignatures();
+        }, data.callId);
+      },
+      executeLazyMint: (data: IIFrameCallData<LazyMintingSignature>) => {
+        this.returnForModel(() => {
+          return this.core.executeLazyMint(data.data);
+        }, data.callId);
+      },
+      revokeLazyMintSignature: (data: IIFrameCallData<LazyMintingSignature>) => {
+        this.returnForModel(() => {
+          return this.core.revokeLazyMintSignature(data.data);
         }, data.callId);
       },
     });

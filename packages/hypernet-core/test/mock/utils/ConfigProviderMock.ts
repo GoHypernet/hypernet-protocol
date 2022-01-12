@@ -2,8 +2,7 @@ import {
   AuthorizedGatewaysSchema,
   ChainId,
   ChainInformation,
-  DefinitionName,
-  SchemaUrl,
+  LazyMintingSignatureSchema,
 } from "@hypernetlabs/objects";
 import { HypernetConfig } from "@interfaces/objects";
 import {
@@ -33,15 +32,19 @@ export class ConfigProviderMock implements IConfigProvider {
         "natsUrl", // natsUrl
         "authUrl", // authUrl
         "gatewayIframeUrl", // gatewayIframeUrl
-        "https://ceramic-clay.3boxlabs.com", // ceramicNodeUrl
+        "https://clay.ceramic.hypernet.foundation", // ceramicNodeUrl
         {
           definitions: {
             [AuthorizedGatewaysSchema.title]:
-              "kjzl6cwe1jw147sl129srofw2tmyw8ln80janj1he23vp95bly1zahc9mdkpzw5",
+              "kjzl6cwe1jw148xm690vbhrn5fwiiqjm4kmvnb8jzhktzdh3tcztzwuxoi8hl5n",
+            [LazyMintingSignatureSchema.title]:
+              "kjzl6cwe1jw145oxq649aslc8hk4zzz52yvyy7rugfx0qme25ksfzq3l93rdea5",
           },
           schemas: {
             [AuthorizedGatewaysSchema.title]:
-              "ceramic://k3y52l7qbv1fryi3az9mgiugaxh6jsny0jua15ztop9em6xx3p4wqx1g39fclpnuo",
+              "ceramic://k3y52l7qbv1frycmgeghbfxd4qqh718tp4s2fd7wnmz5vhy7f3lvhcvl1w2lggglc",
+            [LazyMintingSignatureSchema.title]:
+              "ceramic://k3y52l7qbv1fryju2t19l5gbemvmtuk6mzpfpyamyy1g45mad0b6yukp38gdxmdj4",
           },
           tiles: {},
         }, // ceramicDataModel

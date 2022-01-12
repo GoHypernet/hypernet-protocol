@@ -29,13 +29,6 @@ export interface IRegistryFactoryContract {
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError>;
-  modules(
-    index: number,
-  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError>;
-  getModuleName(
-    moduleAddress: EthereumContractAddress,
-  ): ResultAsync<string, RegistryFactoryContractError>;
-  getNumberOfModules(): ResultAsync<number, RegistryFactoryContractError>;
 }
 
 export const IRegistryFactoryContractType = Symbol.for(

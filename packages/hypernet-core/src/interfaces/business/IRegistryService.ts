@@ -14,6 +14,11 @@ import {
   GovernanceSignerUnavailableError,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
+  PersistenceError,
+  VectorError,
+  LazyMintingSignature,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -182,7 +187,7 @@ export interface IRegistryService {
   >;
   getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError
   >;
   createBatchRegistryEntry(
     registryName: string,
@@ -200,11 +205,46 @@ export interface IRegistryService {
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
+  submitLazyMintSignature(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
+  >;
   getRegistryEntryListByUsername(
     registryName: string,
     username: string,
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
+  retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError
+  >;
+  executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+  >;
+  revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
   >;
 }

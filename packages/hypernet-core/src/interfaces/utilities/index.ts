@@ -14,4 +14,5 @@ export * from "@interfaces/utilities/IInternalProvider";
 export * from "@interfaces/utilities/ICeramicUtils";
 export * from "@interfaces/utilities/IAccountAddressSignature";
 export * from "@interfaces/utilities/IBlockchainTimeUtils";
+export * from "@interfaces/utilities/IDIDDataStoreProvider";
 export * from "@interfaces/utilities/IIPFSUtils";

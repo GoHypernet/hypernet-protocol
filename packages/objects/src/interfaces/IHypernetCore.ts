@@ -36,6 +36,7 @@ import {
   PaymentCreationError,
   InactiveGatewayError,
   BatchModuleContractError,
+  LazyMintModuleContractError,
   IPFSUnavailableError,
   CoreInitializationErrors,
 } from "@objects/errors";
@@ -63,6 +64,7 @@ import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
 import { IpfsCID } from "@objects/IpfsCID";
 import { InitializeStatus } from "@web-integration/InitializeStatus";
+import { LazyMintingSignature } from "@web-integration/LazyMintingSignature";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -111,6 +113,7 @@ export interface IHypernetCore {
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
+    | IPFSUnavailableError
     | ProxyError
   >;
 
@@ -700,7 +703,7 @@ export interface IHypernetCore {
 
   getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError | ProxyError
+    NonFungibleRegistryContractError | ProxyError
   >;
 
   createBatchRegistryEntry(
@@ -722,6 +725,22 @@ export interface IHypernetCore {
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
+  submitLazyMintSignature(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
+    | ProxyError
+  >;
+
   getRegistryEntryListByUsername(
     registryName: string,
     username: string,
@@ -729,6 +748,32 @@ export interface IHypernetCore {
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
+
+  retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError | ProxyError
+  >;
+
+  executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+    | ProxyError
+  >;
+
+  revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
+  >;
+
   /**
    * Observables for seeing what's going on
    */

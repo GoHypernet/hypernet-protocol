@@ -27,6 +27,7 @@ import {
   Signature,
   TransferId,
   UnixTimestamp,
+  RegistryModulesNames,
 } from "@hypernetlabs/objects";
 
 export const account = EthereumAccountAddress("account-address-1");
@@ -142,6 +143,9 @@ export const hypernetProfileRegistryAddress = EthereumContractAddress(
   "hypernetProfileRegistryAddress",
 );
 
+export const modulesRegistryAddress = EthereumContractAddress(
+  "modulesRegistryAddress",
+);
 export const hypernetGovernorAddress = EthereumContractAddress(
   "hypernetGovernorAddress",
 );
@@ -150,8 +154,10 @@ export const registryFactoryAddress = EthereumContractAddress(
   "registryFactoryAddress",
 );
 
-export const batchModuleContract = EthereumContractAddress(
-  "batchModuleContract",
+const registryModulesNames = new RegistryModulesNames(
+  "Batch Minting",
+  "Lazy Minting",
+  "Merkle Drop",
 );
 
 export const governanceChainInformation = new GovernanceChainInformation(
@@ -171,7 +177,8 @@ export const governanceChainInformation = new GovernanceChainInformation(
   tokenRegistryAddress,
   chainRegistryAddress,
   hypernetProfileRegistryAddress,
-  batchModuleContract,
+  modulesRegistryAddress,
+  registryModulesNames,
   [ProviderUrl("http://localhost:8545")],
 );
 

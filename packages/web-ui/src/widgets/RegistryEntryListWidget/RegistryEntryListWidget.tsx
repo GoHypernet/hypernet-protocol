@@ -46,28 +46,31 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   );
   const [reversedSortingEnabled, setReversedSortingEnabled] =
     useState<boolean>(false);
-
   const [createIdentityModalOpen, setCreateIdentityModalOpen] =
     useState<boolean>(false);
   const [createBatchIdentityModalOpen, setCreateBatchIdentityModalOpen] =
     useState<boolean>(false);
-
+  const [lazyMintModeEnabled, setLazyMintModeEnabled] =
+    useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [registryFetched, setRegistryFetched] = useState<boolean>(false);
 
   useEffect(() => {
     getRegistry();
   }, []);
 
   useEffect(() => {
-    if (registry?.numberOfEntries) {
+    if (registry?.numberOfEntries && registryFetched) {
       getRegistryEntries(page);
     }
   }, [registry?.numberOfEntries, page, REGISTRY_ENTRIES_PER_PAGE]);
 
   useEffect(() => {
-    getRegistryEntries(1);
+    if (registryFetched) {
+      getRegistryEntries(1);
+    }
   }, [reversedSortingEnabled]);
 
   useEffect(() => {
@@ -82,6 +85,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .getRegistryByName([registryName])
       .map((registryMap) => {
         const registry = registryMap.get(registryName);
+        setRegistryFetched(true);
         setRegistry(registry);
         setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
@@ -127,7 +131,22 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const canCreateNewBatchRegistryEntry =
       isRegistrar && registry?.modulesCapability.batchMintEnabled;
 
+    const cansubmitLazyMintSignature =
+      isRegistrar && registry?.modulesCapability.lazyMintEnabled;
+
     let headerActions: IHeaderAction[] = [];
+
+    if (cansubmitLazyMintSignature) {
+      headerActions.push({
+        label: "Lazy Mint Identity",
+        onClick: () => {
+          setCreateIdentityModalOpen(true);
+          setLazyMintModeEnabled(true);
+        },
+        variant: "contained",
+        color: "primary",
+      });
+    }
 
     if (canCreateNewBatchRegistryEntry) {
       headerActions.push({
@@ -141,7 +160,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     if (canCreateNewRegistryEntry) {
       headerActions.push({
         label: "Create New Identity",
-        onClick: () => setCreateIdentityModalOpen(true),
+        onClick: () => {
+          setCreateIdentityModalOpen(true);
+          setLazyMintModeEnabled(false);
+        },
         variant: "contained",
         color: "primary",
       });
@@ -193,6 +215,12 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onRestartClick = () => {
     setSearchTerm("");
     getRegistryEntries(1);
+  };
+
+  const handleIdentityCallback = () => {
+    getRegistry();
+    setLazyMintModeEnabled(false);
+    setCreateIdentityModalOpen(false);
   };
 
   return (
@@ -336,10 +364,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       )}
       {createIdentityModalOpen && (
         <CreateIdentityWidget
-          onCloseCallback={() => {
-            getRegistry();
-            setCreateIdentityModalOpen(false);
-          }}
+          onCloseCallback={handleIdentityCallback}
+          lazyMintModeEnabled={lazyMintModeEnabled}
           registryName={registryName}
           currentAccountAddress={accountAddress}
         />

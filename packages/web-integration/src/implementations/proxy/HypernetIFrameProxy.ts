@@ -52,10 +52,13 @@ import {
   RegistryModule,
   BatchModuleContractError,
   InvalidPaymentIdError,
+  LazyMintModuleContractError,
+  RegistryTokenId,
   InitializeStatus,
   IPFSUnavailableError,
   CoreInitializationErrors,
   GovernanceSignerUnavailableError,
+  LazyMintingSignature,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -1090,7 +1093,7 @@ export default class HypernetIFrameProxy
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError | ProxyError
+    NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryModules", null);
   }
@@ -1135,6 +1138,60 @@ export default class HypernetIFrameProxy
       registryName,
       username,
     });
+  }
+
+  public submitLazyMintSignature(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
+    | ProxyError
+  > {
+    return this._createCall("submitLazyMintSignature", {
+      registryName,
+      tokenId,
+      ownerAddress,
+      registrationData,
+    });
+  }
+
+  public retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError | ProxyError
+  > {
+    return this._createCall("retrieveLazyMintingSignatures", null);
+  }
+
+  public executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+    | ProxyError
+  > {
+    return this._createCall("executeLazyMint", lazyMintingSignature);
+  }
+
+  public revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
+  > {
+    return this._createCall("revokeLazyMintSignature", lazyMintingSignature);
   }
 
   private _displayCoreIFrame(): void {

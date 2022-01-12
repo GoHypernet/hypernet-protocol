@@ -11,6 +11,7 @@ import RegistryEntryList from "@user-dashboard/pages/Governance/RegistryEntryLis
 import RegistryEntryDetail from "@user-dashboard/pages/Governance/RegistryEntryDetail";
 import RegistryDetail from "@user-dashboard/pages/Governance/RegistryDetail";
 import PaymentHistory from "@user-dashboard/pages/PaymentHistory";
+import LazyMintingRequests from "@user-dashboard/pages/Governance/LazyMintingRequests";
 
 export interface IRouteConfig {
   [x: string]: IRouteItem;
@@ -38,6 +39,7 @@ export enum ROUTES {
   PROPOSALS = "/proposals",
   PROPOSAL_DETAIL = "/proposals/:proposalId",
   PROPOSAL_CREATE = "/proposal-create",
+  LAZY_MINTING_REQUEST = "/lazy-minting-requests",
   ROOT = "/",
 }
 
@@ -95,6 +97,12 @@ export const routeConfig: IRouteConfig = {
     path: ROUTES.PROPOSAL_CREATE,
     Component: ProposalCreate,
     name: "Proposal",
+  },
+  lazyMintingRequests: {
+    path: ROUTES.LAZY_MINTING_REQUEST,
+    Component: LazyMintingRequests,
+    name: "Lazy Minting Requests",
+    isHeaderItem: false,
   },
   registryDetail: {
     path: ROUTES.REGISTRY_DEFAIL,

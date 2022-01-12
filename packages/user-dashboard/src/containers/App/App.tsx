@@ -49,7 +49,10 @@ const App: React.FC = () => {
 
     if (pathname === ROUTES.ROOT || pathname.includes(ROUTES.PAYMENTS)) {
       readyResult = integration.getPaymentsReady();
-    } else if (pathname.includes(ROUTES.REGISTRIES)) {
+    } else if (
+      pathname.includes(ROUTES.REGISTRIES) ||
+      pathname.includes(ROUTES.LAZY_MINTING_REQUEST)
+    ) {
       readyResult = integration.getRegistriesReady();
     } else if (
       pathname.includes(ROUTES.PROPOSALS) ||

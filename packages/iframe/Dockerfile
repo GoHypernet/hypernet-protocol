@@ -42,7 +42,7 @@ ENV __AUTH_URL__ $AUTH_URL
 ARG VALIDATOR_IFRAME_URL=http://localhost:5005
 ENV __VALIDATOR_IFRAME_URL__ $VALIDATOR_IFRAME_URL
 
-ARG CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com
+ARG CERAMIC_NODE_URL=https://clay.ceramic.hypernet.foundation
 ENV __CERAMIC_NODE_URL__ $CERAMIC_NODE_URL
 
 ARG IPFS_API_URL=http://localhost:5021

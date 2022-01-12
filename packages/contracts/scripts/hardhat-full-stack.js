@@ -60,7 +60,7 @@ async function main() {
   );
   const tx1_reciept = await tx1.wait();
 
-  console.log("DAO has proposer role")
+  console.log("DAO has proposer role");
 
   // give the governor contract the Executor role in the timelock contract
   const tx2 = await timelock.grantRole(
@@ -120,6 +120,7 @@ async function main() {
   );
   const factoryregistry = await FactoryRegistry.deploy(
     timelock.address,
+    ["Hypernet Profiles", "Gateways", "Liquidity Providers", "Payment Tokens", "Registry Modules"],
     [
         "Hypernet Profiles", 
         "Gateways", 
