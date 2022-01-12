@@ -1,4 +1,6 @@
-const { HT, RF, NFR, factoryAddress, hAddress } = require("./constants.js");
+const { HT, RF, NFR,  BM, factoryAddress, hAddress } = require("./constants.js");
+const csv=require('csvtojson')
+const fs = require('fs');
 
 task("createRegistryByToken", "Creates a registry by burning token.")
   .addParam("name", "Name of the target registry.")
@@ -170,6 +172,92 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     console.log("Registration Fee:", registrationFee.toString());
     console.log("Primary Registry:", primaryRegistry);
   });
+
+task("listRegistryEntries", "Prints all NFI entries for the specified registry.")
+  .addParam("name", "Target NonFungible Registry Name.")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(
+      registryAddress,
+      NFR.abi,
+      accounts[0],
+    );
+
+    const totalSupply = await registryHandle.totalSupply();
+
+    let tokenId;
+    let tokenURI;
+    let tokenOwner;
+    let tokenLabel;
+    console.log("INDEX, ID, URI, OWNER, LABEL ")
+    for (let i = 0; i < totalSupply; i++) {
+        tokenId = await registryHandle.tokenByIndex(i);
+        tokenURI = await registryHandle.tokenURI(tokenId);
+        tokenOwner = await registryHandle.ownerOf(tokenId);
+        tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
+        console.log(`${i}, ${tokenId}, ${tokenURI}, ${tokenOwner}, ${tokenLabel}`)
+    }
+ });
+
+ task("batchRegister", "Mints NFIs specified in the given csv file.")
+ .addParam("name", "Target NonFungible Registry Name.")
+ .addParam("nfis","Path to csv file with NFI data.")
+ .setAction(async (taskArgs) => {
+   const name = taskArgs.name;
+   const nfis = taskArgs.nfis;
+
+   const accounts = await hre.ethers.getSigners();
+
+   const factoryHandle = new hre.ethers.Contract(
+     factoryAddress(),
+     RF.abi,
+     accounts[0],
+   );
+   const registryModulesAddress = await factoryHandle.nameToAddress("Registry Modules");
+   const targetRegistryAddress = await factoryHandle.nameToAddress(name);
+   const registryModulesHandle = new hre.ethers.Contract(
+    registryModulesAddress,
+    NFR.abi,
+    accounts[0],
+   );
+   const batchModuleTokenId = await registryModulesHandle.registryMap("Batch Minting");
+   const batchModuleAddress = await registryModulesHandle.tokenURI(batchModuleTokenId);
+
+   const batchModuleHandle = new hre.ethers.Contract(
+     batchModuleAddress,
+     BM.abi,
+     accounts[0],
+   );
+
+   const jsonObj = await csv().fromFile(nfis)
+   const indexArr = jsonObj.map((row) => row.INDEX);
+   const idArr = jsonObj.map((row) => row.ID);
+   const uriArr = jsonObj.map((row) => row.URI);
+   const recipArr = jsonObj.map((row) => row.OWNER);
+   const labelArr = jsonObj.map((row) => row.LABEL);
+   if ((indexArr.length === idArr.length) && (uriArr.length === recipArr.length) && (indexArr.length === recipArr.length)) {
+       let tx = await batchModuleHandle.batchRegister(recipArr, labelArr, uriArr, idArr, targetRegistryAddress);
+    console.log(labelArr)
+   } else {
+       console.log("Arrays are different lengths.")
+       console.log(indexArr.length)
+       console.log(idArr.length)
+       console.log(uriArr.length)
+       console.log(recipArr.length)
+       console.log(labelArr.length)
+   }
+   console.log("Batch Module token ID:", batchModuleTokenId.toString());
+   console.log("Batch Module Address:", batchModuleAddress);
+});
 
 task("registryEntryByLabel", "Prints NunFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")
