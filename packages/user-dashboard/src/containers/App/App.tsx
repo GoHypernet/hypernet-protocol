@@ -47,9 +47,10 @@ const App: React.FC = () => {
     setLoading(true);
     let readyResult: ResultAsync<IHypernetCore, Error>;
 
-    if (pathname === ROUTES.ROOT || pathname.includes(ROUTES.PAYMENTS)) {
+    if (pathname.includes(ROUTES.PAYMENTS)) {
       readyResult = integration.getPaymentsReady();
     } else if (
+      pathname === ROUTES.ROOT ||
       pathname.includes(ROUTES.REGISTRIES) ||
       pathname.includes(ROUTES.LAZY_MINTING_REQUEST)
     ) {

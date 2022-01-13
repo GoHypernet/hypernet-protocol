@@ -45,7 +45,7 @@ export enum ROUTES {
 
 export const routeConfig: IRouteConfig = {
   registries: {
-    path: ROUTES.ROOT,
+    path: ROUTES.REGISTRIES,
     Component: RegistryList,
     name: "Registries",
     isHeaderItem: true,
@@ -119,5 +119,11 @@ export const routeConfig: IRouteConfig = {
     path: ROUTES.REGISTRY_ENTRY_DETAIL,
     Component: RegistryEntryDetail,
     name: "Registry Entry Detail",
+  },
+  root: {
+    path: ROUTES.ROOT,
+    Component: RegistryList,
+    name: "Registries",
+    isHeaderItem: false,
   },
 };
