@@ -1,6 +1,44 @@
 const { HT, RF, NFR,  BM, factoryAddress, hAddress } = require("./constants.js");
+const IBEACON = require("../artifacts/@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol/UpgradeableBeacon.json")
 const csv=require('csvtojson')
-const fs = require('fs');
+
+task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon proxies and implementation contracts.")
+  .setAction(async (taskArgs) => {
+
+    const accounts = await hre.ethers.getSigners();
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+
+    const regBeaconAddr = await factoryHandle.registryBeacon();
+    const enumRegBeaconAddr = await factoryHandle.enumerableRegistryBeacon();
+
+    const regBeaconHandle = new hre.ethers.Contract(
+        regBeaconAddr,
+        IBEACON.abi,
+        accounts[0],
+      );
+
+      const enumRegBeaconHandle = new hre.ethers.Contract(
+        enumRegBeaconAddr,
+        IBEACON.abi,
+        accounts[0],
+      );
+
+    const regImpleAddr = await regBeaconHandle.implementation();
+    const regBeaconOwner = await regBeaconHandle.owner();
+    const enumRegImplAddr = await enumRegBeaconHandle.implementation();
+    const enumRegBeaconOwner = await enumRegBeaconHandle.owner();
+
+    console.log("Registry Beacon Address:", regBeaconAddr);
+    console.log("Registry Implementation Address:", regImpleAddr);
+    console.log("Registry Beacon Owner:", regBeaconOwner)
+    console.log("Enumerable Registry Beacon Address:", enumRegBeaconAddr);
+    console.log("Enumerable Registry Implementation Address:", enumRegImplAddr);
+    console.log("Enumerable Registry Beacon Owner:", enumRegBeaconOwner)
+  });
 
 task("createRegistryByToken", "Creates a registry by burning token.")
   .addParam("name", "Name of the target registry.")
@@ -265,7 +303,7 @@ task("listRegistryEntries", "Prints all NFI entries for the specified registry."
    console.log("Batch Module Address:", batchModuleAddress);
 });
 
-task("registryEntryByLabel", "Prints NunFungible Identity Data.")
+task("registryEntryByLabel", "Prints NonFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")
   .addParam("label", "NFI label")
   .setAction(async (taskArgs) => {
@@ -297,7 +335,7 @@ task("registryEntryByLabel", "Prints NunFungible Identity Data.")
     console.log("NFI label:", tokenLabel);
   });
 
-task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
+task("registryEntryByTokenID", "Prints NonFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")
   .addParam("tokenid", "NFI tokenID")
   .setAction(async (taskArgs) => {
@@ -328,7 +366,7 @@ task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
     console.log("NFI label:", tokenLabel);
   });
 
-  task("registryEntryByIndex", "Prints NunFungible Identity Data.")
+  task("registryEntryByIndex", "Prints NonFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")
   .addParam("tokenindex", "NFI index")
   .setAction(async (taskArgs) => {
@@ -360,7 +398,7 @@ task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
     console.log("NFI label:", tokenLabel);
   });
 
-  task("tokenOfOwnerByIndex", "Prints NunFungible Identity Data.")
+  task("tokenOfOwnerByIndex", "Prints NonFungible Identity Data.")
   .addParam("registry", "Target NonFungle Registry Name.")
   .addParam("address", "asdf")
   .addParam("tokenindex", "NFI index")
@@ -423,7 +461,7 @@ task("transferEntryByTokenID", "Transfers a token to a specified participant.")
     console.log("New owner of NFI:", newTokenOwner);
   });
 
-task("burnRegistryEntry", "Prints NunFungible Identity Data.")
+task("burnRegistryEntry", "Prints NonFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")
   .addParam("tokenid", "token ID of the NFI.")
   .setAction(async (taskArgs) => {
