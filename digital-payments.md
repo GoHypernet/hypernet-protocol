@@ -12,7 +12,7 @@ integrates Connext's [Vector](https://github.com/connext/vector) payment channel
 with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The
 Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements
 of their particular business, and tools to streamline software integration. Meeting these needs has led to the development
-light-weight developer abstraction layer and an accompanying user interfact compenent library. Developer's are isolated 
+light-weight developer abstraction layer and an accompanying user interface component library. Developers are isolated 
 from the particulars of Layer 2 scaling protocols and are presented with a small set of function calls bundled together in 
 an npm package that looks familiar to those who have used a traditional payment service provider SDK.
 
@@ -24,7 +24,7 @@ This section discusses a few key concepts of how payments are implemented in the
 ### **Layer 1**
 
 This is an alternative name for a base-layer consensus network. Networks like Bitcoin, Ethereum, and Avalanche are examples of *layer 1* protocols. 
-The term layer 1 does not imply a particular ledger data structure, i.e, a layer 1 protocol could be either blockchain-based or based on a 
+The term layer 1 does not imply a particular ledger data structure, i.e., a layer 1 protocol could be either blockchain-based or based on a 
 directed acyclic graph (DAG) topology. 
 
 Though most of the payments and activity in the Hypernet Protocol payments stack occur at layer 2 (see below), Hypernet Core relies on layer 1 for 
@@ -52,7 +52,7 @@ Vector can be found at the below link.
 ### **Payment Channel**
 
 [Payment channels](https://dl.acm.org/doi/pdf/10.1145/3243734.3243856?casa_token=ySJOdlwgPCcAAAAA%3AnkfO9uHl7fZ-c7C0_L3xrQSHhujnqNIJgtkB7Gt2yE6MZV9145qbyHsGHQaSV1NGZBNousWk-wQ) 
-are a layer 2 technique that is a speciallization of state-channels. They are designed specifically for scaling trustless value transfers without having to submit 
+are a layer 2 technique that is a specialization of state-channels. They are designed specifically for scaling trustless value transfers without having to submit 
 transactions directly to a layer 1 network. This is accomplished via a two-party consensus protocol in which digital signatures are shared directly between two
 participants via a p2p communication layer. 
 
@@ -67,7 +67,7 @@ key).
 It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
 [Gateway registry](/packages/contracts/contracts/identity/README.md#gateways) in order for the Hypernet Core infrastructure to allow their service to process payments. 
 Registration requires locking in a significant amount of Hypertoken to the registry contract. This deposit will be forfeited in the scenario that the Hypernet DAO votes 
-to remove them from participating in the payment network due. The service provider can chose to recover their deposit by burning their registration and exiting the payment 
+to remove them from participating in the payment network due. The service provider choose to recover their deposit by burning their registration and exiting the payment 
 network.
 
 ## Hypernet Core as a _Serverless_ Payment Infrastructure Protocol
@@ -81,4 +81,4 @@ via a _routing node_ to the end participant.
 
 Though the routing node is an active participant in transfers, it has no knowledge of participant activity otherwise; it simply routes a payment from one person 
 to another. Importantly, routing nodes are never in custody of end user funds, and if they go (even permanently) offline, funds are not lost (though the end users 
-that had active payment channels open will have to submit a blockchain transaction in order to claim their funds; more on that in the payment channels section!)
+that had active payment channels open will have to submit a blockchain transaction to claim their funds; more on that in the payment channels section!)
