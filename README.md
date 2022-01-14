@@ -6,7 +6,7 @@
 
 ## Summary 
 
-The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based [payments](/digital-payments.md) with a privacy-preserving, 
+The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based [payments](/documentation/gitbook/digital-payments.md) with a privacy-preserving, 
 [sybil-resistant](https://en.wikipedia.org/wiki/Sybil_attack), "non-fungible" [identity registry framework](/packages/contracts/contracts/identity/README.md)
 that is governed by the Hypertoken community through a [Decentralized Autonomous Organization](/packages/contracts/contracts/governance/README.md). 
 The combination of these elements enables merchants to securely accept cyptocurrency payments in their traditional online 
