@@ -23,20 +23,30 @@ This section discusses a few key concepts of how payments are implemented in the
 
 ### **Layer 1**
 
-This is an alternative name for the base-layer consensus network (i.e. a blockchain or DAG network (directed acyclic graph)).
+This is an alternative name for a base-layer consensus network. Networks like Bitcoin, Ethereum, and Avalanche are examples of *layer 1* protocols. 
+The term layer 1 does not imply a particular ledger data structure, i.e, a layer 1 protocol could be either blockchain-based or based on a 
+directed acyclic graph (DAG) topology. 
 
 ### **Layer 2**
 
-Colloquial term for any technology that inherently derives its security from a Layer 1 network. Typically, Layer 2 technologies are designed to circumvent
-the throughput limitations of the Layer 1 network they are secured against and therefor are ofter referred to as off-chain scaling techniques. 
+This is a colloquial term for any technology that inherently derives its security from a Layer 1 network. Typically, Layer 2 technologies are designed to circumvent
+the throughput limitations of the layer 1 network they are secured against and therefor are ofter referred to as off-chain scaling techniques. Some communication
+layer 2 approaches include: [state-channels](https://ethereum.org/en/developers/docs/scaling/state-channels/), 
+[zk-rollups](https://ethereum.org/en/developers/docs/scaling/layer-2-rollups/#zk-video), [side-chains](https://ethereum.org/en/developers/docs/scaling/sidechains/#top), etc.
 
 ### **Payment Channel**
 
-A layer 2 technique designed specifically for scaling trustless value transfers without having to submit transactions directly to a layer 1 network.
+[Payment channels](https://dl.acm.org/doi/pdf/10.1145/3243734.3243856?casa_token=ySJOdlwgPCcAAAAA%3AnkfO9uHl7fZ-c7C0_L3xrQSHhujnqNIJgtkB7Gt2yE6MZV9145qbyHsGHQaSV1NGZBNousWk-wQ) 
+are a layer 2 technique that is a speciallization of state-channels. They are designed specifically for scaling trustless value transfers without having to submit 
+transactions directly to a layer 1 network. This is accomplished via a two-party consensus protocol in which digital signatures are shared directly between two
+participants via a p2p communication layer. 
 
 ### **Gateways**
 
-A *third-party* component built on top of the Hypernet Protocol primitives that manages Payment Channels and processes payments.
+Gateways are participants in the Hypernet Protocol payment network. They are *third-party* service providers built on top of the Hypernet Protocol primitives.
+Gateways manage payment channels and processes payments on behalf of end-users and merchants while never having custody of funds (Gateways never know a user's private
+key). It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
+[Gateway registry](/packages/contracts/contracts/identity/README.md#gateways) in order for the Hypernet Core infrastructure to allow their service to process payments. 
 
 ## Hypernet Core as a _Serverless_ Payment Infrastructure Protocol
 
