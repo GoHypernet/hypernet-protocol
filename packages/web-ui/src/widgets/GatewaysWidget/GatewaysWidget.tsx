@@ -1,21 +1,22 @@
-import React, { useState, ReactNode } from "react";
+import React, { useState, useEffect } from "react";
 
 import { Box, Avatar, Tooltip, Typography } from "@material-ui/core";
 import { Folder as FolderIcon, Block as BlockIcon } from "@material-ui/icons";
 import { Form, Formik } from "formik";
 
-import { GatewayUrl } from "@hypernetlabs/objects";
+import { GatewayRegistrationInfo, GatewayUrl } from "@hypernetlabs/objects";
 import {
   GovernanceEmptyState,
   GovernanceButton,
   GovernanceCard,
-  GovernanceField,
   List,
   ListItem,
+  GovernanceDialogSelectField,
 } from "@web-ui/components";
 import GatewayInfoModalWidget from "@web-ui/widgets/GatewayInfoModalWidget";
 import GatewayDeauthorizationModalWidget from "@web-ui/widgets/GatewayDeauthorizationModalWidget";
 import { useGateways } from "@web-ui/hooks";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRenderParams } from "@web-ui/interfaces";
 import { useStyles } from "@web-ui/widgets/GatewaysWidget/GatewaysWidget.style";
 import { HYPERPAY_LOGO_URL } from "@web-ui/constants";
@@ -29,9 +30,26 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
     useGateways();
   const classes = useStyles();
 
-  const [inputGatewayUrl, setInputGatewayUrl] = useState<GatewayUrl>(
-    GatewayUrl(""),
-  );
+  const { setLoading, handleCoreError } = useLayoutContext();
+  const { coreProxy } = useStoreContext();
+  const [gateways, setGateways] = useState<GatewayRegistrationInfo[]>([]);
+
+  useEffect(() => {
+    getGateways();
+  }, []);
+
+  const getGateways = () => {
+    setLoading(true);
+    coreProxy
+      .getGatewayEntryList()
+      .map((gatewayMap) => {
+        const gateways = [...gatewayMap.values()];
+        setGateways(gateways);
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
   const [selectedGatewayUrl, setSelectedGatewayUrl] = useState<GatewayUrl>(
     GatewayUrl(""),
   );
@@ -52,47 +70,6 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
 
   const gatewayDeauthorizationModalcloseCallback = () => {
     setSelectedDeauthorizedGatewayUrl(GatewayUrl(""));
-  };
-
-  const renderGatewayAuthorization = (): ReactNode => {
-    return (
-      <Formik
-        initialValues={{
-          inputGatewayUrl,
-        }}
-        onSubmit={() => {
-          authorizeGateway(inputGatewayUrl);
-          setInputGatewayUrl(GatewayUrl(""));
-        }}
-      >
-        {({ handleSubmit, values }) => {
-          if (values["inputGatewayUrl"] !== inputGatewayUrl) {
-            setInputGatewayUrl(GatewayUrl(values["inputGatewayUrl"]));
-          }
-          return (
-            <Form onSubmit={handleSubmit}>
-              <GovernanceField
-                required
-                name="inputGatewayUrl"
-                title="Gateway Url"
-                type="input"
-                placeholder="Type Gateway URL"
-              />
-
-              <GovernanceButton
-                fullWidth
-                color="primary"
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={!inputGatewayUrl}
-              >
-                Authorize
-              </GovernanceButton>
-            </Form>
-          );
-        }}
-      </Formik>
-    );
   };
 
   const hasEmptyState = [...gatewaysMap.keys()].length === 0 && !loading;
@@ -205,7 +182,45 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
           </List>
         </>
       )}
-      {renderGatewayAuthorization()}
+      <Formik
+        initialValues={{ gateway: "" }}
+        enableReinitialize
+        onSubmit={(values, { resetForm }) => {
+          if (values?.gateway) {
+            authorizeGateway(GatewayUrl(values.gateway), resetForm);
+          }
+        }}
+      >
+        {({ values, handleSubmit, setFieldValue }) => {
+          return (
+            <Form onSubmit={handleSubmit}>
+              <GovernanceDialogSelectField
+                required
+                dialogTitle="Select a Gateway"
+                name="gateway"
+                type="select"
+                options={gateways.map(({ url }) => ({
+                  primaryText: url,
+                  value: url,
+                }))}
+                fullWidth
+                handleChange={(gateway: GatewayUrl) => {
+                  setFieldValue("gateway", gateway);
+                }}
+              />
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={!values?.gateway}
+              >
+                Authorize
+              </GovernanceButton>
+            </Form>
+          );
+        }}
+      </Formik>
     </GovernanceCard>
   );
 };

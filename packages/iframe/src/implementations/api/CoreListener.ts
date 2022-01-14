@@ -20,6 +20,8 @@ import {
   RegistryTokenId,
   ProviderId,
   RegistryEntry,
+  LazyMintingSignature,
+  IpfsCID,
 } from "@hypernetlabs/objects";
 import {
   IIFrameCallData,
@@ -48,9 +50,44 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.initialize();
         }, data.callId);
       },
+      initializeRegistries: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.initializeRegistries();
+        }, data.callId);
+      },
+      initializeGovernance: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.initializeGovernance();
+        }, data.callId);
+      },
+      initializePayments: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.initializePayments();
+        }, data.callId);
+      },
+      getInitializationStatus: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getInitializationStatus();
+        }, data.callId);
+      },
       waitInitialized: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.waitInitialized();
+        }, data.callId);
+      },
+      waitRegistriesInitialized: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.waitRegistriesInitialized();
+        }, data.callId);
+      },
+      waitGovernanceInitialized: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.waitGovernanceInitialized();
+        }, data.callId);
+      },
+      waitPaymentsInitialized: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.waitPaymentsInitialized();
         }, data.callId);
       },
       getEthereumAccounts: (data: IIFrameCallData<void>) => {
@@ -190,6 +227,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getGatewayRegistrationInfo(data.data);
         }, data.callId);
       },
+      getGatewayEntryList: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getGatewayEntryList();
+        }, data.callId);
+      },
       providePrivateCredentials: (
         data: IIFrameCallData<{
           privateKey: string | null;
@@ -249,6 +291,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getProposalDetails: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
           return this.core.getProposalDetails(data.data);
+        }, data.callId);
+      },
+      getProposalDescription: (data: IIFrameCallData<IpfsCID>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalDescription(data.data);
         }, data.callId);
       },
       castVote: (
@@ -581,6 +628,51 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getBlockNumber();
         }, data.callId);
       },
+      getRegistryEntryListByUsername: (
+        data: IIFrameCallData<{
+          registryName: string;
+          username: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryEntryListByUsername(
+            data.data.registryName,
+            data.data.username,
+          );
+        }, data.callId);
+      },
+      submitLazyMintSignature: (
+        data: IIFrameCallData<{
+          registryName: string;
+          tokenId: RegistryTokenId;
+          ownerAddress: EthereumAccountAddress;
+          registrationData: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.submitLazyMintSignature(
+            data.data.registryName,
+            data.data.tokenId,
+            data.data.ownerAddress,
+            data.data.registrationData,
+          );
+        }, data.callId);
+      },
+      retrieveLazyMintingSignatures: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.retrieveLazyMintingSignatures();
+        }, data.callId);
+      },
+      executeLazyMint: (data: IIFrameCallData<LazyMintingSignature>) => {
+        this.returnForModel(() => {
+          return this.core.executeLazyMint(data.data);
+        }, data.callId);
+      },
+      revokeLazyMintSignature: (data: IIFrameCallData<LazyMintingSignature>) => {
+        this.returnForModel(() => {
+          return this.core.revokeLazyMintSignature(data.data);
+        }, data.callId);
+      },
     });
   }
 
@@ -589,6 +681,18 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     // to the parent when it is initialized; combining a few functions.
     this.core.waitInitialized().map(() => {
       parent.emit("initialized");
+    });
+
+    this.core.waitRegistriesInitialized().map(() => {
+      parent.emit("registriesInitialized");
+    });
+
+    this.core.waitGovernanceInitialized().map(() => {
+      parent.emit("governanceInitialized");
+    });
+
+    this.core.waitPaymentsInitialized().map(() => {
+      parent.emit("paymentsInitialized");
     });
 
     // We are going to relay the RXJS events

@@ -25,6 +25,7 @@ export interface GovernanceDialogSelectFieldProps extends FieldAttributes<any> {
   dialogTitle?: string;
   options?: IGovernanceDialogSelectFieldOption[];
   wrapperClassName?: string;
+  size?: "small" | "medium" | "large";
 }
 
 export interface IGovernanceDialogSelectFieldOption {
@@ -37,7 +38,8 @@ export interface IGovernanceDialogSelectFieldOption {
 
 export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldProps> =
   (props: GovernanceDialogSelectFieldProps) => {
-    const { title, dialogTitle, required, options, wrapperClassName } = props;
+    const { title, dialogTitle, required, options, wrapperClassName, size } =
+      props;
     const classes = useStyles({});
     const titleText = `${title}${required ? " *" : ""}`;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -65,7 +67,11 @@ export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldPr
             {({ field, form, meta }: FieldProps) => {
               return (
                 <>
-                  <Box className={classes.fieldTextWrapper}>
+                  <Box
+                    className={`${classes.fieldTextWrapper} ${
+                      size === "small" ? classes.smallFieldTextWrapper : ""
+                    }`}
+                  >
                     <Typography variant="body2">
                       {
                         options?.find((option) => option.value === field.value)

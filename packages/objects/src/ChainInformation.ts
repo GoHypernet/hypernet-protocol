@@ -1,5 +1,6 @@
 import { ChainId } from "@objects/ChainId";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
+import { RegistryModulesNames } from "@objects/RegistryModulesNames";
 import { ProviderUrl } from "@objects/ProviderUrl";
 
 export class ChainInformation {
@@ -19,7 +20,9 @@ export class ChainInformation {
     public liquidityRegistryAddress: EthereumContractAddress | null,
     public tokenRegistryAddress: EthereumContractAddress | null,
     public chainRegistryAddress: EthereumContractAddress | null,
-    public batchModuleAddress: EthereumContractAddress | null,
+    public hypernetProfileRegistryAddress: EthereumContractAddress | null,
+    public modulesRegistryAddress: EthereumContractAddress | null,
+    public registryModulesNames: RegistryModulesNames,
     public providerUrls: ProviderUrl[],
   ) {}
 }
@@ -41,7 +44,9 @@ export class GovernanceChainInformation extends ChainInformation {
     public liquidityRegistryAddress: EthereumContractAddress,
     public tokenRegistryAddress: EthereumContractAddress,
     public chainRegistryAddress: EthereumContractAddress,
-    public batchModuleAddress: EthereumContractAddress,
+    public hypernetProfileRegistryAddress: EthereumContractAddress,
+    public modulesRegistryAddress: EthereumContractAddress | null,
+    public registryModulesNames: RegistryModulesNames,
     public providerUrls: ProviderUrl[],
   ) {
     super(
@@ -60,7 +65,9 @@ export class GovernanceChainInformation extends ChainInformation {
       liquidityRegistryAddress,
       tokenRegistryAddress,
       chainRegistryAddress,
-      batchModuleAddress,
+      hypernetProfileRegistryAddress,
+      modulesRegistryAddress,
+      registryModulesNames,
       providerUrls,
     );
   }

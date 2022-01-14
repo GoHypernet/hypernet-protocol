@@ -17,7 +17,7 @@ const HypertokenBalanceWidget: React.FC<HypertokenBalanceWidgetParams> = () => {
   useEffect(() => {
     setLoading(true);
     coreProxy
-      .waitInitialized()
+      .waitGovernanceInitialized()
       .map(() => {
         coreProxy
           .getEthereumAccounts()

@@ -1,1 +1,1 @@
-export { default } from "@web-integration/pages/Governance/Proposals/Proposals";
+export { default } from "@user-dashboard/pages/Governance/Proposals/Proposals";

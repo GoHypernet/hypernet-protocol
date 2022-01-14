@@ -62,7 +62,7 @@ contract Vester {
             amount = vestingAmount.mul(block.timestamp - lastUpdate).div(vestingEnd - vestingBegin);
             lastUpdate = block.timestamp;
         }
-        IHypertoken(h).transfer(recipient, amount);
+        require(IHypertoken(h).transfer(recipient, amount), "Vester::claim: token transfer failed");
     }
 }
 

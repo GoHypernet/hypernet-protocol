@@ -16,6 +16,7 @@ export interface IRenderParams {
   excludeCardWrapper?: boolean;
   bodyStyle?: React.CSSProperties;
   closeCallback?: () => void;
+  hideLoadingSpinner?: boolean;
 }
 
 export interface IConnectorAuthorizationFlowParams extends IRenderParams {
@@ -60,6 +61,7 @@ export interface IProposalCreateWidgetParams extends IRenderParams {
 export interface IRegistryListWidgetParams extends IRenderParams {
   onRegistryEntryListNavigate?: (registryName: string) => void;
   onRegistryDetailNavigate?: (registryName: string) => void;
+  onLazyMintRequestsNavigate?: () => void;
 }
 
 export interface IRegistryEntryListWidgetParams extends IRenderParams {
@@ -134,4 +136,7 @@ export interface IHypernetWebUI {
     params?: IRenderParams,
   ): Result<void, RenderError>;
   renderWalletConnectWidget(config: IRenderParams): Result<void, RenderError>;
+  renderRegistryLazyMintingRequestsWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError>;
 }

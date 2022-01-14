@@ -40,18 +40,23 @@ export const GovernanceAutocomplete: React.FC<IGovernanceAutocompleteProps> = ({
     <Autocomplete
       options={options}
       multiple={multiple}
-      disableCloseOnSelect
-      renderOption={(option, { selected }) => (
-        <>
-          <GovernanceCheckbox
-            size="small"
-            color="primary"
-            className={classes.checkbox}
-            checked={selected}
-          />
-          {option.label}
-        </>
-      )}
+      disableCloseOnSelect={multiple}
+      disableClearable={!multiple}
+      renderOption={(option, { selected }) =>
+        multiple ? (
+          <>
+            <GovernanceCheckbox
+              size="small"
+              color="primary"
+              className={classes.checkbox}
+              checked={selected}
+            />
+            {option.label}
+          </>
+        ) : (
+          option.label
+        )
+      }
       getOptionLabel={(option) => option.label}
       ChipProps={{
         deleteIcon: <CloseIcon />,

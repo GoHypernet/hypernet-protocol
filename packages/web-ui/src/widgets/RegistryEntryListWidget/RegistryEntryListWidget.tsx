@@ -1,3 +1,5 @@
+import React, { useEffect, useState, useMemo } from "react";
+import { Form, Formik } from "formik";
 import {
   ERegistrySortOrder,
   EthereumAccountAddress,
@@ -7,7 +9,6 @@ import {
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
-import React, { useEffect, useState, useMemo } from "react";
 
 import {
   GovernanceRegistryListItem,
@@ -17,17 +18,25 @@ import {
   GovernanceSwitch,
   IHeaderAction,
   GovernanceSearchFilter,
+  GovernanceDialogSelectField,
 } from "@web-ui/components";
 import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import CreateBatchIdentityWidget from "@web-ui/widgets/CreateBatchIdentityWidget";
+import { useStyles } from "@web-ui/widgets/RegistryEntryListWidget/RegistryEntryListWidget.style";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
+
+enum ERegistryEntrySearchBy {
+  OWNER_ADDRESS,
+  USERNAME,
+}
 
 const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   onRegistryEntryDetailsNavigate,
   onRegistryListNavigate,
   registryName,
 }: IRegistryEntryListWidgetParams) => {
+  const classes = useStyles();
   const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
@@ -37,27 +46,31 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   );
   const [reversedSortingEnabled, setReversedSortingEnabled] =
     useState<boolean>(false);
-
   const [createIdentityModalOpen, setCreateIdentityModalOpen] =
     useState<boolean>(false);
   const [createBatchIdentityModalOpen, setCreateBatchIdentityModalOpen] =
     useState<boolean>(false);
-
+  const [lazyMintModeEnabled, setLazyMintModeEnabled] =
+    useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [registryFetched, setRegistryFetched] = useState<boolean>(false);
 
   useEffect(() => {
     getRegistry();
   }, []);
 
   useEffect(() => {
-    if (registry?.numberOfEntries) {
+    if (registry?.numberOfEntries && registryFetched) {
       getRegistryEntries(page);
     }
   }, [registry?.numberOfEntries, page, REGISTRY_ENTRIES_PER_PAGE]);
 
   useEffect(() => {
-    getRegistryEntries(1);
+    if (registryFetched) {
+      getRegistryEntries(1);
+    }
   }, [reversedSortingEnabled]);
 
   useEffect(() => {
@@ -72,6 +85,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .getRegistryByName([registryName])
       .map((registryMap) => {
         const registry = registryMap.get(registryName);
+        setRegistryFetched(true);
         setRegistry(registry);
         setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
@@ -117,7 +131,22 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const canCreateNewBatchRegistryEntry =
       isRegistrar && registry?.modulesCapability.batchMintEnabled;
 
+    const cansubmitLazyMintSignature =
+      isRegistrar && registry?.modulesCapability.lazyMintEnabled;
+
     let headerActions: IHeaderAction[] = [];
+
+    if (cansubmitLazyMintSignature) {
+      headerActions.push({
+        label: "Lazy Mint Identity",
+        onClick: () => {
+          setCreateIdentityModalOpen(true);
+          setLazyMintModeEnabled(true);
+        },
+        variant: "contained",
+        color: "primary",
+      });
+    }
 
     if (canCreateNewBatchRegistryEntry) {
       headerActions.push({
@@ -131,7 +160,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     if (canCreateNewRegistryEntry) {
       headerActions.push({
         label: "Create New Identity",
-        onClick: () => setCreateIdentityModalOpen(true),
+        onClick: () => {
+          setCreateIdentityModalOpen(true);
+          setLazyMintModeEnabled(false);
+        },
         variant: "contained",
         color: "primary",
       });
@@ -140,8 +172,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     return headerActions;
   };
 
-  const onSearchClick = (value) => {
+  const onSearchByOwnerAddressClick = (value) => {
     setLoading(true);
+    setSearchTerm(value);
     coreProxy
       .getRegistryEntryListByOwnerAddress(
         registryName,
@@ -152,11 +185,42 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         setPage(1);
         setLoading(false);
       })
-      .mapErr(handleCoreError);
+      .mapErr(handleSearchError);
   };
 
+  const onSearchByUsernameClick = (value) => {
+    setLoading(true);
+    setSearchTerm(value);
+    coreProxy
+      .getRegistryEntryListByUsername(registryName, value)
+      .map((registryEntries) => {
+        setRegistryEntries(registryEntries);
+        setPage(1);
+        setLoading(false);
+      })
+      .mapErr(handleSearchError);
+  };
+
+  const handleSearchError = (err: any) => {
+    console.error(err);
+    setRegistryEntries([]);
+    setLoading(false);
+  };
+
+  const hasEmptyFilterResult = useMemo(
+    () => searchTerm && !registryEntries.length,
+    [searchTerm, JSON.stringify(registryEntries)],
+  );
+
   const onRestartClick = () => {
+    setSearchTerm("");
     getRegistryEntries(1);
+  };
+
+  const handleIdentityCallback = () => {
+    getRegistry();
+    setLazyMintModeEnabled(false);
+    setCreateIdentityModalOpen(false);
   };
 
   return (
@@ -171,22 +235,55 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         }}
         headerActions={getHeaderActions()}
         bottomContent={
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            width="100%"
-          >
-            <Box>
-              <GovernanceSearchFilter
-                title="Search for owner address"
-                placeholder="Search for owner address"
-                onSearchClick={onSearchClick}
-                onRestartClick={onRestartClick}
-              />
-            </Box>
-            <Box display="flex" alignItems="center">
-              <Typography style={{ paddingRight: 5 }}>
+          <Box className={classes.headerBottomContentWrapper}>
+            <Formik
+              initialValues={{
+                searchBy: ERegistryEntrySearchBy.OWNER_ADDRESS,
+              }}
+              onSubmit={() => {}}
+            >
+              {({ handleSubmit, values }) => {
+                return (
+                  <Form onSubmit={handleSubmit} className={classes.searchForm}>
+                    <GovernanceDialogSelectField
+                      title="Search By"
+                      size="small"
+                      name="searchBy"
+                      wrapperClassName={classes.searchBySelectWrapper}
+                      options={[
+                        {
+                          primaryText: "Owner Address",
+                          value: ERegistryEntrySearchBy.OWNER_ADDRESS,
+                        },
+                        {
+                          primaryText: "Username",
+                          value: ERegistryEntrySearchBy.USERNAME,
+                        },
+                      ]}
+                    />
+                    <Box className={classes.searchFilterWrapper}>
+                      {values.searchBy === ERegistryEntrySearchBy.USERNAME ? (
+                        <GovernanceSearchFilter
+                          title="Search by username"
+                          placeholder="Search by username"
+                          onSearchClick={onSearchByUsernameClick}
+                          onRestartClick={onRestartClick}
+                        />
+                      ) : (
+                        <GovernanceSearchFilter
+                          title="Search by owner address"
+                          placeholder="Search by owner address"
+                          onSearchClick={onSearchByOwnerAddressClick}
+                          onRestartClick={onRestartClick}
+                        />
+                      )}
+                    </Box>
+                  </Form>
+                );
+              }}
+            </Formik>
+            <Box className={classes.sortWrapper}>
+              <Typography className={classes.reverseSortLabel}>
                 Reverse sorting
               </Typography>
               <GovernanceSwitch
@@ -199,14 +296,18 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           </Box>
         }
       />
-
       {hasEmptyState && (
         <GovernanceEmptyState
           title="No registiry entries found."
           description="Registiry entries submitted by community members will appear here."
         />
       )}
-
+      {hasEmptyFilterResult && (
+        <GovernanceEmptyState
+          title="No registiry entries found."
+          description="This filter/search returned no registry entries submitted by community members."
+        />
+      )}
       {registryEntries.map((registryEntry) => (
         <GovernanceRegistryListItem
           key={registryEntry.label}
@@ -249,7 +350,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           })}
         />
       ))}
-      {!!registry?.numberOfEntries && (
+      {!!registry?.numberOfEntries && !searchTerm && (
         <GovernancePagination
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,
@@ -263,10 +364,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       )}
       {createIdentityModalOpen && (
         <CreateIdentityWidget
-          onCloseCallback={() => {
-            getRegistry();
-            setCreateIdentityModalOpen(false);
-          }}
+          onCloseCallback={handleIdentityCallback}
+          lazyMintModeEnabled={lazyMintModeEnabled}
           registryName={registryName}
           currentAccountAddress={accountAddress}
         />

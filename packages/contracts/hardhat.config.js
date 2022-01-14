@@ -52,18 +52,38 @@ module.exports = {
         mnemonic,
       },
       chainId: 31337,
-      url: 'http://127.0.0.1:8545'
+      url: "http://127.0.0.1:8569",
     },
+    halfdev: {
+        accounts: {
+          accountsBalance: "10000000000000000000000",
+          mnemonic,
+        },
+        chainId: 31337,
+        url: 'http://127.0.0.1:8569'
+      },
     DevNet: {
       accounts: {
         mnemonic,
       },
       url: "https://eth-provider-dev.hypernetlabs.io",
     },
-    rinkeby: {
+    rinkeby: { // ethereum tesnet
       accounts: { mnemonic },
       chainId: 4,
       url: urlOverride || "http://localhost:8545",
+    },
+    mumbai: { // polygon testnet
+        accounts: { mnemonic },
+        chainId: 80001,
+        url: urlOverride || "https://rpc-mumbai.maticvigil.com",
+        gas: 6000000,
+        gasPrice: 8000000000
+    },
+    fuji: { // avalanche testnet
+        accounts: { mnemonic },
+        chainId: 43113,
+        url: urlOverride || "https://api.avax-test.network/ext/bc/C/rpc",
     },
   },
   gasReporter: {

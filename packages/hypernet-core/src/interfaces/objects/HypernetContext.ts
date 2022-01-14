@@ -9,6 +9,7 @@ import {
   ActiveStateChannel,
   ChainId,
   EthereumAccountAddress,
+  InitializeStatus,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -20,6 +21,7 @@ export class HypernetContext {
     public publicIdentifier: PublicIdentifier | null,
     public activeStateChannels: ActiveStateChannel[] | null,
     public inControl: boolean,
+    public initializeStatus: InitializeStatus,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
     public onPushPaymentSent: Subject<PushPayment>,
@@ -65,6 +67,7 @@ export class InitializedHypernetContext {
     public publicIdentifier: PublicIdentifier,
     public activeStateChannels: ActiveStateChannel[],
     public inControl: boolean,
+    public initializeStatus: InitializeStatus,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
     public onPushPaymentSent: Subject<PushPayment>,

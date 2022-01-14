@@ -36,6 +36,9 @@ import {
   PaymentCreationError,
   InactiveGatewayError,
   BatchModuleContractError,
+  LazyMintModuleContractError,
+  IPFSUnavailableError,
+  CoreInitializationErrors,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
@@ -59,15 +62,30 @@ import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
+import { IpfsCID } from "@objects/IpfsCID";
+import { InitializeStatus } from "@web-integration/InitializeStatus";
+import { LazyMintingSignature } from "@web-integration/LazyMintingSignature";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): Result<boolean, never>;
+  initialized(): ResultAsync<boolean, never>;
 
   waitInitialized(): ResultAsync<void, never>;
+
+  registriesInitialized(): Result<boolean, never>;
+
+  waitRegistriesInitialized(): ResultAsync<void, never>;
+
+  governanceInitialized(): Result<boolean, never>;
+
+  waitGovernanceInitialized(): ResultAsync<void, never>;
+
+  paymentsInitialized(): Result<boolean, never>;
+
+  waitPaymentsInitialized(): ResultAsync<void, never>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
@@ -88,26 +106,29 @@ export interface IHypernetCore {
    * hypernet core will be representing.
    * @param account The address that says who this instance of HypernetCore is representing.
    */
-  initialize(): ResultAsync<
+  initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors>;
+
+  initializeRegistries(): ResultAsync<
     void,
-    | MessagingError
-    | BlockchainUnavailableError
-    | VectorError
-    | RouterChannelUnknownError
-    | GatewayConnectorError
-    | GatewayValidationError
-    | PersistenceError
-    | ProxyError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | InvalidPaymentIdError
     | GovernanceSignerUnavailableError
-    | TransferResolutionError
-    | TransferCreationError
-    | PaymentStakeError
-    | PaymentFinalizeError
-    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | IPFSUnavailableError
+    | ProxyError
   >;
+
+  initializeGovernance(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | IPFSUnavailableError
+    | ProxyError
+  >;
+
+  initializePayments(): ResultAsync<void, CoreInitializationErrors>;
+
+  getInitializationStatus(): ResultAsync<InitializeStatus, ProxyError>;
 
   /**
    * Gets the public id of the Hypernet Core user account. If the core is not initialized,
@@ -345,6 +366,14 @@ export interface IHypernetCore {
     PersistenceError | VectorError | ProxyError
   >;
 
+  /**
+   * Returns a map of all gateways from the gateway registry
+   */
+  getGatewayEntryList(): ResultAsync<
+    Map<GatewayUrl, GatewayRegistrationInfo>,
+    NonFungibleRegistryContractError | ProxyError
+  >;
+
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
@@ -395,7 +424,10 @@ export interface IHypernetCore {
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
+  ): ResultAsync<
+    Proposal,
+    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+  >;
 
   delegateVote(
     delegateAddress: EthereumAccountAddress,
@@ -405,6 +437,13 @@ export interface IHypernetCore {
   getProposalDetails(
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
+
+  getProposalDescription(
+    descriptionHash: IpfsCID,
+  ): ResultAsync<
+    string,
+    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+  >;
 
   castVote(
     proposalId: string,
@@ -664,7 +703,7 @@ export interface IHypernetCore {
 
   getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError | ProxyError
+    NonFungibleRegistryContractError | ProxyError
   >;
 
   createBatchRegistryEntry(
@@ -684,6 +723,55 @@ export interface IHypernetCore {
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  >;
+
+  submitLazyMintSignature(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
+    | ProxyError
+  >;
+
+  getRegistryEntryListByUsername(
+    registryName: string,
+    username: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
+  >;
+
+  retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError | ProxyError
+  >;
+
+  executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+    | ProxyError
+  >;
+
+  revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
   >;
 
   /**

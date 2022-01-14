@@ -13,6 +13,8 @@ export interface IViewUtils {
   fromPaymentState(state: EPaymentState): string;
   fromPaymentStateColor(state: EPaymentState): string;
   getPaymentStateOptions(): PaymentStateOption[];
+  getProposalName(description: string): string;
+  getProposalDescriptionHash(description: string): string
   convertToBigNumber(value: number | string): BigNumber;
   isZeroAddress(
     address: EthereumAccountAddress | EthereumContractAddress,

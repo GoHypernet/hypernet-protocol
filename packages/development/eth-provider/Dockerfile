@@ -18,5 +18,8 @@ COPY HypernetGovernor/HypernetGovernor.json artifacts/src.sol/testing/HypernetGo
 COPY UpgradeableRegistryFactory/UpgradeableRegistryFactory.json artifacts/src.sol/testing/UpgradeableRegistryFactory.sol/
 COPY NonFungibleRegistryEnumerableUpgradeable/NonFungibleRegistryEnumerableUpgradeable.json artifacts/src.sol/testing/NonFungibleRegistryEnumerableUpgradeable.sol/
 COPY NonFungibleRegistryUpgradeable/NonFungibleRegistryUpgradeable.json artifacts/src.sol/testing/NonFungibleRegistryUpgradeable.sol/
+COPY BatchModule/BatchModule.json artifacts/src.sol/testing/BatchModule.sol/
+COPY LazyMintModule/LazyMintModule.json artifacts/src.sol/testing/LazyMintModule.sol/
+COPY MerkleModule/MerkleModule.json artifacts/src.sol/testing/MerkleModule.sol/
 COPY src.ts/ src.ts/
 EXPOSE 8545

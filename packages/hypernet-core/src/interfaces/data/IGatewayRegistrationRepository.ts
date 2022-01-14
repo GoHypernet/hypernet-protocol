@@ -19,6 +19,14 @@ export interface IGatewayRegistrationRepository {
     NonFungibleRegistryContractError
   >;
 
+  /**
+   * Returns a map of all gateway URLs to their registration information
+   */
+  getGatewayEntryList(): ResultAsync<
+    Map<GatewayUrl, GatewayRegistrationInfo>,
+    NonFungibleRegistryContractError
+  >;
+
   getFilteredGatewayRegistrationInfo(
     filter?: GatewayRegistrationFilter,
   ): ResultAsync<GatewayRegistrationInfo[], PersistenceError>;

@@ -2,8 +2,7 @@ import {
   AuthorizedGatewaysSchema,
   ChainId,
   ChainInformation,
-  DefinitionName,
-  SchemaUrl,
+  LazyMintingSignatureSchema,
 } from "@hypernetlabs/objects";
 import { HypernetConfig } from "@interfaces/objects";
 import {
@@ -33,18 +32,29 @@ export class ConfigProviderMock implements IConfigProvider {
         "natsUrl", // natsUrl
         "authUrl", // authUrl
         "gatewayIframeUrl", // gatewayIframeUrl
-        "https://ceramic-clay.3boxlabs.com", // ceramicNodeUrl
-        new Map([
-          [
-            DefinitionName(AuthorizedGatewaysSchema.title),
-            SchemaUrl(
-              "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
-            ),
-          ],
-        ]), // storageAliases
+        "https://clay.ceramic.hypernet.foundation", // ceramicNodeUrl
+        {
+          definitions: {
+            [AuthorizedGatewaysSchema.title]:
+              "kjzl6cwe1jw148xm690vbhrn5fwiiqjm4kmvnb8jzhktzdh3tcztzwuxoi8hl5n",
+            [LazyMintingSignatureSchema.title]:
+              "kjzl6cwe1jw145oxq649aslc8hk4zzz52yvyy7rugfx0qme25ksfzq3l93rdea5",
+          },
+          schemas: {
+            [AuthorizedGatewaysSchema.title]:
+              "ceramic://k3y52l7qbv1frycmgeghbfxd4qqh718tp4s2fd7wnmz5vhy7f3lvhcvl1w2lggglc",
+            [LazyMintingSignatureSchema.title]:
+              "ceramic://k3y52l7qbv1fryju2t19l5gbemvmtuk6mzpfpyamyy1g45mad0b6yukp38gdxmdj4",
+          },
+          tiles: {},
+        }, // ceramicDataModel
         5 * 1000, // gatewayDeauthorizationTimeout
         "HypernetProtocolControlClaims", // controlClaimSubject
         false, // requireOnline
+        true,
+        true,
+        "ipfsApiUrl",
+        "ipfsGatewayUrl",
         false, // debug is off for testing
       );
   }

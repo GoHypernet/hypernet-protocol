@@ -5,6 +5,7 @@ import {
 } from "@objects/ChainInformation";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { ProviderUrl } from "@objects/ProviderUrl";
+import { RegistryModulesNames } from "@objects/RegistryModulesNames";
 
 export const chainConfig = new Map<ChainId, ChainInformation>([
   [
@@ -25,7 +26,9 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // liquidityRegistry
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
-      EthereumContractAddress("0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"), // batchModuleAddress
+      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
+      EthereumContractAddress("0xbb55fe723929CcB45a12C03fc91EBeD5407C8a6A"), // modulesRegistry
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("http://localhost:8545")],
     ),
   ],
@@ -43,11 +46,13 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4"), // parameterizedTransfer
       EthereumContractAddress("0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"), // hypernetGovernor
       EthereumContractAddress("0x610178dA211FEF7D417bC0e6FeD39F05609AD788"), // registryFactory
-      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // gatewayRegistry
-      EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // liquidityRegistry
+      EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // gatewayRegistry
+      EthereumContractAddress("0x29A5Df5784eC1e58a03557e825470A217534C816"), // liquidityRegistry
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
-      EthereumContractAddress("0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"), // batchModuleAddress
+      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
+      EthereumContractAddress("0xbb55fe723929CcB45a12C03fc91EBeD5407C8a6A"), // modulesRegistry
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("http://localhost:8545")],
     ),
   ],
@@ -67,9 +72,11 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"), // registryFactory
       EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // gatewayRegistry
       EthereumContractAddress("0x29A5Df5784eC1e58a03557e825470A217534C816"), // liquidityRegistry
-      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // tokenRegistry
+      EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0xCdFa906b330485021fD37d5E3Ceab4F11D5101c6"), // chainRegistry
-      EthereumContractAddress("TODO"), // batchModuleAddress
+      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
+      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // modulesRegistry
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("https://eth-provider-dev.hypernetlabs.io")],
     ),
   ],
@@ -91,7 +98,9 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0xc616c67f9c680E662103b26cEfFcC70a121CD5d5"), // liquidityRegistry
       EthereumContractAddress("0x4BE5BA85859B124a52fBE822d042AcdCd3b4eC4D"), // tokenRegistry
       EthereumContractAddress("TODO"), // chainRegistry
-      EthereumContractAddress("TODO"), // batchModuleAddress
+      EthereumContractAddress("0x6c355Ad248477eeDcadf1d6724154C6152C0edca"), // hypernetProfileRegistry
+      EthereumContractAddress("0xfEb1CA801C76Fd1b81b851C7E6d2544ce9DAdCA8"), // modulesRegistry
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("https://rinkeby.hypernet.foundation")],
     ),
   ],
@@ -113,7 +122,9 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // liquidityRegistry
       EthereumContractAddress("TODO"), // tokenRegistry
       EthereumContractAddress("TODO"), // chainRegistry
-      EthereumContractAddress("TODO"), // batchModuleAddress
+      EthereumContractAddress("T0D0"), // hypernetProfileRegistry
+      EthereumContractAddress("TODO"), // modulesRegistry
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("https://mainnet.hypernet.foundation")],
     ),
   ],

@@ -59,6 +59,11 @@ import {
   InactiveGatewayError,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
+  InitializeStatus,
+  CoreInitializationErrors,
+  LazyMintingSignature,
+  IPFSUnavailableError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -134,7 +139,7 @@ import {
   IRegistryRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
-import { ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
 import { StorageUtils } from "@implementations/data/utilities";
@@ -151,6 +156,8 @@ import {
   CeramicUtils,
   MessagingProvider,
   BlockchainTimeUtils,
+  DIDDataStoreProvider,
+  IPFSUtils,
 } from "@implementations/utilities";
 import {
   GatewayConnectorProxyFactory,
@@ -172,6 +179,8 @@ import {
   ICeramicUtils,
   IMessagingProvider,
   IBlockchainTimeUtils,
+  IDIDDataStoreProvider,
+  IIPFSUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -241,12 +250,14 @@ export class HypernetCore implements IHypernetCore {
   protected vectorUtils: IVectorUtils;
   protected paymentUtils: IPaymentUtils;
   protected ceramicUtils: ICeramicUtils;
+  protected ipfsUtils: IIPFSUtils;
 
   // Factories
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
   protected nonFungibleRegistryContractFactory: INonFungibleRegistryContractFactory;
+  protected didDataStoreProvider: IDIDDataStoreProvider;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -278,28 +289,25 @@ export class HypernetCore implements IHypernetCore {
   protected blockchainListener: IBlockchainListener;
 
   protected _initializeResult: ResultAsync<
-    void,
-    | MessagingError
-    | BlockchainUnavailableError
-    | VectorError
-    | RouterChannelUnknownError
-    | GatewayConnectorError
-    | GatewayValidationError
-    | ProxyError
-    | PersistenceError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | InvalidPaymentIdError
-    | GovernanceSignerUnavailableError
-    | TransferResolutionError
-    | TransferCreationError
-    | PaymentStakeError
-    | PaymentFinalizeError
-    | NonFungibleRegistryContractError
+    InitializeStatus,
+    CoreInitializationErrors
   > | null;
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
   protected _initializePromiseResolve: (() => void) | null;
+
+  protected _registriesInitialized: boolean;
+  protected _registriesInitializePromise: Promise<void>;
+  protected _registriesInitializePromiseResolve: (() => void) | null;
+
+  protected _governanceInitialized: boolean;
+  protected _governanceInitializePromise: Promise<void>;
+  protected _governanceInitializePromiseResolve: (() => void) | null;
+
+  protected _paymentsInitialized: boolean;
+  protected _paymentsInitializePromise: Promise<void>;
+  protected _paymentsInitializePromiseResolve: (() => void) | null;
+
   protected _inControl: boolean;
 
   /**
@@ -440,10 +448,16 @@ export class HypernetCore implements IHypernetCore {
       this.browserNodeFactory,
     );
 
-    this.ceramicUtils = new CeramicUtils(
+    this.didDataStoreProvider = new DIDDataStoreProvider(
       this.configProvider,
       this.contextProvider,
       this.browserNodeProvider,
+      this.logUtils,
+    );
+
+    this.ceramicUtils = new CeramicUtils(
+      this.contextProvider,
+      this.didDataStoreProvider,
       this.logUtils,
     );
 
@@ -475,6 +489,12 @@ export class HypernetCore implements IHypernetCore {
       this.vectorUtils,
       this.browserNodeProvider,
       this.timeUtils,
+    );
+
+    this.ipfsUtils = new IPFSUtils(
+      this.configProvider,
+      this.localStorageUtils,
+      this.logUtils,
     );
 
     this.messagingProvider = new MessagingProvider(
@@ -545,11 +565,13 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.configProvider,
       this.logUtils,
+      this.ipfsUtils,
     );
 
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
       this.configProvider,
+      this.didDataStoreProvider,
       this.logUtils,
     );
 
@@ -644,17 +666,91 @@ export class HypernetCore implements IHypernetCore {
     this._initializePromise = new Promise((resolve) => {
       this._initializePromiseResolve = resolve;
     });
+
+    this._registriesInitialized = false;
+    this._registriesInitializePromiseResolve = null;
+    this._registriesInitializePromise = new Promise((resolve) => {
+      this._registriesInitializePromiseResolve = resolve;
+    });
+
+    this._governanceInitialized = false;
+    this._governanceInitializePromiseResolve = null;
+    this._governanceInitializePromise = new Promise((resolve) => {
+      this._governanceInitializePromiseResolve = resolve;
+    });
+
+    this._paymentsInitialized = false;
+    this._paymentsInitializePromiseResolve = null;
+    this._paymentsInitializePromise = new Promise((resolve) => {
+      this._paymentsInitializePromiseResolve = resolve;
+    });
   }
 
   /**
    * Returns the initialized status of this instance of Hypernet Core.
    */
-  public initialized(): Result<boolean, never> {
-    return ok(this._initialized);
+  public initialized(): ResultAsync<boolean, never> {
+    return this.configProvider.getConfig().andThen((config) => {
+      if (
+        config.governanceRequired == true &&
+        config.paymentsRequired == true
+      ) {
+        return ok(this._governanceInitialized && this._paymentsInitialized);
+      } else {
+        return ok(this._governanceInitialized || this._paymentsInitialized);
+      }
+    });
   }
 
   public waitInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._initializePromise);
+    return this.configProvider.getConfig().andThen((config) => {
+      if (
+        config.governanceRequired == true &&
+        config.paymentsRequired == true
+      ) {
+        return ResultUtils.combine([
+          ResultAsync.fromSafePromise<void, never>(
+            this._governanceInitializePromise,
+          ),
+          ResultAsync.fromSafePromise<void, never>(
+            this._paymentsInitializePromise,
+          ),
+        ]).map(() => {});
+      } else {
+        return ResultUtils.race([
+          ResultAsync.fromSafePromise<void, never>(
+            this._governanceInitializePromise,
+          ),
+          ResultAsync.fromSafePromise<void, never>(
+            this._paymentsInitializePromise,
+          ),
+        ]).map(() => {});
+      }
+    });
+  }
+
+  public registriesInitialized(): Result<boolean, never> {
+    return ok(this._registriesInitialized);
+  }
+
+  public waitRegistriesInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._registriesInitializePromise);
+  }
+
+  public governanceInitialized(): Result<boolean, never> {
+    return ok(this._governanceInitialized);
+  }
+
+  public waitGovernanceInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._governanceInitializePromise);
+  }
+
+  public paymentsInitialized(): Result<boolean, never> {
+    return ok(this._paymentsInitialized);
+  }
+
+  public waitPaymentsInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._paymentsInitializePromise);
   }
 
   /**
@@ -730,7 +826,6 @@ export class HypernetCore implements IHypernetCore {
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
-    // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
     return this.accountService
       .depositFunds(channelAddress, assetAddress, amount)
       .mapErr((e) => {
@@ -866,159 +961,227 @@ export class HypernetCore implements IHypernetCore {
 
   /**
    * Initialize this instance of Hypernet Core
-   * @param account: the ethereum account to initialize with
    */
-  public initialize(): ResultAsync<
-    void,
-    | MessagingError
-    | BlockchainUnavailableError
-    | VectorError
-    | RouterChannelUnknownError
-    | GatewayConnectorError
-    | GatewayValidationError
-    | PersistenceError
-    | ProxyError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | InvalidPaymentIdError
-    | GovernanceSignerUnavailableError
-    | TransferResolutionError
-    | TransferCreationError
-    | PaymentStakeError
-    | PaymentFinalizeError
-    | NonFungibleRegistryContractError
-  > {
+  public initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors> {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }
 
-    this.logUtils.debug(`Initializing Hypernet Protocol Core`);
+    this._initializeResult = ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+      this.initializeRegistries(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      this.logUtils.debug(`Initializing Hypernet Protocol Core`);
 
-    let context: HypernetContext;
-    this._initializeResult = this.blockchainProvider
-      .initialize()
-      .andThen(() => {
-        // Get the config
-        return this.configProvider.getConfig();
-      })
-      .andThen((config) => {
-        this.logUtils.debug("Getting Ethereum accounts");
-        return (
-          ResultUtils.combine([
-            this.contextProvider.getContext(),
-            this.accountRepository.getAccounts(),
-          ])
-            .andThen((vals) => {
-              context = vals[0];
-              const accounts = vals[1];
-              context.account = accounts[0];
-              this.logUtils.debug(`Obtained accounts: ${accounts}`);
-              return this.contextProvider.setContext(context);
-            })
-            .andThen(() => {
-              return this.ceramicUtils.initialize();
-            })
-            .andThen(() => {
-              // Initialize governance provider with contracts
-              return ResultUtils.combine([
-                this.registryRepository.initializeReadOnly(),
-                this.governanceRepository.initializeReadOnly(),
-              ]);
-            })
-            .andThen(() => {
-              // Initialize governance signer with contracts
-              return ResultUtils.combine([
-                this.registryRepository.initializeForWrite(),
-                this.governanceRepository.initializeForWrite(),
-                this.tokenInformationRepository.initialize(
-                  config.governanceChainInformation.tokenRegistryAddress,
-                ),
-              ])
-                .map(() => {})
-                .orElse((e) => {
-                  this.logUtils.error(e);
-                  return okAsync(undefined);
-                });
-            })
-            .andThen(() => {
-              return ResultUtils.combine([
-                this.accountRepository.getPublicIdentifier(),
-                this.accountRepository.getActiveStateChannels(),
-              ]);
-            })
-            .andThen((vals) => {
-              const [publicIdentifier, activeStateChannels] = vals;
-
-              this.logUtils.debug(
-                `Obtained active state channels: ${activeStateChannels}`,
-              );
-
-              context.publicIdentifier = publicIdentifier;
-              context.activeStateChannels = activeStateChannels;
-
-              return this.contextProvider.setContext(context);
-            })
-            .andThen(() => {
-              // By doing some active initialization, we can avoid whole categories
-              // of errors occuring post-initialization (ie, runtime), which makes the
-              // whole thing more reliable in operation.
-              this.logUtils.debug("Initializing utilities");
-              this.logUtils.debug("Initializing services");
-              return this.gatewayConnectorService.initialize();
-            })
-            .andThen(() => {
-              this.logUtils.debug("Initializing API listeners");
-              // Initialize anything that wants an initialized context
-              return ResultUtils.combine([
-                this.vectorAPIListener.initialize(),
-                this.gatewayConnectorListener.initialize(),
-                this.messagingListener.initialize(),
-                this.blockchainListener.initialize(),
-              ]);
-            })
-            .andThen(() => {
-              this.logUtils.debug("Initialized all internal services");
-              return this.gatewayConnectorService.activateAuthorizedGateways();
-            })
-            // .andThen(() => {
-            //   // Claim control
-            //   return this.controlService.claimControl();
-            // })
-
-            .andThen(() => {
-              // If we are in debug mode, we'll print the registered transfers out.
-              if (config.debug) {
-                return this.browserNodeProvider
-                  .getBrowserNode()
-                  .andThen((browserNode) => {
-                    return browserNode.getRegisteredTransfers(
-                      config.governanceChainId,
-                    );
-                  })
-                  .map((registeredTransfers) => {
-                    this.logUtils.debug("Registered Transfers");
-                    this.logUtils.debug(registeredTransfers);
-                  });
-              }
-              return okAsync(undefined);
-            })
-            .map(() => {
-              if (this._initializePromiseResolve != null) {
-                this._initializePromiseResolve();
-              }
-              this.logUtils.debug(
-                `Hypernet Protocol core initialized successfully`,
-              );
-              this._initialized = true;
-            })
-            .mapErr((e) => {
-              this.logUtils.error(e);
-              return e;
-            })
-        );
+      return ResultUtils.combine([
+        this.initializeGovernance().orElse((e) => {
+          this.logUtils.error(e);
+          if (config.governanceRequired === true) {
+            return errAsync(e);
+          } else {
+            return okAsync(undefined);
+          }
+        }),
+        this.initializePayments().orElse((e) => {
+          this.logUtils.error(e);
+          if (config.paymentsRequired === true) {
+            return errAsync(e);
+          } else {
+            return okAsync(undefined);
+          }
+        }),
+      ]).andThen(() => {
+        return okAsync(context.initializeStatus);
       });
+    });
 
     return this._initializeResult;
+  }
+
+  private initializeBlockchainProvider(): ResultAsync<
+    void,
+    BlockchainUnavailableError | InvalidParametersError
+  > {
+    // Initialize blockchain provider
+    return this.contextProvider.getContext().andThen((context) => {
+      return this.blockchainProvider.initialize().andThen(() => {
+        context.initializeStatus.blockchainProviderInitialized = true;
+        return this.contextProvider.setContext(context);
+      });
+    });
+  }
+
+  public initializeRegistries(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | IPFSUnavailableError
+  > {
+    // Initialize registries contracts
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.configProvider.getConfig(),
+      this.initializeBlockchainProvider(),
+    ]).andThen((vals) => {
+      const [context, config] = vals;
+      if (context.initializeStatus.registriesInitialized === true) {
+        return okAsync(undefined);
+      }
+
+      return ResultUtils.combine([
+        this.registryRepository.initializeReadOnly(),
+        this.registryRepository.initializeForWrite(),
+        this.initializeGovernance(),
+      ]).andThen(() => {
+        if (this._registriesInitializePromiseResolve != null) {
+          this._registriesInitializePromiseResolve();
+        }
+
+        context.initializeStatus.registriesInitialized = true;
+        return this.contextProvider.setContext(context).andThen(() => {
+          return this.tokenInformationRepository
+            .initialize(config.governanceChainInformation.tokenRegistryAddress)
+            .orElse((e) => {
+              this.logUtils.error(e);
+              return okAsync(undefined);
+            });
+        });
+      });
+    });
+  }
+
+  public initializeGovernance(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | IPFSUnavailableError
+  > {
+    // Initialize governance contracts
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.initializeBlockchainProvider(),
+    ]).andThen((vals) => {
+      const [context] = vals;
+      if (context.initializeStatus.governanceInitialized === true) {
+        return okAsync(undefined);
+      }
+
+      return ResultUtils.combine([
+        this.ipfsUtils.initialize(),
+        this.governanceRepository.initializeReadOnly(),
+        this.governanceRepository.initializeForWrite(),
+      ]).andThen(() => {
+        if (this._governanceInitializePromiseResolve != null) {
+          this._governanceInitializePromiseResolve();
+        }
+
+        context.initializeStatus.governanceInitialized = true;
+        return this.contextProvider.setContext(context);
+      });
+    });
+  }
+
+  public initializePayments(): ResultAsync<void, CoreInitializationErrors> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+      this.initializeBlockchainProvider(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      if (context.initializeStatus.paymentsInitialized === true) {
+        return okAsync(undefined);
+      }
+
+      return this.initializeRegistries()
+        .andThen(() => {
+          this.logUtils.debug("Getting Ethereum accounts");
+          return this.accountRepository.getAccounts();
+        })
+        .andThen((accounts) => {
+          context.account = accounts[0];
+          this.logUtils.debug(`Obtained accounts: ${accounts}`);
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return this.ceramicUtils.initialize();
+        })
+        .andThen(() => {
+          return ResultUtils.combine([
+            this.accountRepository.getPublicIdentifier(),
+            this.accountRepository.getActiveStateChannels(),
+          ]);
+        })
+        .andThen((vals) => {
+          const [publicIdentifier, activeStateChannels] = vals;
+
+          this.logUtils.debug(
+            `Obtained active state channels: ${activeStateChannels}`,
+          );
+
+          context.publicIdentifier = publicIdentifier;
+          context.activeStateChannels = activeStateChannels;
+
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          // By doing some active initialization, we can avoid whole categories
+          // of errors occuring post-initialization (ie, runtime), which makes the
+          // whole thing more reliable in operation.
+          this.logUtils.debug("Initializing payments utilities");
+          this.logUtils.debug("Initializing payments services");
+          return this.gatewayConnectorService.initialize();
+        })
+        .andThen(() => {
+          this.logUtils.debug("Initializing API listeners");
+          // Initialize anything that wants an initialized context
+          return ResultUtils.combine([
+            this.vectorAPIListener.initialize(),
+            this.gatewayConnectorListener.initialize(),
+            this.messagingListener.initialize(),
+            this.blockchainListener.initialize(),
+          ]);
+        })
+        .andThen(() => {
+          this.logUtils.debug("Initialized all internal services");
+          return this.gatewayConnectorService.activateAuthorizedGateways();
+        })
+
+        .andThen(() => {
+          // If we are in debug mode, we'll print the registered transfers out.
+          if (config.debug) {
+            return this.browserNodeProvider
+              .getBrowserNode()
+              .andThen((browserNode) => {
+                return browserNode.getRegisteredTransfers(
+                  config.governanceChainId,
+                );
+              })
+              .map((registeredTransfers) => {
+                this.logUtils.debug("Registered Transfers");
+                this.logUtils.debug(registeredTransfers);
+              });
+          }
+          return okAsync(undefined);
+        })
+        .andThen(() => {
+          if (this._paymentsInitializePromiseResolve != null) {
+            this._paymentsInitializePromiseResolve();
+          }
+
+          context.initializeStatus.paymentsInitialized = true;
+          return this.contextProvider.setContext(context);
+        });
+    });
+  }
+
+  public getInitializationStatus(): ResultAsync<InitializeStatus, never> {
+    return this.contextProvider.getContext().map((context) => {
+      return context.initializeStatus;
+    });
   }
 
   /**
@@ -1128,6 +1291,13 @@ export class HypernetCore implements IHypernetCore {
       });
   }
 
+  public getGatewayEntryList(): ResultAsync<
+    Map<GatewayUrl, GatewayRegistrationInfo>,
+    NonFungibleRegistryContractError
+  > {
+    return this.gatewayRegistrationRepository.getGatewayEntryList();
+  }
+
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError | VectorError | BlockchainUnavailableError
@@ -1216,7 +1386,10 @@ export class HypernetCore implements IHypernetCore {
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<
+    Proposal,
+    IPFSUnavailableError | HypernetGovernorContractError
+  > {
     return this.governanceService.createProposal(
       name,
       symbol,
@@ -1236,6 +1409,12 @@ export class HypernetCore implements IHypernetCore {
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.getProposalDetails(proposalId);
+  }
+
+  public getProposalDescription(
+    descriptionHash: string,
+  ): ResultAsync<string, IPFSUnavailableError | HypernetGovernorContractError> {
+    return this.governanceService.getProposalDescription(descriptionHash);
   }
 
   public castVote(
@@ -1573,7 +1752,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError
   > {
     return this.registryService.getRegistryModules();
   }
@@ -1604,5 +1783,70 @@ export class HypernetCore implements IHypernetCore {
       registryName,
       ownerAddress,
     );
+  }
+
+  public getRegistryEntryListByUsername(
+    registryName: string,
+    username: EthereumAccountAddress,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryService.getRegistryEntryListByUsername(
+      registryName,
+      username,
+    );
+  }
+
+  public submitLazyMintSignature(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
+  > {
+    return this.registryService.submitLazyMintSignature(
+      registryName,
+      tokenId,
+      ownerAddress,
+      registrationData,
+    );
+  }
+
+  public retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError
+  > {
+    return this.registryService.retrieveLazyMintingSignatures();
+  }
+
+  public executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+  > {
+    return this.registryService.executeLazyMint(lazyMintingSignature);
+  }
+
+  public revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
+    return this.registryService.revokeLazyMintSignature(lazyMintingSignature);
   }
 }

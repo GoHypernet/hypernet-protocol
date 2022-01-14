@@ -14,4 +14,7 @@ export const useStyles = makeStyles({
     margin: 0,
     background: colors.WHITE,
   },
+  bodyWrapper: {
+    display: "flex",
+  },
 });

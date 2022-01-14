@@ -1,7 +1,6 @@
-import { IHypernetCore } from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { ViewUtils, IViewUtils } from "@hypernetlabs/web-ui";
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 
 interface IStore {
   viewUtils: IViewUtils;

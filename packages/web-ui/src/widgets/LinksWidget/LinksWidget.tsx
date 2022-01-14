@@ -35,7 +35,7 @@ import {
   GovernanceButton,
 } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
-import { theme } from "@web-integration/components/SideFilter/SideFilter.style";
+import { theme } from "@user-dashboard/components/SideFilter/SideFilter.style";
 
 interface ILinksWidget extends IRenderParams {}
 

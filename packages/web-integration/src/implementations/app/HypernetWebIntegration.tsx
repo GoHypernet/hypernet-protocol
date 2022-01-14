@@ -5,22 +5,22 @@ import {
   ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
-import { ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypernetWebIntegration";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
-  private static instance: IHypernetWebIntegration;
   protected iframeURL = "http://localhost:5020";
   protected governanceChainId = 1337;
   protected debug = false;
   protected currentGatewayUrl: GatewayUrl | undefined | null;
-  protected getReadyTimeout: number = 15 * 1000;
-  protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
-  protected getReadyResolved = false;
   protected selectedStateChannel: ActiveStateChannel = {} as ActiveStateChannel;
+  protected getReadyResolved = false;
+  protected getRegistriesReadyResolved = false;
+  protected getGovernanceReadyResolved = false;
+  protected getPaymentsReadyResolved = false;
 
   public webUIClient: IHypernetWebUI;
   public core: HypernetIFrameProxy;
@@ -29,6 +29,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   constructor(
     iframeURL: string | null,
     governanceChainId: number | null,
+    governanceRequired: boolean | null,
+    paymentsRequired: boolean | null,
     debug: boolean | null,
   ) {
     let iframeURLWithSearchParams = new URL(iframeURL || this.iframeURL);
@@ -37,6 +39,20 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       iframeURLWithSearchParams.searchParams.append(
         "governanceChainId",
         governanceChainId.toString(),
+      );
+    }
+
+    if (governanceRequired != null) {
+      iframeURLWithSearchParams.searchParams.append(
+        "governanceRequired",
+        governanceRequired.toString(),
+      );
+    }
+
+    if (paymentsRequired != null) {
+      iframeURLWithSearchParams.searchParams.append(
+        "paymentsRequired",
+        paymentsRequired.toString(),
       );
     }
 
@@ -92,29 +108,18 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   // wait for the core to be intialized
   public getReady(): ResultAsync<IHypernetCore, Error> {
-    // Wait getReadyTimeout and show timeout guid if getReady hasn't resolved yet
-    /* setTimeout(() => {
-      if (this.getReadyResolved === false) {
-        this.webUIClient.renderWarningAlertModal(
-          "Timeout exceeded while initializing Hypernet Protocol!",
-        );
-      }
-    }, this.getReadyTimeout); */
-
-    if (this.getReadyResult != null) {
-      return this.getReadyResult;
+    if (this.getReadyResolved === true) {
+      return okAsync(this.core);
     }
-    this.getReadyResult = this.core
+    return this.core
       .activate()
       .andThen(() => this.core.initialize())
       .map(() => {
-        // This is for web ui to use if there is no core instance passed in web ui constructor
-        window.hypernetCoreInstance = this.core;
         this.getReadyResolved = true;
+        window.hypernetCoreInstance = this.core;
         return this.core;
       })
       .mapErr((err) => {
-        this.getReadyResolved = true;
         this.webUIClient.renderWarningAlertModal(
           `an error occurred during initialization of hypernet core${
             err?.message ? `: ${err?.message}` : "."
@@ -122,8 +127,72 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         );
         return new Error("Something went wrong!");
       });
+  }
 
-    return this.getReadyResult;
+  public getRegistriesReady(): ResultAsync<IHypernetCore, Error> {
+    if (this.getRegistriesReadyResolved === true) {
+      return okAsync(this.core);
+    }
+    return this.core
+      .activate()
+      .andThen(() => this.core.initializeRegistries())
+      .map(() => {
+        this.getRegistriesReadyResolved = true;
+        window.hypernetCoreInstance = this.core;
+        return this.core;
+      })
+      .mapErr((err) => {
+        this.webUIClient.renderWarningAlertModal(
+          `an error occurred during registries initialization of hypernet core${
+            err?.message ? `: ${err?.message}` : "."
+          }`,
+        );
+        return new Error("Something went wrong!");
+      });
+  }
+
+  public getGovernanceReady(): ResultAsync<IHypernetCore, Error> {
+    if (this.getGovernanceReadyResolved === true) {
+      return okAsync(this.core);
+    }
+    return this.core
+      .activate()
+      .andThen(() => this.core.initializeGovernance())
+      .map(() => {
+        this.getGovernanceReadyResolved = true;
+        window.hypernetCoreInstance = this.core;
+        return this.core;
+      })
+      .mapErr((err) => {
+        this.webUIClient.renderWarningAlertModal(
+          `an error occurred during governance initialization of hypernet core${
+            err?.message ? `: ${err?.message}` : "."
+          }`,
+        );
+        return new Error("Something went wrong!");
+      });
+  }
+
+  public getPaymentsReady(): ResultAsync<IHypernetCore, Error> {
+    if (this.getPaymentsReadyResolved === true) {
+      return okAsync(this.core);
+    }
+    return this.core
+      .activate()
+      .andThen(() => this.core.initializePayments())
+      .map(() => {
+        this.getPaymentsReadyResolved = false;
+        window.hypernetCoreInstance = this.core;
+        return this.core;
+      })
+      .mapErr((err) => {
+        this.webUIClient.renderWarningAlertModal(
+          `an error occurred during payments initialization of hypernet core${
+            err?.message ? `: ${err?.message}` : "."
+          }`,
+        );
+        return new Error("Something went wrong!");
+      });
   }
 
   public displayGatewayIFrame(gatewayUrl: GatewayUrl): void {

@@ -14,6 +14,11 @@ import {
   RegistryTokenId,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
+  PersistenceError,
+  VectorError,
+  LazyMintingSignature,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { IRegistryService } from "@interfaces/business";
 import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
@@ -280,7 +285,7 @@ export class RegistryService implements IRegistryService {
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError
   > {
     return this.registryRepository.getRegistryModules();
   }
@@ -310,6 +315,74 @@ export class RegistryService implements IRegistryService {
     return this.registryRepository.getRegistryEntryListByOwnerAddress(
       registryName,
       ownerAddress,
+    );
+  }
+
+  public submitLazyMintSignature(
+    registryName: string,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
+  > {
+    return this.registryRepository.submitLazyMintSignature(
+      registryName,
+      tokenId,
+      ownerAddress,
+      registrationData,
+    );
+  }
+
+  public getRegistryEntryListByUsername(
+    registryName: string,
+    username: string,
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
+    return this.registryRepository.getRegistryEntryListByUsername(
+      registryName,
+      username,
+    );
+  }
+
+  public retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError
+  > {
+    return this.registryRepository.retrieveLazyMintingSignatures();
+  }
+
+  public executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+    | NonFungibleRegistryContractError
+  > {
+    return this.registryRepository.executeLazyMint(lazyMintingSignature);
+  }
+
+  public revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
+    return this.registryRepository.revokeLazyMintSignature(
+      lazyMintingSignature,
     );
   }
 }

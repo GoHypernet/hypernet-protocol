@@ -1,5 +1,6 @@
 import {
   AuthorizedGatewaysSchema,
+  LazyMintingSignatureSchema,
   ChainId,
   DefinitionName,
   GovernanceChainInformation,
@@ -18,6 +19,8 @@ declare const __AUTH_URL__: string;
 declare const __VALIDATOR_IFRAME_URL__: string;
 declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
+declare const __IPFS_API_URL__: string;
+declare const __IPFS_GATEWAY_URL__: string;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -49,19 +52,29 @@ export class ConfigProvider implements IConfigProvider {
       config?.authUrl || __AUTH_URL__, // authUrl
       config?.gatewayIframeUrl || __VALIDATOR_IFRAME_URL__, // gatewayIframeUrl
       config?.ceramicNodeUrl || __CERAMIC_NODE_URL__, // ceramicNodeUrl,
-      config?.storageAliases ||
-        new Map([
-          [
-            DefinitionName(AuthorizedGatewaysSchema.title),
-            SchemaUrl(
-              "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
-            ),
-          ],
-        ]), // storageAliases
+      config?.ceramicDataModel || {
+        definitions: {
+          [AuthorizedGatewaysSchema.title]:
+            "kjzl6cwe1jw148xm690vbhrn5fwiiqjm4kmvnb8jzhktzdh3tcztzwuxoi8hl5n",
+          [LazyMintingSignatureSchema.title]:
+            "kjzl6cwe1jw145oxq649aslc8hk4zzz52yvyy7rugfx0qme25ksfzq3l93rdea5",
+        },
+        schemas: {
+          [AuthorizedGatewaysSchema.title]:
+            "ceramic://k3y52l7qbv1frycmgeghbfxd4qqh718tp4s2fd7wnmz5vhy7f3lvhcvl1w2lggglc",
+          [LazyMintingSignatureSchema.title]:
+            "ceramic://k3y52l7qbv1fryju2t19l5gbemvmtuk6mzpfpyamyy1g45mad0b6yukp38gdxmdj4",
+        },
+        tiles: {},
+      }, // ceramicDataModel
       config?.gatewayDeauthorizationTimeout || 5 * 1000, // gatewayDeauthorizationTimeout
       config?.controlClaimSubject || "HypernetProtocolControlClaims",
-      config?.requireOnline || true, // requireOnline
-      config?.debug || __DEBUG__, // debug
+      config?.requireOnline == null ? true : config?.requireOnline, // requireOnline
+      config?.governanceRequired == null ? true : config?.governanceRequired, // governanceRequired
+      config?.paymentsRequired == null ? true : config?.paymentsRequired, // paymentsRequired
+      config?.ipfsApiUrl || __IPFS_API_URL__,
+      config?.ipfsGatewayUrl || __IPFS_GATEWAY_URL__,
+      config?.debug == null ? __DEBUG__ : config?.debug, // debug
     );
 
     this.logUtils.debug("Using Configuration", this.config);

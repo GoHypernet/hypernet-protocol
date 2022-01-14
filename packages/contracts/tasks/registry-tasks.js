@@ -1,52 +1,6 @@
-const { HT, RF, NFR, factoryAddress, hAddress } = require("./constants.js");
-
-task("numberOfModules", "Get the number of available modules.")
-  .setAction(async (taskArgs) => {
-    const accounts = await hre.ethers.getSigners();
-
-    const factoryHandle = new hre.ethers.Contract(
-      factoryAddress(),
-      RF.abi,
-      accounts[0],
-    );
-
-    const numModules = await factoryHandle.getNumberOfModules();
-    console.log("Number of Official Modules:", numModules.toString());
-  });
-
-  task("getModuleName", "Get the name of a Module at a given index.")
-  .addParam("index", "Index of the module in the registry factory array.")
-  .setAction(async (taskArgs) => {
-    const accounts = await hre.ethers.getSigners();
-    const index = taskArgs.index; 
-
-    const factoryHandle = new hre.ethers.Contract(
-      factoryAddress(),
-      RF.abi,
-      accounts[0],
-    );
-
-    const moduleAddress = await factoryHandle.modules(index);
-    const moduleABI = [
-        {
-        "inputs": [],
-        "name": "name",
-        "outputs": [
-          {
-            "internalType": "string",
-            "name": "",
-            "type": "string"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ];
-    const moduleHandle = new hre.ethers.Contract(moduleAddress, moduleABI, accounts[0]); 
-    const name = await moduleHandle.name();
-    console.log("Module Address:", moduleAddress);
-    console.log("Number of Official Modules:", name);
-  });
+const { HT, RF, NFR,  BM, factoryAddress, hAddress } = require("./constants.js");
+const csv=require('csvtojson')
+const fs = require('fs');
 
 task("createRegistryByToken", "Creates a registry by burning token.")
   .addParam("name", "Name of the target registry.")
@@ -121,8 +75,10 @@ task("registryParameters", "Prints NFR  parameters.")
     const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
+    const baseURI = await registryHandle.baseURI();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
+    console.log("Base URI:", baseURI);
     console.log("Registry Address:", registryAddress);
     console.log("Registrar:", registrarAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
@@ -144,6 +100,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
   .addParam("registrationfee", "Amount of registration token needed to create an NFI")
   .addParam("burnaddress","Address where burned tokens will be sent")
   .addParam("burnfee", "percentage of registration token to burn (<=10000)")
+  .addParam("baseuri", "Optional string to append to all registry tokenURIs")
   .setAction(async (taskArgs) => {
     const name = taskArgs.name;
     const schema = (taskArgs.schema.length ? [taskArgs.schema]: []);
@@ -154,6 +111,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     const registrationfee = (taskArgs.registrationfee.length ? [taskArgs.registrationfee]: []);
     const burnaddress = (taskArgs.burnaddress.length ? [taskArgs.burnaddress]: []);
     const burnfee = (taskArgs.burnfee.length ? [taskArgs.burnfee]: []);
+    const baseURI = (taskArgs.baseuri.length ? [taskArgs.baseuri]: []);
 
     const accounts = await hre.ethers.getSigners();
 
@@ -174,7 +132,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     // construct call data via ABI encoding
     let params = abiCoder.encode(
         [
-          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
         ],
         [
             [
@@ -185,7 +143,8 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
             registrationtoken, 
             registrationfee, 
             burnaddress, 
-            burnfee
+            burnfee,
+            baseURI
             ]
         ],
       );
@@ -206,8 +165,10 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
+    const prefix = await registryHandle.baseURI();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
+    console.log("Base URI:", prefix);
     console.log("Registry Address:", registryAddress);
     console.log("Registrar:", registrarAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
@@ -218,6 +179,91 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     console.log("Registration Fee:", registrationFee.toString());
     console.log("Primary Registry:", primaryRegistry);
   });
+
+task("listRegistryEntries", "Prints all NFI entries for the specified registry.")
+  .addParam("name", "Target NonFungible Registry Name.")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(
+      registryAddress,
+      NFR.abi,
+      accounts[0],
+    );
+
+    const totalSupply = await registryHandle.totalSupply();
+
+    let tokenId;
+    let tokenURI;
+    let tokenOwner;
+    let tokenLabel;
+    console.log("INDEX, ID, URI, OWNER, LABEL ")
+    for (let i = 0; i < totalSupply; i++) {
+        tokenId = await registryHandle.tokenByIndex(i);
+        tokenURI = await registryHandle.tokenURI(tokenId);
+        tokenOwner = await registryHandle.ownerOf(tokenId);
+        tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
+        console.log(`${i}, ${tokenId}, ${tokenURI}, ${tokenOwner}, ${tokenLabel}`)
+    }
+ });
+
+ task("batchRegister", "Mints NFIs specified in the given csv file.")
+ .addParam("name", "Target NonFungible Registry Name.")
+ .addParam("nfis","Path to csv file with NFI data.")
+ .setAction(async (taskArgs) => {
+   const name = taskArgs.name;
+   const nfis = taskArgs.nfis;
+
+   const accounts = await hre.ethers.getSigners();
+
+   const factoryHandle = new hre.ethers.Contract(
+     factoryAddress(),
+     RF.abi,
+     accounts[0],
+   );
+   const registryModulesAddress = await factoryHandle.nameToAddress("Registry Modules");
+   const targetRegistryAddress = await factoryHandle.nameToAddress(name);
+   const registryModulesHandle = new hre.ethers.Contract(
+    registryModulesAddress,
+    NFR.abi,
+    accounts[0],
+   );
+   const batchModuleTokenId = await registryModulesHandle.registryMap("Batch Minting");
+   const batchModuleAddress = await registryModulesHandle.tokenURI(batchModuleTokenId);
+
+   const batchModuleHandle = new hre.ethers.Contract(
+     batchModuleAddress,
+     BM.abi,
+     accounts[0],
+   );
+
+   const jsonObj = await csv().fromFile(nfis)
+   const indexArr = jsonObj.map((row) => row.INDEX);
+   const idArr = jsonObj.map((row) => row.ID);
+   const uriArr = jsonObj.map((row) => row.URI);
+   const recipArr = jsonObj.map((row) => row.OWNER);
+   const labelArr = jsonObj.map((row) => row.LABEL);
+   if ((indexArr.length === idArr.length) && (uriArr.length === recipArr.length) && (indexArr.length === recipArr.length)) {
+       let tx = await batchModuleHandle.batchRegister(recipArr, labelArr, uriArr, idArr, targetRegistryAddress);
+   } else {
+       console.log("Arrays are different lengths.")
+       console.log(indexArr.length)
+       console.log(idArr.length)
+       console.log(uriArr.length)
+       console.log(recipArr.length)
+       console.log(labelArr.length)
+   }
+   console.log("Batch Module token ID:", batchModuleTokenId.toString());
+   console.log("Batch Module Address:", batchModuleAddress);
+});
 
 task("registryEntryByLabel", "Prints NunFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")

@@ -61,6 +61,7 @@ import {
   VOTING_POWER_WIDGET,
   CONNECTED_ACCOUNT_WIDGET,
   CONNECT_WALLET_WIDGET_SELECTOR,
+  REGISTRY_LAZY_MINTING_REQUESTS_WIDGET_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -86,6 +87,7 @@ import HypertokenBalanceWidget from "@web-ui/widgets/HypertokenBalanceWidget";
 import VotingPowerWidget from "@web-ui/widgets/VotingPowerWidget";
 import ConnectedAccountWidget from "@web-ui/widgets/ConnectedAccountWidget";
 import WalletConnectWidget from "@web-ui/widgets/WalletConnectWidget";
+import RegistryLazyMintingRequestsWidget from "@web-ui/widgets/RegistryLazyMintingRequestsWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -146,6 +148,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     closeCallback?: () => void,
     modalStyle?: React.CSSProperties,
     hasTheme?: boolean,
+    hideLoadingSpinner?: boolean,
   ) {
     if (this.coreInstance == null) {
       throw new Error("core instance is required");
@@ -193,6 +196,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
                   closeCallback={closeCallback}
                   modalStyle={modalStyle}
                   isV2={hasTheme}
+                  hideLoadingSpinner={hideLoadingSpinner}
                 >
                   {component}
                 </MainContainer>
@@ -256,6 +260,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
             zIndex: 99999,
           },
           true,
+          config.hideLoadingSpinner,
         ),
         this._generateDomElement(
           config?.selector || CONNECT_WALLET_WIDGET_SELECTOR,
@@ -295,6 +300,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
           undefined,
           undefined,
           true,
+          config?.hideLoadingSpinner,
         ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
@@ -661,6 +667,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
           undefined,
           undefined,
           true,
+          config?.hideLoadingSpinner,
         ),
         this._generateDomElement(config?.selector || HYPERTOKEN_BALANCE_WIDGET),
       );
@@ -679,6 +686,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
           undefined,
           undefined,
           true,
+          config?.hideLoadingSpinner,
         ),
         this._generateDomElement(config?.selector || VOTING_POWER_WIDGET),
       );
@@ -696,8 +704,29 @@ export default class HypernetWebUI implements IHypernetWebUI {
           undefined,
           undefined,
           true,
+          config?.hideLoadingSpinner,
         ),
         this._generateDomElement(config?.selector || CONNECTED_ACCOUNT_WIDGET),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderRegistryLazyMintingRequestsWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <RegistryLazyMintingRequestsWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || REGISTRY_LAZY_MINTING_REQUESTS_WIDGET_ID_SELECTOR,
+        ),
       );
     };
     return this._getThrowableRender(renderReact);
