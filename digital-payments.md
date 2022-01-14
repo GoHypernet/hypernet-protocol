@@ -60,16 +60,21 @@ participants via a p2p communication layer.
 
 Gateways are participants in the Hypernet Protocol payment network. They are *third-party* service providers built on top of the Hypernet Protocol primitives.
 Gateways manage payment channels and processes payments on behalf of end-users and merchants while never having custody of funds (Gateways never know a user's private
-key). It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
+key). 
+
+It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
 [Gateway registry](/packages/contracts/contracts/identity/README.md#gateways) in order for the Hypernet Core infrastructure to allow their service to process payments. 
+Registration requires locking in a significant amount of Hypertoken to the registry contract. This deposit will be forfeited in the scenario that the Hypernet DAO votes 
+to remove them from participating in the payment network due. The service provider can chose to recover their deposit by burning their registration and exiting the payment 
+network.
 
 ## Hypernet Core as a _Serverless_ Payment Infrastructure Protocol
 
 Most payment protocols require highly available centralized server infrastructure. For example, Visa processes credit card transactions 
 via [mainframes](https://en.wikipedia.org/wiki/Mainframe_computer#Characteristics); Stripe processes payments in their cloud.
 
-_Hypernet Core_ is peer-to-peer and serverless - mostly. Right now (as of Q4 2021), two clients communicate with each other 
-via a [NATS](https://nats.io/) messaging network, and payments are _routed_ (via the [Vector protocol](https://github.com/connext/vector)) 
+_Hypernet Core_ is peer-to-peer and serverless - mostly. Right now (as of Q4 2021), two clients (typically and end-user and a merchant) are 
+directed by a gateway to communicate with each other via a [NATS](https://nats.io/) messaging network, and payments are _routed_ (via the [Vector protocol](https://github.com/connext/vector)) 
 via a _routing node_ to the end participant.
 
 Though the routing node is an active participant in transfers, it has no knowledge of participant activity otherwise; it simply routes a payment from one person 
