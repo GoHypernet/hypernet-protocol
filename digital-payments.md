@@ -8,39 +8,43 @@
 
 A successful payment protocol must solve problems on both sides of the market. On the consumer side, users expect a
 payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol
-integrates Connext's [Vector](https://github.com/connext/vector) library to enable fast, secure, microtransactions,
+integrates Connext's [Vector](https://github.com/connext/vector) payment channel engine to enable fast, secure, microtransactions,
 with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The
 Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements
 of their particular business, and tools to streamline software integration. Meeting these needs has led to the development
-light-weight developer abstraction layer. Developer's are isolated from the particulars of Layer 2 scaling protocols and
-are presented with a small set of function calls bundled together in an npm package that looks familiar to those who
-have used a traditional payment service provider SDK.
+light-weight developer abstraction layer and an accompanying user interfact compenent library. Developer's are isolated 
+from the particulars of Layer 2 scaling protocols and are presented with a small set of function calls bundled together in 
+an npm package that looks familiar to those who have used a traditional payment service provider SDK.
 
 ## Key Concepts
 
-As a developer or contributor to the Core, there are a few key concepts that need to be understood; most relate to blockchain and the underlying technologies used by 
-the core.
+All functionality related to the Hypernet Protocol can be access via the use of the [Hypernet Core](/packages/hypernet-core) package.
+This section discuess a few key concepts of how payments are implemented in the Hypernet Protocol.
+
+### Nomenclature and Definitions
+
+* *Layer 1*: Alternative name for the base-layer consensus network (i.e. a blockchain or DAG network (directed acyclic graph))
+* *Layer 2*: Colloquial term for any technology that inherently derives its security from a Layer 1 network. Typically, Layer 2 technologies are designed to circumvent
+the throughput limitations of the Layer 1 network they are secured against and therefor are ofter referred to as off-chain scaling techniques. 
+* *Payment Channel*: A layer 2 technique designed specifically for scaling trustless value transfers without having to submit transactions directly to a layer 1 network.
 
 ### Hypernet Core as a _Serverless_ Payment Infrastructure Protocol
 
-Most payment protocols requires a central server infrastructure; Visa processes credit card transactions via mainframes; Stripe processes payments in their cloud.
+Most payment protocols require highly available centralized server infrastructure. For example, Visa processes credit card transactions 
+via [mainframes](https://en.wikipedia.org/wiki/Mainframe_computer#Characteristics); Stripe processes payments in their cloud.
 
-_Hypernet Core_ is peer to peer and serverless - mostly. Right now (as of Q4 2021), two clients communicate with each other via a central NATS messaging server, 
-and payments are _routed_ (via the Vector protocol) via a _routing node_ to the end participant.
+_Hypernet Core_ is peer-to-peer and serverless - mostly. Right now (as of Q4 2021), two clients communicate with each other 
+via a [NATS](https://nats.io/) messaging network, and payments are _routed_ (via the [Vector protocol](https://github.com/connext/vector)) 
+via a _routing node_ to the end participant.
 
 Though the routing node is an active participant in transfers, it has no knowledge of participant activity otherwise; it simply routes a payment from one person 
-to another. Routing nodes never have custody of end user funds, and if they go (even permanently) offline, funds are not lost (though the end users that had 
-active payment channels open will have to submit a blockchain transaction in order to claim their funds; more on that in the payment channels section!)
+to another. Importantly, routing nodes are never in custody of end user funds, and if they go (even permanently) offline, funds are not lost (though the end users 
+that had active payment channels open will have to submit a blockchain transaction in order to claim their funds; more on that in the payment channels section!)
 
-### Blockchain, Payment Channels, & Layer 2
+#### Layer 1
 
-Developers will need to know the basics of how blockchain works, as well as what payment channels are and how they work at a high level overview, in order to 
-develop Hypernet Core.
-
-#### Blockchain & Ethereum
-
-Though most of the payments and activity occur at Layer 2 (see below), the Core must go down to Layer 1 for disputes, deposits, withdrawals, and other 
-(hopefully rare) occasions.
+Though most of the payments and activity in the Hypernet Protocol payments stack occur at Layer 2 (see below), the Core relies on layer 1 for disputes, deposits, 
+withdrawals, and other (hopefully rare) occasions.
 
 As of Q4 2020, the Ethereum blockchain is capable of processing only 15 transactions per second; the supply and demand market for the fees associated with 
 transactions on the blockchain, paired with this slow transaction speed, mean that individual transactions can be costly (sometimes as much as a few dollars!)

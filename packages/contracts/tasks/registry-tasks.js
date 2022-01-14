@@ -113,10 +113,10 @@ task("registryParameters", "Prints NFR  parameters.")
     const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
-    const baseURI = await registryHandle.baseURI();
+    //const baseURI = await registryHandle.baseURI();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
-    console.log("Base URI:", baseURI);
+    //console.log("Base URI:", baseURI);
     console.log("Registry Address:", registryAddress);
     console.log("Registrar:", registrarAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
