@@ -60,7 +60,9 @@ participants via a p2p communication layer.
 
 Gateways are participants in the Hypernet Protocol payment network. They are *third-party* service providers built on top of the Hypernet Protocol primitives.
 Gateways manage payment channels and processes payments on behalf of end-users and merchants while never having custody of funds (Gateways never know a user's private
-key). 
+key).
+
+![Gateways direct payments from end-users to merchants without having custody of funds.](/documentation/images/gateway-diagram.png)
 
 It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
 [Gateway registry](/packages/contracts/contracts/identity/README.md#gateways) in order for the Hypernet Core infrastructure to allow their service to process payments. 
