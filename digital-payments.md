@@ -16,19 +16,29 @@ light-weight developer abstraction layer and an accompanying user interfact comp
 from the particulars of Layer 2 scaling protocols and are presented with a small set of function calls bundled together in 
 an npm package that looks familiar to those who have used a traditional payment service provider SDK.
 
-## Key Concepts
+All functionality related to the Hypernet Protocol can be accessed via the use of the [Hypernet Core](/packages/hypernet-core) package.
+This section discusses a few key concepts of how payments are implemented in the Hypernet Protocol.
 
-All functionality related to the Hypernet Protocol can be access via the use of the [Hypernet Core](/packages/hypernet-core) package.
-This section discuess a few key concepts of how payments are implemented in the Hypernet Protocol.
+## Definitions & Key Terms
 
-### Nomenclature and Definitions
+### **Layer 1**
 
-* *Layer 1*: Alternative name for the base-layer consensus network (i.e. a blockchain or DAG network (directed acyclic graph))
-* *Layer 2*: Colloquial term for any technology that inherently derives its security from a Layer 1 network. Typically, Layer 2 technologies are designed to circumvent
+This is an alternative name for the base-layer consensus network (i.e. a blockchain or DAG network (directed acyclic graph)).
+
+### **Layer 2**
+
+Colloquial term for any technology that inherently derives its security from a Layer 1 network. Typically, Layer 2 technologies are designed to circumvent
 the throughput limitations of the Layer 1 network they are secured against and therefor are ofter referred to as off-chain scaling techniques. 
-* *Payment Channel*: A layer 2 technique designed specifically for scaling trustless value transfers without having to submit transactions directly to a layer 1 network.
 
-### Hypernet Core as a _Serverless_ Payment Infrastructure Protocol
+### **Payment Channel**
+
+A layer 2 technique designed specifically for scaling trustless value transfers without having to submit transactions directly to a layer 1 network.
+
+### **Gateways**
+
+A *third-party* component built on top of the Hypernet Protocol primitives that manages Payment Channels and processes payments.
+
+## Hypernet Core as a _Serverless_ Payment Infrastructure Protocol
 
 Most payment protocols require highly available centralized server infrastructure. For example, Visa processes credit card transactions 
 via [mainframes](https://en.wikipedia.org/wiki/Mainframe_computer#Characteristics); Stripe processes payments in their cloud.
@@ -68,20 +78,3 @@ Hypernet Core specifically uses the payment channel framework developed by Conne
 Vector can be found at the below link.
 
 - [Connext - Vector](https://github.com/connext/vector)
-
-### Definitions & Key Terms
-
-#### Hypernet Link
-
-A _Hypernet Link_ is an abstraction representing the collective group of payments & transfers between two participants in the Hypernet Core ecosystem - 
-namely, a service/product provider and a service/product consumer.
-
-There can be up to _two_ Hypernet Links between two individuals/clients - one where Alice is a consumer and Bob is a provider, and one where Alice is a 
-provider and Bob is a consumer.
-
-#### Payment Channel
-
-Similar to a _Hypernet Link_, but at a lower level of abstraction; a _payment channel_ represents an agreed-upon set of parameters between two participants 
-on the Ethereum blockchain. When using the term payment channel henceforth, we are specifically referring to payment channels within the Connext/Vector framework.
-
-**Important** - **Note the difference between a Hypernet Link and a Payment Channel, and at what layers they each live. It can be very easy to confuse the two if one isn't careful**
