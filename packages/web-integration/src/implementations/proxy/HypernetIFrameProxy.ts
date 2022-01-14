@@ -59,6 +59,7 @@ import {
   CoreInitializationErrors,
   GovernanceSignerUnavailableError,
   LazyMintingSignature,
+  ChainInformation,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -1192,6 +1193,13 @@ export default class HypernetIFrameProxy
     PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
   > {
     return this._createCall("revokeLazyMintSignature", lazyMintingSignature);
+  }
+
+  public retrieveChainInformationList(): ResultAsync<
+    Map<ChainId, ChainInformation>,
+    ProxyError
+  > {
+    return this._createCall("retrieveChainInformationList", null);
   }
 
   private _displayCoreIFrame(): void {

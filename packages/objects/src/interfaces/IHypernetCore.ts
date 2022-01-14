@@ -63,8 +63,9 @@ import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
 import { IpfsCID } from "@objects/IpfsCID";
-import { InitializeStatus } from "@web-integration/InitializeStatus";
-import { LazyMintingSignature } from "@web-integration/LazyMintingSignature";
+import { InitializeStatus } from "@objects/InitializeStatus";
+import { LazyMintingSignature } from "@objects/LazyMintingSignature";
+import { ChainInformation } from "@objects/ChainInformation";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -106,9 +107,13 @@ export interface IHypernetCore {
    * hypernet core will be representing.
    * @param account The address that says who this instance of HypernetCore is representing.
    */
-  initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors>;
+  initialize(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors>;
 
-  initializeRegistries(): ResultAsync<
+  initializeRegistries(
+    chainId?: ChainId,
+  ): ResultAsync<
     void,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
@@ -117,7 +122,9 @@ export interface IHypernetCore {
     | ProxyError
   >;
 
-  initializeGovernance(): ResultAsync<
+  initializeGovernance(
+    chainId?: ChainId,
+  ): ResultAsync<
     void,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
@@ -126,7 +133,9 @@ export interface IHypernetCore {
     | ProxyError
   >;
 
-  initializePayments(): ResultAsync<void, CoreInitializationErrors>;
+  initializePayments(
+    chainId?: ChainId,
+  ): ResultAsync<void, CoreInitializationErrors>;
 
   getInitializationStatus(): ResultAsync<InitializeStatus, ProxyError>;
 
@@ -772,6 +781,11 @@ export interface IHypernetCore {
   ): ResultAsync<
     void,
     PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
+  >;
+
+  retrieveChainInformationList(): ResultAsync<
+    Map<ChainId, ChainInformation>,
+    ProxyError
   >;
 
   /**

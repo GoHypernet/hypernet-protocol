@@ -22,7 +22,7 @@ export class ConfigProviderMock implements IConfigProvider {
       config ??
       new HypernetConfig(
         "iframeSource", // iframeSource
-        chainId, // governanceChainId
+        chainId, // defaultGovernanceChainId
         new Map<ChainId, ChainInformation>([
           [chainId, governanceChainInformation],
         ]), // chainInformation

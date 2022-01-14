@@ -668,9 +668,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.executeLazyMint(data.data);
         }, data.callId);
       },
-      revokeLazyMintSignature: (data: IIFrameCallData<LazyMintingSignature>) => {
+      revokeLazyMintSignature: (
+        data: IIFrameCallData<LazyMintingSignature>,
+      ) => {
         this.returnForModel(() => {
           return this.core.revokeLazyMintSignature(data.data);
+        }, data.callId);
+      },
+      retrieveChainInformationList: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.retrieveChainInformationList();
         }, data.callId);
       },
     });

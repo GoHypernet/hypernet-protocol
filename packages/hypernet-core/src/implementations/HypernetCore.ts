@@ -64,6 +64,7 @@ import {
   CoreInitializationErrors,
   LazyMintingSignature,
   IPFSUnavailableError,
+  ChainInformation,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -962,7 +963,9 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Initialize this instance of Hypernet Core
    */
-  public initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+  public initialize(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }
@@ -970,13 +973,13 @@ export class HypernetCore implements IHypernetCore {
     this._initializeResult = ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
-      this.initializeRegistries(),
+      this.initializeRegistries(chainId),
     ]).andThen((vals) => {
       const [config, context] = vals;
       this.logUtils.debug(`Initializing Hypernet Protocol Core`);
 
       return ResultUtils.combine([
-        this.initializeGovernance().orElse((e) => {
+        this.initializeGovernance(chainId).orElse((e) => {
           this.logUtils.error(e);
           if (config.governanceRequired === true) {
             return errAsync(e);
@@ -984,7 +987,7 @@ export class HypernetCore implements IHypernetCore {
             return okAsync(undefined);
           }
         }),
-        this.initializePayments().orElse((e) => {
+        this.initializePayments(chainId).orElse((e) => {
           this.logUtils.error(e);
           if (config.paymentsRequired === true) {
             return errAsync(e);
@@ -1000,20 +1003,24 @@ export class HypernetCore implements IHypernetCore {
     return this._initializeResult;
   }
 
-  private initializeBlockchainProvider(): ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError
-  > {
+  private initializeBlockchainProvider(
+    chainId?: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
     // Initialize blockchain provider
     return this.contextProvider.getContext().andThen((context) => {
-      return this.blockchainProvider.initialize().andThen(() => {
+      return this.blockchainProvider.initialize(chainId).andThen(() => {
         context.initializeStatus.blockchainProviderInitialized = true;
+        if (chainId != null) {
+          context.governanceChainId = chainId;
+        }
         return this.contextProvider.setContext(context);
       });
     });
   }
 
-  public initializeRegistries(): ResultAsync<
+  public initializeRegistries(
+    chainId?: ChainId,
+  ): ResultAsync<
     void,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
@@ -1024,7 +1031,7 @@ export class HypernetCore implements IHypernetCore {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
       this.configProvider.getConfig(),
-      this.initializeBlockchainProvider(),
+      this.initializeBlockchainProvider(chainId),
     ]).andThen((vals) => {
       const [context, config] = vals;
       if (context.initializeStatus.registriesInitialized === true) {
@@ -1053,7 +1060,9 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public initializeGovernance(): ResultAsync<
+  public initializeGovernance(
+    chainId?: ChainId,
+  ): ResultAsync<
     void,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
@@ -1063,7 +1072,7 @@ export class HypernetCore implements IHypernetCore {
     // Initialize governance contracts
     return ResultUtils.combine([
       this.contextProvider.getContext(),
-      this.initializeBlockchainProvider(),
+      this.initializeBlockchainProvider(chainId),
     ]).andThen((vals) => {
       const [context] = vals;
       if (context.initializeStatus.governanceInitialized === true) {
@@ -1085,18 +1094,20 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public initializePayments(): ResultAsync<void, CoreInitializationErrors> {
+  public initializePayments(
+    chainId?: ChainId,
+  ): ResultAsync<void, CoreInitializationErrors> {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
-      this.initializeBlockchainProvider(),
+      this.initializeBlockchainProvider(chainId),
     ]).andThen((vals) => {
       const [config, context] = vals;
       if (context.initializeStatus.paymentsInitialized === true) {
         return okAsync(undefined);
       }
 
-      return this.initializeRegistries()
+      return this.initializeRegistries(chainId)
         .andThen(() => {
           this.logUtils.debug("Getting Ethereum accounts");
           return this.accountRepository.getAccounts();
@@ -1157,7 +1168,7 @@ export class HypernetCore implements IHypernetCore {
               .getBrowserNode()
               .andThen((browserNode) => {
                 return browserNode.getRegisteredTransfers(
-                  config.governanceChainId,
+                  config.defaultGovernanceChainId,
                 );
               })
               .map((registeredTransfers) => {
@@ -1849,4 +1860,17 @@ export class HypernetCore implements IHypernetCore {
   > {
     return this.registryService.revokeLazyMintSignature(lazyMintingSignature);
   }
+
+  public retrieveChainInformationList(): ResultAsync<
+    Map<ChainId, ChainInformation>,
+    never
+  > {
+    return this.configProvider.getConfig().map((config) => {
+      return config.chainInformation;
+    });
+  }
+
+  /* public selectGovernanceChainId(ChainId): ResultAsync<void, never> {
+    console.log("ChainId", ChainId);
+  } */
 }

@@ -6,7 +6,7 @@ import { LogUtils, JsonUtils } from "@hypernetlabs/utils";
 // Instantiate the hypernet core.
 
 const urlParams = new URLSearchParams(window.location.search);
-const governanceChainId = urlParams.get("governanceChainId");
+const defaultGovernanceChainId = urlParams.get("defaultGovernanceChainId");
 const governanceRequired = urlParams.get("governanceRequired");
 const paymentsRequired = urlParams.get("paymentsRequired");
 const debug = urlParams.get("debug");
@@ -24,7 +24,7 @@ const paymentsRequiredParsed = jsonUtils.safelyParseJSON<boolean>(
 const debugParsed = jsonUtils.safelyParseJSON<boolean>(debug as string);
 
 const core: IHypernetCore = new HypernetCore({
-  governanceChainId: ChainId(Number(governanceChainId)) || undefined,
+  defaultGovernanceChainId: ChainId(Number(defaultGovernanceChainId)) || undefined,
   governanceRequired:
     governanceRequiredParsed == null ? true : governanceRequiredParsed,
   paymentsRequired:

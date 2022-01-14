@@ -81,7 +81,7 @@ export class BlockchainListener implements IBlockchainListener {
       // Subscribe to chainId change
       governanceProvider.on("chainChanged", (chainId: ChainId) => {
         this.logUtils.error(
-          `Governance chain changed to ${chainId}, it should be ${config.governanceChainId}. This should never happen!`,
+          `Governance chain changed to ${chainId}, it should be ${config.defaultGovernanceChainId}. This should never happen!`,
         );
         context.onGovernanceChainChanged.next(chainId);
       });

@@ -13,7 +13,7 @@ import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypern
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected iframeURL = "http://localhost:5020";
-  protected governanceChainId = 1337;
+  protected defaultGovernanceChainId = 1337;
   protected debug = false;
   protected currentGatewayUrl: GatewayUrl | undefined | null;
   protected selectedStateChannel: ActiveStateChannel = {} as ActiveStateChannel;
@@ -28,17 +28,17 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   constructor(
     iframeURL: string | null,
-    governanceChainId: number | null,
+    defaultGovernanceChainId: number | null,
     governanceRequired: boolean | null,
     paymentsRequired: boolean | null,
     debug: boolean | null,
   ) {
     let iframeURLWithSearchParams = new URL(iframeURL || this.iframeURL);
 
-    if (governanceChainId != null) {
+    if (defaultGovernanceChainId != null) {
       iframeURLWithSearchParams.searchParams.append(
-        "governanceChainId",
-        governanceChainId.toString(),
+        "defaultGovernanceChainId",
+        defaultGovernanceChainId.toString(),
       );
     }
 
@@ -61,7 +61,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     this.iframeURL = iframeURLWithSearchParams.toString();
     this.debug = debug || this.debug;
-    this.governanceChainId = governanceChainId || this.governanceChainId;
+    this.defaultGovernanceChainId = defaultGovernanceChainId || this.defaultGovernanceChainId;
 
     // Create a proxy connection to the iframe
     this.core = new HypernetIFrameProxy(
@@ -87,7 +87,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         this.core,
         this.UIData,
         this.iframeURL,
-        this.governanceChainId,
+        this.defaultGovernanceChainId,
         this.debug,
       );
     }

@@ -95,12 +95,12 @@ export default class HypernetWebUI implements IHypernetWebUI {
   protected UIData: IUIData;
   protected viewUtils: IViewUtils;
   protected dateUtils: IDateUtils;
-  protected governanceChainId: ChainId;
+  protected defaultGovernanceChainId: ChainId;
   constructor(
     _coreInstance: IHypernetCore,
     _UIData: IUIData,
     iframeURL: string | null,
-    governanceChainId: number | null,
+    defaultGovernanceChainId: number | null,
     debug: boolean | null,
   ) {
     if (_coreInstance) {
@@ -111,7 +111,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
 
-    this.governanceChainId = ChainId(governanceChainId || 1);
+    this.defaultGovernanceChainId = ChainId(defaultGovernanceChainId || 1);
 
     // This is to cache web ui instance in window so it may prevent from having multiple web ui instances
     window.hypernetWebUIInstance = HypernetWebUI.instance;
@@ -181,7 +181,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
         widgetUniqueIdentifier={widgetUniqueIdentifier}
-        governanceChainId={this.governanceChainId}
+        defaultGovernanceChainId={this.defaultGovernanceChainId}
       >
         <StylesProvider generateClassName={generateClassName}>
           <Theme theme={theme}>

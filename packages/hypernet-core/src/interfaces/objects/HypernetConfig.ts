@@ -8,7 +8,7 @@ import { ModelData } from "@glazed/types";
 export class HypernetConfig {
   constructor(
     public iframeSource: string,
-    public governanceChainId: ChainId,
+    public defaultGovernanceChainId: ChainId,
     public chainInformation: Map<ChainId, ChainInformation>,
     public governanceChainInformation: GovernanceChainInformation,
     public hypernetProtocolDomain: string,
