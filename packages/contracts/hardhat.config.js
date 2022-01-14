@@ -83,7 +83,7 @@ module.exports = {
     fuji: { // avalanche testnet
         accounts: { mnemonic },
         chainId: 43113,
-        url: urlOverride || "https://api.avax-test.network/ext/bc/C/rpc",
+        url: urlOverride || "https://f0fa7eba-0c1b-4f3f-bc37-67ba6ae2b60a.hypernetlabs.io/http/ext/bc/C/rpc",
     },
   },
   gasReporter: {
