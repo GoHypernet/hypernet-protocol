@@ -11,9 +11,9 @@ payment solution that quickly executes transactions and is intuitive. To accompl
 integrates Connext's [Vector](https://github.com/connext/vector) payment channel engine to enable fast, secure, microtransactions,
 with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The
 Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements
-of their particular business, and tools to streamline software integration. Meeting these needs has led to the development
+of their particular business, and tools to streamline software integration. Meeting these needs has led to the development of a 
 light-weight developer abstraction layer and an accompanying user interface component library. Developers are isolated 
-from the particulars of Layer 2 scaling protocols and are presented with a small set of function calls bundled together in 
+from the particulars of layer 2 scaling protocols and are presented with a small set of function calls bundled together in 
 an npm package that looks familiar to those who have used a traditional payment service provider SDK.
 
 All functionality related to the Hypernet Protocol can be accessed via the use of the [Hypernet Core](/packages/hypernet-core) package.
