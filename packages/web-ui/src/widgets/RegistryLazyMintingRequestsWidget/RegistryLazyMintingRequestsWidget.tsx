@@ -31,8 +31,11 @@ const RegistryLazyMintingRequestsWidget: React.FC<IRegistryLazyMintingRequestsWi
       coreProxy
         .retrieveLazyMintingSignatures()
         .map((lazyMintingSignatureList) => {
-          setLazyMintingSignatures(lazyMintingSignatureList);
-          if (lazyMintingSignatureList.length === 0) {
+          setLazyMintingSignatures(lazyMintingSignatureList || []);
+          if (
+            !lazyMintingSignatureList ||
+            lazyMintingSignatureList.length === 0
+          ) {
             setHasEmptyState(true);
           }
           setLoading(false);
@@ -73,7 +76,7 @@ const RegistryLazyMintingRequestsWidget: React.FC<IRegistryLazyMintingRequestsWi
           />
         )}
 
-        {lazyMintingSignatures.map((lazyMintingSignature, index) => (
+        {lazyMintingSignatures?.map((lazyMintingSignature, index) => (
           <GovernanceRegistryListItem
             key={lazyMintingSignature.tokenId}
             number={(index + 1).toString()}
