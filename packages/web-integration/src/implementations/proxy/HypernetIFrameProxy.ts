@@ -422,36 +422,44 @@ export default class HypernetIFrameProxy
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors> {
-    return this._createCall("initialize", null);
+  public initialize(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+    return this._createCall("initialize", chainId);
   }
 
-  public initializeRegistries(): ResultAsync<
-    void,
+  public initializeRegistries(
+    chainId?: ChainId,
+  ): ResultAsync<
+    InitializeStatus,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
     | ProxyError
   > {
-    return this._createCall("initializeRegistries", null);
+    return this._createCall("initializeRegistries", chainId);
   }
 
   public getInitializationStatus(): ResultAsync<InitializeStatus, ProxyError> {
     return this._createCall("getInitializationStatus", null);
   }
 
-  public initializeGovernance(): ResultAsync<
-    void,
+  public initializeGovernance(
+    chainId?: ChainId,
+  ): ResultAsync<
+    InitializeStatus,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
     | ProxyError
   > {
-    return this._createCall("initializeGovernance", null);
+    return this._createCall("initializeGovernance", chainId);
   }
 
-  public initializePayments(): ResultAsync<void, CoreInitializationErrors> {
-    return this._createCall("initializePayments", null);
+  public initializePayments(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+    return this._createCall("initializePayments", chainId);
   }
 
   public getPublicIdentifier(): ResultAsync<PublicIdentifier, ProxyError> {

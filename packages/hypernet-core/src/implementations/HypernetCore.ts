@@ -984,7 +984,7 @@ export class HypernetCore implements IHypernetCore {
           if (config.governanceRequired === true) {
             return errAsync(e);
           } else {
-            return okAsync(undefined);
+            return okAsync(context.initializeStatus);
           }
         }),
         this.initializePayments(chainId).orElse((e) => {
@@ -992,7 +992,7 @@ export class HypernetCore implements IHypernetCore {
           if (config.paymentsRequired === true) {
             return errAsync(e);
           } else {
-            return okAsync(undefined);
+            return okAsync(context.initializeStatus);
           }
         }),
       ]).andThen(() => {
@@ -1021,7 +1021,7 @@ export class HypernetCore implements IHypernetCore {
   public initializeRegistries(
     chainId?: ChainId,
   ): ResultAsync<
-    void,
+    InitializeStatus,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
@@ -1035,27 +1035,37 @@ export class HypernetCore implements IHypernetCore {
     ]).andThen((vals) => {
       const [context, config] = vals;
       if (context.initializeStatus.registriesInitialized === true) {
-        return okAsync(undefined);
+        return okAsync(context.initializeStatus);
       }
 
       return ResultUtils.combine([
         this.registryRepository.initializeReadOnly(),
-        this.registryRepository.initializeForWrite(),
-        this.initializeGovernance(),
+        this.registryRepository.initializeForWrite().orElse((e) => {
+          console.log("registryRepository.initializeForWrite() e: ", e);
+          return okAsync(undefined);
+        }),
+        this.initializeGovernance(chainId),
       ]).andThen(() => {
         if (this._registriesInitializePromiseResolve != null) {
           this._registriesInitializePromiseResolve();
         }
 
         context.initializeStatus.registriesInitialized = true;
-        return this.contextProvider.setContext(context).andThen(() => {
-          return this.tokenInformationRepository
-            .initialize(config.governanceChainInformation.tokenRegistryAddress)
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return okAsync(undefined);
-            });
-        });
+        return this.contextProvider
+          .setContext(context)
+          .andThen(() => {
+            return this.tokenInformationRepository
+              .initialize(
+                config.governanceChainInformation.tokenRegistryAddress,
+              )
+              .orElse((e) => {
+                this.logUtils.error(e);
+                return okAsync(undefined);
+              });
+          })
+          .andThen(() => {
+            return okAsync(context.initializeStatus);
+          });
       });
     });
   }
@@ -1063,7 +1073,7 @@ export class HypernetCore implements IHypernetCore {
   public initializeGovernance(
     chainId?: ChainId,
   ): ResultAsync<
-    void,
+    InitializeStatus,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
@@ -1076,27 +1086,34 @@ export class HypernetCore implements IHypernetCore {
     ]).andThen((vals) => {
       const [context] = vals;
       if (context.initializeStatus.governanceInitialized === true) {
-        return okAsync(undefined);
+        return okAsync(context.initializeStatus);
       }
 
       return ResultUtils.combine([
         this.ipfsUtils.initialize(),
         this.governanceRepository.initializeReadOnly(),
-        this.governanceRepository.initializeForWrite(),
-      ]).andThen(() => {
-        if (this._governanceInitializePromiseResolve != null) {
-          this._governanceInitializePromiseResolve();
-        }
+        this.governanceRepository.initializeForWrite().orElse((e) => {
+          console.log("governanceRepository.initializeForWrite() e: ", e);
+          return okAsync(undefined);
+        }),
+      ])
+        .andThen(() => {
+          if (this._governanceInitializePromiseResolve != null) {
+            this._governanceInitializePromiseResolve();
+          }
 
-        context.initializeStatus.governanceInitialized = true;
-        return this.contextProvider.setContext(context);
-      });
+          context.initializeStatus.governanceInitialized = true;
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return okAsync(context.initializeStatus);
+        });
     });
   }
 
   public initializePayments(
     chainId?: ChainId,
-  ): ResultAsync<void, CoreInitializationErrors> {
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
@@ -1104,7 +1121,7 @@ export class HypernetCore implements IHypernetCore {
     ]).andThen((vals) => {
       const [config, context] = vals;
       if (context.initializeStatus.paymentsInitialized === true) {
-        return okAsync(undefined);
+        return okAsync(context.initializeStatus);
       }
 
       return this.initializeRegistries(chainId)
@@ -1185,6 +1202,9 @@ export class HypernetCore implements IHypernetCore {
 
           context.initializeStatus.paymentsInitialized = true;
           return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return okAsync(context.initializeStatus);
         });
     });
   }

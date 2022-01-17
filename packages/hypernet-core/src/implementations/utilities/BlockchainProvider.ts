@@ -48,7 +48,7 @@ export class BlockchainProvider implements IBlockchainProvider {
   protected initializeProviderResult: Map<
     ChainId,
     ResultAsync<
-      ethers.providers.JsonRpcProvider,
+      ethers.providers.JsonRpcProvider | ethers.providers.FallbackProvider,
       BlockchainUnavailableError | InvalidParametersError
     >
   > = new Map();
@@ -60,6 +60,8 @@ export class BlockchainProvider implements IBlockchainProvider {
     | ethers.providers.FallbackProvider
     | null = null;
   protected governanceSigner: ethers.providers.JsonRpcSigner | null = null;
+  protected initialized = false;
+  protected _isMetamask = false;
 
   constructor(
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
@@ -198,7 +200,6 @@ export class BlockchainProvider implements IBlockchainProvider {
     return okAsync(undefined);
   }
 
-  private _isMetamask = false;
   public isMetamask(): boolean {
     if (!this.initialized) {
       throw new Error("Initialization must be completed first!");
@@ -206,118 +207,114 @@ export class BlockchainProvider implements IBlockchainProvider {
     return this._isMetamask;
   }
 
-  private initialized = false;
   public initialize(
     chainId?: ChainId,
   ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
-    ])
-      .andThen((vals) => {
-        const [config, context] = vals;
+    ]).andThen((vals) => {
+      console.log("chainIdchainId", chainId);
+      console.log("this.governanceProvider", this.governanceProvider);
+      console.log(
+        "this.initializeProviderResult",
+        this.initializeProviderResult,
+      );
+      const [config, context] = vals;
 
-        const governanceChainId = chainId || config.defaultGovernanceChainId;
+      const governanceChainId = chainId || config.defaultGovernanceChainId;
+      console.log("governanceChainId: ", governanceChainId);
 
-        let initializeProviderResult =
-          this.initializeProviderResult.get(governanceChainId);
+      let initializeProviderResult =
+        this.initializeProviderResult.get(governanceChainId);
+      console.log("initializeProviderResult", initializeProviderResult);
 
-        if (initializeProviderResult == null) {
-          this.logUtils.debug("Initializing BlockchainProvider");
-          const web3Modal = this.getWalletConnectWeb3Modal(config);
+      if (initializeProviderResult == null) {
+        this.logUtils.debug("Initializing BlockchainProvider");
+        const web3Modal = this.getWalletConnectWeb3Modal(config);
 
-          initializeProviderResult = this.getWalletConnectModalProvider(
-            web3Modal,
-          )
-            .map((modalProvider) => {
-              this.logUtils.debug("Web3Modal initialized");
-              const provider = new providers.Web3Provider(modalProvider);
+        initializeProviderResult = this.getWalletConnectModalProvider(web3Modal)
+          .map((modalProvider) => {
+            console.log("modalProvider: ", modalProvider);
+            this.logUtils.debug("Web3Modal initialized");
+            const provider = new providers.Web3Provider(modalProvider);
 
-              // Hide the iframe
-              context.onCoreIFrameCloseRequested.next();
+            // Hide the iframe
+            context.onCoreIFrameCloseRequested.next();
 
-              // Return the values for use
-              this.provider = provider;
-              this.signer = provider.getSigner();
+            // Return the values for use
+            this.provider = provider;
+            this.signer = provider.getSigner();
 
-              this._isMetamask = web3Modal.cachedProvider == "injected";
-            })
-            // TODO: do not forget to bring back the orElse for the internal provider stuff
-            .andThen(() => {
-              // Now we have the main provider, as given by the modal or provided externally. We now need to check if that provider is connected to
+            this._isMetamask = web3Modal.cachedProvider == "injected";
+          })
+          // TODO: do not forget to bring back the orElse for the internal provider stuff
+          .andThen(() => {
+            // Now we have the main provider, as given by the modal or provided externally. We now need to check if that provider is connected to
               // the governance chain. If it is, great! We're done. If it's not, we need to create a provider using our configured ProviderUrls.
               // In this case, a signer will not be available.
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-
-              const mainProvider = this.provider!;
-              return ResultAsync.fromPromise(mainProvider.getNetwork(), (e) => {
-                return new BlockchainUnavailableError(
-                  "Could not get the network for the main blockchain provider!",
-                  e,
-                );
-              }).andThen((mainNetwork) => {
-                if (mainNetwork.chainId == config.defaultGovernanceChainId) {
-                  // Whoo-hoo!
-                  this.governanceProvider = mainProvider;
-                  this.governanceSigner = mainProvider.getSigner();
-
-                  if (this.provider == null) {
-                    return errAsync(
-                      new BlockchainUnavailableError(
-                        "Blockchain provider unavailable!",
-                      ),
-                    );
-                  }
-
-                  return okAsync(this.provider);
-                }
-
-                // We will have to create a provider for the governance chain. We won't bother with the a signer.
-                const providers =
-                  config.governanceChainInformation.providerUrls.map(
-                    (providerUrl) => {
-                      return new ethers.providers.JsonRpcProvider(
-                        providerUrl,
-                        config.defaultGovernanceChainId,
-                      );
-                    },
-                  );
-                this.governanceProvider = new ethers.providers.FallbackProvider(
-                  providers,
-                );
-                if (this.provider == null) {
-                  return errAsync(
-                    new BlockchainUnavailableError(
-                      "Blockchain provider unavailable!",
-                    ),
-                  );
-                }
-                return okAsync(this.provider);
-              });
-            })
-            .map((val) => {
-              this.initialized = true;
-              return val;
+              
+            const mainProvider = this.provider!;
+            return ResultAsync.fromPromise(mainProvider.getNetwork(), (e) => {
+              return new BlockchainUnavailableError(
+                "Could not get the network for the main blockchain provider!",
+                e,
+              );
             });
+          })
+          .andThen((mainNetwork) => {
+            console.log("governanceChainId", governanceChainId);
+            console.log("mainNetwork: ", mainNetwork);
+            if (mainNetwork.chainId == governanceChainId) {
+              const mainProvider = this.provider!;
+              this.governanceProvider = mainProvider;
+              this.governanceSigner = mainProvider.getSigner();
+              return okAsync(undefined);
+            } else {
+              // give notification to the user telling him that he's connected to a wrong network and won't be able to use signers
+            }
 
-          if (initializeProviderResult == null) {
-            return errAsync(
-              new BlockchainUnavailableError(
-                "Blockchain provider unavailable!",
-              ),
+            // We will have to create a provider for the governance chain. We won't bother with the a signer.
+            const providers =
+              config.governanceChainInformation.providerUrls.map(
+                (providerUrl) => {
+                  return new ethers.providers.JsonRpcProvider(
+                    providerUrl,
+                    governanceChainId,
+                  );
+                },
+              );
+            this.governanceProvider = new ethers.providers.FallbackProvider(
+              providers,
             );
-          }
 
-          // TODO: this provider is for the chain id or the network that is selected in metamask not the actuall chain id that user wants to get the provider for.
-          this.initializeProviderResult.set(
-            governanceChainId,
-            initializeProviderResult,
-          );
-        }
+            return okAsync(undefined);
+          })
+          .andThen(() => {
+            this.initialized = true;
+            if (this.governanceProvider == null) {
+              return errAsync(
+                new BlockchainUnavailableError(
+                  "Cound not intialize governanceProvider!",
+                ),
+              );
+            }
+            this.initializeProviderResult.set(
+              governanceChainId,
+              okAsync(this.governanceProvider),
+            );
 
-        return initializeProviderResult.map(() => {});
-      })
-      .map(() => {});
+            return okAsync(this.governanceProvider);
+          });
+      } else {
+        initializeProviderResult.map((governanceProvider) => {
+          this.governanceProvider = governanceProvider;
+        });
+      }
+
+      return initializeProviderResult.map(() => {});
+    });
   }
 
   private getWalletConnectWeb3Modal(config: HypernetConfig): Web3Modal {
@@ -391,7 +388,7 @@ export class BlockchainProvider implements IBlockchainProvider {
   }
 
   private getInitializeProviderResult(): ResultAsync<
-    ethers.providers.JsonRpcProvider,
+    ethers.providers.JsonRpcProvider | ethers.providers.FallbackProvider,
     BlockchainUnavailableError | InvalidParametersError
   > {
     return ResultUtils.combine([

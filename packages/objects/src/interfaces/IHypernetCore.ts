@@ -114,7 +114,7 @@ export interface IHypernetCore {
   initializeRegistries(
     chainId?: ChainId,
   ): ResultAsync<
-    void,
+    InitializeStatus,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
@@ -125,7 +125,7 @@ export interface IHypernetCore {
   initializeGovernance(
     chainId?: ChainId,
   ): ResultAsync<
-    void,
+    InitializeStatus,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
@@ -135,7 +135,7 @@ export interface IHypernetCore {
 
   initializePayments(
     chainId?: ChainId,
-  ): ResultAsync<void, CoreInitializationErrors>;
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors>;
 
   getInitializationStatus(): ResultAsync<InitializeStatus, ProxyError>;
 
