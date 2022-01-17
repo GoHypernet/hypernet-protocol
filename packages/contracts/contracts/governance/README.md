@@ -13,7 +13,7 @@ places of precision. The DAO is based on OpenZeppelin's [Governor](https://docs.
 is itself based on a reference implementation by [Compound Finance](https://compound.finance/docs/governance). Given below is a sequence 
 diagram for the proposal lifecycle. 
 
-![alt text](/documentation/images/Governance-sequence-diagram.png)
+![Proposal sequence diagram.](/documentation/images/Governance-sequence-diagram.png)
 
 This particular governance architecture has been adopted by a number of highly successful projects including
 [Uniswap](https://docs.uniswap.org/protocol/reference/Governance/governance-reference) and has proven quite

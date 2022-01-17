@@ -72,10 +72,10 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"), // registryFactory
       EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // gatewayRegistry
       EthereumContractAddress("0x29A5Df5784eC1e58a03557e825470A217534C816"), // liquidityRegistry
-      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // tokenRegistry
+      EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0xCdFa906b330485021fD37d5E3Ceab4F11D5101c6"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
-      EthereumContractAddress("TODO"), // modulesRegistry
+      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // modulesRegistry
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("https://eth-provider-dev.hypernetlabs.io")],
     ),

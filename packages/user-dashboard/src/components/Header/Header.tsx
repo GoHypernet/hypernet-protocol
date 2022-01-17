@@ -69,6 +69,10 @@ const Header: React.FC = () => {
       return pathname.startsWith(ROUTES.PAYMENTS);
     }
 
+    if (itemPath === ROUTES.REGISTRIES) {
+      return pathname.startsWith(ROUTES.REGISTRIES) || pathname === ROUTES.ROOT;
+    }
+
     return !!pathToRegexp(itemPath).exec(pathname);
   };
 
