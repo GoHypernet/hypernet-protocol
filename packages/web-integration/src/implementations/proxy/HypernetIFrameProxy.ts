@@ -1210,6 +1210,19 @@ export default class HypernetIFrameProxy
     return this._createCall("retrieveChainInformationList", null);
   }
 
+  public retrieveGovernanceChainInformation(): ResultAsync<
+    ChainInformation,
+    ProxyError
+  > {
+    return this._createCall("retrieveGovernanceChainInformation", null);
+  }
+
+  public switchProviderNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | ProxyError> {
+    return this._createCall("switchProviderNetwork", chainId);
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

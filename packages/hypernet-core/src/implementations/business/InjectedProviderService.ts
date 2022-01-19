@@ -1,8 +1,9 @@
 import {
   BlockchainUnavailableError,
   EthereumContractAddress,
-  GovernanceChainInformation,
   NonFungibleRegistryContractError,
+  ChainId,
+  ChainInformation,
 } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
@@ -59,8 +60,51 @@ export class InjectedProviderService implements IInjectedProviderService {
     return okAsync(undefined);
   }
 
+  public switchNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    if (this.blockchainProvider.isMetamask()) {
+      return ResultUtils.combine([
+        this.configProvider.getConfig(),
+        this.blockchainProvider.getProvider(),
+      ]).andThen(([config, provider]) => {
+        const chainInformation = config.chainInformation.get(chainId);
+
+        if (chainInformation == null) {
+          console.log(`Failed to switch network`);
+
+          throw new BlockchainUnavailableError("Failed to switch network.");
+        }
+
+        return ResultAsync.fromPromise(
+          provider.send("wallet_switchEthereumChain", [
+            {
+              chainId: `0x${chainId.toString(16)}`,
+            },
+          ]),
+          (switchError: any) => {
+            console.log(switchError);
+            if (switchError?.code == 4902) {
+              this.logUtils.info(
+                `Adding ${chainInformation.name} network to provider.`,
+              );
+              this.addNetwork(chainInformation, provider).map(() => {
+                return this.switchNetwork(chainId);
+              });
+              //TODO: Fix retry here.
+            }
+            const errorMessage = "Unable to switch network";
+            this.logUtils.error(errorMessage);
+            return new BlockchainUnavailableError(errorMessage, switchError);
+          },
+        ).map(() => {});
+      });
+    }
+    return okAsync(undefined);
+  }
+
   protected addNetwork(
-    governanceChainInfo: GovernanceChainInformation,
+    governanceChainInfo: ChainInformation,
     provider: ethers.providers.JsonRpcProvider,
   ): ResultAsync<void, BlockchainUnavailableError> {
     const network = governanceChainInfo.providerUrls[0];

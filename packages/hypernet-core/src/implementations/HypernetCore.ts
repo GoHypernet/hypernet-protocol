@@ -95,6 +95,7 @@ import {
   GovernanceService,
   RegistryService,
   TokenInformationService,
+  InjectedProviderService,
 } from "@implementations/business";
 import {
   AccountsRepository,
@@ -127,6 +128,7 @@ import {
   IGovernanceService,
   IRegistryService,
   ITokenInformationService,
+  IInjectedProviderService,
 } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -282,6 +284,7 @@ export class HypernetCore implements IHypernetCore {
   protected governanceService: IGovernanceService;
   protected registryService: IRegistryService;
   protected tokenInformationService: ITokenInformationService;
+  protected injectedProviderService: IInjectedProviderService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -625,6 +628,12 @@ export class HypernetCore implements IHypernetCore {
     this.registryService = new RegistryService(this.registryRepository);
     this.tokenInformationService = new TokenInformationService(
       this.tokenInformationRepository,
+    );
+    this.injectedProviderService = new InjectedProviderService(
+      this.blockchainProvider,
+      this.localStorageUtils,
+      this.logUtils,
+      this.configProvider,
     );
 
     this.vectorAPIListener = new VectorAPIListener(
@@ -1890,7 +1899,26 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  /* public selectGovernanceChainId(ChainId): ResultAsync<void, never> {
-    console.log("ChainId", ChainId);
-  } */
+  public retrieveGovernanceChainInformation(): ResultAsync<
+    ChainInformation,
+    never
+  > {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).map((vals) => {
+      const [config, context] = vals;
+      const governanceChainId =
+        context.governanceChainId || config.defaultGovernanceChainId;
+
+      return config.chainInformation.get(governanceChainId) as ChainInformation;
+    });
+  }
+
+  public switchProviderNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    console.log(chainId);
+    return this.injectedProviderService.switchNetwork(chainId);
+  }
 }

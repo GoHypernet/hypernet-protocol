@@ -14,6 +14,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Local Development Chain",
       ChainId(1337),
       true,
+      true,
       EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"), // channelFactory
       EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"), // transferRegistry
       EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"), // hypertoken
@@ -27,7 +28,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
-      EthereumContractAddress("0xbb55fe723929CcB45a12C03fc91EBeD5407C8a6A"), // modulesRegistry
+      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // modulesRegistry
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("http://localhost:8545")],
     ),
@@ -37,6 +38,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
     new GovernanceChainInformation(
       "Local Development Hardhat Chain",
       ChainId(31337),
+      true,
       true,
       EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"), // channelFactory
       EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"), // transferRegistry
@@ -62,6 +64,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Dev Environment Chain",
       ChainId(1369),
       true,
+      true,
       EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"), // channelFactory
       EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"), // transferRegistry
       EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"), // hypertoken
@@ -86,6 +89,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Rinkeby",
       ChainId(4),
       true,
+      true,
       EthereumContractAddress("0xC82e22B0Ef5808DE0F7E9CeB265499e29012b02c"), // channelFactory
       EthereumContractAddress("0x4b86a332d76b21933d245fEF7636B1019EE6C824"), // transferRegistry
       EthereumContractAddress("0x6D4eE7f794103672490830e15308A99eB7a89024"), // hypertoken
@@ -109,6 +113,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
     new GovernanceChainInformation(
       "MainNet",
       ChainId(1),
+      true,
       true,
       EthereumContractAddress("TODO"), // channelFactory
       EthereumContractAddress("TODO"), // transferRegistry
