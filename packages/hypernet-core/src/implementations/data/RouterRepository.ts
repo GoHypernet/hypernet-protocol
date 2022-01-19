@@ -1,6 +1,5 @@
 import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
 import {
-  BlockchainUnavailableError,
   GatewayUrl,
   NonFungibleRegistryContractError,
   PublicIdentifier,
@@ -10,15 +9,15 @@ import {
 import { ResultUtils } from "@hypernetlabs/utils";
 import { IRouterRepository } from "@interfaces/data";
 import { inject, injectable } from "inversify";
-import { errAsync, ResultAsync } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
   IBlockchainUtils,
   IBlockchainUtilsType,
-  IConfigProvider,
-  IConfigProviderType,
+  IContextProvider,
+  IContextProviderType,
 } from "@interfaces/utilities";
 
 @injectable()
@@ -29,7 +28,7 @@ export class RouterRepository implements IRouterRepository {
     @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
-    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     this.routerRegistrationInfoMap = new Map();
   }
@@ -41,9 +40,9 @@ export class RouterRepository implements IRouterRepository {
     NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([config, provider]) => {
+    ]).andThen(([context, provider]) => {
       const returnInfo = new Map<PublicIdentifier, RouterDetails>();
       const newRouterResults = new Array<
         ResultAsync<void, NonFungibleRegistryContractError>
@@ -52,7 +51,7 @@ export class RouterRepository implements IRouterRepository {
       const routerRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          config.governanceChainInformation.liquidityRegistryAddress,
+          context.governanceChainInformation.liquidityRegistryAddress,
         );
 
       // Check for entries that are already cached.

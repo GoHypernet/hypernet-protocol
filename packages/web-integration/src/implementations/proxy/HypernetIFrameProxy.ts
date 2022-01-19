@@ -60,6 +60,7 @@ import {
   GovernanceSignerUnavailableError,
   LazyMintingSignature,
   ChainInformation,
+  chainConfig,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -73,15 +74,22 @@ export default class HypernetIFrameProxy
   protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
-  protected coreRegistriesInitialized = false;
-  protected waitRegistriesInitializedPromise: Promise<void>;
-  protected registriesInitializePromiseResolve: (() => void) | null;
-  protected coreGovernanceInitialized = false;
-  protected waitGovernanceInitializedPromise: Promise<void>;
-  protected governanceInitializePromiseResolve: (() => void) | null;
-  protected corePaymentsInitialized = false;
-  protected waitPaymentsInitializedPromise: Promise<void>;
-  protected paymentsInitializePromiseResolve: (() => void) | null;
+  protected coreRegistriesInitialized: Map<ChainId, boolean> = new Map();
+  protected waitRegistriesInitializedPromise: Map<ChainId, Promise<void>> =
+    new Map();
+  protected registriesInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
+  protected coreGovernanceInitialized: Map<ChainId, boolean> = new Map();
+  protected waitGovernanceInitializedPromise: Map<ChainId, Promise<void>> =
+    new Map();
+  protected governanceInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
+  protected corePaymentsInitialized: Map<ChainId, boolean> = new Map();
+  protected waitPaymentsInitializedPromise: Map<ChainId, Promise<void>> =
+    new Map();
+  protected paymentsInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
+  protected currentGovernanceChainId: ChainId = ChainId(1369); // should look to the default
 
   constructor(
     protected element: HTMLElement | null,
@@ -127,19 +135,27 @@ export default class HypernetIFrameProxy
     this.onGovernanceChainChanged = new Subject();
     this.onGovernanceAccountChanged = new Subject();
 
-    this.registriesInitializePromiseResolve = null;
-    this.waitRegistriesInitializedPromise = new Promise((resolve) => {
-      this.registriesInitializePromiseResolve = resolve;
-    });
+    chainConfig.forEach((chainInformation, chainId) => {
+      this.waitRegistriesInitializedPromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this.registriesInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
 
-    this.governanceInitializePromiseResolve = null;
-    this.waitGovernanceInitializedPromise = new Promise((resolve) => {
-      this.governanceInitializePromiseResolve = resolve;
-    });
+      this.waitGovernanceInitializedPromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this.governanceInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
 
-    this.paymentsInitializePromiseResolve = null;
-    this.waitPaymentsInitializedPromise = new Promise((resolve) => {
-      this.paymentsInitializePromiseResolve = resolve;
+      this.waitPaymentsInitializedPromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this.paymentsInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
     });
 
     // Initialize the promise that we'll use to monitor the core
@@ -268,6 +284,7 @@ export default class HypernetIFrameProxy
 
         // Setup a listener for the "initialized" event.
         child.on("initialized", () => {
+          console.log("proxy initialized");
           // Resolve waitInitialized
           resolve();
 
@@ -276,36 +293,55 @@ export default class HypernetIFrameProxy
         });
 
         // Setup a listener for the "registriesInitialized" event.
-        child.on("registriesInitialized", () => {
+        child.on("registriesInitialized", (data) => {
+          console.log("governanceInitialized data: ", data);
           // Resolve waitRegistriesInitialized
-          if (this.registriesInitializePromiseResolve != null) {
-            this.registriesInitializePromiseResolve();
+          const registriesInitializePromiseResolve =
+            this.registriesInitializePromiseResolve.get(
+              this.currentGovernanceChainId,
+            );
+          if (registriesInitializePromiseResolve != null) {
+            registriesInitializePromiseResolve();
           }
 
           // And mark us as registries initialized
-          this.coreRegistriesInitialized = true;
+          this.coreRegistriesInitialized.set(
+            this.currentGovernanceChainId,
+            true,
+          );
         });
 
         // Setup a listener for the "governanceInitialized" event.
-        child.on("governanceInitialized", () => {
+        child.on("governanceInitialized", (data) => {
           // Resolve waitGovernanceInitialized
-          if (this.governanceInitializePromiseResolve != null) {
-            this.governanceInitializePromiseResolve();
+          const governanceInitializePromiseResolve =
+            this.governanceInitializePromiseResolve.get(
+              this.currentGovernanceChainId,
+            );
+          if (governanceInitializePromiseResolve != null) {
+            governanceInitializePromiseResolve();
           }
 
           // And mark us as governance initialized
-          this.coreGovernanceInitialized = true;
+          this.coreGovernanceInitialized.set(
+            this.currentGovernanceChainId,
+            true,
+          );
         });
 
         // Setup a listener for the "paymentsInitialized" event.
         child.on("paymentsInitialized", () => {
           // Resolve waitGovernanceInitialized
-          if (this.paymentsInitializePromiseResolve != null) {
-            this.paymentsInitializePromiseResolve();
+          const paymentsInitializePromiseResolve =
+            this.paymentsInitializePromiseResolve.get(
+              this.currentGovernanceChainId,
+            );
+          if (paymentsInitializePromiseResolve != null) {
+            paymentsInitializePromiseResolve();
           }
 
           // And mark us as payments initialized
-          this.corePaymentsInitialized = true;
+          this.corePaymentsInitialized.set(this.currentGovernanceChainId, true);
         });
 
         child.on("onGatewayIFrameDisplayRequested", (data: GatewayUrl) => {
@@ -354,7 +390,7 @@ export default class HypernetIFrameProxy
     throw new Error("Method not implemented.");
   }
 
-  public initialized(): ResultAsync<boolean, never> {
+  public initialized(chainId?: ChainId): ResultAsync<boolean, never> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
       return okAsync(false);
@@ -365,44 +401,59 @@ export default class HypernetIFrameProxy
     return okAsync(this.coreInitialized);
   }
 
-  public waitInitialized(): ResultAsync<void, never> {
+  public waitInitialized(chainId?: ChainId): ResultAsync<void, never> {
     return ResultAsync.fromSafePromise(this.waitInitializedPromise);
   }
 
-  public registriesInitialized(): Result<boolean, never> {
-    if (this.child == null) {
-      return ok(false);
+  public registriesInitialized(
+    chainId?: ChainId,
+  ): ResultAsync<boolean, ProxyError> {
+    console.log("web registriesInitializedchainId", chainId);
+    return this._createCall("registriesInitialized", chainId);
+  }
+
+  public waitRegistriesInitialized(
+    chainId?: ChainId,
+  ): ResultAsync<void, never> {
+    console.log("web waitRegistriesInitialized", chainId);
+    const waitRegistriesInitializedPromise =
+      this.waitRegistriesInitializedPromise.get(this.currentGovernanceChainId);
+    if (waitRegistriesInitializedPromise == null) {
+      throw new Error("waitRegistriesInitializedPromise.get() failed");
     }
-
-    return ok(this.coreRegistriesInitialized);
+    return ResultAsync.fromSafePromise(waitRegistriesInitializedPromise);
   }
 
-  public waitRegistriesInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this.waitRegistriesInitializedPromise);
+  public governanceInitialized(
+    chainId?: ChainId,
+  ): ResultAsync<boolean, ProxyError> {
+    return this._createCall("governanceInitialized", chainId);
   }
 
-  public governanceInitialized(): Result<boolean, never> {
-    if (this.child == null) {
-      return ok(false);
+  public waitGovernanceInitialized(
+    chainId?: ChainId,
+  ): ResultAsync<void, never> {
+    const waitGovernanceInitializedPromise =
+      this.waitGovernanceInitializedPromise.get(this.currentGovernanceChainId);
+    if (waitGovernanceInitializedPromise == null) {
+      throw new Error("waitGovernanceInitializedPromise.get() failed");
     }
-
-    return ok(this.coreGovernanceInitialized);
+    return ResultAsync.fromSafePromise(waitGovernanceInitializedPromise);
   }
 
-  public waitGovernanceInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this.waitGovernanceInitializedPromise);
+  public paymentsInitialized(
+    chainId?: ChainId,
+  ): ResultAsync<boolean, ProxyError> {
+    return this._createCall("paymentsInitialized", chainId);
   }
 
-  public paymentsInitialized(): Result<boolean, never> {
-    if (this.child == null) {
-      return ok(false);
+  public waitPaymentsInitialized(chainId?: ChainId): ResultAsync<void, never> {
+    const waitPaymentsInitializedPromise =
+      this.waitPaymentsInitializedPromise.get(this.currentGovernanceChainId);
+    if (waitPaymentsInitializedPromise == null) {
+      throw new Error("waitPaymentsInitializedPromise.get() failed");
     }
-
-    return ok(this.corePaymentsInitialized);
-  }
-
-  public waitPaymentsInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this.waitPaymentsInitializedPromise);
+    return ResultAsync.fromSafePromise(waitPaymentsInitializedPromise);
   }
 
   public inControl(): Result<boolean, never> {
@@ -1219,7 +1270,10 @@ export default class HypernetIFrameProxy
 
   public switchProviderChain(
     chainId: ChainId,
-  ): ResultAsync<void, BlockchainUnavailableError | ProxyError> {
+  ): ResultAsync<
+    void,
+    BlockchainUnavailableError | InvalidParametersError | ProxyError
+  > {
     return this._createCall("switchProviderChain", chainId);
   }
 

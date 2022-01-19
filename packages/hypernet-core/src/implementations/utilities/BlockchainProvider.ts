@@ -6,6 +6,7 @@ import {
   GovernanceSignerUnavailableError,
   ProviderId,
   ChainId,
+  chainConfig,
 } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
@@ -214,12 +215,6 @@ export class BlockchainProvider implements IBlockchainProvider {
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
     ]).andThen((vals) => {
-      console.log("chainIdchainId", chainId);
-      console.log("this.governanceProvider", this.governanceProvider);
-      console.log(
-        "this.initializeProviderResult",
-        this.initializeProviderResult,
-      );
       const [config, context] = vals;
 
       const governanceChainId = chainId || config.defaultGovernanceChainId;
@@ -227,7 +222,6 @@ export class BlockchainProvider implements IBlockchainProvider {
 
       let initializeProviderResult =
         this.initializeProviderResult.get(governanceChainId);
-      console.log("initializeProviderResult", initializeProviderResult);
 
       if (initializeProviderResult == null) {
         this.logUtils.debug("Initializing BlockchainProvider");
@@ -235,7 +229,6 @@ export class BlockchainProvider implements IBlockchainProvider {
 
         initializeProviderResult = this.getWalletConnectModalProvider(web3Modal)
           .map((modalProvider) => {
-            console.log("modalProvider: ", modalProvider);
             this.logUtils.debug("Web3Modal initialized");
             const provider = new providers.Web3Provider(modalProvider);
 
@@ -251,10 +244,10 @@ export class BlockchainProvider implements IBlockchainProvider {
           // TODO: do not forget to bring back the orElse for the internal provider stuff
           .andThen(() => {
             // Now we have the main provider, as given by the modal or provided externally. We now need to check if that provider is connected to
-              // the governance chain. If it is, great! We're done. If it's not, we need to create a provider using our configured ProviderUrls.
-              // In this case, a signer will not be available.
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              
+            // the governance chain. If it is, great! We're done. If it's not, we need to create a provider using our configured ProviderUrls.
+            // In this case, a signer will not be available.
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
             const mainProvider = this.provider!;
             return ResultAsync.fromPromise(mainProvider.getNetwork(), (e) => {
               return new BlockchainUnavailableError(
@@ -276,15 +269,28 @@ export class BlockchainProvider implements IBlockchainProvider {
             }
 
             // We will have to create a provider for the governance chain. We won't bother with the a signer.
-            const providers =
-              config.governanceChainInformation.providerUrls.map(
-                (providerUrl) => {
-                  return new ethers.providers.JsonRpcProvider(
-                    providerUrl,
-                    governanceChainId,
-                  );
-                },
+            const chainInfo = chainConfig.get(governanceChainId);
+            if (chainInfo == null) {
+              return errAsync(
+                new InvalidParametersError(
+                  `Chain information does not exist for chain id:${governanceChainId} !`,
+                ),
               );
+            }
+
+            console.log(
+              "config.defaultGovernanceChainInformation",
+              config.defaultGovernanceChainInformation,
+              chainInfo,
+              governanceChainId,
+            );
+
+            const providers = chainInfo.providerUrls.map((providerUrl) => {
+              return new ethers.providers.JsonRpcProvider(
+                providerUrl,
+                governanceChainId,
+              );
+            });
             this.governanceProvider = new ethers.providers.FallbackProvider(
               providers,
             );
@@ -398,7 +404,8 @@ export class BlockchainProvider implements IBlockchainProvider {
       const [config, context] = vals;
 
       const initializeProviderResult = this.initializeProviderResult.get(
-        context.governanceChainId || config.defaultGovernanceChainId,
+        context.governanceChainInformation.chainId ||
+          config.defaultGovernanceChainId,
       );
 
       if (initializeProviderResult == null) {

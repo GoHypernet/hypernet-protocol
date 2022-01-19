@@ -18,14 +18,14 @@ import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
 import { INonFungibleRegistryContractFactory } from "@interfaces/utilities/factory";
-import { ConfigProviderMock } from "@mock/utils";
+import { ContextProviderMock } from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
 class TokenInformationRepositoryMocks {
   public contractFactory = td.object<INonFungibleRegistryContractFactory>();
-  public configProviderMock = new ConfigProviderMock();
+  public contextProviderMock = new ContextProviderMock();
   public logUtils = td.object<ILogUtils>();
   public contract =
     td.object<INonFungibleRegistryEnumerableUpgradeableContract>();
@@ -69,7 +69,7 @@ describe("TokenInformationRepository tests", () => {
 
     // Act
     const result = await repo.initialize(
-      mocks.configProviderMock.config.governanceChainInformation
+      mocks.contextProviderMock.context.governanceChainInformation
         .tokenRegistryAddress,
     );
 
@@ -89,7 +89,7 @@ describe("TokenInformationRepository tests", () => {
 
     // Act
     const result = await repo.initialize(
-      mocks.configProviderMock.config.governanceChainInformation
+      mocks.contextProviderMock.context.governanceChainInformation
         .tokenRegistryAddress,
     );
 
@@ -111,7 +111,7 @@ describe("TokenInformationRepository tests", () => {
 
     // Act
     const result = await repo.initialize(
-      mocks.configProviderMock.config.governanceChainInformation
+      mocks.contextProviderMock.context.governanceChainInformation
         .tokenRegistryAddress,
     );
 
@@ -135,7 +135,7 @@ describe("TokenInformationRepository tests", () => {
 
     // Act
     const result = await repo.initialize(
-      mocks.configProviderMock.config.governanceChainInformation
+      mocks.contextProviderMock.context.governanceChainInformation
         .tokenRegistryAddress,
     );
 
@@ -154,7 +154,7 @@ describe("TokenInformationRepository tests", () => {
     // Act
     const result = await repo
       .initialize(
-        mocks.configProviderMock.config.governanceChainInformation
+        mocks.contextProviderMock.context.governanceChainInformation
           .tokenRegistryAddress,
       )
       .andThen(() => {
@@ -177,7 +177,7 @@ describe("TokenInformationRepository tests", () => {
     // Act
     const result = await repo
       .initialize(
-        mocks.configProviderMock.config.governanceChainInformation
+        mocks.contextProviderMock.context.governanceChainInformation
           .tokenRegistryAddress,
       )
       .andThen(() => {
@@ -200,7 +200,7 @@ describe("TokenInformationRepository tests", () => {
     // Act
     const result = await repo
       .initialize(
-        mocks.configProviderMock.config.governanceChainInformation
+        mocks.contextProviderMock.context.governanceChainInformation
           .tokenRegistryAddress,
       )
       .andThen(() => {

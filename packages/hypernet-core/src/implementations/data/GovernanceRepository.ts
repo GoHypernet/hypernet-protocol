@@ -30,8 +30,8 @@ import { ResultAsync } from "neverthrow";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
-  IConfigProvider,
-  IConfigProviderType,
+  IContextProvider,
+  IContextProviderType,
   IIPFSUtils,
   IIPFSUtilsType,
 } from "@interfaces/utilities";
@@ -49,7 +49,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
-    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
     @inject(IIPFSUtilsType) protected ipfsUtils: IIPFSUtils,
   ) {}
@@ -272,22 +272,22 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public initializeReadOnly(): ResultAsync<void, never> {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).map(([config, provider]) => {
+    ]).map(([context, provider]) => {
       this.provider = provider;
 
       this.hypernetGovernorContract = new HypernetGovernorContract(
         provider,
-        config.governanceChainInformation.hypernetGovernorAddress,
+        context.governanceChainInformation.hypernetGovernorAddress,
       );
       this.registryFactoryContract = new RegistryFactoryContract(
         provider,
-        config.governanceChainInformation.registryFactoryAddress,
+        context.governanceChainInformation.registryFactoryAddress,
       );
       this.hypertokenContract = new ERC20Contract(
         provider,
-        config.governanceChainInformation.hypertokenAddress,
+        context.governanceChainInformation.hypertokenAddress,
       );
     });
   }
@@ -299,22 +299,22 @@ export class GovernanceRepository implements IGovernanceRepository {
     | InvalidParametersError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceSigner(),
-    ]).map(([config, signer]) => {
+    ]).map(([context, signer]) => {
       this.signer = signer;
 
       this.hypernetGovernorContract = new HypernetGovernorContract(
         signer,
-        config.governanceChainInformation.hypernetGovernorAddress,
+        context.governanceChainInformation.hypernetGovernorAddress,
       );
       this.registryFactoryContract = new RegistryFactoryContract(
         signer,
-        config.governanceChainInformation.registryFactoryAddress,
+        context.governanceChainInformation.registryFactoryAddress,
       );
       this.hypertokenContract = new ERC20Contract(
         signer,
-        config.governanceChainInformation.hypertokenAddress,
+        context.governanceChainInformation.hypertokenAddress,
       );
     });
   }
