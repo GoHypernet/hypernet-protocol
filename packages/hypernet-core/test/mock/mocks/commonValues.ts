@@ -160,7 +160,7 @@ const registryModulesNames = new RegistryModulesNames(
   "Merkle Drop",
 );
 
-export const governanceChainInformation = new GovernanceChainInformation(
+export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   "Mock Chain",
   chainId,
   true,

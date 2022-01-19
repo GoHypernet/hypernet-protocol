@@ -27,7 +27,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
-      EthereumContractAddress("0xbb55fe723929CcB45a12C03fc91EBeD5407C8a6A"), // modulesRegistry
+      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // modulesRegistry
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("http://localhost:8545")],
     ),

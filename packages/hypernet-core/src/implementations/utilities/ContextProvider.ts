@@ -5,11 +5,12 @@ import {
   Balances,
   PublicIdentifier,
   GatewayUrl,
-  Signature,
   ActiveStateChannel,
   ChainId,
   EthereumAccountAddress,
   InitializeStatus,
+  chainConfig,
+  GovernanceChainInformation,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -67,13 +68,24 @@ export class ContextProvider implements IContextProvider {
     onGovernanceChainChanged: Subject<ChainId>,
     onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
   ) {
+    const mainnetChainInfo = chainConfig.get(ChainId(1));
+    if (mainnetChainInfo == null) {
+      throw new Error("Main net chain information does not exist!");
+    }
+
+    if (!(mainnetChainInfo instanceof GovernanceChainInformation)) {
+      throw new Error(
+        `Invalid configuration! Governance chain ${mainnetChainInfo} is not a GovernanceChainInformation`,
+      );
+    }
+
     this.context = new HypernetContext(
       null,
       null,
       null,
       false,
-      new InitializeStatus(false, false, false, false),
-      null,
+      new InitializeStatus(new Map(), new Map(), new Map(), new Map()),
+      mainnetChainInfo,
       onControlClaimed,
       onControlYielded,
       onPushPaymentSent,
@@ -145,7 +157,7 @@ export class ContextProvider implements IContextProvider {
           this.context.activeStateChannels || [],
           this.context.inControl,
           this.context.initializeStatus,
-          ChainId(this.context.governanceChainId || 1),
+          this.context.governanceChainInformation,
           this.context.onControlClaimed,
           this.context.onControlYielded,
           this.context.onPushPaymentSent,

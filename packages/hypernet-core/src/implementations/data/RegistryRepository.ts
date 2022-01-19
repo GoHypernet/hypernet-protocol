@@ -44,12 +44,12 @@ import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
-  IConfigProvider,
-  IConfigProviderType,
+  IContextProvider,
+  IContextProviderType,
   IDIDDataStoreProvider,
   IDIDDataStoreProviderType,
 } from "@interfaces/utilities";
-import { HypernetConfig } from "@interfaces/objects";
+import { HypernetContext } from "@interfaces/objects";
 import { DIDDataStore } from "@glazed/did-datastore";
 
 @injectable()
@@ -69,7 +69,7 @@ export class RegistryRepository implements IRegistryRepository {
   constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
-    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(IDIDDataStoreProviderType)
     protected didDataStoreProvider: IDIDDataStoreProvider,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
@@ -123,10 +123,10 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.getRegistryModules(),
     ]).andThen((vals) => {
-      const [config, registryModules] = vals;
+      const [context, registryModules] = vals;
       const registriesMap: Map<string, Registry> = new Map();
       return ResultUtils.combine(
         registryNames.map((registryName) => {
@@ -177,14 +177,14 @@ export class RegistryRepository implements IRegistryRepository {
                 const batchModule = registryModules.find(
                   (registryModule) =>
                     registryModule.name ===
-                    config.governanceChainInformation.registryModulesNames
+                    context.governanceChainInformation.registryModulesNames
                       .batchMintingModule,
                 );
 
                 const lazyMintModule = registryModules.find(
                   (registryModule) =>
                     registryModule.name ===
-                    config.governanceChainInformation.registryModulesNames
+                    context.governanceChainInformation.registryModulesNames
                       .lazyMintingModule,
                 );
 
@@ -241,10 +241,10 @@ export class RegistryRepository implements IRegistryRepository {
     const registriesMap: Map<EthereumContractAddress, Registry> = new Map();
 
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.getRegistryModules(),
     ]).andThen((vals) => {
-      const [config, registryModules] = vals;
+      const [context, registryModules] = vals;
       return ResultUtils.combine(
         registryAddresses.map((registryAddress) => {
           if (this.provider == null) {
@@ -293,14 +293,14 @@ export class RegistryRepository implements IRegistryRepository {
             const batchModule = registryModules.find(
               (registryModule) =>
                 registryModule.name ===
-                config.governanceChainInformation.registryModulesNames
+                context.governanceChainInformation.registryModulesNames
                   .batchMintingModule,
             );
 
             const lazyMintModule = registryModules.find(
               (registryModule) =>
                 registryModule.name ===
-                config.governanceChainInformation.registryModulesNames
+                context.governanceChainInformation.registryModulesNames
                   .lazyMintingModule,
             );
 
@@ -952,17 +952,17 @@ export class RegistryRepository implements IRegistryRepository {
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
     return ResultUtils.combine([
+      this.contextProvider.getContext(),
       this.registryFactoryContract.registrationFee(),
-      this.configProvider.getConfig(),
     ]).andThen((vals) => {
-      const [registrationFees, config] = vals;
+      const [context, registrationFees] = vals;
       if (this.signer == null) {
         throw new Error("No signer available!");
       }
 
       this.tokenERC20Contract = new ERC20Contract(
         this.signer,
-        config.governanceChainInformation.hypertokenAddress,
+        context.governanceChainInformation.hypertokenAddress,
       );
 
       return this.tokenERC20Contract
@@ -1165,12 +1165,12 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryModule[],
     NonFungibleRegistryContractError
   > {
-    return this.configProvider.getConfig().andThen((config) => {
+    return this.contextProvider.getContext().andThen((context) => {
       if (this.provider == null) {
         throw new Error("No provider available!");
       }
 
-      if (config.governanceChainInformation.modulesRegistryAddress == null) {
+      if (context.governanceChainInformation.modulesRegistryAddress == null) {
         return errAsync(
           new NonFungibleRegistryContractError(
             "modulesRegistryAddress is not defined!",
@@ -1182,7 +1182,7 @@ export class RegistryRepository implements IRegistryRepository {
       this.nonFungibleRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           this.provider,
-          config.governanceChainInformation.modulesRegistryAddress,
+          context.governanceChainInformation.modulesRegistryAddress,
         );
 
       return this.nonFungibleRegistryContract
@@ -1232,10 +1232,10 @@ export class RegistryRepository implements IRegistryRepository {
     | NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.getRegistryModules(),
     ]).andThen((vals) => {
-      const [config, registryModules] = vals;
+      const [context, registryModules] = vals;
 
       return this.getRegistryByName([registryName]).andThen((registryMap) => {
         const registry = registryMap.get(registryName);
@@ -1262,7 +1262,7 @@ export class RegistryRepository implements IRegistryRepository {
         const batchModule = registryModules.find(
           (registryModule) =>
             registryModule.name ===
-            config.governanceChainInformation.registryModulesNames
+            context.governanceChainInformation.registryModulesNames
               .batchMintingModule,
         );
 
@@ -1386,11 +1386,11 @@ export class RegistryRepository implements IRegistryRepository {
     }
 
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.getSignerAddress(),
       this.getRegistryModules(),
     ]).andThen((vals) => {
-      const [config, selfAddress, registryModules] = vals;
+      const [context, selfAddress, registryModules] = vals;
 
       return this.didDataStoreProvider
         .initializeDIDDataStoreProvider(selfAddress)
@@ -1422,7 +1422,7 @@ export class RegistryRepository implements IRegistryRepository {
               const lazyMintingModule = registryModules.find(
                 (registryModule) =>
                   registryModule.name ===
-                  config.governanceChainInformation.registryModulesNames
+                  context.governanceChainInformation.registryModulesNames
                     .lazyMintingModule,
               );
 
@@ -1601,15 +1601,15 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([config, provider]) => {
+    ]).andThen(([context, provider]) => {
       this.provider = provider;
 
       const hypernetProfileRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          config.governanceChainInformation.hypernetProfileRegistryAddress,
+          context.governanceChainInformation.hypernetProfileRegistryAddress,
         );
 
       return hypernetProfileRegistryContract
@@ -1650,12 +1650,12 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.registryFactoryContract.enumerableRegistries(index),
       this.getRegistryModules(),
     ])
       .andThen((vals) => {
-        const [config, registryAddress, registryModules] = vals;
+        const [context, registryAddress, registryModules] = vals;
         // Call the NFI contract of that address
         if (this.provider == null) {
           throw new Error("No provider available!");
@@ -1701,14 +1701,14 @@ export class RegistryRepository implements IRegistryRepository {
           const batchModule = registryModules.find(
             (registryModule) =>
               registryModule.name ===
-              config.governanceChainInformation.registryModulesNames
+              context.governanceChainInformation.registryModulesNames
                 .batchMintingModule,
           );
 
           const lazyMintModule = registryModules.find(
             (registryModule) =>
               registryModule.name ===
-              config.governanceChainInformation.registryModulesNames
+              context.governanceChainInformation.registryModulesNames
                 .lazyMintingModule,
           );
 
@@ -1817,12 +1817,12 @@ export class RegistryRepository implements IRegistryRepository {
 
   public initializeReadOnly(): ResultAsync<void, never> {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).map(([config, provider]) => {
+    ]).map(([context, provider]) => {
       this.provider = provider;
 
-      return this.initializeContracts(config, provider);
+      return this.initializeContracts(context, provider);
     });
   }
 
@@ -1833,28 +1833,28 @@ export class RegistryRepository implements IRegistryRepository {
     | InvalidParametersError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceSigner(),
-    ]).map(([config, signer]) => {
+    ]).map(([context, signer]) => {
       this.signer = signer;
 
-      return this.initializeContracts(config, signer);
+      return this.initializeContracts(context, signer);
     });
   }
 
   private initializeContracts(
-    config: HypernetConfig,
+    context: HypernetContext,
     signerOrProvider:
       | ethers.providers.JsonRpcSigner
       | ethers.providers.Provider,
   ): void {
     this.registryFactoryContract = new RegistryFactoryContract(
       signerOrProvider,
-      config.governanceChainInformation.registryFactoryAddress,
+      context.governanceChainInformation.registryFactoryAddress,
     );
     this.tokenERC20Contract = new ERC20Contract(
       signerOrProvider,
-      config.governanceChainInformation.hypertokenAddress,
+      context.governanceChainInformation.hypertokenAddress,
     );
   }
 }

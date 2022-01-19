@@ -45,10 +45,10 @@ export class InjectedProviderService implements IInjectedProviderService {
       ])
         .andThen(([config, provider]) => {
           return ResultUtils.combine([
-            this.addNetwork(config.governanceChainInformation, provider),
+            this.addNetwork(config.defaultGovernanceChainInformation, provider),
             this.addTokenAddress(
               "HyperToken",
-              config.governanceChainInformation.hypertokenAddress,
+              config.defaultGovernanceChainInformation.hypertokenAddress,
               provider,
             ),
           ]);

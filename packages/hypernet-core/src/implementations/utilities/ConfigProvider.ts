@@ -26,16 +26,21 @@ export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
 
   constructor(protected logUtils: ILogUtils, config?: Partial<HypernetConfig>) {
-    const defaultGovernanceChainId = config?.defaultGovernanceChainId || ChainId(1); // default to mainnet
-    const governanceChainInformation = chainConfig.get(defaultGovernanceChainId);
+    const defaultGovernanceChainId =
+      config?.defaultGovernanceChainId || ChainId(1); // default to mainnet
+    const defaultGovernanceChainInformation = chainConfig.get(
+      defaultGovernanceChainId,
+    );
 
-    if (governanceChainInformation == null) {
+    if (defaultGovernanceChainInformation == null) {
       throw new Error(
         `Invalid configuration! No ChainInformation exists for governance chain ${defaultGovernanceChainId}`,
       );
     }
 
-    if (!(governanceChainInformation instanceof GovernanceChainInformation)) {
+    if (
+      !(defaultGovernanceChainInformation instanceof GovernanceChainInformation)
+    ) {
       throw new Error(
         `Invalid configuration! Governance chain ${defaultGovernanceChainId} is not a GovernanceChainInformation`,
       );
@@ -45,7 +50,8 @@ export class ConfigProvider implements IConfigProvider {
       config?.iframeSource || __IFRAME_SOURCE__, // iframeSource
       defaultGovernanceChainId, // defaultGovernanceChainId
       config?.chainInformation || chainConfig, // chainInfo
-      config?.governanceChainInformation || governanceChainInformation, // governanceChainInformation
+      config?.defaultGovernanceChainInformation ||
+        defaultGovernanceChainInformation, // defaultGovernanceChainInformation
       config?.hypernetProtocolDomain || "Hypernet", // Hypernet Protocol Domain for Transfers
       config?.defaultPaymentExpiryLength || 5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       config?.natsUrl || __NATS_URL__, // natsUrl

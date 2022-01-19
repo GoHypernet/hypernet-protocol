@@ -10,7 +10,7 @@ export class HypernetConfig {
     public iframeSource: string,
     public defaultGovernanceChainId: ChainId,
     public chainInformation: Map<ChainId, ChainInformation>,
-    public governanceChainInformation: GovernanceChainInformation,
+    public defaultGovernanceChainInformation: GovernanceChainInformation,
     public hypernetProtocolDomain: string,
     public defaultPaymentExpiryLength: number,
     public natsUrl: string,
