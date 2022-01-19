@@ -35,7 +35,6 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   >([]);
 
   const chainOptions = useMemo(() => {
-    console.log("chainInformationList", chainInformationList);
     return chainInformationList.map(({ chainId: value, name }) => ({
       name,
       value,
@@ -101,7 +100,6 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
         initialValues={{ chainId: governanceChainId }}
         onSubmit={(values) => {
           handleSwitchChain(values.chainId);
-          console.log(`fe`, values.chainId);
         }}
       >
         {({ handleSubmit }) => (
