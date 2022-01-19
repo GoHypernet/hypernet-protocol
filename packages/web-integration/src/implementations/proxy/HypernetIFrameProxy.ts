@@ -1261,16 +1261,21 @@ export default class HypernetIFrameProxy
     return this._createCall("retrieveChainInformationList", null);
   }
 
-  /* public changeGovernanceChainId(
+  public retrieveGovernanceChainInformation(): ResultAsync<
+    ChainInformation,
+    ProxyError
+  > {
+    return this._createCall("retrieveGovernanceChainInformation", null);
+  }
+
+  public switchProviderChain(
     chainId: ChainId,
-  ): ResultAsync<void, ProxyError> {
-    return this._createCall<ChainId, ProxyError, ChainId>(
-      "changeGovernanceChainId",
-      chainId,
-    ).map((resChainId) => {
-      console.log("resChainId", resChainId);
-    });
-  } */
+  ): ResultAsync<
+    void,
+    BlockchainUnavailableError | InvalidParametersError | ProxyError
+  > {
+    return this._createCall("switchProviderChain", chainId);
+  }
 
   private _displayCoreIFrame(): void {
     // Show core iframe

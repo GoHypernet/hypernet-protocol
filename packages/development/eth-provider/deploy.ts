@@ -119,7 +119,7 @@ const func: DeployFunction = async () => {
       "UpgradeableRegistryFactory",
       [
         timelockContractAddress,
-        ["Hypernet Profiles1", "Gateways", "Liquidity Providers", "Payment Tokens", "Registry Modules11", "Muho"],
+        ["Hypernet Profiles", "Gateways", "Liquidity Providers", "Payment Tokens", "Registry Modules", "Hypernet.ID"],
         [
             "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
             "Payment gateway signatures for the Hypernet Protocol payment network.", 
@@ -277,7 +277,7 @@ const func: DeployFunction = async () => {
   ////////////////////////////////////////
   log.info("Registering router info");
   const profilesRegistryAddress = await registryFactoryContract.nameToAddress(
-    "Hypernet Profiles1",
+    "Hypernet Profiles",
   );
   const gatewayRegistryAddress = await registryFactoryContract.nameToAddress(
     "Gateways",
@@ -286,13 +286,13 @@ const func: DeployFunction = async () => {
     "Liquidity Providers",
   );
   const regModulesRegistryAddress = await registryFactoryContract.nameToAddress(
-    "Registry Modules11",
+    "Registry Modules",
   );
   const tokenRegistryAddress = await registryFactoryContract.nameToAddress(
     "Payment Tokens",
   );
   const hyperidRegistryAddress = await registryFactoryContract.nameToAddress(
-    "Muho",
+    "Hypernet.ID",
   );
   
   const batchMintAddress = "0x0d8cc4b8d15D4c3eF1d70af0071376fb26B5669b";
@@ -304,7 +304,7 @@ const func: DeployFunction = async () => {
   log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
   log.info(`HyperID Registry Address: ${hyperidRegistryAddress}`);
   log.info(`Token Registry Address: ${tokenRegistryAddress}`);
-  log.info(`Registry Modules11 Registry Address: ${regModulesRegistryAddress}`);
+  log.info(`Registry Modules Registry Address: ${regModulesRegistryAddress}`);
   log.info(`Batch Mint Module Address: ${batchMintAddress}`);
   log.info(`Lazy Mint Module Address: ${lazyMintAddress}`);
   log.info(`Merkle Drop Module Address: ${merkleMintAddress}`);

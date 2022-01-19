@@ -788,6 +788,15 @@ export interface IHypernetCore {
     ProxyError
   >;
 
+  retrieveGovernanceChainInformation(): ResultAsync<
+    ChainInformation,
+    ProxyError
+  >;
+
+  switchProviderChain(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | ProxyError>;
+
   /**
    * Observables for seeing what's going on
    */

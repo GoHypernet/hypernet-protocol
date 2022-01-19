@@ -164,6 +164,7 @@ export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   "Mock Chain",
   chainId,
   true,
+  true,
   channelFactoryAddress,
   transferRegistryAddress,
   hyperTokenAddress,
