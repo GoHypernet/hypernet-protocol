@@ -6,7 +6,7 @@
 * [Digital Identity](/packages/contracts/contracts/identity/README.md)
   * [Registry Modules](/packages/contracts/contracts/modules/README.md)
   * [Access Control](/packages/contracts/contracts/access/README.md)
-* [Digital Payments](/digital-payments.md)
+* [Digital Payments](/documentation/gitbook/digital-payments.md)
 
 ## For Developers
 
