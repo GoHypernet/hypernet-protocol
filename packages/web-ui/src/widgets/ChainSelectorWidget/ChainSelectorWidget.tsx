@@ -42,7 +42,6 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
     }));
   }, [JSON.stringify(chainInformationList)]);
 
-  /*
   useEffect(() => {
     setLoading(true);
     coreProxy
@@ -75,7 +74,6 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
       })
       .mapErr(handleCoreError);
   };
-  */
 
   const toggleDialogOpen = () => {
     setIsDialogOpen((open) => !open);
