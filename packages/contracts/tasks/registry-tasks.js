@@ -490,6 +490,48 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
     console.log("Balance after: ", balanceAfter);
   });
 
+  task("register", "Register an NFI as the REGISTRAR_ROLE.")
+  .addParam("registry", "Name of target Registry where NFI is to be entered.")
+  .addParam("label", "NFI label.")
+  .addParam("data", "Data to be written to NFI entry.")
+  .addParam("recipient", "Recipient address of the NFI.")
+  .addParam("tokenid", "Desired token ID for NFI to be created.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+
+    const registryName = taskArgs.registry;
+    const NFILabel = taskArgs.label;
+    const NFIData = taskArgs.data;
+    const NFIRecipient = taskArgs.recipient;
+    const tokenid = taskArgs.tokenid;
+
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = new hre.ethers.Contract(
+      registryAddress,
+      NFR.abi,
+      accounts[0],
+    );
+
+
+    // call registerByToken on the NFR
+    tx = await registryHandle.register(
+      NFIRecipient,
+      NFILabel,
+      NFIData,
+      tokenid,
+    );
+    await tx.wait(3);
+
+    const tokenId = await registryHandle.registryMap(NFILabel);
+    console.log("Token ID:", tokenId.toString());
+  });
+
 task("registerWithToken", "Register an NFI with ERC20 token.")
   .addParam("registry", "Name of target Registry where NFI is to be entered.")
   .addParam("label", "NFI label.")
@@ -537,3 +579,39 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
     const tokenId = await registryHandle.registryMap(NFILabel);
     console.log("Token ID:", tokenId.toString());
   });
+
+  
+task("updateTokenURI", "Update the token URI of a NFI in the specified NFR.")
+.addParam("registry", "Name of target Registry where NFI is to be entered.")
+.addParam("data", "Data to be written to NFI entry.")
+.addParam("tokenid", "Desired token ID for NFI to be created.")
+.setAction(async (taskArgs) => {
+  const accounts = await hre.ethers.getSigners();
+
+  const registryName = taskArgs.registry;
+  const NFIData = taskArgs.data;
+  const tokenid = taskArgs.tokenid;
+
+  const factoryHandle = new hre.ethers.Contract(
+    factoryAddress(),
+    RF.abi,
+    accounts[0],
+  );
+
+  const registryAddress = await factoryHandle.nameToAddress(registryName);
+  const registryHandle = new hre.ethers.Contract(
+    registryAddress,
+    NFR.abi,
+    accounts[0],
+  );
+
+  // call registerByToken on the NFR
+  tx = await registryHandle.updateRegistration(
+    tokenid,
+    NFIData,
+  );
+  await tx.wait();
+
+  const updatedRegistration = await registryHandle.tokenURI(tokenid);
+  console.log("New Registration Data:", updatedRegistration);
+});

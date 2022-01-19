@@ -71,7 +71,7 @@ module.exports = {
     rinkeby: { // ethereum tesnet
       accounts: { mnemonic },
       chainId: 4,
-      url: urlOverride || "http://localhost:8545",
+      url: urlOverride || "https://station-hundred-assure-neighborhood.trycloudflare.com/http/",
     },
     mumbai: { // polygon testnet
         accounts: { mnemonic },
