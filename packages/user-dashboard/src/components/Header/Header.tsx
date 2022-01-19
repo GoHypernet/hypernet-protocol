@@ -57,6 +57,13 @@ const Header: React.FC = () => {
           hideLoadingSpinner: true,
         })
         .mapErr(handleError);
+
+      hypernetWebIntegration.webUIClient
+        .renderChainSelectorWidget({
+          selector: "chain-selector-widget-wrapper",
+          hideLoadingSpinner: true,
+        })
+        .mapErr(handleError);
     }
   }, [isLargeScreen]);
 
@@ -126,10 +133,16 @@ const Header: React.FC = () => {
         />
 
         {isLargeScreen ? (
-          <Box
-            className={classes.widgetWrapper}
-            id="connected-account-widget-wrapper"
-          />
+          <>
+            <Box
+              className={classes.widgetWrapper}
+              id="connected-account-widget-wrapper"
+            />
+            <Box
+              className={classes.widgetWrapper}
+              id="chain-selector-widget-wrapper"
+            />
+          </>
         ) : (
           <MobileSidebarMenu />
         )}
