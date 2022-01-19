@@ -1217,10 +1217,10 @@ export default class HypernetIFrameProxy
     return this._createCall("retrieveGovernanceChainInformation", null);
   }
 
-  public switchProviderNetwork(
+  public switchProviderChain(
     chainId: ChainId,
   ): ResultAsync<void, BlockchainUnavailableError | ProxyError> {
-    return this._createCall("switchProviderNetwork", chainId);
+    return this._createCall("switchProviderChain", chainId);
   }
 
   private _displayCoreIFrame(): void {

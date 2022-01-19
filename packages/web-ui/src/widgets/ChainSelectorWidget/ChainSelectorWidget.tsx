@@ -66,7 +66,7 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
       .retrieveChainInformationList()
       .map((chainInformationMap) => {
         const chainInformationList: ChainInformation[] = [];
-        chainInformationMap.forEach((chainInformation, _chainId) => {
+        chainInformationMap.forEach((chainInformation) => {
           chainInformationList.push(chainInformation);
         });
         setChainInformationList(chainInformationList);
@@ -80,7 +80,7 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
 
   const handleSwitchChain = (chainId: ChainId) => {
     coreProxy
-      .switchProviderNetwork(chainId)
+      .switchProviderChain(chainId)
       .map(() => {
         // retrieveGovernanceChainInformation();
         console.log("Now re-init something");

@@ -793,7 +793,7 @@ export interface IHypernetCore {
     ProxyError
   >;
 
-  switchProviderNetwork(
+  switchProviderChain(
     chainId: ChainId,
   ): ResultAsync<void, BlockchainUnavailableError | ProxyError>;
 

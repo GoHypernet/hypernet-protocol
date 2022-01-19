@@ -1915,7 +1915,7 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public switchProviderNetwork(
+  public switchProviderChain(
     chainId: ChainId,
   ): ResultAsync<void, BlockchainUnavailableError> {
     console.log(chainId);
