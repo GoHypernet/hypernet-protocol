@@ -50,6 +50,9 @@ export interface IBlockchainProvider {
   ): ResultAsync<void, InvalidParametersError>;
 
   isMetamask(): boolean;
+  setGovernanceSigner(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError>;
 }
 
 export const IBlockchainProviderType = Symbol.for("IBlockchainProvider");

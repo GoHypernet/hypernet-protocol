@@ -144,6 +144,39 @@ export class BlockchainProvider implements IBlockchainProvider {
     });
   }
 
+  public setGovernanceSigner(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
+    if (this.provider == null) {
+      return errAsync(
+        new BlockchainUnavailableError("Main provider is not ready yet!"),
+      );
+    }
+
+    console.log("this.provider", this.provider);
+
+    return ResultAsync.fromPromise(this.provider.getNetwork(), (e) => {
+      console.log("this.provider.getNetwork e: ", e);
+      return new BlockchainUnavailableError(
+        "Could not get the network for the main blockchain provider!",
+        e,
+      );
+    }).andThen((mainNetwork) => {
+      if (mainNetwork.chainId == chainId) {
+        this.governanceProvider = this.provider;
+        this.governanceSigner = this.provider!.getSigner();
+        console.log("this.governanceSigner: ", this.governanceSigner);
+        return okAsync(undefined);
+      } else {
+        return errAsync(
+          new BlockchainUnavailableError(
+            "Couldn't update governanceSigner because main Provider network chain id is different from governance chain id!",
+          ),
+        );
+      }
+    });
+  }
+
   private ceramicEIP1193Bridge: CeramicEIP1193Bridge | null = null;
   public getCeramicEIP1193Provider(): ResultAsync<CeramicEIP1193Bridge, never> {
     return this.getInitializeProviderResult()
@@ -230,7 +263,7 @@ export class BlockchainProvider implements IBlockchainProvider {
         initializeProviderResult = this.getWalletConnectModalProvider(web3Modal)
           .map((modalProvider) => {
             this.logUtils.debug("Web3Modal initialized");
-            const provider = new providers.Web3Provider(modalProvider);
+            const provider = new providers.Web3Provider(modalProvider, "any");
 
             // Hide the iframe
             context.onCoreIFrameCloseRequested.next();
@@ -248,26 +281,14 @@ export class BlockchainProvider implements IBlockchainProvider {
             // In this case, a signer will not be available.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 
-            const mainProvider = this.provider!;
-            return ResultAsync.fromPromise(mainProvider.getNetwork(), (e) => {
-              return new BlockchainUnavailableError(
-                "Could not get the network for the main blockchain provider!",
-                e,
-              );
+            return this.setGovernanceSigner(governanceChainId).orElse((e) => {
+              console.log("setGovernanceSigner e: ", e);
+              // TODO: send notification to the user telling him that he's connected to a wrong network and won't be able to use governance signers
+              this.logUtils.error("Unable to set governance signer!");
+              return okAsync(undefined);
             });
           })
-          .andThen((mainNetwork) => {
-            console.log("governanceChainId", governanceChainId);
-            console.log("mainNetwork: ", mainNetwork);
-            if (mainNetwork.chainId == governanceChainId) {
-              const mainProvider = this.provider!;
-              this.governanceProvider = mainProvider;
-              this.governanceSigner = mainProvider.getSigner();
-              return okAsync(undefined);
-            } else {
-              // give notification to the user telling him that he's connected to a wrong network and won't be able to use signers
-            }
-
+          .andThen(() => {
             // We will have to create a provider for the governance chain. We won't bother with the a signer.
             const chainInfo = chainConfig.get(governanceChainId);
             if (chainInfo == null) {
@@ -316,6 +337,7 @@ export class BlockchainProvider implements IBlockchainProvider {
       } else {
         initializeProviderResult.map((governanceProvider) => {
           this.governanceProvider = governanceProvider;
+          this.governanceSigner = this.provider!?.getSigner();
         });
       }
 
@@ -384,7 +406,7 @@ export class BlockchainProvider implements IBlockchainProvider {
           >,
           (e) => {
             return new BlockchainUnavailableError(
-              "Could not get the network for the main blockchain provider!",
+              "Could connectTo web3Modal!",
               e,
             );
           },

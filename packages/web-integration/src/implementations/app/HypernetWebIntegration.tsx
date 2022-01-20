@@ -3,6 +3,7 @@ import {
   GatewayUrl,
   IUIData,
   ActiveStateChannel,
+  ChainId,
 } from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -61,7 +62,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     this.iframeURL = iframeURLWithSearchParams.toString();
     this.debug = debug || this.debug;
-    this.defaultGovernanceChainId = defaultGovernanceChainId || this.defaultGovernanceChainId;
+    this.defaultGovernanceChainId =
+      defaultGovernanceChainId || this.defaultGovernanceChainId;
 
     // Create a proxy connection to the iframe
     this.core = new HypernetIFrameProxy(
@@ -73,6 +75,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.UIData = {
       onSelectedStateChannelChanged: new Subject<ActiveStateChannel>(),
       onVotesDelegated: new Subject<void>(),
+      onCoreGovernanceChainChanged: new Subject<ChainId>(),
       getSelectedStateChannel: () => this.selectedStateChannel,
     };
 

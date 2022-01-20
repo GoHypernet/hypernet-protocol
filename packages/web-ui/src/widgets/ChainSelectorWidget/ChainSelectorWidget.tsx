@@ -25,7 +25,7 @@ interface ChainSelectorWidgetParams extends IRenderParams {}
 
 const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   const classes = useStyles({});
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, UIData } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
 
   const [governanceChainId, setGovernanceChainId] = useState<ChainId>();
@@ -43,13 +43,19 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
 
   useEffect(() => {
     setLoading(true);
-    coreProxy
+    /* coreProxy
       .waitInitialized()
       .map(() => {
         retrieveGovernanceChainInformation();
         retrieveChainInformationList();
       })
-      .mapErr(handleCoreError);
+      .mapErr(handleCoreError); */
+
+    // TODO: remove setTimeout after fixing waitInitializers bug
+    setTimeout(() => {
+      retrieveGovernanceChainInformation();
+      retrieveChainInformationList();
+    }, 15000);
   }, []);
 
   const retrieveGovernanceChainInformation = () => {
@@ -83,10 +89,13 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
       .switchProviderChain(chainId)
       .map(() => {
         // retrieveGovernanceChainInformation();
+        UIData.onCoreGovernanceChainChanged.next(chainId);
         console.log("Now re-init something");
       })
       .mapErr((e) => {
+        console.log("e: ", e);
         console.log("!!! Switch your metamask network");
+        handleCoreError(e);
       });
   };
 

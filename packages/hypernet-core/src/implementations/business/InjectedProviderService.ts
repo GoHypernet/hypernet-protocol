@@ -15,7 +15,7 @@ import {
 import { IInjectedProviderService } from "@interfaces/business";
 import { ethers } from "ethers";
 import { inject, injectable } from "inversify";
-import { okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import {
   IBlockchainProvider,
@@ -73,7 +73,9 @@ export class InjectedProviderService implements IInjectedProviderService {
         if (chainInformation == null) {
           console.log(`Failed to switch network`);
 
-          throw new BlockchainUnavailableError("Failed to switch network.");
+          return errAsync(
+            new BlockchainUnavailableError("Failed to switch network."),
+          );
         }
 
         return ResultAsync.fromPromise(
@@ -82,22 +84,27 @@ export class InjectedProviderService implements IInjectedProviderService {
               chainId: `0x${chainId.toString(16)}`,
             },
           ]),
-          (switchError: any) => {
-            console.log(switchError);
-            if (switchError?.code == 4902) {
-              this.logUtils.info(
-                `Adding ${chainInformation.name} network to provider.`,
-              );
-              this.addNetwork(chainInformation, provider).map(() => {
-                return this.switchNetwork(chainId);
-              });
-              //TODO: Fix retry here.
-            }
-            const errorMessage = "Unable to switch network";
-            this.logUtils.error(errorMessage);
-            return new BlockchainUnavailableError(errorMessage, switchError);
+          (switchError) => {
+            return new BlockchainUnavailableError(
+              "wallet_switchEthereumChain has failed!",
+              switchError,
+            );
           },
-        ).map(() => {});
+        ).orElse((error) => {
+          console.log("error: ", error);
+          if ((error as any)?.src?.code == 4902) {
+            this.logUtils.info(
+              `Adding ${chainInformation.name} network to provider.`,
+            );
+            return this.addNetwork(chainInformation, provider);
+          }
+          return errAsync(
+            new BlockchainUnavailableError(
+              "Unable to switch network",
+              error.src,
+            ),
+          );
+        });
       });
     }
     return okAsync(undefined);

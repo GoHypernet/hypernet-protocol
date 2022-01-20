@@ -1270,10 +1270,7 @@ export default class HypernetIFrameProxy
 
   public switchProviderChain(
     chainId: ChainId,
-  ): ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError | ProxyError
-  > {
+  ): ResultAsync<void, CoreInitializationErrors> {
     return this._createCall("switchProviderChain", chainId);
   }
 

@@ -795,7 +795,7 @@ export interface IHypernetCore {
 
   switchProviderChain(
     chainId: ChainId,
-  ): ResultAsync<void, BlockchainUnavailableError | ProxyError>;
+  ): ResultAsync<void, CoreInitializationErrors>;
 
   /**
    * Observables for seeing what's going on

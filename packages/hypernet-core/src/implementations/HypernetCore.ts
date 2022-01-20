@@ -893,9 +893,9 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider.getConfig(),
     ]).andThen((vals) => {
       const [context, config] = vals;
-      return this.blockchainProvider.initialize(chainId).andThen(() => {
-        const governanceChainId = chainId || config.defaultGovernanceChainId;
+      const governanceChainId = chainId || config.defaultGovernanceChainId;
 
+      return this.blockchainProvider.initialize(chainId).andThen(() => {
         context.initializeStatus.blockchainProviderInitialized.set(
           governanceChainId,
           true,
@@ -903,13 +903,13 @@ export class HypernetCore implements IHypernetCore {
 
         const chainInfo =
           chainId != null
-            ? chainConfig.get(chainId)
+            ? config.chainInformation.get(chainId)
             : config.defaultGovernanceChainInformation;
 
         if (!(chainInfo instanceof GovernanceChainInformation)) {
           return errAsync(
             new InvalidParametersError(
-              "Provided Chain Id has not chain information object",
+              "Provided Chain Id does not have chain information object",
             ),
           );
         }
@@ -919,6 +919,8 @@ export class HypernetCore implements IHypernetCore {
           "context.governanceChainInformation",
           context.governanceChainInformation,
         );
+        context.onGovernanceChainChanged.next(governanceChainId);
+
         return this.contextProvider.setContext(context);
       });
     });
@@ -941,6 +943,7 @@ export class HypernetCore implements IHypernetCore {
           this.configProvider.getConfig(),
           this.registryRepository.initializeReadOnly(),
           this.registryRepository.initializeForWrite().orElse((e) => {
+            // TODO: remove orElse here and handle error cases
             console.log("registryRepository.initializeForWrite() e: ", e);
             return okAsync(undefined);
           }),
@@ -996,6 +999,7 @@ export class HypernetCore implements IHypernetCore {
         this.ipfsUtils.initialize(),
         this.governanceRepository.initializeReadOnly(),
         this.governanceRepository.initializeForWrite().orElse((e) => {
+          // TODO: remove orElse here and handle error cases
           console.log("governanceRepository.initializeForWrite() e: ", e);
           return okAsync(undefined);
         }),
@@ -2021,7 +2025,8 @@ export class HypernetCore implements IHypernetCore {
     ]).map((vals) => {
       const [config, context] = vals;
       const governanceChainId =
-        context.governanceChainId || config.defaultGovernanceChainId;
+        context.governanceChainInformation.chainId ||
+        config.defaultGovernanceChainId;
 
       return config.chainInformation.get(governanceChainId) as ChainInformation;
     });
@@ -2029,8 +2034,60 @@ export class HypernetCore implements IHypernetCore {
 
   public switchProviderChain(
     chainId: ChainId,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, CoreInitializationErrors> {
     console.log(chainId);
-    return this.injectedProviderService.switchNetwork(chainId);
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      if (config.chainInformation.get(chainId) == null) {
+        return errAsync(
+          new InvalidParametersError(
+            "Provided Chain Id does not have chain information object",
+          ),
+        );
+      }
+
+      let initializerList: ResultAsync<
+        InitializeStatus,
+        CoreInitializationErrors
+      >[] = [];
+      // Check if any of registries, governance or payments chains is initialized
+      for (let initializeStatus of context.initializeStatus.registriesInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.initializeRegistries(chainId));
+          break;
+        }
+      }
+      for (let initializeStatus of context.initializeStatus.governanceInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.initializeGovernance(chainId));
+          break;
+        }
+      }
+      for (let initializeStatus of context.initializeStatus.paymentsInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.initializePayments(chainId));
+          break;
+        }
+      }
+
+      return ResultUtils.combine(initializerList).andThen(() => {
+        return this.injectedProviderService
+          .switchNetwork(chainId)
+          .andThen(() => {
+            return this.blockchainProvider.setGovernanceSigner(chainId);
+          })
+          .orElse((e) => {
+            console.log("setGovernanceSigner or switchNetwork e: ", e);
+            this.logUtils.error(
+              "Could not set Governance signer, switch to the correct network!",
+            );
+            // TODO: give notification to the user telling him that he's connected to a wrong network and won't be able to use signers
+            return okAsync(undefined);
+          });
+      });
+    });
   }
 }

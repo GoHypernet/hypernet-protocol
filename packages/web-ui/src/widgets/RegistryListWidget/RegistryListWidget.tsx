@@ -25,7 +25,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryDetailNavigate,
   onLazyMintRequestsNavigate,
 }: IRegistryListWidgetParams) => {
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, UIData } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [registries, setRegistries] = useState<Registry[]>([]);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
@@ -40,17 +40,12 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     useState<boolean>(false);
 
   useEffect(() => {
-    setLoading(true);
-    coreProxy
-      .getNumberOfRegistries()
-      .map((numberOfRegistries) => {
-        setRegistriesCount(numberOfRegistries);
-        if (!numberOfRegistries) {
-          setHasEmptyState(true);
-        }
-        setLoading(false);
-      })
-      .mapErr(handleCoreError);
+    getNumberOfRegistries();
+    UIData.onCoreGovernanceChainChanged.subscribe((chainId) => {
+      console.log("onCoreGovernanceChainChanged chainId: ", chainId);
+      getNumberOfRegistries();
+      getRegistries(page);
+    });
   }, []);
 
   useEffect(() => {
@@ -66,6 +61,20 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   useEffect(() => {
     getRegistries(1);
   }, [reversedSortingEnabled]);
+
+  const getNumberOfRegistries = () => {
+    setLoading(true);
+    coreProxy
+      .getNumberOfRegistries()
+      .map((numberOfRegistries) => {
+        setRegistriesCount(numberOfRegistries);
+        if (!numberOfRegistries) {
+          setHasEmptyState(true);
+        }
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
 
   const getRegistries = (pageNumber: number) => {
     setLoading(true);

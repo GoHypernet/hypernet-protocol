@@ -9,6 +9,7 @@ import {
   GovernanceSignerUnavailableError,
   EthereumContractAddress,
   ProviderId,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { routerChannelAddress, commonAmount, mockUtils } from "@mock/mocks";
 import { BigNumber, ethers } from "ethers";
@@ -95,6 +96,12 @@ export class BlockchainProviderMock implements IBlockchainProvider {
   public supplyProviderId(
     providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError> {
+    return okAsync(undefined);
+  }
+
+  public setGovernanceSigner(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
     return okAsync(undefined);
   }
 }
