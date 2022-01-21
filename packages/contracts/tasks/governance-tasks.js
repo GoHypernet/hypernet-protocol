@@ -1,4 +1,5 @@
 const {  HT, HG, RF, NFR, govAddress, timelockAddress, factoryAddress, hAddress}  = require("./constants.js");
+const IBEACON = require("../artifacts/@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol/UpgradeableBeacon.json")
 
 task("delegateVote", "Delegate your voting power")
   .addParam("delegate", "Address of the delegate (can be self)")
@@ -133,6 +134,56 @@ task("cancelProposal", "Cancel a proposal if it is your or if proposer is below 
     console.log("Cancelling Proposal:", proposalID);
     const tx = await govHandle["cancel(uint256)"](proposalID);
     const tx_rcp = await tx.wait();
+});
+
+task("proposeNewEnumeralNFRBeacon", "Propose a new beacon implementation for all NFRs.")
+  .addParam("address", "Address of the proposed NFR Beacon.")
+  .addParam("ipfshash", "IPFS hash of the proposal description.")
+  .addParam("proposalname", "Display name of the proposal for UI.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const address = taskArgs.address;
+    const ipfshash = taskArgs.ipfshash;
+    const proposalname = taskArgs.proposalname;
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(
+        factoryAddress(),
+        RF.abi,
+        accounts[0],
+      );
+
+    const enumRegBeaconAddr = await factoryHandle.enumerableRegistryBeacon();
+    const enumRegBeaconHandle = new hre.ethers.Contract(
+        enumRegBeaconAddr,
+        IBEACON.abi,
+        accounts[0],
+      );
+
+    const proposalDescription = `${proposalname}:${ipfshash}`;
+    console.log("Proposal Description:", proposalDescription);
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = enumRegBeaconHandle.interface.encodeFunctionData(
+      "upgradeTo",
+      [address],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [enumRegBeaconAddr],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [enumRegBeaconAddr],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
 });
 
 task("proposeDAOProfileRegistry", "Propose a registry to serve as profile accounts for the DAO.")

@@ -21,7 +21,7 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
         accounts[0],
       );
 
-      const enumRegBeaconHandle = new hre.ethers.Contract(
+    const enumRegBeaconHandle = new hre.ethers.Contract(
         enumRegBeaconAddr,
         IBEACON.abi,
         accounts[0],
@@ -105,6 +105,12 @@ task("registryParameters", "Prints NFR  parameters.")
       REGISTRAR_ROLE,
       0,
     );
+
+    const REGISTRAR_ROLE_ADMIN = registryHandle.REGISTRAR_ROLE_ADMIN();
+    const registrarAdminAddress = await registryHandle.getRoleMember(
+        REGISTRAR_ROLE_ADMIN,
+      0,
+    );
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
     const registrationToken = await registryHandle.registrationToken();
@@ -113,12 +119,13 @@ task("registryParameters", "Prints NFR  parameters.")
     const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
-    //const baseURI = await registryHandle.baseURI();
+    const baseURI = await registryHandle.baseURI();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
-    //console.log("Base URI:", baseURI);
+    console.log("Base URI:", baseURI);
     console.log("Registry Address:", registryAddress);
     console.log("Registrar:", registrarAddress);
+    console.log("Registrar Admin:", registrarAdminAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
     console.log("Label Updating Allowed:", allowLabelChange);
     console.log("Storage Updating Allowed:", allowStorageUpdate);
