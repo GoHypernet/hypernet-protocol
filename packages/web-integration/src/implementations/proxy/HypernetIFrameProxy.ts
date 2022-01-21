@@ -70,26 +70,24 @@ export default class HypernetIFrameProxy
   extends ParentProxy
   implements IHypernetCore
 {
-  protected coreInitialized = false;
   protected isInControl = false;
-  protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
-  protected coreRegistriesInitialized: Map<ChainId, boolean> = new Map();
-  protected waitRegistriesInitializedPromise: Map<ChainId, Promise<void>> =
-    new Map();
-  protected registriesInitializePromiseResolve: Map<ChainId, () => void> =
-    new Map();
-  protected coreGovernanceInitialized: Map<ChainId, boolean> = new Map();
-  protected waitGovernanceInitializedPromise: Map<ChainId, Promise<void>> =
-    new Map();
-  protected governanceInitializePromiseResolve: Map<ChainId, () => void> =
-    new Map();
-  protected corePaymentsInitialized: Map<ChainId, boolean> = new Map();
-  protected waitPaymentsInitializedPromise: Map<ChainId, Promise<void>> =
-    new Map();
-  protected paymentsInitializePromiseResolve: Map<ChainId, () => void> =
-    new Map();
-  protected currentGovernanceChainId: ChainId = ChainId(1369); // should look to the default
+
+  protected coreInitialized = false;
+  protected waitInitializedPromise: Promise<void>;
+  protected initializePromiseResolve: (() => void) | null;
+
+  protected coreRegistriesInitialized = false;
+  protected waitRegistriesInitializedPromise: Promise<void>;
+  protected registriesInitializePromiseResolve: (() => void) | null;
+
+  protected coreGovernanceInitialized = false;
+  protected waitGovernanceInitializedPromise: Promise<void>;
+  protected governanceInitializePromiseResolve: (() => void) | null;
+
+  protected corePaymentsInitialized = false;
+  protected waitPaymentsInitializedPromise: Promise<void>;
+  protected paymentsInitializePromiseResolve: (() => void) | null;
 
   constructor(
     protected element: HTMLElement | null,
@@ -135,7 +133,27 @@ export default class HypernetIFrameProxy
     this.onGovernanceChainChanged = new Subject();
     this.onGovernanceAccountChanged = new Subject();
 
-    chainConfig.forEach((chainInformation, chainId) => {
+    this.initializePromiseResolve = null;
+    this.waitInitializedPromise = new Promise((resolve) => {
+      this.initializePromiseResolve = resolve;
+    });
+
+    this.registriesInitializePromiseResolve = null;
+    this.waitRegistriesInitializedPromise = new Promise((resolve) => {
+      this.registriesInitializePromiseResolve = resolve;
+    });
+
+    this.governanceInitializePromiseResolve = null;
+    this.waitGovernanceInitializedPromise = new Promise((resolve) => {
+      this.governanceInitializePromiseResolve = resolve;
+    });
+
+    this.paymentsInitializePromiseResolve = null;
+    this.waitPaymentsInitializedPromise = new Promise((resolve) => {
+      this.paymentsInitializePromiseResolve = resolve;
+    });
+
+    /* chainConfig.forEach((chainInformation, chainId) => {
       this.waitRegistriesInitializedPromise.set(
         chainId,
         new Promise((resolve) => {
@@ -156,229 +174,207 @@ export default class HypernetIFrameProxy
           this.paymentsInitializePromiseResolve.set(chainId, resolve);
         }),
       );
-    });
+    }); */
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
     // once the core is initialized, we'll use that to resolve this promise.
-    this.waitInitializedPromise = new Promise<void>((resolve) => {
-      this._handshakePromise = this.handshake.then((child) => {
-        // Subscribe to the message streams from the iframe,
-        // and convert them back to RXJS Subjects.
-        child.on("onControlClaimed", (data: ControlClaim) => {
-          this.isInControl = true;
-          this.onControlClaimed.next(data);
-        });
+    this._handshakePromise = this.handshake.then((child) => {
+      // Subscribe to the message streams from the iframe,
+      // and convert them back to RXJS Subjects.
+      child.on("onControlClaimed", (data: ControlClaim) => {
+        this.isInControl = true;
+        this.onControlClaimed.next(data);
+      });
 
-        child.on("onControlYielded", (data: ControlClaim) => {
-          this.isInControl = false;
-          this.onControlYielded.next(data);
-        });
+      child.on("onControlYielded", (data: ControlClaim) => {
+        this.isInControl = false;
+        this.onControlYielded.next(data);
+      });
 
-        child.on("onPushPaymentSent", (data: PushPayment) => {
-          this.onPushPaymentSent.next(data);
-        });
+      child.on("onPushPaymentSent", (data: PushPayment) => {
+        this.onPushPaymentSent.next(data);
+      });
 
-        child.on("onPullPaymentSent", (data: PullPayment) => {
-          this.onPullPaymentSent.next(data);
-        });
+      child.on("onPullPaymentSent", (data: PullPayment) => {
+        this.onPullPaymentSent.next(data);
+      });
 
-        child.on("onPushPaymentReceived", (data: PushPayment) => {
-          this.onPushPaymentReceived.next(data);
-        });
+      child.on("onPushPaymentReceived", (data: PushPayment) => {
+        this.onPushPaymentReceived.next(data);
+      });
 
-        child.on("onPullPaymentReceived", (data: PullPayment) => {
-          this.onPullPaymentReceived.next(data);
-        });
+      child.on("onPullPaymentReceived", (data: PullPayment) => {
+        this.onPullPaymentReceived.next(data);
+      });
 
-        child.on("onPushPaymentUpdated", (data: PushPayment) => {
-          this.onPushPaymentUpdated.next(data);
-        });
+      child.on("onPushPaymentUpdated", (data: PushPayment) => {
+        this.onPushPaymentUpdated.next(data);
+      });
 
-        child.on("onPullPaymentUpdated", (data: PullPayment) => {
-          this.onPullPaymentUpdated.next(data);
-        });
+      child.on("onPullPaymentUpdated", (data: PullPayment) => {
+        this.onPullPaymentUpdated.next(data);
+      });
 
-        child.on("onPushPaymentDelayed", (data: PushPayment) => {
-          this.onPushPaymentDelayed.next(data);
-        });
+      child.on("onPushPaymentDelayed", (data: PushPayment) => {
+        this.onPushPaymentDelayed.next(data);
+      });
 
-        child.on("onPullPaymentDelayed", (data: PullPayment) => {
-          this.onPullPaymentDelayed.next(data);
-        });
+      child.on("onPullPaymentDelayed", (data: PullPayment) => {
+        this.onPullPaymentDelayed.next(data);
+      });
 
-        child.on("onPushPaymentCanceled", (data: PushPayment) => {
-          this.onPushPaymentCanceled.next(data);
-        });
+      child.on("onPushPaymentCanceled", (data: PushPayment) => {
+        this.onPushPaymentCanceled.next(data);
+      });
 
-        child.on("onPullPaymentCanceled", (data: PullPayment) => {
-          this.onPullPaymentCanceled.next(data);
-        });
+      child.on("onPullPaymentCanceled", (data: PullPayment) => {
+        this.onPullPaymentCanceled.next(data);
+      });
 
-        child.on("onBalancesChanged", (data: Balances) => {
-          this.onBalancesChanged.next(data);
-        });
+      child.on("onBalancesChanged", (data: Balances) => {
+        this.onBalancesChanged.next(data);
+      });
 
-        child.on("onCeramicAuthenticationStarted", () => {
-          this._displayCoreIFrame();
+      child.on("onCeramicAuthenticationStarted", () => {
+        this._displayCoreIFrame();
 
-          this.onCeramicAuthenticationStarted.next();
-        });
+        this.onCeramicAuthenticationStarted.next();
+      });
 
-        child.on("onCeramicAuthenticationSucceeded", () => {
-          this._closeCoreIFrame();
+      child.on("onCeramicAuthenticationSucceeded", () => {
+        this._closeCoreIFrame();
 
-          this.onCeramicAuthenticationSucceeded.next();
-        });
+        this.onCeramicAuthenticationSucceeded.next();
+      });
 
-        child.on("onCeramicFailed", () => {
-          this.onCeramicFailed.next();
-        });
+      child.on("onCeramicFailed", () => {
+        this.onCeramicFailed.next();
+      });
 
-        child.on("onGatewayAuthorized", (data: GatewayUrl) => {
-          this.onGatewayAuthorized.next(data);
-        });
+      child.on("onGatewayAuthorized", (data: GatewayUrl) => {
+        this.onGatewayAuthorized.next(data);
+      });
 
-        child.on("onGatewayDeauthorizationStarted", (data: GatewayUrl) => {
-          this.onGatewayDeauthorizationStarted.next(data);
-        });
+      child.on("onGatewayDeauthorizationStarted", (data: GatewayUrl) => {
+        this.onGatewayDeauthorizationStarted.next(data);
+      });
 
-        child.on("onAuthorizedGatewayUpdated", (data: GatewayUrl) => {
-          this.onAuthorizedGatewayUpdated.next(data);
-        });
+      child.on("onAuthorizedGatewayUpdated", (data: GatewayUrl) => {
+        this.onAuthorizedGatewayUpdated.next(data);
+      });
 
-        child.on("onAuthorizedGatewayActivationFailed", (data: GatewayUrl) => {
-          this.onAuthorizedGatewayActivationFailed.next(data);
-        });
+      child.on("onAuthorizedGatewayActivationFailed", (data: GatewayUrl) => {
+        this.onAuthorizedGatewayActivationFailed.next(data);
+      });
 
-        child.on("onStateChannelCreated", (data: ActiveStateChannel) => {
-          this.onStateChannelCreated.next(data);
-        });
+      child.on("onStateChannelCreated", (data: ActiveStateChannel) => {
+        this.onStateChannelCreated.next(data);
+      });
 
-        child.on("onChainConnected", (data: ChainId) => {
-          this.onChainConnected.next(data);
-        });
+      child.on("onChainConnected", (data: ChainId) => {
+        this.onChainConnected.next(data);
+      });
 
-        child.on("onGovernanceChainConnected", (data: ChainId) => {
-          this.onGovernanceChainConnected.next(data);
-        });
+      child.on("onGovernanceChainConnected", (data: ChainId) => {
+        this.onGovernanceChainConnected.next(data);
+      });
 
-        child.on("onChainChanged", (data: ChainId) => {
-          this.onChainChanged.next(data);
-        });
+      child.on("onChainChanged", (data: ChainId) => {
+        this.onChainChanged.next(data);
+      });
 
-        child.on("onAccountChanged", (data: EthereumAccountAddress) => {
-          this.onAccountChanged.next(data);
-        });
+      child.on("onAccountChanged", (data: EthereumAccountAddress) => {
+        this.onAccountChanged.next(data);
+      });
 
-        child.on("onGovernanceChainChanged", (data: ChainId) => {
-          this.onGovernanceChainChanged.next(data);
-        });
+      child.on("onGovernanceChainChanged", (data: ChainId) => {
+        this.onGovernanceChainChanged.next(data);
+      });
 
-        child.on(
-          "onGovernanceAccountChanged",
-          (data: EthereumAccountAddress) => {
-            this.onGovernanceAccountChanged.next(data);
-          },
-        );
+      child.on("onGovernanceAccountChanged", (data: EthereumAccountAddress) => {
+        this.onGovernanceAccountChanged.next(data);
+      });
 
-        // Setup a listener for the "initialized" event.
-        child.on("initialized", () => {
-          console.log("proxy initialized");
-          // Resolve waitInitialized
-          resolve();
+      // Setup a listener for the "initialized" event.
+      child.on("initialized", (data: ChainId) => {
+        console.log("proxy initialized");
+        // Resolve waitInitialized
+        if (this.initializePromiseResolve != null) {
+          this.initializePromiseResolve();
+        }
 
-          // And mark us as initialized
-          this.coreInitialized = true;
-        });
+        // And mark us as initialized
+        this.coreInitialized = true;
+      });
 
-        // Setup a listener for the "registriesInitialized" event.
-        child.on("registriesInitialized", (data) => {
-          console.log("governanceInitialized data: ", data);
-          // Resolve waitRegistriesInitialized
-          const registriesInitializePromiseResolve =
-            this.registriesInitializePromiseResolve.get(
-              this.currentGovernanceChainId,
-            );
-          if (registriesInitializePromiseResolve != null) {
-            registriesInitializePromiseResolve();
-          }
+      // Setup a listener for the "registriesInitialized" event.
+      child.on("registriesInitialized", (data: ChainId) => {
+        // Resolve waitRegistriesInitialized
+        if (this.registriesInitializePromiseResolve != null) {
+          this.registriesInitializePromiseResolve();
+        }
 
-          // And mark us as registries initialized
-          this.coreRegistriesInitialized.set(
-            this.currentGovernanceChainId,
-            true,
-          );
-        });
+        // And mark us as registries initialized
+        this.coreRegistriesInitialized = true;
+      });
 
-        // Setup a listener for the "governanceInitialized" event.
-        child.on("governanceInitialized", (data) => {
-          // Resolve waitGovernanceInitialized
-          const governanceInitializePromiseResolve =
-            this.governanceInitializePromiseResolve.get(
-              this.currentGovernanceChainId,
-            );
-          if (governanceInitializePromiseResolve != null) {
-            governanceInitializePromiseResolve();
-          }
+      // Setup a listener for the "governanceInitialized" event.
+      child.on("governanceInitialized", (data: ChainId) => {
+        // Resolve waitGovernanceInitialized
+        if (this.governanceInitializePromiseResolve != null) {
+          this.governanceInitializePromiseResolve();
+        }
 
-          // And mark us as governance initialized
-          this.coreGovernanceInitialized.set(
-            this.currentGovernanceChainId,
-            true,
-          );
-        });
+        // And mark us as governance initialized
+        this.coreGovernanceInitialized = true;
+      });
 
-        // Setup a listener for the "paymentsInitialized" event.
-        child.on("paymentsInitialized", () => {
-          // Resolve waitGovernanceInitialized
-          const paymentsInitializePromiseResolve =
-            this.paymentsInitializePromiseResolve.get(
-              this.currentGovernanceChainId,
-            );
-          if (paymentsInitializePromiseResolve != null) {
-            paymentsInitializePromiseResolve();
-          }
+      // Setup a listener for the "paymentsInitialized" event.
+      child.on("paymentsInitialized", (data: ChainId) => {
+        // Resolve waitGovernanceInitialized
+        if (this.paymentsInitializePromiseResolve != null) {
+          this.paymentsInitializePromiseResolve();
+        }
 
-          // And mark us as payments initialized
-          this.corePaymentsInitialized.set(this.currentGovernanceChainId, true);
-        });
+        // And mark us as payments initialized
+        this.corePaymentsInitialized = true;
+      });
 
-        child.on("onGatewayIFrameDisplayRequested", (data: GatewayUrl) => {
-          this._displayCoreIFrame();
+      child.on("onGatewayIFrameDisplayRequested", (data: GatewayUrl) => {
+        this._displayCoreIFrame();
 
-          this.onGatewayIFrameDisplayRequested.next(data);
-        });
+        this.onGatewayIFrameDisplayRequested.next(data);
+      });
 
-        child.on("onGatewayIFrameCloseRequested", (data: GatewayUrl) => {
-          this._closeCoreIFrame();
+      child.on("onGatewayIFrameCloseRequested", (data: GatewayUrl) => {
+        this._closeCoreIFrame();
 
-          this.onGatewayIFrameCloseRequested.next(data);
-        });
+        this.onGatewayIFrameCloseRequested.next(data);
+      });
 
-        child.on("onCoreIFrameDisplayRequested", () => {
-          this._displayCoreIFrame();
+      child.on("onCoreIFrameDisplayRequested", () => {
+        this._displayCoreIFrame();
 
-          this.onCoreIFrameDisplayRequested.next();
-        });
+        this.onCoreIFrameDisplayRequested.next();
+      });
 
-        child.on("onCoreIFrameCloseRequested", () => {
-          this._closeCoreIFrame();
+      child.on("onCoreIFrameCloseRequested", () => {
+        this._closeCoreIFrame();
 
-          this.onCoreIFrameCloseRequested.next();
-        });
+        this.onCoreIFrameCloseRequested.next();
+      });
 
-        child.on("onInitializationRequired", () => {
-          this.onInitializationRequired.next();
-        });
+      child.on("onInitializationRequired", () => {
+        this.onInitializationRequired.next();
+      });
 
-        child.on("onPrivateCredentialsRequested", () => {
-          this.onPrivateCredentialsRequested.next();
-        });
+      child.on("onPrivateCredentialsRequested", () => {
+        this.onPrivateCredentialsRequested.next();
+      });
 
-        child.on("onWalletConnectOptionsDisplayRequested", () => {
-          this.onWalletConnectOptionsDisplayRequested.next();
-        });
+      child.on("onWalletConnectOptionsDisplayRequested", () => {
+        this.onWalletConnectOptionsDisplayRequested.next();
       });
     });
   }
@@ -390,7 +386,7 @@ export default class HypernetIFrameProxy
     throw new Error("Method not implemented.");
   }
 
-  public initialized(chainId?: ChainId): ResultAsync<boolean, never> {
+  public initialized(chainId?: ChainId): ResultAsync<boolean, ProxyError> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
       return okAsync(false);
@@ -398,30 +394,31 @@ export default class HypernetIFrameProxy
 
     // Return the current known status of coreInitialized. We request this
     // information as soon as the child is up.
-    return okAsync(this.coreInitialized);
+    return this._createCall("initialized", chainId);
   }
 
-  public waitInitialized(chainId?: ChainId): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this.waitInitializedPromise);
+  public waitInitialized(chainId?: ChainId): ResultAsync<void, ProxyError> {
+    if (this.coreInitialized === true) {
+      return this._createCall("waitInitialized", chainId);
+    } else {
+      return ResultAsync.fromSafePromise(this.waitInitializedPromise);
+    }
   }
 
   public registriesInitialized(
     chainId?: ChainId,
   ): ResultAsync<boolean, ProxyError> {
-    console.log("web registriesInitializedchainId", chainId);
     return this._createCall("registriesInitialized", chainId);
   }
 
   public waitRegistriesInitialized(
     chainId?: ChainId,
-  ): ResultAsync<void, never> {
-    console.log("web waitRegistriesInitialized", chainId);
-    const waitRegistriesInitializedPromise =
-      this.waitRegistriesInitializedPromise.get(this.currentGovernanceChainId);
-    if (waitRegistriesInitializedPromise == null) {
-      throw new Error("waitRegistriesInitializedPromise.get() failed");
+  ): ResultAsync<void, ProxyError> {
+    if (this.coreRegistriesInitialized === true) {
+      return this._createCall("waitRegistriesInitialized", chainId);
+    } else {
+      return ResultAsync.fromSafePromise(this.waitRegistriesInitializedPromise);
     }
-    return ResultAsync.fromSafePromise(waitRegistriesInitializedPromise);
   }
 
   public governanceInitialized(
@@ -432,13 +429,12 @@ export default class HypernetIFrameProxy
 
   public waitGovernanceInitialized(
     chainId?: ChainId,
-  ): ResultAsync<void, never> {
-    const waitGovernanceInitializedPromise =
-      this.waitGovernanceInitializedPromise.get(this.currentGovernanceChainId);
-    if (waitGovernanceInitializedPromise == null) {
-      throw new Error("waitGovernanceInitializedPromise.get() failed");
+  ): ResultAsync<void, ProxyError> {
+    if (this.coreGovernanceInitialized === true) {
+      return this._createCall("waitGovernanceInitialized", chainId);
+    } else {
+      return ResultAsync.fromSafePromise(this.waitGovernanceInitializedPromise);
     }
-    return ResultAsync.fromSafePromise(waitGovernanceInitializedPromise);
   }
 
   public paymentsInitialized(
@@ -447,13 +443,14 @@ export default class HypernetIFrameProxy
     return this._createCall("paymentsInitialized", chainId);
   }
 
-  public waitPaymentsInitialized(chainId?: ChainId): ResultAsync<void, never> {
-    const waitPaymentsInitializedPromise =
-      this.waitPaymentsInitializedPromise.get(this.currentGovernanceChainId);
-    if (waitPaymentsInitializedPromise == null) {
-      throw new Error("waitPaymentsInitializedPromise.get() failed");
+  public waitPaymentsInitialized(
+    chainId?: ChainId,
+  ): ResultAsync<void, ProxyError> {
+    if (this.corePaymentsInitialized === true) {
+      return this._createCall("waitPaymentsInitialized", chainId);
+    } else {
+      return ResultAsync.fromSafePromise(this.waitPaymentsInitializedPromise);
     }
-    return ResultAsync.fromSafePromise(waitPaymentsInitializedPromise);
   }
 
   public inControl(): Result<boolean, never> {

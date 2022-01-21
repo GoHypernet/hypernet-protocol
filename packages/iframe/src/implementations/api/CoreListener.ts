@@ -38,6 +38,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     @inject(IHypernetCoreType) protected core: IHypernetCore,
     @inject(ICoreUIServiceType) protected coreUIService: ICoreUIService,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
+    protected defaultGovernanceChainId: ChainId,
   ) {
     super();
   }
@@ -70,24 +71,24 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getInitializationStatus();
         }, data.callId);
       },
-      waitInitialized: (data: IIFrameCallData<void>) => {
+      waitInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
           return this.core.waitInitialized();
         }, data.callId);
       },
-      waitRegistriesInitialized: (data: IIFrameCallData<void>) => {
+      waitRegistriesInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitRegistriesInitialized();
+          return this.core.waitRegistriesInitialized(data.data);
         }, data.callId);
       },
-      waitGovernanceInitialized: (data: IIFrameCallData<void>) => {
+      waitGovernanceInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitGovernanceInitialized();
+          return this.core.waitGovernanceInitialized(data.data);
         }, data.callId);
       },
-      waitPaymentsInitialized: (data: IIFrameCallData<void>) => {
+      waitPaymentsInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitPaymentsInitialized();
+          return this.core.waitPaymentsInitialized(data.data);
         }, data.callId);
       },
       getEthereumAccounts: (data: IIFrameCallData<void>) => {
@@ -685,9 +686,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.retrieveGovernanceChainInformation();
         }, data.callId);
       },
-      switchProviderChain: (
-        data: IIFrameCallData<ChainId>,
-      ) => {
+      switchProviderChain: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
           return this.core.switchProviderChain(data.data);
         }, data.callId);
@@ -698,20 +697,24 @@ export class CoreListener extends ChildProxy implements ICoreListener {
   protected onModelActivated(parent: Postmate.ChildAPI): void {
     // We are going to just call waitInitialized() on the core, and emit an event
     // to the parent when it is initialized; combining a few functions.
-    this.core.waitInitialized().map(() => {
-      parent.emit("initialized");
+    this.core.waitInitialized(this.defaultGovernanceChainId).map(() => {
+      parent.emit("initialized", this.defaultGovernanceChainId);
     });
 
-    this.core.waitRegistriesInitialized().map(() => {
-      parent.emit("registriesInitialized");
-    });
+    this.core
+      .waitRegistriesInitialized(this.defaultGovernanceChainId)
+      .map(() => {
+        parent.emit("registriesInitialized", this.defaultGovernanceChainId);
+      });
 
-    this.core.waitGovernanceInitialized().map(() => {
-      parent.emit("governanceInitialized");
-    });
+    this.core
+      .waitGovernanceInitialized(this.defaultGovernanceChainId)
+      .map(() => {
+        parent.emit("governanceInitialized", this.defaultGovernanceChainId);
+      });
 
-    this.core.waitPaymentsInitialized().map(() => {
-      parent.emit("paymentsInitialized");
+    this.core.waitPaymentsInitialized(this.defaultGovernanceChainId).map(() => {
+      parent.emit("paymentsInitialized", this.defaultGovernanceChainId);
     });
 
     // We are going to relay the RXJS events

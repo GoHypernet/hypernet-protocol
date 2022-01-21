@@ -72,21 +72,21 @@ import { ChainInformation } from "@objects/ChainInformation";
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(chainId?: ChainId): ResultAsync<boolean, never>;
+  initialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
-  waitInitialized(chainId?: ChainId): ResultAsync<void, never>;
+  waitInitialized(chainId?: ChainId): ResultAsync<void, ProxyError>;
 
   registriesInitialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
-  waitRegistriesInitialized(chainId?: ChainId): ResultAsync<void, never>;
+  waitRegistriesInitialized(chainId?: ChainId): ResultAsync<void, ProxyError>;
 
   governanceInitialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
-  waitGovernanceInitialized(chainId?: ChainId): ResultAsync<void, never>;
+  waitGovernanceInitialized(chainId?: ChainId): ResultAsync<void, ProxyError>;
 
   paymentsInitialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
-  waitPaymentsInitialized(chainId?: ChainId): ResultAsync<void, never>;
+  waitPaymentsInitialized(chainId?: ChainId): ResultAsync<void, ProxyError>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve

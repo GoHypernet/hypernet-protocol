@@ -43,19 +43,13 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
 
   useEffect(() => {
     setLoading(true);
-    /* coreProxy
+    coreProxy
       .waitInitialized()
       .map(() => {
         retrieveGovernanceChainInformation();
         retrieveChainInformationList();
       })
-      .mapErr(handleCoreError); */
-
-    // TODO: remove setTimeout after fixing waitInitializers bug
-    setTimeout(() => {
-      retrieveGovernanceChainInformation();
-      retrieveChainInformationList();
-    }, 15000);
+      .mapErr(handleCoreError);
   }, []);
 
   const retrieveGovernanceChainInformation = () => {

@@ -409,6 +409,7 @@ export class HypernetCore implements IHypernetCore {
       this.onAccountChanged,
       this.onGovernanceChainChanged,
       this.onGovernanceAccountChanged,
+      config?.defaultGovernanceChainId,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(this.logUtils, config);
@@ -775,8 +776,10 @@ export class HypernetCore implements IHypernetCore {
   ): ResultAsync<void, never> {
     console.log("core waitRegistriesInitialized chainId", chainId);
     return this.contextProvider.getContext().andThen((context) => {
+      console.log("context: ", context);
       const governanceChainId =
         chainId || context.governanceChainInformation.chainId;
+      console.log("governanceChainId", governanceChainId);
 
       const registriesInitializePromise =
         this._registriesInitializePromise.get(governanceChainId);
@@ -893,7 +896,8 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider.getConfig(),
     ]).andThen((vals) => {
       const [context, config] = vals;
-      const governanceChainId = chainId || config.defaultGovernanceChainId;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
 
       return this.blockchainProvider.initialize(chainId).andThen(() => {
         context.initializeStatus.blockchainProviderInitialized.set(
@@ -901,25 +905,20 @@ export class HypernetCore implements IHypernetCore {
           true,
         );
 
-        const chainInfo =
-          chainId != null
-            ? config.chainInformation.get(chainId)
-            : config.defaultGovernanceChainInformation;
+        if (chainId != null) {
+          const chainInfo = config.chainInformation.get(chainId);
 
-        if (!(chainInfo instanceof GovernanceChainInformation)) {
-          return errAsync(
-            new InvalidParametersError(
-              "Provided Chain Id does not have chain information object",
-            ),
-          );
+          if (!(chainInfo instanceof GovernanceChainInformation)) {
+            return errAsync(
+              new InvalidParametersError(
+                "Provided Chain Id does not have chain information object",
+              ),
+            );
+          }
+
+          context.governanceChainInformation = chainInfo;
+          context.onGovernanceChainChanged.next(governanceChainId);
         }
-
-        context.governanceChainInformation = chainInfo;
-        console.log(
-          "context.governanceChainInformation",
-          context.governanceChainInformation,
-        );
-        context.onGovernanceChainChanged.next(governanceChainId);
 
         return this.contextProvider.setContext(context);
       });
@@ -956,7 +955,8 @@ export class HypernetCore implements IHypernetCore {
             }),
         ]).andThen((vals) => {
           const [config] = vals;
-          const governanceChainId = chainId || config.defaultGovernanceChainId;
+          const governanceChainId =
+            chainId || context.governanceChainInformation.chainId;
           const registriesInitializePromiseResolve =
             this._registriesInitializePromiseResolve.get(governanceChainId);
           if (registriesInitializePromiseResolve != null) {
@@ -993,7 +993,8 @@ export class HypernetCore implements IHypernetCore {
       this.initializeBlockchainProvider(chainId),
     ]).andThen((vals) => {
       const [context, config] = vals;
-      const governanceChainId = chainId || config.defaultGovernanceChainId;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
 
       return ResultUtils.combine([
         this.ipfsUtils.initialize(),
@@ -1028,13 +1029,15 @@ export class HypernetCore implements IHypernetCore {
   public initializePayments(
     chainId?: ChainId,
   ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+    console.log("initializePayments chainId", chainId);
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
       this.initializeBlockchainProvider(chainId),
     ]).andThen((vals) => {
       const [config, context] = vals;
-      const governanceChainId = chainId || config.defaultGovernanceChainId;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
 
       return this.initializeRegistries(chainId)
         .andThen(() => {
@@ -1097,7 +1100,7 @@ export class HypernetCore implements IHypernetCore {
               .getBrowserNode()
               .andThen((browserNode) => {
                 return browserNode.getRegisteredTransfers(
-                  config.defaultGovernanceChainId,
+                  context.governanceChainInformation.chainId,
                 );
               })
               .map((registeredTransfers) => {

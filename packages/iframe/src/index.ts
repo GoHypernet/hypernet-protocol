@@ -24,7 +24,8 @@ const paymentsRequiredParsed = jsonUtils.safelyParseJSON<boolean>(
 const debugParsed = jsonUtils.safelyParseJSON<boolean>(debug as string);
 
 const core: IHypernetCore = new HypernetCore({
-  defaultGovernanceChainId: ChainId(Number(defaultGovernanceChainId)) || undefined,
+  defaultGovernanceChainId:
+    ChainId(Number(defaultGovernanceChainId)) || undefined,
   governanceRequired:
     governanceRequiredParsed == null ? true : governanceRequiredParsed,
   paymentsRequired:
@@ -32,5 +33,10 @@ const core: IHypernetCore = new HypernetCore({
   debug: debugParsed == null ? undefined : debugParsed,
 });
 
-const coreListener = new CoreListener(core, coreUIService, logUtils);
+const coreListener = new CoreListener(
+  core,
+  coreUIService,
+  logUtils,
+  ChainId(Number(defaultGovernanceChainId)),
+);
 coreListener.activateModel();

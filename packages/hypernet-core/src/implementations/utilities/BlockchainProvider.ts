@@ -153,10 +153,7 @@ export class BlockchainProvider implements IBlockchainProvider {
       );
     }
 
-    console.log("this.provider", this.provider);
-
     return ResultAsync.fromPromise(this.provider.getNetwork(), (e) => {
-      console.log("this.provider.getNetwork e: ", e);
       return new BlockchainUnavailableError(
         "Could not get the network for the main blockchain provider!",
         e,
@@ -165,7 +162,6 @@ export class BlockchainProvider implements IBlockchainProvider {
       if (mainNetwork.chainId == chainId) {
         this.governanceProvider = this.provider;
         this.governanceSigner = this.provider!.getSigner();
-        console.log("this.governanceSigner: ", this.governanceSigner);
         return okAsync(undefined);
       } else {
         return errAsync(
@@ -250,8 +246,8 @@ export class BlockchainProvider implements IBlockchainProvider {
     ]).andThen((vals) => {
       const [config, context] = vals;
 
-      const governanceChainId = chainId || config.defaultGovernanceChainId;
-      console.log("governanceChainId: ", governanceChainId);
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
 
       let initializeProviderResult =
         this.initializeProviderResult.get(governanceChainId);
@@ -282,7 +278,6 @@ export class BlockchainProvider implements IBlockchainProvider {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 
             return this.setGovernanceSigner(governanceChainId).orElse((e) => {
-              console.log("setGovernanceSigner e: ", e);
               // TODO: send notification to the user telling him that he's connected to a wrong network and won't be able to use governance signers
               this.logUtils.error("Unable to set governance signer!");
               return okAsync(undefined);
@@ -298,13 +293,6 @@ export class BlockchainProvider implements IBlockchainProvider {
                 ),
               );
             }
-
-            console.log(
-              "config.defaultGovernanceChainInformation",
-              config.defaultGovernanceChainInformation,
-              chainInfo,
-              governanceChainId,
-            );
 
             const providers = chainInfo.providerUrls.map((providerUrl) => {
               return new ethers.providers.JsonRpcProvider(

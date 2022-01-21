@@ -67,15 +67,18 @@ export class ContextProvider implements IContextProvider {
     onAccountChanged: Subject<EthereumAccountAddress>,
     onGovernanceChainChanged: Subject<ChainId>,
     onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
+    defaultGovernanceChainId?: ChainId,
   ) {
-    const mainnetChainInfo = chainConfig.get(ChainId(1));
-    if (mainnetChainInfo == null) {
+    const governanceChainInfo = chainConfig.get(
+      defaultGovernanceChainId || ChainId(1),
+    );
+    if (governanceChainInfo == null) {
       throw new Error("Main net chain information does not exist!");
     }
 
-    if (!(mainnetChainInfo instanceof GovernanceChainInformation)) {
+    if (!(governanceChainInfo instanceof GovernanceChainInformation)) {
       throw new Error(
-        `Invalid configuration! Governance chain ${mainnetChainInfo} is not a GovernanceChainInformation`,
+        `Invalid configuration! Governance chain ${governanceChainInfo} is not a GovernanceChainInformation`,
       );
     }
 
@@ -85,7 +88,7 @@ export class ContextProvider implements IContextProvider {
       null,
       false,
       new InitializeStatus(new Map(), new Map(), new Map(), new Map()),
-      mainnetChainInfo,
+      governanceChainInfo,
       onControlClaimed,
       onControlYielded,
       onPushPaymentSent,
