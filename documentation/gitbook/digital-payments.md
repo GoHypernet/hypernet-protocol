@@ -8,7 +8,7 @@
 
 A successful payment protocol must solve problems on both sides of the market. On the consumer side, users expect a
 payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol
-integrates Connext's [Vector](https://github.com/connext/vector) payment channel engine to enable fast, secure, microtransactions,
+integrates Connext's [Vector](https://github.com/connext/vector) payment channel engine to enable fast and secure microtransactions,
 with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The
 Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements
 of their particular business, and tools to streamline software integration. Meeting these needs has led to the development of a 
