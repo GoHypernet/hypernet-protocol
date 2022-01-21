@@ -66,8 +66,8 @@ key).
 
 It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
 [Gateway registry](/packages/contracts/contracts/identity/README.md#gateways) in order for the Hypernet Core infrastructure to allow their service to process payments. 
-Registration requires locking in a significant amount of Hypertoken to the registry contract. This deposit will be forfeited in the scenario that the Hypernet DAO votes 
-to remove them from participating in the payment network due. The service provider choose to recover their deposit by burning their registration and exiting the payment 
+Registration requires locking a significant amount of Hypertoken into the Gateways registry contract. This deposit will be forfeited in the scenario that the Hypernet DAO votes 
+to remove them from participating in the payment network. The service provider can choose to recover their deposit by burning their registration and exiting the payment 
 network.
 
 ## Hypernet Core as a _Serverless_ Payment Infrastructure Protocol
