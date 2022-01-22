@@ -1,6 +1,6 @@
 # Casting Your Vote
 
-Voting for active proposals in the Hypernet Protocol DAO is fascilitated by the opensouce Governance hosting in the
+Voting for active proposals in the Hypernet Protocol DAO is fascilitated by the open source Governance app hosted in the
 Hypernet Foundation [launchpad](rinkeby.launchpad.hypernet.foundation). You must hold a non-zero amount of Hypertoken 
 in your Ethereum account in order to participate, and each token counts as single vote. The steps for particpants are 
 as follows:
