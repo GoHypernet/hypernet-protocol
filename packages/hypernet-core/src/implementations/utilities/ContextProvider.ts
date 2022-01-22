@@ -67,6 +67,7 @@ export class ContextProvider implements IContextProvider {
     onAccountChanged: Subject<EthereumAccountAddress>,
     onGovernanceChainChanged: Subject<ChainId>,
     onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
+    onGovernanceSignerUnavailable: Subject<void>,
     defaultGovernanceChainId?: ChainId,
   ) {
     const governanceChainInfo = chainConfig.get(
@@ -124,6 +125,7 @@ export class ContextProvider implements IContextProvider {
       onAccountChanged,
       onGovernanceChainChanged,
       onGovernanceAccountChanged,
+      onGovernanceSignerUnavailable,
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {
@@ -196,6 +198,7 @@ export class ContextProvider implements IContextProvider {
           this.context.onAccountChanged,
           this.context.onGovernanceChainChanged,
           this.context.onGovernanceAccountChanged,
+          this.context.onGovernanceSignerUnavailable,
         ),
       );
     }

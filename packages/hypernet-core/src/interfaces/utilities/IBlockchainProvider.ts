@@ -52,7 +52,13 @@ export interface IBlockchainProvider {
   isMetamask(): boolean;
   setGovernanceSigner(
     chainId: ChainId,
-  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError>;
+  ): ResultAsync<
+    void,
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | GovernanceSignerUnavailableError
+  >;
+  getMainProviderChainId(): ResultAsync<ChainId, BlockchainUnavailableError>;
 }
 
 export const IBlockchainProviderType = Symbol.for("IBlockchainProvider");

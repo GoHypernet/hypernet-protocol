@@ -56,4 +56,12 @@ export const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  switchChainButton: (props: any) => ({
+    padding: 8,
+    border: `1px solid ${colors.STATUS_RED}`,
+    borderRadius: 3,
+    cursor: "pointer",
+    textAlign: "left",
+    marginLeft: 15,
+  }),
 }));

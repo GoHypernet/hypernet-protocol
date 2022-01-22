@@ -22,8 +22,6 @@ import {
   IHypernetCore,
   GatewayAuthorizationDeniedError,
   BigNumberString,
-  MessagingError,
-  RouterChannelUnknownError,
   ActiveStateChannel,
   ChainId,
   GatewayTokenInfo,
@@ -132,6 +130,7 @@ export default class HypernetIFrameProxy
     this.onAccountChanged = new Subject();
     this.onGovernanceChainChanged = new Subject();
     this.onGovernanceAccountChanged = new Subject();
+    this.onGovernanceSignerUnavailable = new Subject();
 
     this.initializePromiseResolve = null;
     this.waitInitializedPromise = new Promise((resolve) => {
@@ -152,29 +151,6 @@ export default class HypernetIFrameProxy
     this.waitPaymentsInitializedPromise = new Promise((resolve) => {
       this.paymentsInitializePromiseResolve = resolve;
     });
-
-    /* chainConfig.forEach((chainInformation, chainId) => {
-      this.waitRegistriesInitializedPromise.set(
-        chainId,
-        new Promise((resolve) => {
-          this.registriesInitializePromiseResolve.set(chainId, resolve);
-        }),
-      );
-
-      this.waitGovernanceInitializedPromise.set(
-        chainId,
-        new Promise((resolve) => {
-          this.governanceInitializePromiseResolve.set(chainId, resolve);
-        }),
-      );
-
-      this.waitPaymentsInitializedPromise.set(
-        chainId,
-        new Promise((resolve) => {
-          this.paymentsInitializePromiseResolve.set(chainId, resolve);
-        }),
-      );
-    }); */
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -296,9 +272,12 @@ export default class HypernetIFrameProxy
         this.onGovernanceAccountChanged.next(data);
       });
 
+      child.on("onGovernanceSignerUnavailable", () => {
+        this.onGovernanceSignerUnavailable.next();
+      });
+
       // Setup a listener for the "initialized" event.
       child.on("initialized", (data: ChainId) => {
-        console.log("proxy initialized");
         // Resolve waitInitialized
         if (this.initializePromiseResolve != null) {
           this.initializePromiseResolve();
@@ -1265,10 +1244,23 @@ export default class HypernetIFrameProxy
     return this._createCall("retrieveGovernanceChainInformation", null);
   }
 
-  public switchProviderChain(
+  public initializeForChainId(
     chainId: ChainId,
   ): ResultAsync<void, CoreInitializationErrors> {
-    return this._createCall("switchProviderChain", chainId);
+    return this._createCall("initializeForChainId", chainId);
+  }
+
+  public switchProviderNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | ProxyError> {
+    return this._createCall("switchProviderNetwork", chainId);
+  }
+
+  public getMainProviderChainId(): ResultAsync<
+    ChainId,
+    BlockchainUnavailableError | ProxyError
+  > {
+    return this._createCall("getMainProviderChainId", null);
   }
 
   private _displayCoreIFrame(): void {
@@ -1332,4 +1324,5 @@ export default class HypernetIFrameProxy
   public onAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceChainChanged: Subject<ChainId>;
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
+  public onGovernanceSignerUnavailable: Subject<void>;
 }

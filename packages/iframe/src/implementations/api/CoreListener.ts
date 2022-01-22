@@ -686,9 +686,19 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.retrieveGovernanceChainInformation();
         }, data.callId);
       },
-      switchProviderChain: (data: IIFrameCallData<ChainId>) => {
+      initializeForChainId: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.switchProviderChain(data.data);
+          return this.core.initializeForChainId(data.data);
+        }, data.callId);
+      },
+      switchProviderNetwork: (data: IIFrameCallData<ChainId>) => {
+        this.returnForModel(() => {
+          return this.core.switchProviderNetwork(data.data);
+        }, data.callId);
+      },
+      getMainProviderChainId: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getMainProviderChainId();
         }, data.callId);
       },
     });
@@ -863,6 +873,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
     this.core.onCeramicAuthenticationSucceeded.subscribe(() => {
       this.coreUIService.renderCeramicAuthenticationSucceededUI();
+    });
+
+    this.core.onGovernanceSignerUnavailable.subscribe(() => {
+      parent.emit("onGovernanceSignerUnavailable");
     });
   }
 }

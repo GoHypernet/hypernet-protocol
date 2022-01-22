@@ -793,9 +793,18 @@ export interface IHypernetCore {
     ProxyError
   >;
 
-  switchProviderChain(
+  initializeForChainId(
     chainId: ChainId,
   ): ResultAsync<void, CoreInitializationErrors>;
+
+  switchProviderNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | ProxyError>;
+
+  getMainProviderChainId(): ResultAsync<
+    ChainId,
+    BlockchainUnavailableError | ProxyError
+  >;
 
   /**
    * Observables for seeing what's going on
@@ -834,6 +843,7 @@ export interface IHypernetCore {
   onAccountChanged: Subject<EthereumAccountAddress>;
   onGovernanceChainChanged: Subject<ChainId>;
   onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
+  onGovernanceSignerUnavailable: Subject<void>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");
