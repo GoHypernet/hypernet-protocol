@@ -4,8 +4,7 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
-// const { NFR } = require("/tasks/constants.js");
-const { NFR} = require("../tasks/constants.js");
+const {NFR} = require("../tasks/constants.js");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -18,8 +17,6 @@ async function main() {
   const [owner] = await hre.ethers.getSigners();
   console.log("Deployment Wallet Address:", owner.address);
   console.log("RPC URL:", hre.network.config.url);
-
-  const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   // deploy enumerable registry contract
   const EnumerableRegistry = await ethers.getContractFactory(

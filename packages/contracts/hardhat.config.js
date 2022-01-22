@@ -44,10 +44,6 @@ module.exports = {
         auto: true,
         interval: [3000, 6000],
       },
-    //   forking: {
-    //     url: "https://rinkeby.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931",
-    //     blockNumber: 10021764
-    //   },
       chainId: 31337,
     },
     dev: {
@@ -58,14 +54,6 @@ module.exports = {
       chainId: 31337,
       url: "http://127.0.0.1:8569",
     },
-    halfdev: {
-        accounts: {
-          accountsBalance: "10000000000000000000000",
-          mnemonic,
-        },
-        chainId: 31337,
-        url: 'http://127.0.0.1:8569'
-      },
     DevNet: {
       accounts: {
         mnemonic,
@@ -74,7 +62,7 @@ module.exports = {
     },
     rinkeby: { // ethereum tesnet
       accounts: { mnemonic },
-      chainId: 31337,
+      chainId: 4,
       url: urlOverride || "https://station-hundred-assure-neighborhood.trycloudflare.com/http/",
     },
     mumbai: { // polygon testnet

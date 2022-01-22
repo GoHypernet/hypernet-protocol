@@ -1,5 +1,4 @@
-const { HT, RF, NFR,  BM, factoryAddress, hAddress } = require("./constants.js");
-const IBEACON = require("../artifacts/@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol/UpgradeableBeacon.json")
+const { HT, RF, NFR,  BM, IBEACON, factoryAddress, hAddress } = require("./constants.js");
 const csv=require('csvtojson')
 
 task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon proxies and implementation contracts.")
@@ -396,12 +395,14 @@ task("registryEntryByTokenID", "Prints NonFungible Identity Data.")
 
     const tokenId = await registryHandle.tokenByIndex(tokenindex);
     const tokenURI = await registryHandle.tokenURI(tokenId);
+    const tokenURINoBase = await registryHandle.tokenURINoBase(tokenId);
     const tokenOwner = await registryHandle.ownerOf(tokenId);
     const tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
 
     console.log("Owner of NFI:", tokenOwner);
     console.log("Token ID:", tokenId.toString());
-    console.log("NFI Data:", tokenURI);
+    console.log("Token URI:", tokenURI);
+    console.log("NFI Data:", tokenURINoBase);
     console.log("NFI label:", tokenLabel);
   });
 
@@ -524,7 +525,6 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
       NFR.abi,
       accounts[0],
     );
-
 
     // call registerByToken on the NFR
     tx = await registryHandle.register(

@@ -1,5 +1,4 @@
-const {  HT, HG, RF, NFR, govAddress, timelockAddress, factoryAddress, hAddress}  = require("./constants.js");
-const IBEACON = require("../artifacts/@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol/UpgradeableBeacon.json")
+const {  HT, HG, RF, NFR, govAddress, timelockAddress, factoryAddress, hAddress, IBEACON }  = require("./constants.js");
 
 task("delegateVote", "Delegate your voting power")
   .addParam("delegate", "Address of the delegate (can be self)")
@@ -136,7 +135,7 @@ task("cancelProposal", "Cancel a proposal if it is your or if proposer is below 
     const tx_rcp = await tx.wait();
 });
 
-task("proposeNewEnumeralNFRBeacon", "Propose a new beacon implementation for all NFRs.")
+task("proposeNewEnumeratedNFRBeacon", "Propose a new beacon implementation for all NFRs.")
   .addParam("address", "Address of the proposed NFR Beacon.")
   .addParam("ipfshash", "IPFS hash of the proposal description.")
   .addParam("proposalname", "Display name of the proposal for UI.")
@@ -177,6 +176,56 @@ task("proposeNewEnumeralNFRBeacon", "Propose a new beacon implementation for all
 
     const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
       [enumRegBeaconAddr],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+});
+
+task("proposeNewNonEnumeratedNFRBeacon", "Propose a new beacon implementation for all NFRs.")
+  .addParam("address", "Address of the proposed NFR Beacon.")
+  .addParam("ipfshash", "IPFS hash of the proposal description.")
+  .addParam("proposalname", "Display name of the proposal for UI.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const address = taskArgs.address;
+    const ipfshash = taskArgs.ipfshash;
+    const proposalname = taskArgs.proposalname;
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(
+        factoryAddress(),
+        RF.abi,
+        accounts[0],
+      );
+
+    const regBeaconAddr = await factoryHandle.registryBeacon();
+    const regBeaconHandle = new hre.ethers.Contract(
+        regBeaconAddr,
+        IBEACON.abi,
+        accounts[0],
+      );
+
+    const proposalDescription = `${proposalname}:${ipfshash}`;
+    console.log("Proposal Description:", proposalDescription);
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = regBeaconHandle.interface.encodeFunctionData(
+      "upgradeTo",
+      [address],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [regBeaconAddr],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [regBeaconAddr],
       [0],
       [transferCalldata],
       proposalDescription,
