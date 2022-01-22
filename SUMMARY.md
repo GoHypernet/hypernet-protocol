@@ -3,6 +3,8 @@
 ## Hypernet Protocol
 * [Introduction](README.md)
 * [Governance](/packages/contracts/contracts/governance/README.md)
+  * [Casting Your Vote](/documentation/gitbook/casting-your-vote.md)
+  * [Executing a Successful Proposal](/documentation/gitbook/executing-a-proposal.md)
 * [Digital Identity](/packages/contracts/contracts/identity/README.md)
   * [Registry Modules](/packages/contracts/contracts/modules/README.md)
   * [Access Control](/packages/contracts/contracts/access/README.md)
