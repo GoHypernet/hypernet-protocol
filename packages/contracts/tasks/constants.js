@@ -1,8 +1,9 @@
-const HT = require("../deployments/fuji/governance/Hypertoken.sol/Hypertoken.json");
-const HG = require("../deployments/fuji/governance/HypernetGovernor.sol/HypernetGovernor.json");
-const RF = require("../deployments/fuji/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
-const NFR = require("../deployments/fuji/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
-const BM = require("../deployments/fuji/modules/BatchModule.sol/BatchModule.json");
+const HT = require("../deployments/rinkeby-update-1-21-2022/governance/Hypertoken.sol/Hypertoken.json");
+const HG = require("../deployments/rinkeby-update-1-21-2022/governance/HypernetGovernor.sol/HypernetGovernor.json");
+const RF = require("../deployments/rinkeby-update-1-21-2022/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
+const NFR = require("../deployments/rinkeby-update-1-21-2022/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
+const BM = require("../deployments/rinkeby-update-1-21-2022/modules/BatchModule.sol/BatchModule.json");
+const IBEACON = require("./BeaconProxy.json");
 
 // define some dynamic imports
 const hAddress = function () {
@@ -79,6 +80,7 @@ module.exports = {
   RF,
   NFR,
   BM,
+  IBEACON,
   govAddress,
   timelockAddress,
   factoryAddress,

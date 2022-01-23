@@ -312,9 +312,13 @@ describe("Enumerated Registry", function () {
     tx.wait();
 
     // when baseURI is set, the tokenURI is the baseURI + registration data
-    tx.wait();
     expect(await registry.tokenURI(1)).to.equal(
         `${baseURI}${registrationData}`,
+    );
+
+    // now check that we can strip the baseURI from the tokenURI
+    expect(await registry.tokenURINoBase(1)).to.equal(
+        registrationData,
     );
   });
 

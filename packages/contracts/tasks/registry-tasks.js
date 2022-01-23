@@ -1,5 +1,4 @@
-const { HT, RF, NFR,  BM, factoryAddress, hAddress } = require("./constants.js");
-const IBEACON = require("../artifacts/@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol/UpgradeableBeacon.json")
+const { HT, RF, NFR,  BM, IBEACON, factoryAddress, hAddress } = require("./constants.js");
 const csv=require('csvtojson')
 
 task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon proxies and implementation contracts.")
@@ -21,7 +20,7 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
         accounts[0],
       );
 
-      const enumRegBeaconHandle = new hre.ethers.Contract(
+    const enumRegBeaconHandle = new hre.ethers.Contract(
         enumRegBeaconAddr,
         IBEACON.abi,
         accounts[0],
@@ -105,6 +104,12 @@ task("registryParameters", "Prints NFR  parameters.")
       REGISTRAR_ROLE,
       0,
     );
+
+    const REGISTRAR_ROLE_ADMIN = registryHandle.REGISTRAR_ROLE_ADMIN();
+    const registrarAdminAddress = await registryHandle.getRoleMember(
+        REGISTRAR_ROLE_ADMIN,
+      0,
+    );
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
     const registrationToken = await registryHandle.registrationToken();
@@ -113,12 +118,13 @@ task("registryParameters", "Prints NFR  parameters.")
     const allowTransfers = await registryHandle.allowTransfers();
     const registrationFee = await registryHandle.registrationFee();
     const primaryRegistry = await registryHandle.primaryRegistry();
-    //const baseURI = await registryHandle.baseURI();
+    const baseURI = await registryHandle.baseURI();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
-    //console.log("Base URI:", baseURI);
+    console.log("Base URI:", baseURI);
     console.log("Registry Address:", registryAddress);
     console.log("Registrar:", registrarAddress);
+    console.log("Registrar Admin:", registrarAdminAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
     console.log("Label Updating Allowed:", allowLabelChange);
     console.log("Storage Updating Allowed:", allowStorageUpdate);
@@ -389,12 +395,14 @@ task("registryEntryByTokenID", "Prints NonFungible Identity Data.")
 
     const tokenId = await registryHandle.tokenByIndex(tokenindex);
     const tokenURI = await registryHandle.tokenURI(tokenId);
+    const tokenURINoBase = await registryHandle.tokenURINoBase(tokenId);
     const tokenOwner = await registryHandle.ownerOf(tokenId);
     const tokenLabel = await registryHandle.reverseRegistryMap(tokenId);
 
     console.log("Owner of NFI:", tokenOwner);
     console.log("Token ID:", tokenId.toString());
-    console.log("NFI Data:", tokenURI);
+    console.log("Token URI:", tokenURI);
+    console.log("NFI Data:", tokenURINoBase);
     console.log("NFI label:", tokenLabel);
   });
 
@@ -517,7 +525,6 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
       NFR.abi,
       accounts[0],
     );
-
 
     // call registerByToken on the NFR
     tx = await registryHandle.register(
