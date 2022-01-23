@@ -15,7 +15,7 @@ diagram for the proposal lifecycle.
 
 ![Proposal sequence diagram.](/documentation/images/governance-proposal-sequence-diagram.svg)
 
-This particular governance architecture has been adopted by a number of highly successful projects including
+This particular governance architecture has been adopted by a number of highly influential projects including
 [Uniswap](https://docs.uniswap.org/protocol/reference/Governance/governance-reference) and has proven quite
 successful in practice at adopting beneficial proposals to protocol upgrades while preventing
 [adversarial attacks](https://docs.uniswap.org/protocol/concepts/governance/adversarial-circumstances).
