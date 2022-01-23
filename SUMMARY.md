@@ -2,6 +2,7 @@
 
 ## Hypernet Protocol
 * [Introduction](README.md)
+  * [Definitions and Key Terms](/documentation/gitbook/definitions-and-key-terms.md)
   * [Protocol Repository Contents](/documentation/gitbook/protocol-repository-contents.md)
 * [Governance](/packages/contracts/contracts/governance/README.md)
   * [Casting Your Vote](/documentation/gitbook/casting-your-vote.md)
@@ -10,6 +11,7 @@
   * [Registry Modules](/packages/contracts/contracts/modules/README.md)
   * [Access Control](/packages/contracts/contracts/access/README.md)
 * [Digital Payments](/documentation/gitbook/digital-payments.md)
+  * [Payment Gateways](/documentation/gitbook/payment-gateways.md)
 
 ## For Developers
 
