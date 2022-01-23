@@ -2,7 +2,7 @@
   <img src="/documentation/images/hypernet-protocol-black.svg" width="500">
 </p>
 
-# Hypernet Identity Registries
+# Hypernet Protocol Digital Identity
 
 ## Summary
 
@@ -18,7 +18,7 @@ upon the creation of a new NFR.
 
 ## Functionality
 
-Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token (NFT) standard and therefor has
+Non-Fungible Registries are a multi-purpose extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token (NFT) standard and therefor has
 all methods specified by the base standard specification. Additionally, the NFR has several customizable attributes. They can be deployed 
 [with](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol) or 
 [without](/packages/contracts/contracts/identity/NonFungibleRegistryUpgradeable.sol) the enumeration property and every entry is an ownable 
