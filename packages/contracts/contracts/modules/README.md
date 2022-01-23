@@ -18,7 +18,7 @@ A list of officially supported modules are curated by the Hypernet Protocol DAO 
 [Hypernet launchpad](https://rinkeby.launchpad.hypernet.foundation/registries) dashboard makes it easy to add a module to an NFR in which 
 you occupy the `REGISTRAR_ROLE_ADMIN` role. Adding and removing modules to an NFR requires submitting 1 transaction each. 
 
-## Offical Modules
+## Official Modules
 
 The name and contract address of officially supported modules are given by the 
 [Registry Modules](https://rinkeby.launchpad.hypernet.foundation/registries/Registry%20Modules/entries) NFR which can be viewed from the 
