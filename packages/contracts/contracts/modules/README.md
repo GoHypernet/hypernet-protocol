@@ -42,6 +42,6 @@ to use this module can be seen in the unit tests directory.
 ### Merkle drop
 
 The [Uniswap](https://github.com/Uniswap/merkle-distributor) team was an early pioneer in setting the standard for large-scale airdrops in settings 
-where gas price is a concern. This module can be added to a NFR do enable merkle drop capability in an NFR. The merkle root must be declared in the NFR 
+where gas price is a concern. This module can be added to a NFR to enable merkle drop capability in an NFR. The merkle root must be declared in the NFR 
 (and optionally frozen) using the the [`setMerkleRoot`](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol#L168) function. 
 An example of the life-cycle of a merkle drop can be seen [here](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L549). 
