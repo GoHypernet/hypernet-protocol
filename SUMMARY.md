@@ -2,6 +2,7 @@
 
 ## Hypernet Protocol
 * [Introduction](README.md)
+  * [Protocol Repository Contents](/documentation/gitbook/protocol-repository-contents.md)
 * [Governance](/packages/contracts/contracts/governance/README.md)
   * [Casting Your Vote](/documentation/gitbook/casting-your-vote.md)
   * [Executing a Successful Proposal](/documentation/gitbook/executing-a-proposal.md)
@@ -12,7 +13,7 @@
 
 ## For Developers
 
-* [Getting Started](/getting-started.md)
+* [Getting Started](/documentation/gitbook/getting-started.md)
 * [Contract Deployment Addresses](/packages/contracts/deployments.md)
 * [Hypernet Core](/packages/hypernet-core/README.md)
 * [Contracts](/packages/contracts/README.md)
