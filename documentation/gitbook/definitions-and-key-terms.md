@@ -43,7 +43,7 @@ non-fungible token standard. NFRs are multipurpose and have extensible logic via
 
 ## Non-Fungible Identity (NFI)
 
-Non-Fungible Identities are entries within an [NFR](/documentation/gitbook/difinitions-and-key-terms.md). An NFI consists of the following data:
+Non-Fungible Identities are entries within an [NFR](/documentation/gitbook/definitions-and-key-terms.md#non-fungible-registry-nfr). An NFI consists of the following data:
 
 1. A unique token ID number
 2. An optional unique label (usually human-readable, like a URL)
@@ -58,11 +58,11 @@ Other consensus protocols that are not based on the [Ethereum Virtual Machine](h
 
 ## Hypertoken
 
-The [EIP20](https://eips.ethereum.org/EIPS/eip-20)-compatible governance token of the Hypernet Protocol (token symbol `H`). It's two primary use cases are for proposing and voting on 
-protocol upgrades via the DAO and as a collateral token in the layer 2 [payments network](/documentation/gitbook/digital-payments.md).
+The [EIP20](https://eips.ethereum.org/EIPS/eip-20)-compatible governance token (1 token = 1 vote) of the Hypernet Protocol (token symbol `H`). It's two primary use cases are for proposing and voting on 
+protocol upgrades via the DAO and as a collateral token in the [layer 2](/documentation/gitbook/definitions-and-key-terms.md#layer-2) [payments network](/documentation/gitbook/digital-payments.md).
 
 ## Decentralized Autonomous Organization (DAO)
 
 A [DAO](https://en.wikipedia.org/wiki/Decentralized_autonomous_organization) is the entity and mechanism by which upgrades to the Hypernet Protocol are proposed and exectued on the 
-blockchain. The Hypernet Protocol DAO is implemented in solidity and currently deployed on the Rinkeby Ethereum testnet. More information about how governance is implement in the 
-Hyperent Protocol can be found [here](/packages/contracts/contracts/governance/README.md). 
+blockchain. The Hypernet Protocol DAO is implemented in [Solidity](https://docs.soliditylang.org/) and currently deployed on the Rinkeby Ethereum testnet. More information about how 
+governance is implemented in the Hyperent Protocol can be found [here](/packages/contracts/contracts/governance/README.md). 
