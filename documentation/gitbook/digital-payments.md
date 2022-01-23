@@ -8,7 +8,7 @@
 
 A successful payment protocol must solve problems on both sides of the market. On the consumer side, users expect a
 payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol
-integrates Connext's [Vector](https://github.com/connext/vector) payment channel engine to enable fast, secure, microtransactions,
+integrates Connext's [Vector](https://github.com/connext/vector) payment channel engine to enable fast and secure microtransactions,
 with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The
 Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements
 of their particular business, and tools to streamline software integration. Meeting these needs has led to the development of a 
@@ -66,8 +66,8 @@ key).
 
 It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
 [Gateway registry](/packages/contracts/contracts/identity/README.md#gateways) in order for the Hypernet Core infrastructure to allow their service to process payments. 
-Registration requires locking in a significant amount of Hypertoken to the registry contract. This deposit will be forfeited in the scenario that the Hypernet DAO votes 
-to remove them from participating in the payment network due. The service provider choose to recover their deposit by burning their registration and exiting the payment 
+Registration requires locking a significant amount of Hypertoken into the Gateways registry contract. This deposit will be forfeited in the scenario that the Hypernet DAO votes 
+to remove them from participating in the payment network. The service provider can choose to recover their deposit by burning their registration and exiting the payment 
 network.
 
 ## Hypernet Core as a _Serverless_ Payment Infrastructure Protocol
