@@ -32,14 +32,14 @@ Vector can be found at the below link.
 
 ## **Payment Channel**
 
-[Payment channels](https://dl.acm.org/doi/pdf/10.1145/3243734.3243856?casa_token=ySJOdlwgPCcAAAAA%3AnkfO9uHl7fZ-c7C0_L3xrQSHhujnqNIJgtkB7Gt2yE6MZV9145qbyHsGHQaSV1NGZBNousWk-wQ) 
-are a layer 2 technique that is a specialization of state-channels. They are designed specifically for scaling trustless value transfers without having to submit 
-transactions directly to a layer 1 network. This is accomplished via a two-party consensus protocol in which digital signatures are shared directly between two
-participants via a p2p communication layer. 
+[Payment channels](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9300150) are a [layer 2](/documentation/gitbook/definitions-and-key-terms.md#layer-2) technique that is a 
+specialization of state-channels. They are designed specifically for scaling trustless value transfers without having to submit transactions directly to a 
+[layer 1](/documentation/gitbook/definitions-and-key-terms.md#layer-1) network. This is accomplished via a two-party consensus protocol in which digital 
+signatures are shared directly between two participants via a p2p communication layer. 
 
 ## Non-Fungible Registry (NFR)
 
-Non-Fungible Registries are the primary datastructure of the Hypernet Protocol identity stack. NFRs are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
+Non-Fungible Registries are the primary data structure of the Hypernet Protocol identity stack. NFRs are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
 non-fungible token standard. NFRs are multipurpose and have extensible logic via registry [modules](/packages/contracts/contracts/modules/README.md). See the section on 
 [digital identity](/packages/contracts/contracts/identity/README.md) for more details. 
 
