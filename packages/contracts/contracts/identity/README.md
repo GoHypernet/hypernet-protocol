@@ -81,7 +81,7 @@ users or burned to reclaim some of the Hypertoken that was staked in its creatio
 ### [Gateways](https://rinkeby.launchpad.hypernet.foundation/registries/Gateways/entries)
 
 This NFR tracks official payment processing gateway providers. An NFI must be claimed in this registry for a payment processor, implemented on top of the 
-Hypernet Protocol, to function withing the Hypernet Protocol network. The `label` of an NFI in this registry denotes the publicly accessible URL which hosts 
+Hypernet Protocol, to function within the Hypernet Protocol network. The `label` of an NFI in this registry denotes the publicly accessible URL which hosts 
 the payment processor's iframe for interacting with the payment processor. Then `tokenURI` consists of the follow json attributes:
 
 - `address`: address of the signing wallet used for code authenticity verification of the gateway provider's iframe

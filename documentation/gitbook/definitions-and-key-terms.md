@@ -1,5 +1,7 @@
 # Definitions & Key Terms
 
+This page contains a list of important terms and their definitions used throughout the documentation. 
+
 ## **Layer 1**
 
 This is an alternative name for a base-layer consensus network. Networks like Bitcoin, Ethereum, and Avalanche are examples of *layer 1* protocols. 

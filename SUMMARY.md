@@ -12,6 +12,7 @@
   * [Access Control](/packages/contracts/contracts/access/README.md)
 * [Digital Payments](/documentation/gitbook/digital-payments.md)
   * [Payment Gateways](/documentation/gitbook/payment-gateways.md)
+  * [Liquidity Providers](/documentation/gitbook/liquidity-providers.md)
 
 ## For Developers
 
