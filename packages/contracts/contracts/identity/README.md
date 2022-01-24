@@ -2,7 +2,7 @@
   <img src="/documentation/images/hypernet-protocol-black.svg" width="500">
 </p>
 
-# Hypernet Identity Registries
+# Hypernet Protocol Digital Identity
 
 ## Summary
 
@@ -18,7 +18,7 @@ upon the creation of a new NFR.
 
 ## Functionality
 
-Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token (NFT) standard and therefor has
+Non-Fungible Registries are a multi-purpose extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token (NFT) standard and therefor has
 all methods specified by the base standard specification. Additionally, the NFR has several customizable attributes. They can be deployed 
 [with](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol) or 
 [without](/packages/contracts/contracts/identity/NonFungibleRegistryUpgradeable.sol) the enumeration property and every entry is an ownable 
@@ -81,7 +81,7 @@ users or burned to reclaim some of the Hypertoken that was staked in its creatio
 ### [Gateways](https://rinkeby.launchpad.hypernet.foundation/registries/Gateways/entries)
 
 This NFR tracks official payment processing gateway providers. An NFI must be claimed in this registry for a payment processor, implemented on top of the 
-Hypernet Protocol, to function withing the Hypernet Protocol network. The `label` of an NFI in this registry denotes the publicly accessible URL which hosts 
+Hypernet Protocol, to function within the Hypernet Protocol network. The `label` of an NFI in this registry denotes the publicly accessible URL which hosts 
 the payment processor's iframe for interacting with the payment processor. Then `tokenURI` consists of the follow json attributes:
 
 - `address`: address of the signing wallet used for code authenticity verification of the gateway provider's iframe
