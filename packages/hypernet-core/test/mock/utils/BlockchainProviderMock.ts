@@ -101,7 +101,12 @@ export class BlockchainProviderMock implements IBlockchainProvider {
 
   public setGovernanceSigner(
     chainId: ChainId,
-  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
+  ): ResultAsync<
+    void,
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | GovernanceSignerUnavailableError
+  > {
     return okAsync(undefined);
   }
 }

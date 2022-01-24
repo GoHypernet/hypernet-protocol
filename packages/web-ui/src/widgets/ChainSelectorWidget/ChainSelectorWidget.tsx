@@ -20,19 +20,22 @@ import { Form, Formik, Field as FormikField, FieldProps } from "formik";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRenderParams } from "@web-ui/interfaces";
 import { useStyles } from "@web-ui/widgets/ChainSelectorWidget/ChainSelectorWidget.style";
+import { useAlert } from "react-alert";
 
 interface ChainSelectorWidgetParams extends IRenderParams {}
 
 const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   const classes = useStyles({});
   const { coreProxy, UIData } = useStoreContext();
-  const { setLoading, handleCoreError } = useLayoutContext();
+  const { handleCoreError } = useLayoutContext();
+  const alert = useAlert();
 
   const [governanceChainId, setGovernanceChainId] = useState<ChainId>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [chainInformationList, setChainInformationList] = useState<
     ChainInformation[]
   >([]);
+  const [mainProviderChainId, setMainProviderChainId] = useState<ChainId>();
 
   const chainOptions = useMemo(() => {
     return chainInformationList.map(({ chainId: value, name }) => ({
@@ -42,14 +45,34 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   }, [JSON.stringify(chainInformationList)]);
 
   useEffect(() => {
-    setLoading(true);
     coreProxy
       .waitInitialized()
       .map(() => {
         retrieveGovernanceChainInformation();
         retrieveChainInformationList();
+        getMainProviderChainId();
       })
       .mapErr(handleCoreError);
+  }, []);
+
+  useEffect(() => {
+    // Governance provider chain id change evet
+    coreProxy.onGovernanceChainChanged.subscribe((chainId) => {
+      setGovernanceChainId(chainId);
+    });
+
+    // Main provider chain id change evet
+    coreProxy.onChainChanged.subscribe((chainId) => {
+      console.log("onChainChanged chainId: ", chainId);
+      setMainProviderChainId(chainId);
+    });
+
+    // Check for governance signer unavailable events
+    coreProxy.onGovernanceSignerUnavailable.subscribe(() => {
+      alert.info(
+        "Your signer is not available for the selected chain, please switch your chain in metamask!",
+      );
+    });
   }, []);
 
   const retrieveGovernanceChainInformation = () => {
@@ -74,31 +97,52 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
       .mapErr(handleCoreError);
   };
 
+  const getMainProviderChainId = () => {
+    coreProxy
+      .getMainProviderChainId()
+      .map((chainId) => {
+        setMainProviderChainId(chainId);
+      })
+      .mapErr(handleCoreError);
+  };
+
   const toggleDialogOpen = () => {
     setIsDialogOpen((open) => !open);
   };
 
   const handleSwitchChain = (chainId: ChainId) => {
     coreProxy
-      .switchProviderChain(chainId)
+      .initializeForChainId(chainId)
       .map(() => {
-        // retrieveGovernanceChainInformation();
         UIData.onCoreGovernanceChainChanged.next(chainId);
-        console.log("Now re-init something");
       })
-      .mapErr((e) => {
-        console.log("e: ", e);
-        console.log("!!! Switch your metamask network");
-        handleCoreError(e);
-      });
+      .mapErr(handleCoreError);
   };
+
+  const handleSwitchMetamaskNetwork = () => {
+    if (governanceChainId == null) {
+      return;
+    }
+
+    coreProxy.switchProviderNetwork(governanceChainId).mapErr(handleCoreError);
+  };
+
+  const showSwitchNetworkButton = useMemo(() => {
+    console.log("useMemo governanceChainId", governanceChainId);
+    console.log("useMemo mainProviderChainId", mainProviderChainId);
+    if (governanceChainId == null || mainProviderChainId == null) {
+      return false;
+    }
+
+    return governanceChainId !== mainProviderChainId;
+  }, [governanceChainId, mainProviderChainId]);
 
   if (!chainInformationList.length || !governanceChainId) {
     return <></>;
   }
 
   return (
-    <>
+    <Box display="flex">
       <Formik
         initialValues={{ chainId: governanceChainId }}
         onSubmit={(values) => {
@@ -183,7 +227,16 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
           </Form>
         )}
       </Formik>
-    </>
+
+      {showSwitchNetworkButton && (
+        <Box
+          className={classes.switchChainButton}
+          onClick={handleSwitchMetamaskNetwork}
+        >
+          <Typography>Switch Metamask Network</Typography>
+        </Box>
+      )}
+    </Box>
   );
 };
 

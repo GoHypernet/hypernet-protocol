@@ -146,26 +146,20 @@ export class BlockchainProvider implements IBlockchainProvider {
 
   public setGovernanceSigner(
     chainId: ChainId,
-  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
-    if (this.provider == null) {
-      return errAsync(
-        new BlockchainUnavailableError("Main provider is not ready yet!"),
-      );
-    }
-
-    return ResultAsync.fromPromise(this.provider.getNetwork(), (e) => {
-      return new BlockchainUnavailableError(
-        "Could not get the network for the main blockchain provider!",
-        e,
-      );
-    }).andThen((mainNetwork) => {
-      if (mainNetwork.chainId == chainId) {
+  ): ResultAsync<
+    void,
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | GovernanceSignerUnavailableError
+  > {
+    return this.getMainProviderChainId().andThen((mainProviderChainId) => {
+      if (mainProviderChainId == chainId) {
         this.governanceProvider = this.provider;
         this.governanceSigner = this.provider!.getSigner();
         return okAsync(undefined);
       } else {
         return errAsync(
-          new BlockchainUnavailableError(
+          new GovernanceSignerUnavailableError(
             "Couldn't update governanceSigner because main Provider network chain id is different from governance chain id!",
           ),
         );
@@ -278,8 +272,8 @@ export class BlockchainProvider implements IBlockchainProvider {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 
             return this.setGovernanceSigner(governanceChainId).orElse((e) => {
-              // TODO: send notification to the user telling him that he's connected to a wrong network and won't be able to use governance signers
               this.logUtils.error("Unable to set governance signer!");
+              context.onGovernanceSignerUnavailable.next();
               return okAsync(undefined);
             });
           })
@@ -425,6 +419,34 @@ export class BlockchainProvider implements IBlockchainProvider {
       }
 
       return initializeProviderResult;
+    });
+  }
+
+  public getMainProviderChainId(): ResultAsync<
+    ChainId,
+    BlockchainUnavailableError
+  > {
+    if (this.provider == null) {
+      return errAsync(
+        new BlockchainUnavailableError("Main provider is not ready yet!"),
+      );
+    }
+
+    return ResultAsync.fromPromise(this.provider.getNetwork(), (e) => {
+      return new BlockchainUnavailableError(
+        "Counld not get main provider network chain id!",
+        e,
+      );
+    }).andThen((mainNetwork) => {
+      if (mainNetwork.chainId != null) {
+        return okAsync(ChainId(mainNetwork.chainId));
+      } else {
+        return errAsync(
+          new BlockchainUnavailableError(
+            "Counld not get main provider network chain id!",
+          ),
+        );
+      }
     });
   }
 }

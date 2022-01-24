@@ -98,6 +98,8 @@ export class ContextProviderMock implements IContextProvider {
   public onGovernanceChainChangedActivations: ChainId[] = [];
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceAccountChangedActivations: EthereumAccountAddress[] = [];
+  public onGovernanceSignerUnavailable: Subject<void>;
+  public onGovernanceSignerUnavailableActivationCount = 0;
 
   constructor(
     context: HypernetContext | null = null,
@@ -279,6 +281,11 @@ export class ContextProviderMock implements IContextProvider {
       this.onGovernanceAccountChangedActivations.push(val);
     });
 
+    this.onGovernanceSignerUnavailable = new Subject();
+    this.onGovernanceSignerUnavailable.subscribe(() => {
+      this.onGovernanceSignerUnavailableActivationCount++;
+    });
+
     if (context != null) {
       this.context = context;
     } else {
@@ -324,6 +331,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onAccountChanged,
         this.onGovernanceChainChanged,
         this.onGovernanceAccountChanged,
+        this.onGovernanceSignerUnavailable,
       );
     }
 
@@ -377,6 +385,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onAccountChanged,
         this.onGovernanceChainChanged,
         this.onGovernanceAccountChanged,
+        this.onGovernanceSignerUnavailable,
       );
     }
   }
@@ -437,6 +446,7 @@ export class ContextProviderMock implements IContextProvider {
       onAccountChanged: 0,
       onGovernanceChainChanged: 0,
       onGovernanceAccountChanged: 0,
+      onGovernanceSignerUnavailable: 0,
     };
 
     // Merge the passed in counts with the basic counts
@@ -540,10 +550,13 @@ export class ContextProviderMock implements IContextProvider {
       counts.onGovernanceChainChanged,
     );
 
-    this.onGovernanceAccountChanged,
-      expect(this.onGovernanceAccountChangedActivations.length).toBe(
-        counts.onGovernanceAccountChanged,
-      );
+    expect(this.onGovernanceAccountChangedActivations.length).toBe(
+      counts.onGovernanceAccountChanged,
+    );
+
+    expect(this.onGovernanceSignerUnavailableActivationCount).toBe(
+      counts.onGovernanceSignerUnavailable,
+    );
   }
 }
 
@@ -581,4 +594,5 @@ export interface IExpectedEventCounts {
   onAccountChanged?: number;
   onGovernanceChainChanged?: number;
   onGovernanceAccountChanged?: number;
+  onGovernanceSignerUnavailable?: number;
 }

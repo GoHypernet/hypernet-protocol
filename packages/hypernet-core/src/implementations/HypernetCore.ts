@@ -233,6 +233,7 @@ export class HypernetCore implements IHypernetCore {
   public onAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceChainChanged: Subject<ChainId>;
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
+  public onGovernanceSignerUnavailable: Subject<void>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -355,6 +356,7 @@ export class HypernetCore implements IHypernetCore {
     this.onAccountChanged = new Subject();
     this.onGovernanceChainChanged = new Subject();
     this.onGovernanceAccountChanged = new Subject();
+    this.onGovernanceSignerUnavailable = new Subject();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -409,6 +411,7 @@ export class HypernetCore implements IHypernetCore {
       this.onAccountChanged,
       this.onGovernanceChainChanged,
       this.onGovernanceAccountChanged,
+      this.onGovernanceSignerUnavailable,
       config?.defaultGovernanceChainId,
     );
     this.paymentIdUtils = new PaymentIdUtils();
@@ -989,10 +992,9 @@ export class HypernetCore implements IHypernetCore {
     // Initialize governance contracts
     return ResultUtils.combine([
       this.contextProvider.getContext(),
-      this.configProvider.getConfig(),
       this.initializeBlockchainProvider(chainId),
     ]).andThen((vals) => {
-      const [context, config] = vals;
+      const [context] = vals;
       const governanceChainId =
         chainId || context.governanceChainInformation.chainId;
 
@@ -2035,7 +2037,7 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public switchProviderChain(
+  public initializeForChainId(
     chainId: ChainId,
   ): ResultAsync<void, CoreInitializationErrors> {
     console.log(chainId);
@@ -2077,20 +2079,35 @@ export class HypernetCore implements IHypernetCore {
       }
 
       return ResultUtils.combine(initializerList).andThen(() => {
-        return this.injectedProviderService
-          .switchNetwork(chainId)
-          .andThen(() => {
-            return this.blockchainProvider.setGovernanceSigner(chainId);
-          })
-          .orElse((e) => {
-            console.log("setGovernanceSigner or switchNetwork e: ", e);
-            this.logUtils.error(
-              "Could not set Governance signer, switch to the correct network!",
-            );
-            // TODO: give notification to the user telling him that he's connected to a wrong network and won't be able to use signers
-            return okAsync(undefined);
-          });
+        return this.switchProviderNetwork(chainId);
       });
     });
+  }
+
+  public switchProviderNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.injectedProviderService.switchNetwork(chainId),
+    ]).andThen((vals) => {
+      const [context] = vals;
+      return this.blockchainProvider
+        .setGovernanceSigner(chainId)
+        .orElse((e) => {
+          this.logUtils.error(
+            "Could not set Governance signer, switch to the correct network!",
+          );
+          context.onGovernanceSignerUnavailable.next();
+          return okAsync(undefined);
+        });
+    });
+  }
+
+  public getMainProviderChainId(): ResultAsync<
+    ChainId,
+    BlockchainUnavailableError
+  > {
+    return this.blockchainProvider.getMainProviderChainId();
   }
 }
