@@ -99,7 +99,7 @@ export class RegistryRepository implements IRegistryRepository {
             index = i + pageNumber * pageSize - pageSize - 1;
           }
 
-          if (index >= 0) {
+          if (index >= 0 && index < totalCount) {
             registryListResult.push(this.getRegistryByIndex(index));
           }
         }
@@ -421,7 +421,7 @@ export class RegistryRepository implements IRegistryRepository {
                 index = i + pageNumber * pageSize - pageSize - 1;
               }
 
-              if (index >= 0) {
+              if (index >= 0 && index < totalCount) {
                 const registryEntryResult: ResultAsync<
                   RegistryEntry | null,
                   NonFungibleRegistryContractError

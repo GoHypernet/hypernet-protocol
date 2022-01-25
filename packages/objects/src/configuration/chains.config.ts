@@ -22,12 +22,12 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4"), // parameterizedTransfer
       EthereumContractAddress("0xdDA6327139485221633A1FcD65f4aC932E60A2e1"), // hypernetGovernor
       EthereumContractAddress("0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"), // registryFactory
-      EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // gatewayRegistry
+      EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // gatewayRegistry
       EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // liquidityRegistry
       EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
-      EthereumContractAddress("0xbb55fe723929CcB45a12C03fc91EBeD5407C8a6A"), // modulesRegistry
+      EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // modulesRegistry
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("http://localhost:8545")],
     ),
@@ -48,7 +48,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x610178dA211FEF7D417bC0e6FeD39F05609AD788"), // registryFactory
       EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // gatewayRegistry
       EthereumContractAddress("0x29A5Df5784eC1e58a03557e825470A217534C816"), // liquidityRegistry
-      EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
+      EthereumContractAddress("0xa0E2E37c8bA56cD19fe3BD70f8c9390C0e3Dd5d8"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
       EthereumContractAddress("0xbb55fe723929CcB45a12C03fc91EBeD5407C8a6A"), // modulesRegistry
