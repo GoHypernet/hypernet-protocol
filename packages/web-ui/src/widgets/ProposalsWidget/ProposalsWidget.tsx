@@ -35,6 +35,25 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
   useEffect(() => {
+    getProposals();
+  }, [page]);
+
+  useEffect(() => {
+    getProposalsCount();
+  }, []);
+
+  const getProposals = () => {
+    setLoading(true);
+    coreProxy
+      .getProposals(page, PROPOSALS_PER_PAGE)
+      .map((proposals) => {
+        setProposals(proposals);
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
+  const getProposalsCount = () => {
     setLoading(true);
     coreProxy
       .getProposalsCount()
@@ -46,18 +65,15 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
         setLoading(false);
       })
       .mapErr(handleCoreError);
-  }, []);
+  };
 
-  useEffect(() => {
-    setLoading(true);
-    coreProxy
-      .getProposals(page, PROPOSALS_PER_PAGE)
-      .map((proposals) => {
-        setProposals(proposals);
-        setLoading(false);
-      })
-      .mapErr(handleCoreError);
-  }, [page]);
+  const handleProposalsRefresh = () => {
+    if (page === 1) {
+      getProposals();
+    } else {
+      setPage(1);
+    }
+  };
 
   return (
     <Box>

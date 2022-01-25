@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Form, Formik } from "formik";
 import {
   ERegistrySortOrder,
@@ -56,6 +56,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [registryFetched, setRegistryFetched] = useState<boolean>(false);
+  const mounted = useRef(false);
 
   useEffect(() => {
     getRegistry();
@@ -63,13 +64,15 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   useEffect(() => {
     if (registry?.numberOfEntries && registryFetched) {
-      getRegistryEntries(page);
+      getRegistryEntries();
     }
   }, [registry?.numberOfEntries, page, REGISTRY_ENTRIES_PER_PAGE]);
 
   useEffect(() => {
-    if (registryFetched) {
-      getRegistryEntries(1);
+    if (mounted.current) {
+      handleRegistryEntriesRefresh();
+    } else {
+      mounted.current = true;
     }
   }, [reversedSortingEnabled]);
 
@@ -78,6 +81,14 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       setAccountAddress(accounts[0]);
     });
   }, []);
+
+  const handleRegistryEntriesRefresh = () => {
+    if (page === 1) {
+      getRegistryEntries();
+    } else {
+      setPage(1);
+    }
+  };
 
   const getRegistry = () => {
     setLoading(true);
@@ -93,12 +104,12 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .mapErr(handleCoreError);
   };
 
-  const getRegistryEntries = (pageNumber: number) => {
+  const getRegistryEntries = () => {
     setLoading(true);
     coreProxy
       .getRegistryEntries(
         registryName,
-        pageNumber,
+        page,
         REGISTRY_ENTRIES_PER_PAGE,
         reversedSortingEnabled
           ? ERegistrySortOrder.REVERSED_ORDER
@@ -106,7 +117,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       )
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
-        setPage(pageNumber);
         setLoading(false);
       })
       .mapErr(handleCoreError);
@@ -214,7 +224,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const onRestartClick = () => {
     setSearchTerm("");
-    getRegistryEntries(1);
+    handleRegistryEntriesRefresh();
   };
 
   const handleIdentityCallback = () => {

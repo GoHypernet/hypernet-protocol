@@ -147,6 +147,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                     name="tokenId"
                     type="input"
                     placeholder="Enter a number for your token"
+                    required
                   />
                   {!lazyMintModeEnabled && (
                     <GovernanceField
@@ -158,14 +159,12 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                   )}
                   <GovernanceField
                     title="Recipient Address"
-                    required
                     name="recipientAddress"
                     type="input"
                     placeholder="Enter the recipient address"
                   />
                   <GovernanceField
                     title="Token URI"
-                    required
                     name="tokenUri"
                     type="input"
                     placeholder="Enter the token URI"
@@ -183,7 +182,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                       variant="contained"
                       color="primary"
                       onClick={handleSubmit}
-                      disabled={!values.recipientAddress || !values.tokenUri}
+                      disabled={!values.tokenId}
                     >
                       Submit
                     </GovernanceButton>
