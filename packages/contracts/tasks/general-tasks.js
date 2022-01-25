@@ -99,22 +99,8 @@ task("gassettings", "Prints the EIP1159 standard gas settings", async (taskArgs,
 
     const gasSettings = { maxFeePerGas: feeData.maxFeePerGas, 
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas, 
+        gasPrice: feeData.gasPrice,
         gasLimit: 6000000 };
 
         console.log("gasSettings:", gasSettings)
-});
-
-task("getdeploytx", "Prints the tx info of the deploy function ", async (taskArgs, hre) => {
-    const [account] = await hre.ethers.getSigners();
-
-    const feeData = await account.getFeeData();
-    const gasSettings = { maxFeePerGas: feeData.maxFeePerGas, 
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas, 
-        gasLimit: 6000000 };
-
-    const EnumerableRegistry = await hre.ethers.getContractFactory(
-        "NonFungibleRegistryEnumerableUpgradeable",
-      );
-    const enumerableregistry = await EnumerableRegistry.getDeployTransaction(gasSettings);
-    console.log(enumerableregistry)
 });

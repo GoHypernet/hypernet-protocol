@@ -38,7 +38,6 @@ module.exports = {
     hardhat: {
       accounts: {
         accountsBalance: "10000000000000000000000",
-        mnemonic,
       },
       mining: {
         auto: true,
@@ -76,8 +75,8 @@ module.exports = {
         accounts: { mnemonic },
         chainId: 137,
         url: urlOverride || "https://polygon-rpc.com/",
-        gas: 8000000,
-        gasPrice: 80000000000
+        gas: 6000000,
+        gasPrice: 40000000000
     },
     fuji: { // avalanche testnet
         accounts: { mnemonic },

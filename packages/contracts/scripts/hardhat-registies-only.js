@@ -22,16 +22,19 @@ async function main() {
   const hypernetidaddress = "0xC1B2875d2dde88fd4889Be7499176e61C8a5aF6c";
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  const feeData = await account.getFeeData();
+  const feeData = await owner.getFeeData();
   const gasSettings = { maxFeePerGas: feeData.maxFeePerGas, 
                         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas, 
-                        gasLimit: 6000000 };
+                        gasLimit: 10000000,
+                      };
+  console.log(gasSettings);
 
   // deploy enumerable registry contract
   const EnumerableRegistry = await ethers.getContractFactory(
     "NonFungibleRegistryEnumerableUpgradeable",
   );
   const enumerableregistry = await EnumerableRegistry.deploy(gasSettings);
+  console.log(enumerableregistry)
   const enumerable_registry_reciept =
     await enumerableregistry.deployTransaction.wait();
   console.log(
