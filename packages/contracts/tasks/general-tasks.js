@@ -1,4 +1,5 @@
 const {  HT, hAddress, timelockAddress}  = require("./constants.js");
+const { fetch } = require("node-fetch")
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -88,3 +89,32 @@ task("account", "Prints the first account", async (taskArgs, hre) => {
     console.log(account.address, "balance:", hre.ethers.utils.formatEther(accountBalance));
   });
 
+task("gassettings", "Prints the EIP1159 standard gas settings", async (taskArgs, hre) => {
+    const [account] = await hre.ethers.getSigners();
+
+    const feeData = await account.getFeeData();
+    console.log("maxFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"), "GWei");
+    console.log("maxPriorityFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxPriorityFeePerGas, "gwei"), "GWei");
+    console.log("gasPrice:",hre.ethers.utils.formatUnits(feeData.gasPrice, "gwei"), "GWei");
+
+    const gasSettings = { maxFeePerGas: feeData.maxFeePerGas, 
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas, 
+        gasLimit: 6000000 };
+
+        console.log("gasSettings:", gasSettings)
+});
+
+task("getdeploytx", "Prints the tx info of the deploy function ", async (taskArgs, hre) => {
+    const [account] = await hre.ethers.getSigners();
+
+    const feeData = await account.getFeeData();
+    const gasSettings = { maxFeePerGas: feeData.maxFeePerGas, 
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas, 
+        gasLimit: 6000000 };
+
+    const EnumerableRegistry = await hre.ethers.getContractFactory(
+        "NonFungibleRegistryEnumerableUpgradeable",
+      );
+    const enumerableregistry = await EnumerableRegistry.getDeployTransaction(gasSettings);
+    console.log(enumerableregistry)
+});

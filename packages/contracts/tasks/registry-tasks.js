@@ -1,5 +1,5 @@
 const { HT, RF, NFR,  BM, IBEACON, factoryAddress, hAddress } = require("./constants.js");
-const csv=require('csvtojson')
+const csv=require('csvtojson');
 
 task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon proxies and implementation contracts.")
   .setAction(async (taskArgs) => {

@@ -17,6 +17,15 @@ Ethereum test network that is based on Proof-of-Authority. Maintained by the Get
 - Lazy Mint Module: [`0x66643a91fD95a8B41Ae673f1861589fb454DEe55`](https://rinkeby.etherscan.io/address/0x66643a91fD95a8B41Ae673f1861589fb454DEe55)
 - Merkle Module: [`0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450`](https://rinkeby.etherscan.io/address/0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450)
 
+## Polygon Mainnet
+
+- Registry Factory: [``](https://polygonscan.com/address/)
+- Hypernet Profiles: [``](https://polygonscan.com/address/)
+- Registry Modules: [``](https://polygonscan.com/address/)
+- Batch Module: [``](https://polygonscan.com/address/)
+- Lazy Mint Module: [``](https://polygonscan.com/address/)
+- Merkle Module: [``](https://polygonscan.com/address/)
+
 ## Mumbai 
 
 Polygon test network that connects with Ethereum's Goërli Testnet. Metamask network settings can be found 
