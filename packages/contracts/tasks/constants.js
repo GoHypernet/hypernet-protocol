@@ -3,7 +3,7 @@ const HG = require("../deployments/rinkeby-update-1-21-2022/governance/HypernetG
 const RF = require("../deployments/rinkeby-update-1-21-2022/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
 const NFR = require("../deployments/rinkeby-update-1-21-2022/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
 const BM = require("../deployments/rinkeby-update-1-21-2022/modules/BatchModule.sol/BatchModule.json");
-const IBEACON = require("./BeaconProxy.json");
+const IBEACON = require("./UpgradeableBeacon.json");
 
 // define some dynamic imports
 const hAddress = function () {
@@ -15,6 +15,8 @@ const hAddress = function () {
   } else if (hre.hardhatArguments.network == "rinkeby") {
     return "0x6D4eE7f794103672490830e15308A99eB7a89024"
   } else if (hre.hardhatArguments.network == "mumbai") {
+    return ""
+  } else if (hre.hardhatArguments.network == "polygon") {
     return ""
   } else if (hre.hardhatArguments.network == "fuji") {
     return ""
@@ -33,6 +35,8 @@ const govAddress = function () {
     return "0x3353da0f24fCACd83832b09e9371a937195D2640"
   } else if (hre.hardhatArguments.network == "mumbai") {
     return ""
+  } else if (hre.hardhatArguments.network == "polygon") {
+    return ""
   } else if (hre.hardhatArguments.network == "fuji") {
     return ""
   } else {
@@ -49,6 +53,8 @@ const timelockAddress = function () {
   } else if (hre.hardhatArguments.network == "rinkeby") {
     return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
   } else if (hre.hardhatArguments.network == "mumbai") {
+    return ""
+  } else if (hre.hardhatArguments.network == "polygon") {
     return ""
   } else if (hre.hardhatArguments.network == "fuji") {
     return ""
@@ -67,6 +73,8 @@ const factoryAddress = function () {
     return "0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB"
   } else if (hre.hardhatArguments.network == "mumbai") {
     return "0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899"
+  } else if (hre.hardhatArguments.network == "polygon") {
+    return "0xd93fbc9d330c5a1d242d01c0f10115483a062d7c"
   } else if (hre.hardhatArguments.network == "fuji") {
     return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
   } else {

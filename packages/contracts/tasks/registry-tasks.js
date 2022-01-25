@@ -39,6 +39,28 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
     console.log("Enumerable Registry Beacon Owner:", enumRegBeaconOwner)
   });
 
+  task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
+  .addParam("name", "Name of the target registry.")
+  .addParam("primaryregistry", "Symbol to give to the registry.")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const primaryregistry = taskArgs.primaryregistry;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+
+    tx = await factoryHandle.setPrimaryRegistry(
+        primaryregistry
+    );
+    await tx.wait(2);
+    console.log("Primary Registry Set");
+  });
+
 task("createRegistryByToken", "Creates a registry by burning token.")
   .addParam("name", "Name of the target registry.")
   .addParam("symbol", "Symbol to give to the registry.")
