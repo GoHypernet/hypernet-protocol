@@ -54,14 +54,6 @@ module.exports = {
       chainId: 31337,
       url: "http://127.0.0.1:8569",
     },
-    halfdev: {
-        accounts: {
-          accountsBalance: "10000000000000000000000",
-          mnemonic,
-        },
-        chainId: 31337,
-        url: 'http://127.0.0.1:8569'
-      },
     DevNet: {
       accounts: {
         mnemonic,
@@ -71,7 +63,7 @@ module.exports = {
     rinkeby: { // ethereum tesnet
       accounts: { mnemonic },
       chainId: 4,
-      url: urlOverride || "http://localhost:8545",
+      url: urlOverride || "https://station-hundred-assure-neighborhood.trycloudflare.com/http/",
     },
     mumbai: { // polygon testnet
         accounts: { mnemonic },
@@ -83,7 +75,7 @@ module.exports = {
     fuji: { // avalanche testnet
         accounts: { mnemonic },
         chainId: 43113,
-        url: urlOverride || "https://api.avax-test.network/ext/bc/C/rpc",
+        url: urlOverride || "https://f0fa7eba-0c1b-4f3f-bc37-67ba6ae2b60a.hypernetlabs.io/http/ext/bc/C/rpc",
     },
   },
   gasReporter: {

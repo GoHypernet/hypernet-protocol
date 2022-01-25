@@ -371,6 +371,32 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         return ERC721URIStorageUpgradeable.tokenURI(tokenId);
     }
 
+    /// @notice tokenURINoBase view function that strips baseURI from the output of tokenURI if it exists
+    /// @param tokenId unique id to refence the target token
+    function tokenURINoBase(
+        uint256 tokenId
+    ) 
+        external 
+        view 
+        virtual 
+        returns (string memory) 
+    {
+        bytes memory basebytes = bytes(baseURI);
+
+        if (basebytes.length == 0) {
+            // if there is no baseURI, return the full tokenURI
+            return ERC721URIStorageUpgradeable.tokenURI(tokenId);
+        } else {
+            // if there is a baseURI, strip it from the tokenURI
+            bytes memory uribytes = bytes(ERC721URIStorageUpgradeable.tokenURI(tokenId));
+            bytes memory uri = new bytes(uribytes.length-basebytes.length);
+            for (uint i = 0; i<uribytes.length-basebytes.length; ++i) {
+                uri[i] = uribytes[i+basebytes.length];
+            }
+            return string(uri);
+        }
+    }
+
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }

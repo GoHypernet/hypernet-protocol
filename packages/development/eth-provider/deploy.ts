@@ -322,6 +322,32 @@ const func: DeployFunction = async () => {
     NFRAbi,
     registrySigner,
   );
+  
+  const abiCoder = ethers.utils.defaultAbiCoder;
+  
+  log.info("Setting Hypertoken as registration token for Hypernet Profiles");
+  // construct call data via ABI encoding
+  let params = abiCoder.encode(
+      [
+        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
+      ],
+      [
+          [
+          [], 
+          [], 
+          [], 
+          [], 
+          [hypertokenContractAddress], 
+          [], 
+          [], 
+          [],
+          []
+          ]
+      ],
+    );
+	
+  const regTokenTx = await profileRegistryContract.setRegistryParameters(params);
+  await regTokenTx.wait(3);
 
   // Mint a profile for the router
   const liquidityProfileTx = await profileRegistryContract.register(

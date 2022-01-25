@@ -18,7 +18,7 @@ A list of officially supported modules are curated by the Hypernet Protocol DAO 
 [Hypernet launchpad](https://rinkeby.launchpad.hypernet.foundation/registries) dashboard makes it easy to add a module to an NFR in which 
 you occupy the `REGISTRAR_ROLE_ADMIN` role. Adding and removing modules to an NFR requires submitting 1 transaction each. 
 
-## Offical Modules
+## Official Modules
 
 The name and contract address of officially supported modules are given by the 
 [Registry Modules](https://rinkeby.launchpad.hypernet.foundation/registries/Registry%20Modules/entries) NFR which can be viewed from the 
@@ -42,6 +42,6 @@ to use this module can be seen in the unit tests directory.
 ### Merkle drop
 
 The [Uniswap](https://github.com/Uniswap/merkle-distributor) team was an early pioneer in setting the standard for large-scale airdrops in settings 
-where gas price is a concern. This module can be added to a NFR do enable merkle drop capability in an NFR. The merkle root must be declared in the NFR 
+where gas price is a concern. This module can be added to a NFR to enable merkle drop capability in an NFR. The merkle root must be declared in the NFR 
 (and optionally frozen) using the the [`setMerkleRoot`](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol#L168) function. 
 An example of the life-cycle of a merkle drop can be seen [here](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L549). 

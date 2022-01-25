@@ -143,7 +143,9 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
           <Box className={classes.createdEntries}>
             {createdEntries.map((registryEntry, index) => (
               <Box key={index} display="flex" justifyContent="space-between">
-                <Typography>{registryEntry.label}</Typography>
+                <Typography>{`${registryEntry.tokenId} ${
+                  registryEntry.label ? ` - ${registryEntry.label}` : ""
+                }`}</Typography>
                 <Box
                   onClick={() => removeCreatedEntry(index)}
                   className={classes.removeIcon}
@@ -222,12 +224,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
                       variant="contained"
                       color="primary"
                       onClick={handleSubmit}
-                      disabled={
-                        (!values.recipientAddress ||
-                          !values.tokenId ||
-                          !values.label) &&
-                        createdEntries.length === 0
-                      }
+                      disabled={!values.tokenId && createdEntries.length === 0}
                     >
                       Submit
                     </GovernanceButton>
