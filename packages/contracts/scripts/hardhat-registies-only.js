@@ -15,7 +15,7 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  const [dummy, owner] = await hre.ethers.getSigners();
+  const [owner] = await hre.ethers.getSigners();
   console.log("Deployment Wallet Address:", owner.address);
   console.log("RPC URL:", hre.network.config.url);
 

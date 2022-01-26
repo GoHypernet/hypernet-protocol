@@ -1,4 +1,4 @@
-const {  HT, hAddress, timelockAddress}  = require("./constants.js");
+const {  HT, hAddress, timelockAddress, gasSettings }  = require("./constants.js");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -21,6 +21,7 @@ task("sendhypertoken", "Send hypertoken to another account")
   const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, owner);
   const recipient = taskArgs.recipient;
   const amount = taskArgs.amount;
+
   const tx = await hypertoken.transfer(recipient, amount);
   const tx_rcpt = await tx.wait();
   const balR = await hypertoken.balanceOf(recipient);
@@ -45,9 +46,7 @@ task("cancelTx", "Send 0 ETH to cancel a transaction")
       to: owner.address,
       value: ethers.utils.parseEther("0"),
       nonce: txCount,
-      maxFeePerGas: 80000000000,
-      maxPriorityFeePerGas: 80000000000, 
-      gasLimit: 100000
+      maxFeePerGas: feeData.maxFeePerGas,
     });
   
   console.log(tx);
@@ -65,19 +64,22 @@ task("sendEth", "Send ethereum another account")
 
     const recipient = taskArgs.recipient;
     const amount = taskArgs.amount;
-    const tx = await owner.sendTransaction({
-    from: owner.address,
-    to: recipient,
-    value: ethers.utils.parseEther(amount),
-  });
-  console.log(tx);
-  await tx.wait();
-  const balR = await owner.provider.getBalance(recipient);
-  const balS = await owner.provider.getBalance(owner.address);
 
+    const txData =  {
+      from: owner.address,
+      to: recipient,
+      value: ethers.utils.parseEther(amount),
+      await gasSettings()
+    };
 
-  console.log("Balance of sender:", balS.toString());
-  console.log("Balance of recipient:", balR.toString());
+    const tx = await owner.sendTransaction(txData);
+
+    await tx.wait();
+    const balR = await owner.provider.getBalance(recipient);
+    const balS = await owner.provider.getBalance(owner.address);
+
+    console.log("Balance of sender:", balS.toString());
+    console.log("Balance of recipient:", balR.toString());
 });
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -120,18 +122,11 @@ task("account", "Prints the first account", async (taskArgs, hre) => {
     console.log(account.address, "balance:", hre.ethers.utils.formatEther(accountBalance));
   });
 
-task("gassettings", "Prints the EIP1159 standard gas settings", async (taskArgs, hre) => {
+task("gasSettings", "Prints the EIP1159 standard gas settings", async (taskArgs, hre) => {
     const [account] = await hre.ethers.getSigners();
 
     const feeData = await account.getFeeData();
     console.log("maxFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"), "GWei");
     console.log("maxPriorityFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxPriorityFeePerGas, "gwei"), "GWei");
     console.log("gasPrice:",hre.ethers.utils.formatUnits(feeData.gasPrice, "gwei"), "GWei");
-
-    const gasSettings = { maxFeePerGas: feeData.maxFeePerGas, 
-        maxFeePerGas: ethers.utils.parseUnits("43.378112", "gwei"),
-        maxPriorityFeePerGas: ethers.utils.parseUnits("42.807710", "gwei"), 
-        gasLimit: ethers.utils.parseUnits("6", 6) };
-
-        console.log("gasSettings:", gasSettings)
 });

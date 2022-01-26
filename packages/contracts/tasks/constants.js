@@ -5,6 +5,16 @@ const NFR = require("../deployments/rinkeby-update-1-21-2022/identity/NonFungibl
 const BM = require("../deployments/rinkeby-update-1-21-2022/modules/BatchModule.sol/BatchModule.json");
 const IBEACON = require("./UpgradeableBeacon.json");
 
+const gasSettings = async function () { 
+    const hre = require("hardhat");
+    const [account] = await hre.ethers.getSigners();
+    const feeData = await account.getFeeData();
+    const gs = { 
+        maxFeePerGas:  feeData.maxFeePerGas
+    };
+    return gs
+  };
+
 // define some dynamic imports
 const hAddress = function () {
   const hre = require("hardhat");
@@ -93,4 +103,5 @@ module.exports = {
   timelockAddress,
   factoryAddress,
   hAddress,
+  gasSettings,
 };

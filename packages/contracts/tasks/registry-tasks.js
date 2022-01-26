@@ -1,4 +1,4 @@
-const { HT, RF, NFR,  BM, IBEACON, factoryAddress, hAddress } = require("./constants.js");
+const { HT, RF, NFR,  BM, IBEACON, factoryAddress, hAddress, gasSettings } = require("./constants.js");
 const csv=require('csvtojson');
 
 task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon proxies and implementation contracts.")
@@ -61,13 +61,9 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
       accounts[0],
     );
 
-    const gasSettings = { 
-        maxFeePerGas: ethers.utils.parseUnits("80.0", "gwei"),
-        maxPriorityFeePerGas: ethers.utils.parseUnits("80.0", "gwei"), 
-        gasLimit: ethers.utils.parseUnits("1", 6) };
     tx = await registryHandle.setPrimaryRegistry(
         primaryregistry,
-        gasSettings
+        await gasSettings()
     );
     await tx.wait(2);
     console.log("Primary Registry Set");
@@ -88,25 +84,20 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
     const enumerable = taskArgs.enumerable;
 
     const accounts = await hre.ethers.getSigners();
-
-    const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(
       factoryAddress(),
       RF.abi,
       accounts[0],
     );
 
-    const gasSettings = { 
-        maxFeePerGas: ethers.utils.parseUnits("80.0", "gwei"),
-        maxPriorityFeePerGas: ethers.utils.parseUnits("80.0", "gwei"), 
-        gasLimit: ethers.utils.parseUnits("1", 6) };
     tx = await factoryHandle.createRegistry(
       name,
       symbol,
       registrar,
       enumerable,
-      gasSettings
+      await gasSettings()
     );
+    console.log(tx);
     await tx.wait(2);
 
     const regAddress = await factoryHandle.nameToAddress(name);
@@ -147,6 +138,7 @@ task("createRegistryByToken", "Creates a registry by burning token.")
       symbol,
       registrar,
       enumerable,
+      await gasSettings(),
     );
     await tx.wait(2);
 
@@ -171,18 +163,19 @@ task("registryParameters", "Prints NFR  parameters.")
       registryAddress,
       NFR.abi,
       accounts[0],
+      await gasSettings(),
     );
 
     const REGISTRAR_ROLE = registryHandle.REGISTRAR_ROLE();
     const registrarAddress = await registryHandle.getRoleMember(
       REGISTRAR_ROLE,
-      0,
+      0
     );
 
     const REGISTRAR_ROLE_ADMIN = registryHandle.REGISTRAR_ROLE_ADMIN();
     const registrarAdminAddress = await registryHandle.getRoleMember(
-        REGISTRAR_ROLE_ADMIN,
-      0,
+      REGISTRAR_ROLE_ADMIN,
+      0
     );
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
@@ -267,7 +260,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
         ],
       );
 
-    const tx = await registryHandle.setRegistryParameters(params);
+    const tx = await registryHandle.setRegistryParameters(params, await gasSettings());
     await tx.wait(3);
 
     const REGISTRAR_ROLE = registryHandle.REGISTRAR_ROLE();
@@ -370,7 +363,7 @@ task("listRegistryEntries", "Prints all NFI entries for the specified registry."
    const recipArr = jsonObj.map((row) => row.OWNER);
    const labelArr = jsonObj.map((row) => row.LABEL);
    if ((indexArr.length === idArr.length) && (uriArr.length === recipArr.length) && (indexArr.length === recipArr.length)) {
-       let tx = await batchModuleHandle.batchRegister(recipArr, labelArr, uriArr, idArr, targetRegistryAddress);
+       let tx = await batchModuleHandle.batchRegister(recipArr, labelArr, uriArr, idArr, targetRegistryAddress, await gasSettings());
    } else {
        console.log("Arrays are different lengths.")
        console.log(indexArr.length)
@@ -535,7 +528,7 @@ task("transferEntryByTokenID", "Transfers a token to a specified participant.")
 
     const tokenOwner = await registryHandle.ownerOf(tokenId);
 
-    let tx = await registryHandle.transferFrom(tokenOwner, recipient, tokenId);
+    let tx = await registryHandle.transferFrom(tokenOwner, recipient, tokenId, await gasSettings());
     await tx.wait();
 
     const newTokenOwner = await registryHandle.ownerOf(tokenId);
@@ -565,7 +558,7 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
     );
 
     const balanceBefore = await registryHandle.balanceOf(accounts[0].address);
-    const tx = await registryHandle.burn(tokenId);
+    const tx = await registryHandle.burn(tokenId, await gasSettings());
     await tx.wait();
     const balanceAfter = await registryHandle.balanceOf(accounts[0].address);
     console.log("Balance before: ", balanceBefore);
@@ -600,22 +593,18 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
       accounts[0],
     );
 
-    const gasSettings = { 
-        maxFeePerGas: ethers.utils.parseUnits("60.0", "gwei"),
-        maxPriorityFeePerGas: ethers.utils.parseUnits("60.0", "gwei"), 
-        gasLimit: ethers.utils.parseUnits("1.5", 6) };
     // call registerByToken on the NFR
     tx = await registryHandle.register(
       NFIRecipient,
       NFILabel,
       NFIData,
       tokenid,
-      gasSettings
+      await gasSettings()
     );
-    await tx.wait(3);
+    console.log(tx);
+    const txrcpt = await tx.wait(3);
 
-    const tokenId = await registryHandle.registryMap(NFILabel);
-    console.log("Token ID:", tokenId.toString());
+    console.log("Gas Used:", txrcpt.gasUsed.toString());
   });
 
 task("registerWithToken", "Register an NFI with ERC20 token.")
@@ -650,7 +639,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
     const registrationtoken = new hre.ethers.Contract(registrationTokenAddress, HT.abi, accounts[0]);
     // approve the transfer of tokens to the NFR
     const registrationFee = await registryHandle.registrationFee();
-    let tx = await registrationtoken.approve(registryAddress, registrationFee);
+    let tx = await registrationtoken.approve(registryAddress, registrationFee, await gasSettings());
     await tx.wait(3);
 
     // call registerByToken on the NFR
@@ -659,6 +648,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
       NFILabel,
       NFIData,
       tokenid,
+      await gasSettings()
     );
     await tx.wait(3);
 
@@ -692,14 +682,10 @@ task("updateTokenURI", "Update the token URI of a NFI in the specified NFR.")
   );
 
   // call registerByToken on the NFR
-  const gasSettings = { 
-    maxFeePerGas: ethers.utils.parseUnits("80.0", "gwei"),
-    maxPriorityFeePerGas: ethers.utils.parseUnits("80.0", "gwei"), 
-    gasLimit: ethers.utils.parseUnits("1", 6) };
   tx = await registryHandle.updateRegistration(
     tokenid,
     NFIData,
-    gasSettings
+    await gasSettings()
   );
   await tx.wait();
 
@@ -730,14 +716,10 @@ task("grantRegistrarRole", "Give the registrar role to a specified account.")
   );
 
   // call registerByToken on the NFR
-  const gasSettings = { 
-    maxFeePerGas: ethers.utils.parseUnits("80.0", "gwei"),
-    maxPriorityFeePerGas: ethers.utils.parseUnits("80.0", "gwei"), 
-    gasLimit: ethers.utils.parseUnits("1", 6) };
   tx = await registryHandle.grantRole(
     registryHandle.REGISTRAR_ROLE(),
     registrar,
-    gasSettings
+    await gasSettings()
   );
   await tx.wait();
 
