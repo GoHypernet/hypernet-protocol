@@ -13,9 +13,9 @@ places of precision. The DAO is based on OpenZeppelin's [Governor](https://docs.
 is itself based on a reference implementation by [Compound Finance](https://compound.finance/docs/governance). Given below is a sequence 
 diagram for the proposal lifecycle. 
 
-![Proposal sequence diagram.](/documentation/images/Governance-sequence-diagram.png)
+![Proposal sequence diagram.](/documentation/images/governance-proposal-sequence-diagram.svg)
 
-This particular governance architecture has been adopted by a number of highly successful projects including
+This particular governance architecture has been adopted by a number of highly influential projects including
 [Uniswap](https://docs.uniswap.org/protocol/reference/Governance/governance-reference) and has proven quite
 successful in practice at adopting beneficial proposals to protocol upgrades while preventing
 [adversarial attacks](https://docs.uniswap.org/protocol/concepts/governance/adversarial-circumstances).
@@ -25,7 +25,7 @@ The Hypernet DAO is used for proposing and vetting (by the token holder communit
 through the [registry factory contract](/packages/contracts/contracts/identity/UpgradeableRegistryFactory.sol), and 
 updating various parameters in the protocol itself. Particularly, the DAO can change the length of a proposal's voting 
 period, the minimum proposal threshold, and the voting delay peroid. Additionally, the DAO is the `DEFAULT_ADMIN_ROLE` of every NFR
-created by the registry factory (and thus can be used as recovery mechanism if a `REGISTRAR_ROLE_ADMIN` loses control of 
+created by the registry factory (and thus can be used as a recovery mechanism if a `REGISTRAR_ROLE_ADMIN` loses control of 
 their registry). The DAO is also the `REGISTRAR_ROLE_ADMIN`, and `REGISTRAR` of several NFRs that are instrumental for 
 the secure functioning of the Hypernet Protocol ecosystem (thus functioning as a form of [token curated registry](https://arxiv.org/pdf/1809.01756.pdf)): 
 
