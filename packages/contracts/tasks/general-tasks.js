@@ -64,12 +64,13 @@ task("sendEth", "Send ethereum another account")
 
     const recipient = taskArgs.recipient;
     const amount = taskArgs.amount;
+    const feeData = owner.feeData();
 
     const txData =  {
       from: owner.address,
       to: recipient,
       value: ethers.utils.parseEther(amount),
-      await gasSettings()
+      maxFeePerGas: feeData.maxFeePerGas,
     };
 
     const tx = await owner.sendTransaction(txData);
