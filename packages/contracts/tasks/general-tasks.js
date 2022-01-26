@@ -31,7 +31,7 @@ task("sendhypertoken", "Send hypertoken to another account")
   console.log("Balance of recipient:", balR.toString());
 });
 
-task("cancelTX", "Send 0 ETH to cancel a transaction")
+task("cancelTx", "Send 0 ETH to cancel a transaction")
   .addParam("nonce", "current transaction count of the account")
   .setAction(async (taskArgs) => {
     const [owner] = await hre.ethers.getSigners();
@@ -45,9 +45,9 @@ task("cancelTX", "Send 0 ETH to cancel a transaction")
       to: owner.address,
       value: ethers.utils.parseEther("0"),
       nonce: txCount,
-      maxFeePerGas: 200000000000,
-      maxPriorityFeePerGas: 200000000000, 
-      gasLimit: 20000000
+      maxFeePerGas: 80000000000,
+      maxPriorityFeePerGas: 80000000000, 
+      gasLimit: 100000
     });
   
   console.log(tx);

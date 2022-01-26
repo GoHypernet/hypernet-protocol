@@ -54,11 +54,63 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
       accounts[0],
     );
 
-    tx = await factoryHandle.setPrimaryRegistry(
-        primaryregistry
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(
+      registryAddress,
+      NFR.abi,
+      accounts[0],
+    );
+
+    const gasSettings = { 
+        maxFeePerGas: ethers.utils.parseUnits("80.0", "gwei"),
+        maxPriorityFeePerGas: ethers.utils.parseUnits("80.0", "gwei"), 
+        gasLimit: ethers.utils.parseUnits("1", 6) };
+    tx = await registryHandle.setPrimaryRegistry(
+        primaryregistry,
+        gasSettings
     );
     await tx.wait(2);
     console.log("Primary Registry Set");
+  });
+
+  task("createRegistry", "Creates a registry if you are the factory admin.")
+  .addParam("name", "Name of the target registry.")
+  .addParam("symbol", "Symbol to give to the registry.")
+  .addParam("registrar", "Address to assign the REGISTRAR_ROLE.")
+  .addParam(
+    "enumerable",
+    "boolean indicating if the token should be enumerable or not.",
+  )
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const symbol = taskArgs.symbol;
+    const registrar = taskArgs.registrar;
+    const enumerable = taskArgs.enumerable;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+
+    const gasSettings = { 
+        maxFeePerGas: ethers.utils.parseUnits("80.0", "gwei"),
+        maxPriorityFeePerGas: ethers.utils.parseUnits("80.0", "gwei"), 
+        gasLimit: ethers.utils.parseUnits("1", 6) };
+    tx = await factoryHandle.createRegistry(
+      name,
+      symbol,
+      registrar,
+      enumerable,
+      gasSettings
+    );
+    await tx.wait(2);
+
+    const regAddress = await factoryHandle.nameToAddress(name);
+    console.log("Registry Deployed to:", regAddress);
   });
 
 task("createRegistryByToken", "Creates a registry by burning token.")
@@ -548,12 +600,17 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
       accounts[0],
     );
 
+    const gasSettings = { 
+        maxFeePerGas: ethers.utils.parseUnits("60.0", "gwei"),
+        maxPriorityFeePerGas: ethers.utils.parseUnits("60.0", "gwei"), 
+        gasLimit: ethers.utils.parseUnits("1.5", 6) };
     // call registerByToken on the NFR
     tx = await registryHandle.register(
       NFIRecipient,
       NFILabel,
       NFIData,
       tokenid,
+      gasSettings
     );
     await tx.wait(3);
 
@@ -635,12 +692,54 @@ task("updateTokenURI", "Update the token URI of a NFI in the specified NFR.")
   );
 
   // call registerByToken on the NFR
+  const gasSettings = { 
+    maxFeePerGas: ethers.utils.parseUnits("80.0", "gwei"),
+    maxPriorityFeePerGas: ethers.utils.parseUnits("80.0", "gwei"), 
+    gasLimit: ethers.utils.parseUnits("1", 6) };
   tx = await registryHandle.updateRegistration(
     tokenid,
     NFIData,
+    gasSettings
   );
   await tx.wait();
 
   const updatedRegistration = await registryHandle.tokenURI(tokenid);
   console.log("New Registration Data:", updatedRegistration);
+});
+
+task("grantRegistrarRole", "Give the registrar role to a specified account.")
+.addParam("registry", "Name of target Registry where role is to be granted.")
+.addParam("registrar", "Recipient of the REGISTRAR_ROLE.")
+.setAction(async (taskArgs) => {
+  const accounts = await hre.ethers.getSigners();
+
+  const registryName = taskArgs.registry;
+  const registrar = taskArgs.registrar
+
+  const factoryHandle = new hre.ethers.Contract(
+    factoryAddress(),
+    RF.abi,
+    accounts[0],
+  );
+
+  const registryAddress = await factoryHandle.nameToAddress(registryName);
+  const registryHandle = new hre.ethers.Contract(
+    registryAddress,
+    NFR.abi,
+    accounts[0],
+  );
+
+  // call registerByToken on the NFR
+  const gasSettings = { 
+    maxFeePerGas: ethers.utils.parseUnits("80.0", "gwei"),
+    maxPriorityFeePerGas: ethers.utils.parseUnits("80.0", "gwei"), 
+    gasLimit: ethers.utils.parseUnits("1", 6) };
+  tx = await registryHandle.grantRole(
+    registryHandle.REGISTRAR_ROLE(),
+    registrar,
+    gasSettings
+  );
+  await tx.wait();
+
+  console.log("REGISTRAR_ROLE updated");
 });
