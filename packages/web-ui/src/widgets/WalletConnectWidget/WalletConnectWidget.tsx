@@ -1,5 +1,5 @@
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
 
@@ -44,12 +44,20 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
 ) => {
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
-  const { closeModal } = useLayoutContext();
+  const { closeModal, setModalHeader } = useLayoutContext();
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   const [selectedWalletOption, setSelectedWalletOption] =
     useState<IProvider>(METAMASK);
+
+  useEffect(() => {
+    setModalHeader("Wallet Option");
+
+    return () => {
+      setModalHeader("");
+    };
+  }, []);
 
   const handleSubmit = () => {
     const { id } = selectedWalletOption;
