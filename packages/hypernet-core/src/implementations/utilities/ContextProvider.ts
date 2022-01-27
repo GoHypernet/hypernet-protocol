@@ -11,6 +11,7 @@ import {
   InitializeStatus,
   chainConfig,
   GovernanceChainInformation,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -67,7 +68,7 @@ export class ContextProvider implements IContextProvider {
     onAccountChanged: Subject<EthereumAccountAddress>,
     onGovernanceChainChanged: Subject<ChainId>,
     onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
-    onGovernanceSignerUnavailable: Subject<void>,
+    onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>,
     defaultGovernanceChainId?: ChainId,
   ) {
     const governanceChainInfo = chainConfig.get(

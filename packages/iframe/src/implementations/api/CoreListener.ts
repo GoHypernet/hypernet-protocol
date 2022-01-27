@@ -861,7 +861,8 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     });
 
     this.core.onCeramicAuthenticationStarted.subscribe(() => {
-      this.coreUIService.renderCeramicAuthenticationUI();
+      this.logUtils.info("Ceramic authentication started!");
+      //this.coreUIService.renderCeramicAuthenticationUI();
     });
 
     this.core.onCeramicFailed.subscribe((error) => {
@@ -872,11 +873,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     });
 
     this.core.onCeramicAuthenticationSucceeded.subscribe(() => {
-      this.coreUIService.renderCeramicAuthenticationSucceededUI();
+      this.logUtils.info("Ceramic authentication succeeded!");
+      //this.coreUIService.renderCeramicAuthenticationSucceededUI();
     });
 
-    this.core.onGovernanceSignerUnavailable.subscribe(() => {
-      parent.emit("onGovernanceSignerUnavailable");
+    this.core.onGovernanceSignerUnavailable.subscribe((error) => {
+      parent.emit("onGovernanceSignerUnavailable", error);
     });
   }
 }

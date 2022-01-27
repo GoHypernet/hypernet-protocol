@@ -138,7 +138,7 @@ export class BlockchainProvider implements IBlockchainProvider {
       }
       return errAsync(
         new GovernanceSignerUnavailableError(
-          `No governance signer available, using fallback provider. Change you main wallet to connect to chain ${config.defaultGovernanceChainId}`,
+          `No governance signer available, using fallback provider. Change your main wallet to connect to chain ${config.defaultGovernanceChainId}`,
         ),
       );
     });
@@ -264,7 +264,53 @@ export class BlockchainProvider implements IBlockchainProvider {
 
             this._isMetamask = web3Modal.cachedProvider == "injected";
           })
-          // TODO: do not forget to bring back the orElse for the internal provider stuff
+          .orElse((e) => {
+            this.logUtils.info(
+              "Reverting to using JsonRPCProvider as the blockchain provider, waiting for a key or mnemonic to be provided.",
+            );
+
+            // Fire an onPrivateCredentialsRequested
+            const privateKeyPromise: Promise<PrivateCredentials> = new Promise(
+              (resolve) => {
+                this.privateCredentialsPromiseResolve = resolve;
+              },
+            );
+
+            // Emit an event that sends a callback to the user. The user can execute the callback to provide their private key or mnemonic._getAccountPromise
+            context.onPrivateCredentialsRequested.next();
+
+            // Wait on
+            return ResultAsync.fromSafePromise<PrivateCredentials, never>(
+              privateKeyPromise,
+            )
+              .andThen((privateCredentials) => {
+                if (privateCredentials.mnemonic != null) {
+                  this.logUtils.info(
+                    "Mnemonic provided, initializing JsonRPCprovider",
+                  );
+                } else if (privateCredentials.privateKey != null) {
+                  this.logUtils.info(
+                    "Private key provided, initializing JsonRPCprovider",
+                  );
+                } else {
+                  this.logUtils.info(
+                    "Neither a mnemonic nor a private key was provided, error iminent!",
+                  );
+                }
+
+                // Inject a InternalProviderFactory to do this
+                return this.internalProviderFactory.factoryInternalProvider(
+                  privateCredentials,
+                );
+              })
+              .andThen((internalProvider) => {
+                return internalProvider.getProvider();
+              })
+              .map((provider) => {
+                this.provider = provider;
+                this.signer = provider.getSigner();
+              });
+          })
           .andThen(() => {
             // Now we have the main provider, as given by the modal or provided externally. We now need to check if that provider is connected to
             // the governance chain. If it is, great! We're done. If it's not, we need to create a provider using our configured ProviderUrls.
@@ -273,7 +319,12 @@ export class BlockchainProvider implements IBlockchainProvider {
 
             return this.setGovernanceSigner(governanceChainId).orElse((e) => {
               this.logUtils.error("Unable to set governance signer!");
-              context.onGovernanceSignerUnavailable.next();
+              context.onGovernanceSignerUnavailable.next(
+                new GovernanceSignerUnavailableError(
+                  e?.message || "Signer is not available",
+                  e,
+                ),
+              );
               return okAsync(undefined);
             });
           })

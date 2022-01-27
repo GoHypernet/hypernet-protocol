@@ -38,10 +38,12 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   const [mainProviderChainId, setMainProviderChainId] = useState<ChainId>();
 
   const chainOptions = useMemo(() => {
-    return chainInformationList.map(({ chainId: value, name }) => ({
-      name,
-      value,
-    }));
+    return chainInformationList
+      .filter(({ isDev }) => isDev === false)
+      .map(({ chainId, name }) => ({
+        name: `${name} - ${chainId}`,
+        value: chainId,
+      }));
   }, [JSON.stringify(chainInformationList)]);
 
   useEffect(() => {
@@ -63,14 +65,14 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
 
     // Main provider chain id change evet
     coreProxy.onChainChanged.subscribe((chainId) => {
-      console.log("onChainChanged chainId: ", chainId);
       setMainProviderChainId(chainId);
     });
 
     // Check for governance signer unavailable events
-    coreProxy.onGovernanceSignerUnavailable.subscribe(() => {
+    coreProxy.onGovernanceSignerUnavailable.subscribe((error) => {
       alert.info(
-        "Your signer is not available for the selected chain, please switch your chain in metamask!",
+        error?.message ||
+          "Your signer is not available for the selected chain, please switch your network in metamask!",
       );
     });
   }, []);
@@ -111,12 +113,7 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   };
 
   const handleSwitchChain = (chainId: ChainId) => {
-    coreProxy
-      .initializeForChainId(chainId)
-      .map(() => {
-        UIData.onCoreGovernanceChainChanged.next(chainId);
-      })
-      .mapErr(handleCoreError);
+    coreProxy.initializeForChainId(chainId).mapErr(handleCoreError);
   };
 
   const handleSwitchMetamaskNetwork = () => {
@@ -128,8 +125,6 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   };
 
   const showSwitchNetworkButton = useMemo(() => {
-    console.log("useMemo governanceChainId", governanceChainId);
-    console.log("useMemo mainProviderChainId", mainProviderChainId);
     if (governanceChainId == null || mainProviderChainId == null) {
       return false;
     }
@@ -233,7 +228,7 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
           className={classes.switchChainButton}
           onClick={handleSwitchMetamaskNetwork}
         >
-          <Typography>Switch Metamask Network</Typography>
+          <Typography>Switch Network</Typography>
         </Box>
       )}
     </Box>

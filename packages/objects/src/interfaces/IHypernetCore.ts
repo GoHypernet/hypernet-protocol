@@ -843,7 +843,7 @@ export interface IHypernetCore {
   onAccountChanged: Subject<EthereumAccountAddress>;
   onGovernanceChainChanged: Subject<ChainId>;
   onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
-  onGovernanceSignerUnavailable: Subject<void>;
+  onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");

@@ -24,7 +24,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalCreationNavigate,
   onProposalDetailsNavigate,
 }: IProposalsWidgetParams) => {
-  const { coreProxy, viewUtils, UIData } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
@@ -41,7 +41,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   useEffect(() => {
     getProposalsCount();
 
-    const subscription = UIData.onCoreGovernanceChainChanged.subscribe(() => {
+    const subscription = coreProxy.onGovernanceChainChanged.subscribe(() => {
       getProposalsCount();
       handleProposalsRefresh();
     });

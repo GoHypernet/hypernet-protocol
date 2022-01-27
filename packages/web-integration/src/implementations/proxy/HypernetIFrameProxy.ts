@@ -272,9 +272,12 @@ export default class HypernetIFrameProxy
         this.onGovernanceAccountChanged.next(data);
       });
 
-      child.on("onGovernanceSignerUnavailable", () => {
-        this.onGovernanceSignerUnavailable.next();
-      });
+      child.on(
+        "onGovernanceSignerUnavailable",
+        (data: GovernanceSignerUnavailableError) => {
+          this.onGovernanceSignerUnavailable.next(data);
+        },
+      );
 
       // Setup a listener for the "initialized" event.
       child.on("initialized", (data: ChainId) => {
@@ -1324,5 +1327,5 @@ export default class HypernetIFrameProxy
   public onAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceChainChanged: Subject<ChainId>;
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
-  public onGovernanceSignerUnavailable: Subject<void>;
+  public onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>;
 }

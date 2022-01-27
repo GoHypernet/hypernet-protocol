@@ -64,7 +64,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Dev Environment Chain",
       ChainId(1369),
       true,
-      true,
+      false,
       EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"), // channelFactory
       EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"), // transferRegistry
       EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"), // hypertoken
@@ -89,7 +89,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Rinkeby",
       ChainId(4),
       true,
-      true,
+      false,
       EthereumContractAddress("0xC82e22B0Ef5808DE0F7E9CeB265499e29012b02c"), // channelFactory
       EthereumContractAddress("0x4b86a332d76b21933d245fEF7636B1019EE6C824"), // transferRegistry
       EthereumContractAddress("0x6D4eE7f794103672490830e15308A99eB7a89024"), // hypertoken
@@ -114,7 +114,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "MainNet",
       ChainId(1),
       true,
-      true,
+      false,
       EthereumContractAddress("TODO"), // channelFactory
       EthereumContractAddress("TODO"), // transferRegistry
       EthereumContractAddress("TODO"), // hypertoken

@@ -233,7 +233,7 @@ export class HypernetCore implements IHypernetCore {
   public onAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceChainChanged: Subject<ChainId>;
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
-  public onGovernanceSignerUnavailable: Subject<void>;
+  public onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -923,7 +923,15 @@ export class HypernetCore implements IHypernetCore {
           context.onGovernanceChainChanged.next(governanceChainId);
         }
 
-        return this.contextProvider.setContext(context);
+        return this.contextProvider
+          .setContext(context)
+          .andThen(() => {
+            // Make sure that main provider network is set to the correct governance chain id
+            return this.switchProviderNetwork(governanceChainId);
+          })
+          .andThen(() => {
+            return this.blockchainListener.initialize();
+          });
       });
     });
   }
@@ -947,6 +955,12 @@ export class HypernetCore implements IHypernetCore {
           this.registryRepository.initializeForWrite().orElse((e) => {
             // TODO: remove orElse here and handle error cases
             console.log("registryRepository.initializeForWrite() e: ", e);
+            context.onGovernanceSignerUnavailable.next(
+              new GovernanceSignerUnavailableError(
+                e?.message || "Signer is not available",
+                e,
+              ),
+            );
             return okAsync(undefined);
           }),
           this.initializeGovernance(chainId),
@@ -1087,7 +1101,6 @@ export class HypernetCore implements IHypernetCore {
             this.vectorAPIListener.initialize(),
             this.gatewayConnectorListener.initialize(),
             this.messagingListener.initialize(),
-            this.blockchainListener.initialize(),
           ]);
         })
         .andThen(() => {
@@ -2058,7 +2071,8 @@ export class HypernetCore implements IHypernetCore {
         InitializeStatus,
         CoreInitializationErrors
       >[] = [];
-      // Check if any of registries, governance or payments chains is initialized
+
+      // Check if any of registries, governance or payments is initialized for the requested chain
       for (let initializeStatus of context.initializeStatus.registriesInitialized.values()) {
         if (initializeStatus === true) {
           initializerList.push(this.initializeRegistries(chainId));
@@ -2087,18 +2101,19 @@ export class HypernetCore implements IHypernetCore {
   public switchProviderNetwork(
     chainId: ChainId,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    return ResultUtils.combine([
-      this.contextProvider.getContext(),
-      this.injectedProviderService.switchNetwork(chainId),
-    ]).andThen((vals) => {
-      const [context] = vals;
-      return this.blockchainProvider
-        .setGovernanceSigner(chainId)
+    return this.contextProvider.getContext().andThen((context) => {
+      return this.injectedProviderService
+        .switchNetwork(chainId)
+        .andThen(() => {
+          return this.blockchainProvider.setGovernanceSigner(chainId);
+        })
         .orElse((e) => {
-          this.logUtils.error(
-            "Could not set Governance signer, switch to the correct network!",
+          const errorMessage =
+            "Could not set Governance signer, switch to the correct network!";
+          this.logUtils.error(errorMessage);
+          context.onGovernanceSignerUnavailable.next(
+            new GovernanceSignerUnavailableError(e?.message || errorMessage, e),
           );
-          context.onGovernanceSignerUnavailable.next();
           return okAsync(undefined);
         });
     });

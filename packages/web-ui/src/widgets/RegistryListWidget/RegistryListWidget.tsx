@@ -25,7 +25,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryDetailNavigate,
   onLazyMintRequestsNavigate,
 }: IRegistryListWidgetParams) => {
-  const { coreProxy, UIData } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [registries, setRegistries] = useState<Registry[]>([]);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
@@ -43,10 +43,13 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   useEffect(() => {
     getNumberOfRegistries();
 
-    const subscription = UIData.onCoreGovernanceChainChanged.subscribe(() => {
-      getNumberOfRegistries();
-      handleRegistryListRefresh();
-    });
+    const subscription = coreProxy.onGovernanceChainChanged.subscribe(
+      (chainId) => {
+        console.log("registries onGovernanceChainChanged: ", chainId);
+        getNumberOfRegistries();
+        handleRegistryListRefresh();
+      },
+    );
 
     return () => {
       subscription.unsubscribe();
