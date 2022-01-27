@@ -1,0 +1,28 @@
+import { useLayoutContext } from "@web-ui/contexts";
+import React, { useEffect } from "react";
+
+import FundWidget from "@web-ui/widgets/FundWidget/FundWidget";
+
+interface IDepositFundsProps {
+  excludeCardWrapper: boolean;
+}
+
+const DepositFunds: React.FC<IDepositFundsProps> = (
+  props: IDepositFundsProps,
+) => {
+  const { excludeCardWrapper } = props;
+
+  const { setModalHeader } = useLayoutContext();
+
+  useEffect(() => {
+    setModalHeader("Deposit Funds");
+
+    return () => {
+      setModalHeader("");
+    };
+  }, []);
+
+  return <FundWidget excludeCardWrapper={excludeCardWrapper} noHeader />;
+};
+
+export default DepositFunds;
