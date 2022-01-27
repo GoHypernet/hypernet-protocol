@@ -765,7 +765,6 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public registriesInitialized(chainId?: ChainId): ResultAsync<boolean, never> {
-    console.log("core registriesInitialized chainId: ", chainId);
     return this.contextProvider.getContext().map((context) => {
       const governanceChainId =
         chainId || context.governanceChainInformation.chainId;
@@ -777,12 +776,9 @@ export class HypernetCore implements IHypernetCore {
   public waitRegistriesInitialized(
     chainId?: ChainId,
   ): ResultAsync<void, never> {
-    console.log("core waitRegistriesInitialized chainId", chainId);
     return this.contextProvider.getContext().andThen((context) => {
-      console.log("context: ", context);
       const governanceChainId =
         chainId || context.governanceChainInformation.chainId;
-      console.log("governanceChainId", governanceChainId);
 
       const registriesInitializePromise =
         this._registriesInitializePromise.get(governanceChainId);
@@ -953,8 +949,6 @@ export class HypernetCore implements IHypernetCore {
           this.configProvider.getConfig(),
           this.registryRepository.initializeReadOnly(),
           this.registryRepository.initializeForWrite().orElse((e) => {
-            // TODO: remove orElse here and handle error cases
-            console.log("registryRepository.initializeForWrite() e: ", e);
             context.onGovernanceSignerUnavailable.next(
               new GovernanceSignerUnavailableError(
                 e?.message || "Signer is not available",
@@ -1016,8 +1010,12 @@ export class HypernetCore implements IHypernetCore {
         this.ipfsUtils.initialize(),
         this.governanceRepository.initializeReadOnly(),
         this.governanceRepository.initializeForWrite().orElse((e) => {
-          // TODO: remove orElse here and handle error cases
-          console.log("governanceRepository.initializeForWrite() e: ", e);
+          context.onGovernanceSignerUnavailable.next(
+            new GovernanceSignerUnavailableError(
+              e?.message || "Signer is not available",
+              e,
+            ),
+          );
           return okAsync(undefined);
         }),
       ])
@@ -1045,7 +1043,6 @@ export class HypernetCore implements IHypernetCore {
   public initializePayments(
     chainId?: ChainId,
   ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
-    console.log("initializePayments chainId", chainId);
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
@@ -2053,7 +2050,6 @@ export class HypernetCore implements IHypernetCore {
   public initializeForChainId(
     chainId: ChainId,
   ): ResultAsync<void, CoreInitializationErrors> {
-    console.log(chainId);
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),

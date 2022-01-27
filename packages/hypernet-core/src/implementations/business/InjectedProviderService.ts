@@ -71,8 +71,6 @@ export class InjectedProviderService implements IInjectedProviderService {
         const chainInformation = config.chainInformation.get(chainId);
 
         if (chainInformation == null) {
-          console.log(`Failed to switch network`);
-
           return errAsync(
             new BlockchainUnavailableError("Failed to switch network."),
           );
@@ -91,7 +89,6 @@ export class InjectedProviderService implements IInjectedProviderService {
             );
           },
         ).orElse((error) => {
-          console.log("error: ", error);
           if ((error as any)?.src?.code == 4902) {
             this.logUtils.info(
               `Adding ${chainInformation.name} network to provider.`,

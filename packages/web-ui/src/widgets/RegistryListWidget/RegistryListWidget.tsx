@@ -45,7 +45,6 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
     const subscription = coreProxy.onGovernanceChainChanged.subscribe(
       (chainId) => {
-        console.log("registries onGovernanceChainChanged: ", chainId);
         getNumberOfRegistries();
         handleRegistryListRefresh();
       },
