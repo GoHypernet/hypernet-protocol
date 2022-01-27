@@ -53,7 +53,7 @@ export const HYPERNET_LOGO_LIGHT =
 export const AUTHENTICATION_IMAGE_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/authentication.svg";
 export const AUTHENTICATION_SUCCESS_IMAGE_URL =
-  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/success-with-flag-and-planet.png";
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/onboarding-success.png";
 export const WARNING_ALERT_SELECTOR = "hypernet-protocol-warning-alert";
 export const METAMASK_LOGO_IMAGE_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/metamask.svg";
