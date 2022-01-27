@@ -35,6 +35,8 @@ the secure functioning of the Hypernet Protocol ecosystem (thus functioning as a
 4. [Payment Tokens](/packages/contracts/contracts/identity/README.md#payment-tokens)
 5. [Registry Modules](/packages/contracts/contracts/identity/README.md#registry-modules)
 
+![Governance contract architecture.](/documentation/images/governance-contract-architecture.png)
+
 ## DAO Access and Usage
 
 Users can see all past and present proposals in the official Hypernet [launchpad dashboard](https://rinkeby.launchpad.hypernet.foundation/proposals). 
