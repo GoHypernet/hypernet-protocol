@@ -17,6 +17,18 @@ Ethereum test network that is based on Proof-of-Authority. Maintained by the Get
 - Lazy Mint Module: [`0x66643a91fD95a8B41Ae673f1861589fb454DEe55`](https://rinkeby.etherscan.io/address/0x66643a91fD95a8B41Ae673f1861589fb454DEe55)
 - Merkle Module: [`0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450`](https://rinkeby.etherscan.io/address/0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450)
 
+## Polygon Mainnet
+
+An Ethereum L2 side chain with low transaction fees and fast finality. Set up your metamask with 
+[these](https://docs.polygon.technology/docs/develop/metamask/config-polygon-on-metamask/) instructions.
+
+- Registry Factory: [`0xd93fbc9d330c5a1d242d01c0f10115483a062d7c`](https://polygonscan.com/address/0xd93fbc9d330c5a1d242d01c0f10115483a062d7c)
+- Hypernet Profiles: [`0x91AE7a63d375CE3869436c1bFE3F7c56ce70c3ad`](https://polygonscan.com/address/0x91AE7a63d375CE3869436c1bFE3F7c56ce70c3ad)
+- Registry Modules: [`0xDC7C87A076ccB379bfB1092B44332278C8B2cbF5`](https://polygonscan.com/address/0xDC7C87A076ccB379bfB1092B44332278C8B2cbF5)
+- Batch Module: [`0x4618723e45a0155563a63f26b90bb5dcc491c115`](https://polygonscan.com/address/0x4618723e45a0155563a63f26b90bb5dcc491c115)
+- Lazy Mint Module: [`0x254ab00481f31b40e06544e7ec62df7dee3436d3`](https://polygonscan.com/address/0x254ab00481f31b40e06544e7ec62df7dee3436d3)
+- Merkle Module: [`0xf4d8675f7a557a2718413e724e10b4c02d18eecc`](https://polygonscan.com/address/0xf4d8675f7a557a2718413e724e10b4c02d18eecc)
+
 ## Mumbai 
 
 Polygon test network that connects with Ethereum's Goërli Testnet. Metamask network settings can be found 
