@@ -1,10 +1,12 @@
-import { useLayoutContext } from "@web-ui/contexts";
 import React, { useEffect, useRef } from "react";
+import { Box, Typography } from "@material-ui/core";
 
-import { WEB_UI_MODAL_ID_SELECTOR } from "@web-ui/constants";
-import { useStyles } from "@web-ui/containers/Modal/Modal.style";
-import { GovernanceDialog } from "@web-ui/components";
+import { GovernanceDialog, GovernanceTypography } from "@web-ui/components";
 import { ModalHeader } from "@web-ui/containers/Modal/ModalHeader";
+import { colors } from "@web-ui/theme";
+import { useLayoutContext } from "@web-ui/contexts";
+import { useStyles } from "@web-ui/containers/Modal/Modal.style";
+import { WEB_UI_MODAL_ID_SELECTOR } from "@web-ui/constants";
 
 interface IModal {
   children: React.ReactNode;
@@ -14,7 +16,7 @@ interface IModal {
 
 const Modal: React.FC<IModal> = (props: IModal) => {
   const { children, closeCallback = () => {}, modalStyle = {} } = props;
-  const { modalWidth, modalStatus } = useLayoutContext();
+  const { modalWidth, modalStatus, modalHeader } = useLayoutContext();
   const classes = useStyles({
     modalWidth,
   });
@@ -51,7 +53,14 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     <GovernanceDialog
       container={elementRef.current}
       isOpen={true}
-      content={children}
+      content={
+        <Box display="flex" flexDirection="column" my={2}>
+          {children}
+          <GovernanceTypography className={classes.bottomText} variant="body1">
+            Powered by Hypernet Protocol
+          </GovernanceTypography>
+        </Box>
+      }
       onClose={closeModal}
       maxWidth="md"
       title={<ModalHeader />}
