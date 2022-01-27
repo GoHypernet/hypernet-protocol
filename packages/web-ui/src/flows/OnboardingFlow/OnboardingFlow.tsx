@@ -123,7 +123,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
           <MerchantAuthorization
             gatewayName={gatewayName}
             gatewayApprovalContent={gatewayApprovalContent}
-            handleGatewayAuthorization={goToFundWalletScreen}
+            handleGatewayAuthorization={handleGatewayAuthorization}
           />
         );
       case EOnboardingScreens.EMPTY_BALANCE:
