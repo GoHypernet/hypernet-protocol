@@ -39,7 +39,73 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
     console.log("Enumerable Registry Beacon Owner:", enumRegBeaconOwner)
   });
 
-  task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
+task("setFactoryBeaconEnumerable", "Update the implementation address of the enumerable NFR beacon.")
+  .addParam("address", "Address of the new implemenation.")
+  .setAction(async (taskArgs) => {
+
+    const [account] = await hre.ethers.getSigners();
+
+    const newImpl = taskArgs.address;
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      account,
+    );
+
+    const enumRegBeaconAddr = await factoryHandle.enumerableRegistryBeacon();
+
+    const enumRegBeaconHandle = new hre.ethers.Contract(
+        enumRegBeaconAddr,
+        IBEACON.abi,
+        account,
+      );
+
+    // set the new implementation address
+    let tx = await enumRegBeaconHandle.upgradeTo(newImpl, await gasSettings());
+    let txrcp = await tx.wait(2);
+
+    const enumRegImplAddr = await enumRegBeaconHandle.implementation();
+    const enumRegBeaconOwner = await enumRegBeaconHandle.owner();
+
+    console.log("Enumerable Registry Implementation Address:", enumRegImplAddr);
+    console.log("Enumerable Registry Beacon Owner:", enumRegBeaconOwner);
+    console.log("Gas Used:", txrcp.gasUsed.toString());
+  });
+
+task("setFactoryBeaconNonEnumerable", "Update the implementation address of the non-enumerable NFR beacon.")
+  .addParam("address", "Address of the new implemenation.")
+  .setAction(async (taskArgs) => {
+
+    const [account] = await hre.ethers.getSigners();
+
+    const newImpl = taskArgs.address;
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      account,
+    );
+
+    const regBeaconAddr = await factoryHandle.registryBeacon();
+
+    const regBeaconHandle = new hre.ethers.Contract(
+        regBeaconAddr,
+        IBEACON.abi,
+        account,
+      );
+
+    // set the new implementation address
+    let tx = await regBeaconHandle.upgradeTo(newImpl, await gasSettings());
+    let txrcp = await tx.wait(2);
+
+    const regImplAddr = await regBeaconHandle.implementation();
+    const regBeaconOwner = await regBeaconHandle.owner();
+
+    console.log("Non-Enumerable Registry Implementation Address:", regImplAddr);
+    console.log("Non-Enumerable Registry Beacon Owner:", regBeaconOwner);
+    console.log("Gas Used:", txrcp.gasUsed.toString());
+  });
+
+task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
   .addParam("name", "Name of the target registry.")
   .addParam("primaryregistry", "Symbol to give to the registry.")
   .setAction(async (taskArgs) => {
