@@ -61,6 +61,8 @@ export * from "@objects/InitializeStatus";
 export * from "@objects/RegistryModulesNames";
 export * from "@objects/LazyMintingSignature";
 export * from "@objects/IpfsCID";
+export * from "@objects/Palette";
+export * from "@objects/Theme";
 
 export * from "@objects/errors";
 export * from "@objects/interfaces";

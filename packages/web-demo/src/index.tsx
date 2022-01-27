@@ -1,15 +1,27 @@
-import { GatewayUrl, ChainId } from "@hypernetlabs/objects";
+import { GatewayUrl, ChainId, Theme } from "@hypernetlabs/objects";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
 
 import Spinner from "./assets/loading-spinner";
 
+const theme = new Theme(
+  {
+    primary: {
+      main: "#00C3A9",
+      light: "#00C3A9",
+      dark: "#00C3A9",
+    },
+  },
+  null,
+);
+
 const client: IHypernetWebIntegration = new HypernetWebIntegration(
   "http://localhost:5020",
   ChainId(1337),
   true,
   false,
+  theme,
   null,
 );
 
@@ -43,6 +55,13 @@ client
           'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',
         showInModal: true,
         excludeCardWrapper: true,
+        gatewayApprovalContent: "Done",
+        successButtonProps: {
+          label: `Sucess baby`,
+          action: () => {
+            console.log(`done`);
+          },
+        },
       })
       .map(() => {
         Spinner.hide();

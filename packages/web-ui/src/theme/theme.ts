@@ -1,3 +1,4 @@
+import { Palette } from "@hypernetlabs/objects";
 import {
   createTheme,
   ThemeProvider as MuiThemeProvider,
@@ -37,6 +38,7 @@ export const colors = {
 
   BLUE100: "#DEEBFF",
   BLUE200: "#B3D4FF",
+  BLUE300: "#4C9AFF",
   BLUE400: "#0052CC",
   BLUE700: "#0747A6",
 
@@ -271,49 +273,56 @@ const typography = {
   },
 };
 
-export const lightTheme = createTheme({
-  typography,
-  palette: {
-    primary: {
-      main: colors.PURPLE400,
-      light: colors.PURPLE300,
-      dark: colors.PURPLE700,
-      contrastText: colors.WHITE,
+export const lightTheme = (palette?: Palette) => {
+  return createTheme({
+    typography,
+    palette: {
+      primary: {
+        main: colors.PURPLE400,
+        light: colors.PURPLE300,
+        dark: colors.PURPLE700,
+        contrastText: colors.WHITE,
+        ...palette?.primary,
+      },
+      text: {
+        primary: colors.GRAY700,
+        secondary: colors.GRAY500,
+        ...palette?.text,
+      },
+      divider: palette?.divider || colors.GRAY200,
     },
-    text: {
-      primary: colors.GRAY700,
-      secondary: colors.GRAY500,
+    overrides: {
+      // @ts-ignore
+      MuiTypography,
+      MuiButton,
+      MuiTextField,
+      MuiLinearProgress,
+      MuiAutocomplete,
+      MuiChip,
+      MuiCheckbox,
     },
-    divider: colors.GRAY200,
-  },
-  overrides: {
-    // @ts-ignore
-    MuiTypography,
-    MuiButton,
-    MuiTextField,
-    MuiLinearProgress,
-    MuiAutocomplete,
-    MuiChip,
-    MuiCheckbox,
-  },
-  props: {
-    MuiButtonBase,
-  },
-});
+    props: {
+      MuiButtonBase,
+    },
+  });
+};
 
-export const darkTheme = createTheme({
-  typography,
-  palette: {
-    type: "dark",
-  },
-  overrides: {
-    // @ts-ignore
-    MuiTypography,
-    MuiButton,
-  },
-  props: {
-    MuiButtonBase,
-  },
-});
+export const darkTheme = (palette?: Palette) => {
+  return createTheme({
+    typography,
+    palette: {
+      type: "dark",
+      ...palette,
+    },
+    overrides: {
+      // @ts-ignore
+      MuiTypography,
+      MuiButton,
+    },
+    props: {
+      MuiButtonBase,
+    },
+  });
+};
 
 export const ThemeProvider = MuiThemeProvider;

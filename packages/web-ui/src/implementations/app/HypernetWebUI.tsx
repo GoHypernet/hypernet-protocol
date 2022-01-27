@@ -3,6 +3,7 @@ import {
   IHypernetCore,
   IUIData,
   RenderError,
+  Theme,
 } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import {
@@ -98,11 +99,13 @@ export default class HypernetWebUI implements IHypernetWebUI {
   protected viewUtils: IViewUtils;
   protected dateUtils: IDateUtils;
   protected defaultGovernanceChainId: ChainId;
+  protected theme: Theme | null = null;
   constructor(
     _coreInstance: IHypernetCore,
     _UIData: IUIData,
     iframeURL: string | null,
     defaultGovernanceChainId: number | null,
+    theme: Theme | null,
     debug: boolean | null,
   ) {
     if (_coreInstance) {
@@ -114,7 +117,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     }
 
     this.defaultGovernanceChainId = ChainId(defaultGovernanceChainId || 1);
-
+    this.theme = theme;
     // This is to cache web ui instance in window so it may prevent from having multiple web ui instances
     window.hypernetWebUIInstance = HypernetWebUI.instance;
 
@@ -174,7 +177,10 @@ export default class HypernetWebUI implements IHypernetWebUI {
       seed: widgetUniqueIdentifier,
     });
 
-    const theme = true ? lightTheme : darkTheme;
+    const lightPalette = this.theme?.light || undefined;
+    const darkPalette = this.theme?.dark || undefined;
+
+    const theme = true ? lightTheme(lightPalette) : darkTheme(darkPalette);
 
     return (
       <StoreProvider

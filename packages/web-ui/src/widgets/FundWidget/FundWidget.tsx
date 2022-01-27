@@ -21,6 +21,7 @@ interface IValues {
 interface IFundWidget extends IRenderParams {}
 
 const FundWidget: React.FC<IFundWidget> = ({
+  noHeader,
   noLabel,
   excludeCardWrapper,
 }: IFundWidget) => {
@@ -57,7 +58,7 @@ const FundWidget: React.FC<IFundWidget> = ({
   return (
     <GovernanceCard
       {...(excludeCardWrapper && { className: classes.nudeCard })}
-      title={!noLabel ? "Deposit Funds" : undefined}
+      title={!noHeader ? "Deposit Funds" : undefined}
       hideDivider={excludeCardWrapper}
       description={
         !noLabel
