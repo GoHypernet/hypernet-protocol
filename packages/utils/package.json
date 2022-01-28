@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/utils",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Utilities used by Hypernet Labs packages",
   "license": "ISC",
   "repository": {
@@ -41,11 +41,11 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@connext/vector-utils": "^0.2.5-beta.6",
-    "@hypernetlabs/objects": "^0.3.14",
+    "@hypernetlabs/objects": "^0.3.15",
     "axios": "^0.21.1",
     "delay": "^5.0.0",
     "inversify": "^5.1.1",
-    "neverthrow": "^4.1.0",
+    "neverthrow": "^4.2.2",
     "pino": "^6.7.0",
     "postmate": "^1.5.2"
   }
