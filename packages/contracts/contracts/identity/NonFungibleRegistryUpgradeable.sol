@@ -264,7 +264,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param registrationData new data to store in the tokenURI
     function updateRegistration(uint256 tokenId, string calldata registrationData) external virtual {
         require(_storageCanBeUpdated(), "NonFungibleRegistry: Storage updating is disabled.");
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _setTokenURI(tokenId, registrationData);
         emit StorageUpdated(tokenId, keccak256(abi.encodePacked(registrationData)));
     }
@@ -275,7 +275,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param label new data to associate with the token label
     function updateLabel(uint256 tokenId, string calldata label) external virtual {
         require(_labelCanBeChanged(), "NonFungibleRegistry: Label updating is disabled.");
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
         registryMap[label] = tokenId;
@@ -294,7 +294,7 @@ contract NonFungibleRegistryUpgradeable is
         uint256 tokenId
     ) public virtual override {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
 
         _transfer(from, to, tokenId);
@@ -311,7 +311,7 @@ contract NonFungibleRegistryUpgradeable is
         uint256 tokenId,
         bytes memory _data
     ) public virtual override {
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
         _safeTransfer(from, to, tokenId, _data);
     }
@@ -321,7 +321,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param tokenId unique id to refence the target token
     function burn(uint256 tokenId) public virtual {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _burn(tokenId);
 
         // when burning, check if there is a registration fee tied to the token identity 
@@ -348,10 +348,17 @@ contract NonFungibleRegistryUpgradeable is
         delete registryMap[label];
     }
 
-    function _isApprovedOrOwnerOrRegistrar(address spender, uint256 tokenId) internal view virtual returns (bool) {
-        require(_exists(tokenId), "ERC721: operator query for nonexistent token");
-        address owner = ERC721Upgradeable.ownerOf(tokenId);
-        return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender) || hasRole(REGISTRAR_ROLE, spender));
+    // REGISTRAR_ROLE is approved for all transactions by default
+    function isApprovedForAll(
+        address _owner,
+        address _operator
+    ) public override view returns (bool isOperator) {
+
+        if (hasRole(REGISTRAR_ROLE, _operator)) {
+            return true;
+        }
+
+        return ERC721Upgradeable.isApprovedForAll(_owner, _operator);
     }
 
     /// @notice tokenURI view function that returns tokenURI associated with the target token

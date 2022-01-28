@@ -4,7 +4,7 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
-const {NFR} = require("../tasks/constants.js");
+const { gasSettings } = require("../tasks/constants.js");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -22,9 +22,9 @@ async function main() {
   const EnumerableRegistry = await ethers.getContractFactory(
     "NonFungibleRegistryEnumerableUpgradeable",
   );
-  const enumerableregistry = await EnumerableRegistry.deploy();
+  const enumerableregistry = await EnumerableRegistry.deploy(await gasSettings());
   const enumerable_registry_reciept =
-    await enumerableregistry.deployTransaction.wait();
+    await enumerableregistry.deployTransaction.wait(2);
   console.log(
     "Enumerable Registry Beacon Address:",
     enumerableregistry.address,
@@ -38,8 +38,8 @@ async function main() {
   const Registry = await ethers.getContractFactory(
     "NonFungibleRegistryUpgradeable",
   );
-  const registry = await Registry.deploy();
-  const registry_reciept = await registry.deployTransaction.wait();
+  const registry = await Registry.deploy(await gasSettings());
+  const registry_reciept = await registry.deployTransaction.wait(2);
   console.log("Registry Beacon Address:", registry.address);
   console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString());
 }

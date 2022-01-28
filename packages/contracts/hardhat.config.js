@@ -38,7 +38,6 @@ module.exports = {
     hardhat: {
       accounts: {
         accountsBalance: "10000000000000000000000",
-        mnemonic,
       },
       mining: {
         auto: true,
@@ -72,10 +71,20 @@ module.exports = {
         gas: 6000000,
         gasPrice: 8000000000
     },
+    polygon: { // polygon mainnet
+        accounts: { mnemonic },
+        chainId: 137,
+        url: urlOverride || "https://rpc-mainnet.maticvigil.com",
+    },
     fuji: { // avalanche testnet
         accounts: { mnemonic },
         chainId: 43113,
         url: urlOverride || "https://f0fa7eba-0c1b-4f3f-bc37-67ba6ae2b60a.hypernetlabs.io/http/ext/bc/C/rpc",
+    },
+    avalanche: { // avalanche testnet
+        accounts: { mnemonic },
+        chainId: 43114,
+        url: urlOverride || "https://053e1c5c-66fd-49c3-b267-42ab5f9202c6.hypernetlabs.io/http/ext/bc/C/rpc",
     },
   },
   gasReporter: {

@@ -195,7 +195,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
             },
             {
               fieldTitle: "Registrar Addresses",
-              fieldValue: registry.registrarAddresses.join("-"),
+              fieldValue: registry.registrarAddresses.join(" "),
             },
           ]}
           actionButtonList={
