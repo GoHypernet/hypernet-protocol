@@ -6,6 +6,7 @@ import {
 } from "@hypernetlabs/objects";
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
+import { ResultUtils } from "@hypernetlabs/utils";
 
 import { IRegistryFactoryContract } from "@governance-sdk/IRegistryFactoryContract";
 
@@ -137,5 +138,102 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
         });
       })
       .map(() => {});
+  }
+
+  public createRegistry(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAccountAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, RegistryFactoryContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.createRegistry(
+        name,
+        symbol,
+        registrarAddress,
+        enumerable,
+      ) as Promise<ethers.providers.TransactionResponse>,
+      (e) => {
+        return new RegistryFactoryContractError(
+          "Unable to call factoryContract createRegistry()",
+          e,
+        );
+      },
+    )
+      .andThen((tx) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
+          return new RegistryFactoryContractError("Unable to wait for tx", e);
+        });
+      })
+      .map(() => {});
+  }
+
+  public getRegistrarDefaultAdminRoleMember(): ResultAsync<
+    EthereumAccountAddress[],
+    RegistryFactoryContractError
+  > {
+    return this.getRegistrarDefaultAdminRole().andThen(
+      (registrarDefaultAdminRole) => {
+        return this.getRegistrarDefaultAdminRoleMemberCount(
+          registrarDefaultAdminRole,
+        ).andThen((countBigNumber) => {
+          const count = countBigNumber.toNumber();
+
+          const registrarResults: ResultAsync<
+            EthereumAccountAddress,
+            RegistryFactoryContractError
+          >[] = [];
+
+          for (let index = 0; index < count; index++) {
+            registrarResults.push(
+              ResultAsync.fromPromise(
+                this.contract?.getRoleMember(
+                  registrarDefaultAdminRole,
+                  index,
+                ) as Promise<EthereumAccountAddress>,
+                (e) => {
+                  return new RegistryFactoryContractError(
+                    `Unable to call getRoleMember DEFAULT_ADMIN_ROLE for registrarDefaultAdminRole: ${registrarDefaultAdminRole} - count: ${count} - index: ${index}`,
+                    e,
+                  );
+                },
+              ),
+            );
+          }
+          return ResultUtils.combine(registrarResults);
+        });
+      },
+    );
+  }
+
+  private getRegistrarDefaultAdminRole(): ResultAsync<
+    ethers.providers.TransactionResponse,
+    RegistryFactoryContractError
+  > {
+    return ResultAsync.fromPromise(
+      this.contract?.DEFAULT_ADMIN_ROLE() as Promise<ethers.providers.TransactionResponse>,
+      (e) => {
+        return new RegistryFactoryContractError(
+          "Unable to call DEFAULT_ADMIN_ROLE",
+          e,
+        );
+      },
+    );
+  }
+
+  private getRegistrarDefaultAdminRoleMemberCount(
+    registrarDefaultAdminRole: ethers.providers.TransactionResponse,
+  ): ResultAsync<BigNumber, RegistryFactoryContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.getRoleMemberCount(
+        registrarDefaultAdminRole, // Get the registrar default admin role addresses numbers
+      ) as Promise<BigNumber>,
+      (e) => {
+        return new RegistryFactoryContractError(
+          "Unable to call getRegistrarDefaultAdminRoleMemberCount DEFAULT_ADMIN_ROLE",
+          e,
+        );
+      },
+    );
   }
 }
