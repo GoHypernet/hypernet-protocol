@@ -29,6 +29,16 @@ export interface IRegistryFactoryContract {
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError>;
+  createRegistry(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAccountAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, RegistryFactoryContractError>;
+  getRegistrarDefaultAdminRoleMember(): ResultAsync<
+    EthereumAccountAddress[],
+    RegistryFactoryContractError
+  >;
 }
 
 export const IRegistryFactoryContractType = Symbol.for(
