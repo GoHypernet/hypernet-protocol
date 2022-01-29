@@ -1831,7 +1831,12 @@ export class HypernetCore implements IHypernetCore {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | ERC20ContractError
+    | BlockchainUnavailableError
+  > {
     return this.registryService.createRegistryByToken(
       name,
       symbol,

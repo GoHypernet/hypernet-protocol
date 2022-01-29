@@ -1032,7 +1032,10 @@ export default class HypernetIFrameProxy
     enumerable: boolean,
   ): ResultAsync<
     void,
-    RegistryFactoryContractError | ERC20ContractError | ProxyError
+    | RegistryFactoryContractError
+    | ERC20ContractError
+    | BlockchainUnavailableError
+    | ProxyError
   > {
     return this._createCall("createRegistryByToken", {
       name,

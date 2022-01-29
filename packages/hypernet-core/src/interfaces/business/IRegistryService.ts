@@ -143,7 +143,12 @@ export interface IRegistryService {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError>;
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | ERC20ContractError
+    | BlockchainUnavailableError
+  >;
   grantRegistrarRole(
     registryName: string,
     address: EthereumAccountAddress | EthereumContractAddress,

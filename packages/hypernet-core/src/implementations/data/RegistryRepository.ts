@@ -987,14 +987,36 @@ export class RegistryRepository implements IRegistryRepository {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | ERC20ContractError
+    | BlockchainUnavailableError
+  > {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
       this.registryFactoryContract.registrationFee(),
+      this.registryFactoryContract.getRegistrarDefaultAdminRoleMember(),
+      this.getSignerAddress(),
     ]).andThen((vals) => {
-      const [context, registrationFees] = vals;
+      const [
+        context,
+        registrationFees,
+        registrarDefaultAdminAddresses,
+        selfAddress,
+      ] = vals;
       if (this.signer == null) {
         throw new Error("No signer available!");
+      }
+
+      if (registrarDefaultAdminAddresses.includes(selfAddress) === true) {
+        // This means that the user address has a default admin role and can call createRegistry without the need for hypertoken
+        return this.registryFactoryContract.createRegistry(
+          name,
+          symbol,
+          registrarAddress,
+          enumerable,
+        );
       }
 
       this.tokenERC20Contract = new ERC20Contract(
