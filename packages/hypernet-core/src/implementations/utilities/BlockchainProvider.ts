@@ -317,16 +317,15 @@ export class BlockchainProvider implements IBlockchainProvider {
             // In this case, a signer will not be available.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 
-            return this.setGovernanceSigner(governanceChainId).orElse((e) => {
-              this.logUtils.error("Unable to set governance signer!");
-              context.onGovernanceSignerUnavailable.next(
-                new GovernanceSignerUnavailableError(
-                  e?.message || "Signer is not available",
-                  e,
-                ),
-              );
-              return okAsync(undefined);
-            });
+            return this.getMainProviderChainId().andThen(
+              (mainProviderChainId) => {
+                if (mainProviderChainId == chainId) {
+                  this.governanceProvider = this.provider;
+                  this.governanceSigner = this.provider!.getSigner();
+                }
+                return okAsync(undefined);
+              },
+            );
           })
           .andThen(() => {
             // We will have to create a provider for the governance chain. We won't bother with the a signer.

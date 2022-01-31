@@ -635,8 +635,9 @@ export class HypernetCore implements IHypernetCore {
     this.injectedProviderService = new InjectedProviderService(
       this.blockchainProvider,
       this.localStorageUtils,
-      this.logUtils,
       this.configProvider,
+      this.contextProvider,
+      this.logUtils,
     );
 
     this.vectorAPIListener = new VectorAPIListener(
@@ -2106,6 +2107,7 @@ export class HypernetCore implements IHypernetCore {
       return this.injectedProviderService
         .switchNetwork(chainId)
         .andThen(() => {
+          console.log("network switchedddd");
           return this.blockchainProvider.setGovernanceSigner(chainId);
         })
         .orElse((e) => {

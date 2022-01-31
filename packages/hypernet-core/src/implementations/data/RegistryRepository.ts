@@ -1744,12 +1744,6 @@ export class RegistryRepository implements IRegistryRepository {
 
         // Get the name, symbol and NumberOfEntries of that registry address
         return ResultUtils.combine([
-          this.nonFungibleRegistryContract.getRegistrarRoleMember(
-            registryAddress,
-          ),
-          this.nonFungibleRegistryContract.getRegistrarRoleAdminMember(
-            registryAddress,
-          ),
           this.nonFungibleRegistryContract.name(registryAddress),
           this.nonFungibleRegistryContract.symbol(registryAddress),
           this.nonFungibleRegistryContract.totalSupply(registryAddress),
@@ -1763,8 +1757,6 @@ export class RegistryRepository implements IRegistryRepository {
           this.nonFungibleRegistryContract.primaryRegistry(registryAddress),
         ]).andThen((vals) => {
           const [
-            registrarAddresses,
-            registrarAdminAddresses,
             registryName,
             registrySymbol,
             registryNumberOfEntries,
@@ -1778,38 +1770,16 @@ export class RegistryRepository implements IRegistryRepository {
             primaryRegistry,
           ] = vals;
 
-          const batchModule = registryModules.find(
-            (registryModule) =>
-              registryModule.name ===
-              context.governanceChainInformation.registryModulesNames
-                .batchMintingModule,
-          );
-
-          const lazyMintModule = registryModules.find(
-            (registryModule) =>
-              registryModule.name ===
-              context.governanceChainInformation.registryModulesNames
-                .lazyMintingModule,
-          );
-
           const modulesCapability = new RegistryModuleCapability(
             registryAddress,
-            registrarAddresses.some(
-              (registrarAddress) =>
-                EthereumContractAddress(registrarAddress) ===
-                batchModule?.address,
-            ),
-            registrarAddresses.some(
-              (registrarAddress) =>
-                EthereumContractAddress(registrarAddress) ===
-                lazyMintModule?.address,
-            ),
+            false,
+            false,
           );
 
           return okAsync(
             new Registry(
-              registrarAddresses,
-              registrarAdminAddresses,
+              [],
+              [],
               registryAddress,
               registryName,
               registrySymbol,
