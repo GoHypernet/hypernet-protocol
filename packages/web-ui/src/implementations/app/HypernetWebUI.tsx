@@ -531,6 +531,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
             closeCallback={config.closeCallback}
             excludeCardWrapper={config.excludeCardWrapper}
             launchpadUrl={config.launchpadUrl}
+            renderGatewayApprovalContent={config?.renderGatewayApprovalContent}
           />,
           config.showInModal,
           config.closeCallback,

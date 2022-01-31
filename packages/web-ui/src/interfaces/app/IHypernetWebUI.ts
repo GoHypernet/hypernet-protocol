@@ -35,7 +35,7 @@ export interface IOnboardingFlowParams extends IRenderParams {
   gatewayUrl: GatewayUrl;
   gatewayName?: string;
   gatewayLogoUrl?: string;
-  gatewayApprovalContent?: React.ReactNode;
+  renderGatewayApprovalContent?: () => React.ReactNode;
   finalSuccessContent?: string;
   launchpadUrl?: string;
   successButtonProps?: IOnboardingSuccessButtonProps;

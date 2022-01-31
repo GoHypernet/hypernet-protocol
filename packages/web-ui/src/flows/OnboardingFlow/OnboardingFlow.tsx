@@ -29,7 +29,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     gatewayUrl,
     successButtonProps,
     gatewayName = "Hypernet.Pay",
-    gatewayApprovalContent,
+    renderGatewayApprovalContent,
     excludeCardWrapper,
     launchpadUrl,
   } = props;
@@ -122,7 +122,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         return (
           <MerchantAuthorization
             gatewayName={gatewayName}
-            gatewayApprovalContent={gatewayApprovalContent}
+            renderGatewayApprovalContent={renderGatewayApprovalContent}
             handleGatewayAuthorization={handleGatewayAuthorization}
           />
         );

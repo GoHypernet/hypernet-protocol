@@ -7,16 +7,19 @@ import { useStyles } from "@web-ui/flows/OnboardingFlow/screens/MerchantAuthoriz
 
 interface IMerchantAuthorizationProps {
   gatewayName: string;
-  gatewayApprovalContent?: React.ReactNode;
+  renderGatewayApprovalContent?: () => React.ReactNode;
   handleGatewayAuthorization: () => void;
 }
 
 const MerchantAuthorization: React.FC<IMerchantAuthorizationProps> = (
   props: IMerchantAuthorizationProps,
 ) => {
-  const { gatewayName, gatewayApprovalContent, handleGatewayAuthorization } =
-    props;
-  const { setModalHeader } = useLayoutContext();
+  const {
+    gatewayName,
+    renderGatewayApprovalContent,
+    handleGatewayAuthorization,
+  } = props;
+  const { setModalHeader, loading } = useLayoutContext();
   const classes = useStyles();
 
   useEffect(() => {
@@ -29,7 +32,9 @@ const MerchantAuthorization: React.FC<IMerchantAuthorizationProps> = (
 
   return (
     <>
-      {gatewayApprovalContent || (
+      {renderGatewayApprovalContent ? (
+        renderGatewayApprovalContent()
+      ) : (
         <GovernanceTypography variant="subtitle1" align="left">
           {`In order to continue approve ${gatewayName} by providing a signature.`}
         </GovernanceTypography>
@@ -38,6 +43,7 @@ const MerchantAuthorization: React.FC<IMerchantAuthorizationProps> = (
         className={classes.approveButton}
         color="primary"
         variant="contained"
+        loading={loading}
         fullWidth
         onClick={handleGatewayAuthorization}
       >

@@ -15,14 +15,20 @@ const DepositFunds: React.FC<IDepositFundsProps> = (
   const { setModalHeader } = useLayoutContext();
 
   useEffect(() => {
-    setModalHeader("Deposit Funds");
+    setModalHeader("Payment Gateway Approval");
 
     return () => {
       setModalHeader("");
     };
   }, []);
 
-  return <FundWidget excludeCardWrapper={excludeCardWrapper} noHeader />;
+  return (
+    <FundWidget
+      selectType="dropdown"
+      excludeCardWrapper={excludeCardWrapper}
+      noHeader
+    />
+  );
 };
 
 export default DepositFunds;

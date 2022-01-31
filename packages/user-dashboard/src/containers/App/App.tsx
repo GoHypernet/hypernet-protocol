@@ -31,6 +31,7 @@ const integration: IHypernetWebIntegration = new HypernetWebIntegration(
   true,
   false,
   null,
+  null,
 );
 
 const App: React.FC = () => {
@@ -82,7 +83,7 @@ const App: React.FC = () => {
 
   return (
     <StoreProvider hypernetWebIntegration={integration}>
-      <ThemeProvider theme={true ? lightTheme : darkTheme}>
+      <ThemeProvider theme={true ? lightTheme() : darkTheme()}>
         <Box className={classes.appWrapper}>
           <Header />
           <Box className={classes.bodyWrapper}>
