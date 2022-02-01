@@ -496,11 +496,6 @@ it("Test Buy Module.", async function () {
     buyModule = await BuyModule.deploy("Buy Module");
     await buyModule.deployTransaction.wait();
 
-    // then add the module as a REGISTRAR
-    const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
-    let tx = await registry.grantRole(REGISTRAR_ROLE, buyModule.address);
-    tx.wait();
-
     // Add a token to purchase
     tx = await registry.register(
       owner.address,
@@ -540,12 +535,23 @@ it("Test Buy Module.", async function () {
     // can't buy the NFI without calling approve
     tx = await hypertoken.transfer(addr1.address, await registry.registrationFee());
     tx.wait();
+    tx = await hypertoken.transfer(addr2.address, await registry.registrationFee());
+    tx.wait();
     await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "ERC20: transfer amount exceeds allowance");
 
-    // sell the token
+    // can't sell the token if the Buy Module is not have the REGISTRAR_ROLD
     tx = await hypertoken.connect(addr1).approve(buyModule.address, await registry.registrationFee());
     tx.wait();
-    buyModule.connect(addr1).buyNFI(42069, registry.address);
+    tx = await hypertoken.connect(addr2).approve(buyModule.address, await registry.registrationFee());
+    tx.wait();
+    await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+
+    // then add the module as a REGISTRAR
+    const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+    tx = await registry.grantRole(REGISTRAR_ROLE, buyModule.address);
+    tx.wait();
+
+    buyModule.connect(addr1).buyNFI(42069, registry.address)
 
     // can't buy it once its already been bought
     await expectRevert(buyModule.connect(addr2).buyNFI(42069, registry.address), "BuyModule: token already sold.");

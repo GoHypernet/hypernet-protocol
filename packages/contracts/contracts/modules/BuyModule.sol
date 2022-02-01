@@ -16,7 +16,7 @@ contract BuyModule is Context {
         name = _name; 
     }
 
-    /// @notice buyNFI purchase any NFIs still held by a REGISTRAR_ROLE account
+    /// @notice buyNFI purchase any NFIs still held by a REGISTRAR_ROLE account from the specified NFR
     /// @dev The price is set by the registrationFee and 
     /// @param tokenId id of the token you want to buy
     /// @param registry address of the target registry to call
