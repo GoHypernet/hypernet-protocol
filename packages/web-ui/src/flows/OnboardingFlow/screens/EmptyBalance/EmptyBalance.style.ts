@@ -8,6 +8,7 @@ export const useStyles = makeStyles({
   authenticationSuccessImg: {
     maxWidth: 280,
     padding: "40px 0",
+    alignSelf: "center",
   },
   fundButton: {
     marginTop: 24,

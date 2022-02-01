@@ -150,7 +150,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   return (
     <Box className={classes.container}>
-      <Box width={480} margin="auto">
+      <Box display="flex" flexDirection="column" width={480} margin="auto" >
         {renderScreen()}
         <ModalFooter url={launchpadUrl} />
       </Box>

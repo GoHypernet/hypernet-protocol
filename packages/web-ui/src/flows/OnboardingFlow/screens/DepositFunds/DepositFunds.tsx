@@ -15,7 +15,7 @@ const DepositFunds: React.FC<IDepositFundsProps> = (
   const { setModalHeader } = useLayoutContext();
 
   useEffect(() => {
-    setModalHeader("Payment Gateway Approval");
+    setModalHeader("Deposit Funds");
 
     return () => {
       setModalHeader("");

@@ -23,7 +23,7 @@ const MerchantAuthorization: React.FC<IMerchantAuthorizationProps> = (
   const classes = useStyles();
 
   useEffect(() => {
-    setModalHeader("Deposit Funds");
+    setModalHeader("Payment Gateway Approval");
 
     return () => {
       setModalHeader("");
@@ -43,11 +43,11 @@ const MerchantAuthorization: React.FC<IMerchantAuthorizationProps> = (
         className={classes.approveButton}
         color="primary"
         variant="contained"
-        loading={loading}
+        disabled={loading}
         fullWidth
         onClick={handleGatewayAuthorization}
       >
-        {`Approve ${gatewayName}`}
+        {`Approve ${gatewayName} ${loading ? "(loading...)" : ""}`}
       </GovernanceButton>
     </>
   );
