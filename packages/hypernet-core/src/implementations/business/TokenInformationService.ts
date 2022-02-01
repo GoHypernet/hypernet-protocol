@@ -2,6 +2,7 @@ import {
   TokenInformation,
   EthereumContractAddress,
   ChainId,
+  NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
 import {
   ITokenInformationRepositoryType,
@@ -16,6 +17,12 @@ export class TokenInformationService implements ITokenInformationService {
     @inject(ITokenInformationRepositoryType)
     protected tokenInformationRepository: ITokenInformationRepository,
   ) {}
+
+  public initialize(
+    tokenRegistryAddress: EthereumContractAddress,
+  ): ResultAsync<void, NonFungibleRegistryContractError> {
+    return this.tokenInformationRepository.initialize(tokenRegistryAddress);
+  }
 
   public getTokenInformation(): ResultAsync<TokenInformation[], never> {
     return this.tokenInformationRepository.getTokenInformation();

@@ -390,4 +390,17 @@ export class RegistryService implements IRegistryService {
       lazyMintingSignature,
     );
   }
+
+  public initializeReadOnly(): ResultAsync<void, never> {
+    return this.registryRepository.initializeReadOnly();
+  }
+
+  public initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
+    return this.registryRepository.initializeForWrite();
+  }
 }

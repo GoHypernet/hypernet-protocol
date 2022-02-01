@@ -252,4 +252,13 @@ export interface IRegistryService {
     void,
     PersistenceError | VectorError | BlockchainUnavailableError
   >;
+  initializeReadOnly(): ResultAsync<void, never>;
+  initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 }
+
+export const IRegistryServiceType = Symbol.for("IRegistryService");

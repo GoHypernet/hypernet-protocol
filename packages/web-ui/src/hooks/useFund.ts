@@ -77,7 +77,7 @@ type Action =
     };
 
 export function useFund(): IReducerStateReducer {
-  const { coreProxy, UIData, governanceChainId } = useStoreContext();
+  const { coreProxy, UIData, defaultGovernanceChainId } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -158,7 +158,7 @@ export function useFund(): IReducerStateReducer {
           ?.getTokenInformation()
           .map((tokenInformation: TokenInformation[]) => {
             const tokenInformationList = tokenInformation.filter(
-              (tokenInfo) => tokenInfo.chainId == governanceChainId,
+              (tokenInfo) => tokenInfo.chainId == defaultGovernanceChainId,
             );
             // prepare balances
             setLoading(false);

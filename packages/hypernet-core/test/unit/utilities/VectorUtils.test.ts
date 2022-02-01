@@ -5,7 +5,7 @@ import {
   canceledInsuranceTransfer,
   canceledOfferTransfer,
   canceledParameterizedTransfer,
-  governanceChainInformation,
+  defaultGovernanceChainInformation,
   insuranceTransferEncodedCancel,
   insuranceTransferResolverEncoding,
   messageTransferEncodedCancel,
@@ -59,14 +59,14 @@ class VectorUtilsMocks {
 
     td.when(
       this.blockchainUtils.getMessageTransferEncodedCancelData(
-        governanceChainInformation,
+        defaultGovernanceChainInformation,
       ),
     ).thenReturn(
       okAsync([messageTransferResolverEncoding, messageTransferEncodedCancel]),
     );
     td.when(
       this.blockchainUtils.getInsuranceTransferEncodedCancelData(
-        governanceChainInformation,
+        defaultGovernanceChainInformation,
       ),
     ).thenReturn(
       okAsync([
@@ -76,7 +76,7 @@ class VectorUtilsMocks {
     );
     td.when(
       this.blockchainUtils.getParameterizedTransferEncodedCancelData(
-        governanceChainInformation,
+        defaultGovernanceChainInformation,
       ),
     ).thenReturn(
       okAsync([

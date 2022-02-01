@@ -5,11 +5,12 @@ import {
   PushPayment,
   Balances,
   GatewayUrl,
-  Signature,
   ActiveStateChannel,
   ChainId,
   EthereumAccountAddress,
   InitializeStatus,
+  GovernanceChainInformation,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -22,6 +23,7 @@ export class HypernetContext {
     public activeStateChannels: ActiveStateChannel[] | null,
     public inControl: boolean,
     public initializeStatus: InitializeStatus,
+    public governanceChainInformation: GovernanceChainInformation,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
     public onPushPaymentSent: Subject<PushPayment>,
@@ -57,6 +59,7 @@ export class HypernetContext {
     public onAccountChanged: Subject<EthereumAccountAddress>,
     public onGovernanceChainChanged: Subject<ChainId>,
     public onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
+    public onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>,
   ) {}
 }
 
@@ -68,6 +71,7 @@ export class InitializedHypernetContext {
     public activeStateChannels: ActiveStateChannel[],
     public inControl: boolean,
     public initializeStatus: InitializeStatus,
+    public governanceChainInformation: GovernanceChainInformation,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
     public onPushPaymentSent: Subject<PushPayment>,
@@ -103,5 +107,6 @@ export class InitializedHypernetContext {
     public onAccountChanged: Subject<EthereumAccountAddress>,
     public onGovernanceChainChanged: Subject<ChainId>,
     public onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
+    public onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>,
   ) {}
 }

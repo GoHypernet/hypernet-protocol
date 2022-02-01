@@ -21,7 +21,7 @@ import {
   gatewayAddress,
   gatewaySignature,
   gatewayUrl,
-  governanceChainInformation,
+  defaultGovernanceChainInformation,
   insuranceTransferId,
   offerTransferId,
   parameterizedTransferId,
@@ -112,7 +112,7 @@ export class VectorUtilsMockFactory {
     td.when(
       vectorUtils.createInsuranceTransfer(
         routerChannelAddress,
-        governanceChainInformation,
+        defaultGovernanceChainInformation,
         publicIdentifier,
         gatewayAddress,
         commonAmount,

@@ -63,29 +63,30 @@ import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
 import { RegistryModule } from "@objects/RegistryModule";
 import { IpfsCID } from "@objects/IpfsCID";
-import { InitializeStatus } from "@web-integration/InitializeStatus";
-import { LazyMintingSignature } from "@web-integration/LazyMintingSignature";
+import { InitializeStatus } from "@objects/InitializeStatus";
+import { LazyMintingSignature } from "@objects/LazyMintingSignature";
+import { ChainInformation } from "@objects/ChainInformation";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): ResultAsync<boolean, never>;
+  initialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
-  waitInitialized(): ResultAsync<void, never>;
+  waitInitialized(chainId?: ChainId): ResultAsync<void, ProxyError>;
 
-  registriesInitialized(): Result<boolean, never>;
+  registriesInitialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
-  waitRegistriesInitialized(): ResultAsync<void, never>;
+  waitRegistriesInitialized(chainId?: ChainId): ResultAsync<void, ProxyError>;
 
-  governanceInitialized(): Result<boolean, never>;
+  governanceInitialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
-  waitGovernanceInitialized(): ResultAsync<void, never>;
+  waitGovernanceInitialized(chainId?: ChainId): ResultAsync<void, ProxyError>;
 
-  paymentsInitialized(): Result<boolean, never>;
+  paymentsInitialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
-  waitPaymentsInitialized(): ResultAsync<void, never>;
+  waitPaymentsInitialized(chainId?: ChainId): ResultAsync<void, ProxyError>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
@@ -106,10 +107,14 @@ export interface IHypernetCore {
    * hypernet core will be representing.
    * @param account The address that says who this instance of HypernetCore is representing.
    */
-  initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors>;
+  initialize(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors>;
 
-  initializeRegistries(): ResultAsync<
-    void,
+  initializeRegistries(
+    chainId?: ChainId,
+  ): ResultAsync<
+    InitializeStatus,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
@@ -117,8 +122,10 @@ export interface IHypernetCore {
     | ProxyError
   >;
 
-  initializeGovernance(): ResultAsync<
-    void,
+  initializeGovernance(
+    chainId?: ChainId,
+  ): ResultAsync<
+    InitializeStatus,
     | GovernanceSignerUnavailableError
     | BlockchainUnavailableError
     | InvalidParametersError
@@ -126,7 +133,9 @@ export interface IHypernetCore {
     | ProxyError
   >;
 
-  initializePayments(): ResultAsync<void, CoreInitializationErrors>;
+  initializePayments(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors>;
 
   getInitializationStatus(): ResultAsync<InitializeStatus, ProxyError>;
 
@@ -777,6 +786,29 @@ export interface IHypernetCore {
     PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
   >;
 
+  retrieveChainInformationList(): ResultAsync<
+    Map<ChainId, ChainInformation>,
+    ProxyError
+  >;
+
+  retrieveGovernanceChainInformation(): ResultAsync<
+    ChainInformation,
+    ProxyError
+  >;
+
+  initializeForChainId(
+    chainId: ChainId,
+  ): ResultAsync<void, CoreInitializationErrors>;
+
+  switchProviderNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | ProxyError>;
+
+  getMainProviderChainId(): ResultAsync<
+    ChainId,
+    BlockchainUnavailableError | ProxyError
+  >;
+
   /**
    * Observables for seeing what's going on
    */
@@ -814,6 +846,7 @@ export interface IHypernetCore {
   onAccountChanged: Subject<EthereumAccountAddress>;
   onGovernanceChainChanged: Subject<ChainId>;
   onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
+  onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");

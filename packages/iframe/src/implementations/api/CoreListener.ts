@@ -38,6 +38,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     @inject(IHypernetCoreType) protected core: IHypernetCore,
     @inject(ICoreUIServiceType) protected coreUIService: ICoreUIService,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
+    protected defaultGovernanceChainId: ChainId,
   ) {
     super();
   }
@@ -45,24 +46,24 @@ export class CoreListener extends ChildProxy implements ICoreListener {
   protected getModel(): Postmate.Model {
     // Fire up the Postmate model, and wrap up the core as the model
     return new Postmate.Model({
-      initialize: (data: IIFrameCallData<void>) => {
+      initialize: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.initialize();
+          return this.core.initialize(data.data);
         }, data.callId);
       },
-      initializeRegistries: (data: IIFrameCallData<void>) => {
+      initializeRegistries: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.initializeRegistries();
+          return this.core.initializeRegistries(data.data);
         }, data.callId);
       },
-      initializeGovernance: (data: IIFrameCallData<void>) => {
+      initializeGovernance: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.initializeGovernance();
+          return this.core.initializeGovernance(data.data);
         }, data.callId);
       },
-      initializePayments: (data: IIFrameCallData<void>) => {
+      initializePayments: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.initializePayments();
+          return this.core.initializePayments(data.data);
         }, data.callId);
       },
       getInitializationStatus: (data: IIFrameCallData<void>) => {
@@ -70,24 +71,24 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getInitializationStatus();
         }, data.callId);
       },
-      waitInitialized: (data: IIFrameCallData<void>) => {
+      waitInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
           return this.core.waitInitialized();
         }, data.callId);
       },
-      waitRegistriesInitialized: (data: IIFrameCallData<void>) => {
+      waitRegistriesInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitRegistriesInitialized();
+          return this.core.waitRegistriesInitialized(data.data);
         }, data.callId);
       },
-      waitGovernanceInitialized: (data: IIFrameCallData<void>) => {
+      waitGovernanceInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitGovernanceInitialized();
+          return this.core.waitGovernanceInitialized(data.data);
         }, data.callId);
       },
-      waitPaymentsInitialized: (data: IIFrameCallData<void>) => {
+      waitPaymentsInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitPaymentsInitialized();
+          return this.core.waitPaymentsInitialized(data.data);
         }, data.callId);
       },
       getEthereumAccounts: (data: IIFrameCallData<void>) => {
@@ -668,9 +669,36 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.executeLazyMint(data.data);
         }, data.callId);
       },
-      revokeLazyMintSignature: (data: IIFrameCallData<LazyMintingSignature>) => {
+      revokeLazyMintSignature: (
+        data: IIFrameCallData<LazyMintingSignature>,
+      ) => {
         this.returnForModel(() => {
           return this.core.revokeLazyMintSignature(data.data);
+        }, data.callId);
+      },
+      retrieveChainInformationList: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.retrieveChainInformationList();
+        }, data.callId);
+      },
+      retrieveGovernanceChainInformation: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.retrieveGovernanceChainInformation();
+        }, data.callId);
+      },
+      initializeForChainId: (data: IIFrameCallData<ChainId>) => {
+        this.returnForModel(() => {
+          return this.core.initializeForChainId(data.data);
+        }, data.callId);
+      },
+      switchProviderNetwork: (data: IIFrameCallData<ChainId>) => {
+        this.returnForModel(() => {
+          return this.core.switchProviderNetwork(data.data);
+        }, data.callId);
+      },
+      getMainProviderChainId: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getMainProviderChainId();
         }, data.callId);
       },
     });
@@ -679,20 +707,24 @@ export class CoreListener extends ChildProxy implements ICoreListener {
   protected onModelActivated(parent: Postmate.ChildAPI): void {
     // We are going to just call waitInitialized() on the core, and emit an event
     // to the parent when it is initialized; combining a few functions.
-    this.core.waitInitialized().map(() => {
-      parent.emit("initialized");
+    this.core.waitInitialized(this.defaultGovernanceChainId).map(() => {
+      parent.emit("initialized", this.defaultGovernanceChainId);
     });
 
-    this.core.waitRegistriesInitialized().map(() => {
-      parent.emit("registriesInitialized");
-    });
+    this.core
+      .waitRegistriesInitialized(this.defaultGovernanceChainId)
+      .map(() => {
+        parent.emit("registriesInitialized", this.defaultGovernanceChainId);
+      });
 
-    this.core.waitGovernanceInitialized().map(() => {
-      parent.emit("governanceInitialized");
-    });
+    this.core
+      .waitGovernanceInitialized(this.defaultGovernanceChainId)
+      .map(() => {
+        parent.emit("governanceInitialized", this.defaultGovernanceChainId);
+      });
 
-    this.core.waitPaymentsInitialized().map(() => {
-      parent.emit("paymentsInitialized");
+    this.core.waitPaymentsInitialized(this.defaultGovernanceChainId).map(() => {
+      parent.emit("paymentsInitialized", this.defaultGovernanceChainId);
     });
 
     // We are going to relay the RXJS events
@@ -829,7 +861,8 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     });
 
     this.core.onCeramicAuthenticationStarted.subscribe(() => {
-      this.coreUIService.renderCeramicAuthenticationUI();
+      this.logUtils.info("Ceramic authentication started!");
+      //this.coreUIService.renderCeramicAuthenticationUI();
     });
 
     this.core.onCeramicFailed.subscribe((error) => {
@@ -840,7 +873,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     });
 
     this.core.onCeramicAuthenticationSucceeded.subscribe(() => {
-      this.coreUIService.renderCeramicAuthenticationSucceededUI();
+      this.logUtils.info("Ceramic authentication succeeded!");
+      //this.coreUIService.renderCeramicAuthenticationSucceededUI();
+    });
+
+    this.core.onGovernanceSignerUnavailable.subscribe((error) => {
+      parent.emit("onGovernanceSignerUnavailable", error);
     });
   }
 }

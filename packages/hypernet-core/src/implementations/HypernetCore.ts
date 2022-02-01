@@ -64,6 +64,9 @@ import {
   CoreInitializationErrors,
   LazyMintingSignature,
   IPFSUnavailableError,
+  ChainInformation,
+  chainConfig,
+  GovernanceChainInformation,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -94,6 +97,7 @@ import {
   GovernanceService,
   RegistryService,
   TokenInformationService,
+  InjectedProviderService,
 } from "@implementations/business";
 import {
   AccountsRepository,
@@ -126,6 +130,7 @@ import {
   IGovernanceService,
   IRegistryService,
   ITokenInformationService,
+  IInjectedProviderService,
 } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -228,6 +233,7 @@ export class HypernetCore implements IHypernetCore {
   public onAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceChainChanged: Subject<ChainId>;
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
+  public onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -281,6 +287,7 @@ export class HypernetCore implements IHypernetCore {
   protected governanceService: IGovernanceService;
   protected registryService: IRegistryService;
   protected tokenInformationService: ITokenInformationService;
+  protected injectedProviderService: IInjectedProviderService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -288,25 +295,22 @@ export class HypernetCore implements IHypernetCore {
   protected messagingListener: IMessagingListener;
   protected blockchainListener: IBlockchainListener;
 
-  protected _initializeResult: ResultAsync<
-    InitializeStatus,
-    CoreInitializationErrors
-  > | null;
-  protected _initialized: boolean;
-  protected _initializePromise: Promise<void>;
-  protected _initializePromiseResolve: (() => void) | null;
+  protected _registriesInitialized: Map<ChainId, boolean> = new Map();
+  protected _registriesInitializePromise: Map<ChainId, Promise<void>> =
+    new Map();
+  protected _registriesInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
 
-  protected _registriesInitialized: boolean;
-  protected _registriesInitializePromise: Promise<void>;
-  protected _registriesInitializePromiseResolve: (() => void) | null;
+  protected _governanceInitialized: Map<ChainId, boolean> = new Map();
+  protected _governanceInitializePromise: Map<ChainId, Promise<void>> =
+    new Map();
+  protected _governanceInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
 
-  protected _governanceInitialized: boolean;
-  protected _governanceInitializePromise: Promise<void>;
-  protected _governanceInitializePromiseResolve: (() => void) | null;
-
-  protected _paymentsInitialized: boolean;
-  protected _paymentsInitializePromise: Promise<void>;
-  protected _paymentsInitializePromiseResolve: (() => void) | null;
+  protected _paymentsInitialized: Map<ChainId, boolean> = new Map();
+  protected _paymentsInitializePromise: Map<ChainId, Promise<void>> = new Map();
+  protected _paymentsInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
 
   protected _inControl: boolean;
 
@@ -352,6 +356,7 @@ export class HypernetCore implements IHypernetCore {
     this.onAccountChanged = new Subject();
     this.onGovernanceChainChanged = new Subject();
     this.onGovernanceAccountChanged = new Subject();
+    this.onGovernanceSignerUnavailable = new Subject();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -406,12 +411,14 @@ export class HypernetCore implements IHypernetCore {
       this.onAccountChanged,
       this.onGovernanceChainChanged,
       this.onGovernanceAccountChanged,
+      this.onGovernanceSignerUnavailable,
+      config?.defaultGovernanceChainId,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
     this.internalProviderFactory = new InternalProviderFactory(
-      this.configProvider,
+      this.contextProvider,
     );
     this.gatewayConnectorProxyFactory = new GatewayConnectorProxyFactory(
       this.configProvider,
@@ -558,19 +565,19 @@ export class HypernetCore implements IHypernetCore {
     this.routerRepository = new RouterRepository(
       this.blockchainUtils,
       this.blockchainProvider,
-      this.configProvider,
+      this.contextProvider,
     );
 
     this.governanceRepository = new GovernanceRepository(
       this.blockchainProvider,
-      this.configProvider,
+      this.contextProvider,
       this.logUtils,
       this.ipfsUtils,
     );
 
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
-      this.configProvider,
+      this.contextProvider,
       this.didDataStoreProvider,
       this.logUtils,
     );
@@ -625,6 +632,13 @@ export class HypernetCore implements IHypernetCore {
     this.tokenInformationService = new TokenInformationService(
       this.tokenInformationRepository,
     );
+    this.injectedProviderService = new InjectedProviderService(
+      this.blockchainProvider,
+      this.localStorageUtils,
+      this.configProvider,
+      this.contextProvider,
+      this.logUtils,
+    );
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -660,97 +674,480 @@ export class HypernetCore implements IHypernetCore {
 
     // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()
     // before the call to initialize() is made
-    this._initializeResult = null;
-    this._initializePromiseResolve = null;
-    this._initialized = false;
-    this._initializePromise = new Promise((resolve) => {
-      this._initializePromiseResolve = resolve;
-    });
+    chainConfig.forEach((chainInformation, chainId) => {
+      this._registriesInitializePromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this._registriesInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
 
-    this._registriesInitialized = false;
-    this._registriesInitializePromiseResolve = null;
-    this._registriesInitializePromise = new Promise((resolve) => {
-      this._registriesInitializePromiseResolve = resolve;
-    });
+      this._governanceInitializePromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this._governanceInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
 
-    this._governanceInitialized = false;
-    this._governanceInitializePromiseResolve = null;
-    this._governanceInitializePromise = new Promise((resolve) => {
-      this._governanceInitializePromiseResolve = resolve;
-    });
-
-    this._paymentsInitialized = false;
-    this._paymentsInitializePromiseResolve = null;
-    this._paymentsInitializePromise = new Promise((resolve) => {
-      this._paymentsInitializePromiseResolve = resolve;
+      this._paymentsInitializePromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this._paymentsInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
     });
   }
 
   /**
    * Returns the initialized status of this instance of Hypernet Core.
    */
-  public initialized(): ResultAsync<boolean, never> {
-    return this.configProvider.getConfig().andThen((config) => {
+  public initialized(chainId?: ChainId): ResultAsync<boolean, never> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
       if (
         config.governanceRequired == true &&
         config.paymentsRequired == true
       ) {
-        return ok(this._governanceInitialized && this._paymentsInitialized);
+        return ok(
+          this._governanceInitialized.get(governanceChainId) === true &&
+            this._paymentsInitialized.get(governanceChainId) === true,
+        );
       } else {
-        return ok(this._governanceInitialized || this._paymentsInitialized);
+        return ok(
+          this._governanceInitialized.get(governanceChainId) === true ||
+            this._paymentsInitialized.get(governanceChainId) === true,
+        );
       }
     });
   }
 
-  public waitInitialized(): ResultAsync<void, never> {
-    return this.configProvider.getConfig().andThen((config) => {
+  public waitInitialized(chainId?: ChainId): ResultAsync<void, never> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      const governanceInitializePromise =
+        this._governanceInitializePromise.get(governanceChainId);
+      const paymentsInitializePromise =
+        this._paymentsInitializePromise.get(governanceChainId);
+
+      if (
+        governanceInitializePromise == null ||
+        paymentsInitializePromise == null
+      ) {
+        throw new Error("Chain Id is not supported in chain config!");
+      }
+
       if (
         config.governanceRequired == true &&
         config.paymentsRequired == true
       ) {
         return ResultUtils.combine([
-          ResultAsync.fromSafePromise<void, never>(
-            this._governanceInitializePromise,
-          ),
-          ResultAsync.fromSafePromise<void, never>(
-            this._paymentsInitializePromise,
-          ),
+          ResultAsync.fromSafePromise<void, never>(governanceInitializePromise),
+          ResultAsync.fromSafePromise<void, never>(paymentsInitializePromise),
         ]).map(() => {});
       } else {
         return ResultUtils.race([
-          ResultAsync.fromSafePromise<void, never>(
-            this._governanceInitializePromise,
-          ),
-          ResultAsync.fromSafePromise<void, never>(
-            this._paymentsInitializePromise,
-          ),
+          ResultAsync.fromSafePromise<void, never>(governanceInitializePromise),
+          ResultAsync.fromSafePromise<void, never>(paymentsInitializePromise),
         ]).map(() => {});
       }
     });
   }
 
-  public registriesInitialized(): Result<boolean, never> {
-    return ok(this._registriesInitialized);
+  public registriesInitialized(chainId?: ChainId): ResultAsync<boolean, never> {
+    return this.contextProvider.getContext().map((context) => {
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      return this._registriesInitialized.get(governanceChainId) === true;
+    });
   }
 
-  public waitRegistriesInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._registriesInitializePromise);
+  public waitRegistriesInitialized(
+    chainId?: ChainId,
+  ): ResultAsync<void, never> {
+    return this.contextProvider.getContext().andThen((context) => {
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      const registriesInitializePromise =
+        this._registriesInitializePromise.get(governanceChainId);
+
+      if (registriesInitializePromise == null) {
+        throw new Error("Chain Id is not supported in chain config!");
+      }
+
+      return ResultAsync.fromSafePromise<void, never>(
+        registriesInitializePromise,
+      );
+    });
   }
 
-  public governanceInitialized(): Result<boolean, never> {
-    return ok(this._governanceInitialized);
+  public governanceInitialized(chainId?: ChainId): ResultAsync<boolean, never> {
+    return this.contextProvider.getContext().map((context) => {
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      return this._governanceInitialized.get(governanceChainId) === true;
+    });
   }
 
-  public waitGovernanceInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._governanceInitializePromise);
+  public waitGovernanceInitialized(
+    chainId?: ChainId,
+  ): ResultAsync<void, never> {
+    return this.contextProvider.getContext().andThen((context) => {
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      const governanceInitializePromise =
+        this._governanceInitializePromise.get(governanceChainId);
+
+      if (governanceInitializePromise == null) {
+        throw new Error("Chain Id is not supported in chain config!");
+      }
+
+      return ResultAsync.fromSafePromise<void, never>(
+        governanceInitializePromise,
+      );
+    });
   }
 
-  public paymentsInitialized(): Result<boolean, never> {
-    return ok(this._paymentsInitialized);
+  public paymentsInitialized(chainId?: ChainId): ResultAsync<boolean, never> {
+    return this.contextProvider.getContext().map((context) => {
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      return this._paymentsInitialized.get(governanceChainId) === true;
+    });
   }
 
-  public waitPaymentsInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._paymentsInitializePromise);
+  public waitPaymentsInitialized(chainId?: ChainId): ResultAsync<void, never> {
+    return this.contextProvider.getContext().andThen((context) => {
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      const paymentsInitializePromise =
+        this._paymentsInitializePromise.get(governanceChainId);
+
+      if (paymentsInitializePromise == null) {
+        throw new Error("Chain Id is not supported in chain config!");
+      }
+
+      return ResultAsync.fromSafePromise<void, never>(
+        paymentsInitializePromise,
+      );
+    });
+  }
+
+  /**
+   * Initialize this instance of Hypernet Core
+   */
+  public initialize(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+      this.initializeRegistries(chainId),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      this.logUtils.debug(`Initializing Hypernet Protocol Core`);
+
+      return ResultUtils.combine([
+        this.initializeGovernance(chainId).orElse((e) => {
+          this.logUtils.error(e);
+          if (config.governanceRequired === true) {
+            return errAsync(e);
+          } else {
+            return okAsync(context.initializeStatus);
+          }
+        }),
+        this.initializePayments(chainId).orElse((e) => {
+          this.logUtils.error(e);
+          if (config.paymentsRequired === true) {
+            return errAsync(e);
+          } else {
+            return okAsync(context.initializeStatus);
+          }
+        }),
+      ]).andThen(() => {
+        return okAsync(context.initializeStatus);
+      });
+    });
+  }
+
+  private initializeBlockchainProvider(
+    chainId?: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
+    // Initialize blockchain provider
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [context, config] = vals;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      return this.blockchainProvider.initialize(chainId).andThen(() => {
+        context.initializeStatus.blockchainProviderInitialized.set(
+          governanceChainId,
+          true,
+        );
+
+        if (chainId != null) {
+          const chainInfo = config.chainInformation.get(chainId);
+
+          if (!(chainInfo instanceof GovernanceChainInformation)) {
+            return errAsync(
+              new InvalidParametersError(
+                "Provided Chain Id does not have chain information object",
+              ),
+            );
+          }
+
+          context.governanceChainInformation = chainInfo;
+          context.onGovernanceChainChanged.next(governanceChainId);
+        }
+
+        return this.contextProvider
+          .setContext(context)
+          .andThen(() => {
+            // Make sure that main provider network is set to the correct governance chain id
+            return this.switchProviderNetwork(governanceChainId);
+          })
+          .andThen(() => {
+            return this.blockchainListener.initialize();
+          });
+      });
+    });
+  }
+
+  public initializeRegistries(
+    chainId?: ChainId,
+  ): ResultAsync<
+    InitializeStatus,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | IPFSUnavailableError
+  > {
+    // Initialize registries contracts
+    return this.initializeBlockchainProvider(chainId).andThen(() => {
+      // It's important to retrieve the context after initializing blockchain provider
+      return this.contextProvider.getContext().andThen((context) => {
+        return ResultUtils.combine([
+          this.configProvider.getConfig(),
+          this.registryRepository.initializeReadOnly(),
+          this.registryRepository.initializeForWrite().orElse((e) => {
+            context.onGovernanceSignerUnavailable.next(
+              new GovernanceSignerUnavailableError(
+                e?.message || "Signer is not available",
+                e,
+              ),
+            );
+            return okAsync(undefined);
+          }),
+          this.initializeGovernance(chainId),
+          this.tokenInformationRepository
+            .initialize(context.governanceChainInformation.tokenRegistryAddress)
+            .orElse((e) => {
+              this.logUtils.error(e);
+              return okAsync(undefined);
+            }),
+        ]).andThen((vals) => {
+          const [config] = vals;
+          const governanceChainId =
+            chainId || context.governanceChainInformation.chainId;
+          const registriesInitializePromiseResolve =
+            this._registriesInitializePromiseResolve.get(governanceChainId);
+          if (registriesInitializePromiseResolve != null) {
+            registriesInitializePromiseResolve();
+          }
+
+          context.initializeStatus.registriesInitialized.set(
+            governanceChainId,
+            true,
+          );
+          this._registriesInitialized.set(governanceChainId, true);
+
+          return this.contextProvider.setContext(context).andThen(() => {
+            return okAsync(context.initializeStatus);
+          });
+        });
+      });
+    });
+  }
+
+  public initializeGovernance(
+    chainId?: ChainId,
+  ): ResultAsync<
+    InitializeStatus,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | IPFSUnavailableError
+  > {
+    // Initialize governance contracts
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.initializeBlockchainProvider(chainId),
+    ]).andThen((vals) => {
+      const [context] = vals;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      return ResultUtils.combine([
+        this.ipfsUtils.initialize(),
+        this.governanceRepository.initializeReadOnly(),
+        this.governanceRepository.initializeForWrite().orElse((e) => {
+          context.onGovernanceSignerUnavailable.next(
+            new GovernanceSignerUnavailableError(
+              e?.message || "Signer is not available",
+              e,
+            ),
+          );
+          return okAsync(undefined);
+        }),
+      ])
+        .andThen(() => {
+          const governanceInitializePromiseResolve =
+            this._governanceInitializePromiseResolve.get(governanceChainId);
+          if (governanceInitializePromiseResolve != null) {
+            governanceInitializePromiseResolve();
+          }
+
+          context.initializeStatus.governanceInitialized.set(
+            governanceChainId,
+            true,
+          );
+          this._governanceInitialized.set(governanceChainId, true);
+
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return okAsync(context.initializeStatus);
+        });
+    });
+  }
+
+  public initializePayments(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+      this.initializeBlockchainProvider(chainId),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      return this.initializeRegistries(chainId)
+        .andThen(() => {
+          this.logUtils.debug("Getting Ethereum accounts");
+          return this.accountRepository.getAccounts();
+        })
+        .andThen((accounts) => {
+          context.account = accounts[0];
+          this.logUtils.debug(`Obtained accounts: ${accounts}`);
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return this.ceramicUtils.initialize();
+        })
+        .andThen(() => {
+          return ResultUtils.combine([
+            this.accountRepository.getPublicIdentifier(),
+            this.accountRepository.getActiveStateChannels(),
+          ]);
+        })
+        .andThen((vals) => {
+          const [publicIdentifier, activeStateChannels] = vals;
+
+          this.logUtils.debug(
+            `Obtained active state channels: ${activeStateChannels}`,
+          );
+
+          context.publicIdentifier = publicIdentifier;
+          context.activeStateChannels = activeStateChannels;
+
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          // By doing some active initialization, we can avoid whole categories
+          // of errors occuring post-initialization (ie, runtime), which makes the
+          // whole thing more reliable in operation.
+          this.logUtils.debug("Initializing payments utilities");
+          this.logUtils.debug("Initializing payments services");
+          return this.gatewayConnectorService.initialize();
+        })
+        .andThen(() => {
+          this.logUtils.debug("Initializing API listeners");
+          // Initialize anything that wants an initialized context
+          return ResultUtils.combine([
+            this.vectorAPIListener.initialize(),
+            this.gatewayConnectorListener.initialize(),
+            this.messagingListener.initialize(),
+          ]);
+        })
+        .andThen(() => {
+          this.logUtils.debug("Initialized all internal services");
+          return this.gatewayConnectorService.activateAuthorizedGateways();
+        })
+
+        .andThen(() => {
+          // If we are in debug mode, we'll print the registered transfers out.
+          if (config.debug) {
+            return this.browserNodeProvider
+              .getBrowserNode()
+              .andThen((browserNode) => {
+                return browserNode.getRegisteredTransfers(
+                  context.governanceChainInformation.chainId,
+                );
+              })
+              .map((registeredTransfers) => {
+                this.logUtils.debug("Registered Transfers");
+                this.logUtils.debug(registeredTransfers);
+              });
+          }
+          return okAsync(undefined);
+        })
+        .andThen(() => {
+          const paymentsInitializePromiseResolve =
+            this._paymentsInitializePromiseResolve.get(governanceChainId);
+          if (paymentsInitializePromiseResolve != null) {
+            paymentsInitializePromiseResolve();
+          }
+
+          context.initializeStatus.paymentsInitialized.set(
+            governanceChainId,
+            true,
+          );
+          this._paymentsInitialized.set(governanceChainId, true);
+
+          return this.contextProvider.setContext(context);
+        })
+        .andThen(() => {
+          return okAsync(context.initializeStatus);
+        });
+    });
+  }
+
+  public getInitializationStatus(): ResultAsync<InitializeStatus, never> {
+    return this.contextProvider.getContext().map((context) => {
+      return context.initializeStatus;
+    });
   }
 
   /**
@@ -957,231 +1354,6 @@ export class HypernetCore implements IHypernetCore {
     | ProxyError
   > {
     return this.paymentService.repairPayments(paymentIds).map(() => {});
-  }
-
-  /**
-   * Initialize this instance of Hypernet Core
-   */
-  public initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors> {
-    if (this._initializeResult != null) {
-      return this._initializeResult;
-    }
-
-    this._initializeResult = ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getContext(),
-      this.initializeRegistries(),
-    ]).andThen((vals) => {
-      const [config, context] = vals;
-      this.logUtils.debug(`Initializing Hypernet Protocol Core`);
-
-      return ResultUtils.combine([
-        this.initializeGovernance().orElse((e) => {
-          this.logUtils.error(e);
-          if (config.governanceRequired === true) {
-            return errAsync(e);
-          } else {
-            return okAsync(undefined);
-          }
-        }),
-        this.initializePayments().orElse((e) => {
-          this.logUtils.error(e);
-          if (config.paymentsRequired === true) {
-            return errAsync(e);
-          } else {
-            return okAsync(undefined);
-          }
-        }),
-      ]).andThen(() => {
-        return okAsync(context.initializeStatus);
-      });
-    });
-
-    return this._initializeResult;
-  }
-
-  private initializeBlockchainProvider(): ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError
-  > {
-    // Initialize blockchain provider
-    return this.contextProvider.getContext().andThen((context) => {
-      return this.blockchainProvider.initialize().andThen(() => {
-        context.initializeStatus.blockchainProviderInitialized = true;
-        return this.contextProvider.setContext(context);
-      });
-    });
-  }
-
-  public initializeRegistries(): ResultAsync<
-    void,
-    | GovernanceSignerUnavailableError
-    | BlockchainUnavailableError
-    | InvalidParametersError
-    | IPFSUnavailableError
-  > {
-    // Initialize registries contracts
-    return ResultUtils.combine([
-      this.contextProvider.getContext(),
-      this.configProvider.getConfig(),
-      this.initializeBlockchainProvider(),
-    ]).andThen((vals) => {
-      const [context, config] = vals;
-      if (context.initializeStatus.registriesInitialized === true) {
-        return okAsync(undefined);
-      }
-
-      return ResultUtils.combine([
-        this.registryRepository.initializeReadOnly(),
-        this.registryRepository.initializeForWrite(),
-        this.initializeGovernance(),
-      ]).andThen(() => {
-        if (this._registriesInitializePromiseResolve != null) {
-          this._registriesInitializePromiseResolve();
-        }
-
-        context.initializeStatus.registriesInitialized = true;
-        return this.contextProvider.setContext(context).andThen(() => {
-          return this.tokenInformationRepository
-            .initialize(config.governanceChainInformation.tokenRegistryAddress)
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return okAsync(undefined);
-            });
-        });
-      });
-    });
-  }
-
-  public initializeGovernance(): ResultAsync<
-    void,
-    | GovernanceSignerUnavailableError
-    | BlockchainUnavailableError
-    | InvalidParametersError
-    | IPFSUnavailableError
-  > {
-    // Initialize governance contracts
-    return ResultUtils.combine([
-      this.contextProvider.getContext(),
-      this.initializeBlockchainProvider(),
-    ]).andThen((vals) => {
-      const [context] = vals;
-      if (context.initializeStatus.governanceInitialized === true) {
-        return okAsync(undefined);
-      }
-
-      return ResultUtils.combine([
-        this.ipfsUtils.initialize(),
-        this.governanceRepository.initializeReadOnly(),
-        this.governanceRepository.initializeForWrite(),
-      ]).andThen(() => {
-        if (this._governanceInitializePromiseResolve != null) {
-          this._governanceInitializePromiseResolve();
-        }
-
-        context.initializeStatus.governanceInitialized = true;
-        return this.contextProvider.setContext(context);
-      });
-    });
-  }
-
-  public initializePayments(): ResultAsync<void, CoreInitializationErrors> {
-    return ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getContext(),
-      this.initializeBlockchainProvider(),
-    ]).andThen((vals) => {
-      const [config, context] = vals;
-      if (context.initializeStatus.paymentsInitialized === true) {
-        return okAsync(undefined);
-      }
-
-      return this.initializeRegistries()
-        .andThen(() => {
-          this.logUtils.debug("Getting Ethereum accounts");
-          return this.accountRepository.getAccounts();
-        })
-        .andThen((accounts) => {
-          context.account = accounts[0];
-          this.logUtils.debug(`Obtained accounts: ${accounts}`);
-          return this.contextProvider.setContext(context);
-        })
-        .andThen(() => {
-          return this.ceramicUtils.initialize();
-        })
-        .andThen(() => {
-          return ResultUtils.combine([
-            this.accountRepository.getPublicIdentifier(),
-            this.accountRepository.getActiveStateChannels(),
-          ]);
-        })
-        .andThen((vals) => {
-          const [publicIdentifier, activeStateChannels] = vals;
-
-          this.logUtils.debug(
-            `Obtained active state channels: ${activeStateChannels}`,
-          );
-
-          context.publicIdentifier = publicIdentifier;
-          context.activeStateChannels = activeStateChannels;
-
-          return this.contextProvider.setContext(context);
-        })
-        .andThen(() => {
-          // By doing some active initialization, we can avoid whole categories
-          // of errors occuring post-initialization (ie, runtime), which makes the
-          // whole thing more reliable in operation.
-          this.logUtils.debug("Initializing payments utilities");
-          this.logUtils.debug("Initializing payments services");
-          return this.gatewayConnectorService.initialize();
-        })
-        .andThen(() => {
-          this.logUtils.debug("Initializing API listeners");
-          // Initialize anything that wants an initialized context
-          return ResultUtils.combine([
-            this.vectorAPIListener.initialize(),
-            this.gatewayConnectorListener.initialize(),
-            this.messagingListener.initialize(),
-            this.blockchainListener.initialize(),
-          ]);
-        })
-        .andThen(() => {
-          this.logUtils.debug("Initialized all internal services");
-          return this.gatewayConnectorService.activateAuthorizedGateways();
-        })
-
-        .andThen(() => {
-          // If we are in debug mode, we'll print the registered transfers out.
-          if (config.debug) {
-            return this.browserNodeProvider
-              .getBrowserNode()
-              .andThen((browserNode) => {
-                return browserNode.getRegisteredTransfers(
-                  config.governanceChainId,
-                );
-              })
-              .map((registeredTransfers) => {
-                this.logUtils.debug("Registered Transfers");
-                this.logUtils.debug(registeredTransfers);
-              });
-          }
-          return okAsync(undefined);
-        })
-        .andThen(() => {
-          if (this._paymentsInitializePromiseResolve != null) {
-            this._paymentsInitializePromiseResolve();
-          }
-
-          context.initializeStatus.paymentsInitialized = true;
-          return this.contextProvider.setContext(context);
-        });
-    });
-  }
-
-  public getInitializationStatus(): ResultAsync<InitializeStatus, never> {
-    return this.contextProvider.getContext().map((context) => {
-      return context.initializeStatus;
-    });
   }
 
   /**
@@ -1853,5 +2025,107 @@ export class HypernetCore implements IHypernetCore {
     PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.registryService.revokeLazyMintSignature(lazyMintingSignature);
+  }
+
+  public retrieveChainInformationList(): ResultAsync<
+    Map<ChainId, ChainInformation>,
+    never
+  > {
+    return this.configProvider.getConfig().map((config) => {
+      return config.chainInformation;
+    });
+  }
+
+  public retrieveGovernanceChainInformation(): ResultAsync<
+    ChainInformation,
+    never
+  > {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).map((vals) => {
+      const [config, context] = vals;
+      const governanceChainId =
+        context.governanceChainInformation.chainId ||
+        config.defaultGovernanceChainId;
+
+      return config.chainInformation.get(governanceChainId) as ChainInformation;
+    });
+  }
+
+  public initializeForChainId(
+    chainId: ChainId,
+  ): ResultAsync<void, CoreInitializationErrors> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      if (config.chainInformation.get(chainId) == null) {
+        return errAsync(
+          new InvalidParametersError(
+            "Provided Chain Id does not have chain information object",
+          ),
+        );
+      }
+
+      let initializerList: ResultAsync<
+        InitializeStatus,
+        CoreInitializationErrors
+      >[] = [];
+
+      // Check if any of registries, governance or payments is initialized for the requested chain
+      for (let initializeStatus of context.initializeStatus.registriesInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.initializeRegistries(chainId));
+          break;
+        }
+      }
+      for (let initializeStatus of context.initializeStatus.governanceInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.initializeGovernance(chainId));
+          break;
+        }
+      }
+      for (let initializeStatus of context.initializeStatus.paymentsInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.initializePayments(chainId));
+          break;
+        }
+      }
+
+      return ResultUtils.combine(initializerList).andThen(() => {
+        return this.switchProviderNetwork(chainId);
+      });
+    });
+  }
+
+  public switchProviderNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.contextProvider.getContext().andThen((context) => {
+      return this.injectedProviderService
+        .switchNetwork(chainId)
+        .andThen(() => {
+          console.log("network switchedddd");
+          return this.blockchainProvider.setGovernanceSigner(chainId);
+        })
+        .orElse((e) => {
+          const errorMessage =
+            "Could not set Governance signer, switch to the correct network!";
+          this.logUtils.error(errorMessage);
+          context.onGovernanceSignerUnavailable.next(
+            new GovernanceSignerUnavailableError(e?.message || errorMessage, e),
+          );
+          return okAsync(undefined);
+        });
+    });
+  }
+
+  public getMainProviderChainId(): ResultAsync<
+    ChainId,
+    BlockchainUnavailableError
+  > {
+    return this.blockchainProvider.getMainProviderChainId();
   }
 }
