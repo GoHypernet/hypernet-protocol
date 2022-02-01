@@ -8,7 +8,7 @@ import { HypernetConfig } from "@interfaces/objects";
 import {
   chainId,
   defaultExpirationLength,
-  governanceChainInformation,
+  defaultGovernanceChainInformation,
 } from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";
 
@@ -22,11 +22,11 @@ export class ConfigProviderMock implements IConfigProvider {
       config ??
       new HypernetConfig(
         "iframeSource", // iframeSource
-        chainId, // governanceChainId
+        chainId, // defaultGovernanceChainId
         new Map<ChainId, ChainInformation>([
-          [chainId, governanceChainInformation],
+          [chainId, defaultGovernanceChainInformation],
         ]), // chainInformation
-        governanceChainInformation, // governanceChainInformation
+        defaultGovernanceChainInformation, // defaultGovernanceChainInformation
         "hypernetProtocolDomain", // hypernetProtocolDomain
         defaultExpirationLength, // defaultPaymentExpiryLength
         "natsUrl", // natsUrl

@@ -6,6 +6,9 @@ import {
   ERC20ContractError,
   EthereumAccountAddress,
   IPFSUnavailableError,
+  GovernanceSignerUnavailableError,
+  BlockchainUnavailableError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -58,4 +61,13 @@ export interface IGovernanceService {
   getHyperTokenBalance(
     account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError>;
+  initializeReadOnly(): ResultAsync<void, never>;
+  initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 }
+
+export const IGovernanceServiceType = Symbol.for("IGovernanceService");

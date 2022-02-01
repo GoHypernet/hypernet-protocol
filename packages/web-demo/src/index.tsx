@@ -1,4 +1,4 @@
-import { GatewayUrl } from "@hypernetlabs/objects";
+import { GatewayUrl, ChainId } from "@hypernetlabs/objects";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
@@ -6,8 +6,8 @@ import HypernetWebIntegration, {
 import Spinner from "./assets/loading-spinner";
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration(
-  null,
-  null,
+  "http://localhost:5020",
+  ChainId(1337),
   true,
   false,
   null,
@@ -35,6 +35,7 @@ const gatewayUrl = GatewayUrl("http://localhost:3000/users/v0");
 client
   .getReady()
   .map((coreProxy) => {
+    Spinner.hide();
     client.webUIClient
       .startOnboardingFlow({
         gatewayUrl: gatewayUrl,

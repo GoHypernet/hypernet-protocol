@@ -16,13 +16,13 @@
     "hardhat-tracer": "^1.0.0-alpha.6",
     "keccak256": "^1.0.3",
     "merkletreejs": "^0.2.24",
-    "neverthrow": "^4.1.0",
+    "neverthrow": "^4.2.2",
     "web3": "^1.5.2"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.0",
     "@openzeppelin/contracts-upgradeable": "^4.3.2",
-    "ethers": "^5.4.7",
+    "ethers": "^5.5.3",
     "hardhat-contract-sizer": "^2.0.3"
   }
 }

@@ -139,4 +139,5 @@ export interface IHypernetWebUI {
   renderRegistryLazyMintingRequestsWidget(
     config?: IRenderParams,
   ): Result<void, RenderError>;
+  renderChainSelectorWidget(params?: IRenderParams): Result<void, RenderError>;
 }

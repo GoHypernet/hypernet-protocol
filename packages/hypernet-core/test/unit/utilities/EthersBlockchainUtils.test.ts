@@ -16,7 +16,7 @@ import {
   account,
   errorAccount,
   TransactionResponseMock,
-  governanceChainInformation,
+  defaultGovernanceChainInformation,
 } from "@mock/mocks";
 import { ethers } from "ethers";
 import td from "testdouble";
@@ -275,7 +275,7 @@ describe("EthersBlockchainUtils tests", () => {
       messageTransferEncodedCancel,
     );
     const result = await utils.getMessageTransferEncodedCancelData(
-      governanceChainInformation,
+      defaultGovernanceChainInformation,
     );
 
     // Assert
@@ -296,7 +296,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     // Act
     const result = await utils.getInsuranceTransferEncodedCancelData(
-      governanceChainInformation,
+      defaultGovernanceChainInformation,
     );
 
     // Assert
@@ -312,7 +312,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     // Act
     const result = await utils.getParameterizedTransferEncodedCancelData(
-      governanceChainInformation,
+      defaultGovernanceChainInformation,
     );
 
     // Assert

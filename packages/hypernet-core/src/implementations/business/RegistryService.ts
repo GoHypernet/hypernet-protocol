@@ -217,7 +217,12 @@ export class RegistryService implements IRegistryService {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | ERC20ContractError
+    | BlockchainUnavailableError
+  > {
     return this.registryRepository.createRegistryByToken(
       name,
       symbol,
@@ -384,5 +389,18 @@ export class RegistryService implements IRegistryService {
     return this.registryRepository.revokeLazyMintSignature(
       lazyMintingSignature,
     );
+  }
+
+  public initializeReadOnly(): ResultAsync<void, never> {
+    return this.registryRepository.initializeReadOnly();
+  }
+
+  public initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
+    return this.registryRepository.initializeForWrite();
   }
 }

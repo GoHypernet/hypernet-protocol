@@ -1,6 +1,7 @@
 import {
   BlockchainUnavailableError,
   NonFungibleRegistryContractError,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -9,6 +10,9 @@ export interface IInjectedProviderService {
     void,
     BlockchainUnavailableError | NonFungibleRegistryContractError
   >;
+  switchNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError>;
 }
 
 export const IInjectedProviderServiceType = Symbol.for(

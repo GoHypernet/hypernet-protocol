@@ -42,6 +42,17 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   useEffect(() => {
     getNumberOfRegistries();
+
+    const subscription = coreProxy.onGovernanceChainChanged.subscribe(
+      (chainId) => {
+        getNumberOfRegistries();
+        handleRegistryListRefresh();
+      },
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -183,8 +194,8 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.numberOfEntries.toString(),
             },
             {
-              fieldTitle: "Registrar Addresses",
-              fieldValue: registry.registrarAddresses.join("-"),
+              fieldTitle: "Registration Fee",
+              fieldValue: registry.registrationFee,
             },
           ]}
           actionButtonList={

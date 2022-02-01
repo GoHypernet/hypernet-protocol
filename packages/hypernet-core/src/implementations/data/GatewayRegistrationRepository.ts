@@ -1,6 +1,5 @@
 import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
 import {
-  BlockchainUnavailableError,
   GatewayUrl,
   PersistenceError,
   GatewayRegistrationInfo,
@@ -68,9 +67,9 @@ export class GatewayRegistrationRepository
     NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([config, provider]) => {
+    ]).andThen(([context, provider]) => {
       const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
       const newGatewayResults = new Array<
         ResultAsync<void, NonFungibleRegistryContractError>
@@ -79,7 +78,7 @@ export class GatewayRegistrationRepository
       const gatewayRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          config.governanceChainInformation.gatewayRegistryAddress,
+          context.governanceChainInformation.gatewayRegistryAddress,
         );
 
       // Check for entries that are already cached.
@@ -134,13 +133,13 @@ export class GatewayRegistrationRepository
     NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([config, provider]) => {
+    ]).andThen(([context, provider]) => {
       const gatewayRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          config.governanceChainInformation.gatewayRegistryAddress,
+          context.governanceChainInformation.gatewayRegistryAddress,
         );
 
       return gatewayRegistryContract.totalSupply().andThen((totalCount) => {

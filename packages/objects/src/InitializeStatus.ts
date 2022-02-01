@@ -1,8 +1,10 @@
+import { ChainId } from "@objects/ChainId";
+
 export class InitializeStatus {
   constructor(
-    public blockchainProviderInitialized: boolean,
-    public registriesInitialized: boolean,
-    public governanceInitialized: boolean,
-    public paymentsInitialized: boolean,
+    public blockchainProviderInitialized: Map<ChainId, boolean>,
+    public registriesInitialized: Map<ChainId, boolean>,
+    public governanceInitialized: Map<ChainId, boolean>,
+    public paymentsInitialized: Map<ChainId, boolean>,
   ) {}
 }
