@@ -686,6 +686,9 @@ export interface IHypernetCore {
   provideProviderId(
     providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError | ProxyError>;
+
+  rejectProviderIdRequest(): ResultAsync<void, ProxyError>;
+
   getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
 
   getBlockNumber(): ResultAsync<

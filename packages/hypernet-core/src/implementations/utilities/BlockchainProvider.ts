@@ -46,6 +46,11 @@ export class BlockchainProvider implements IBlockchainProvider {
   protected walletConnectProviderIdPromiseResolve: (
     providerId: ProviderId,
   ) => void = () => null;
+
+  protected walletConnectProviderIdPromiseReject: (
+    e: BlockchainUnavailableError,
+  ) => void = () => null;
+
   protected initializeProviderResult: Map<
     ChainId,
     ResultAsync<
@@ -224,6 +229,13 @@ export class BlockchainProvider implements IBlockchainProvider {
     return okAsync(undefined);
   }
 
+  public rejectProviderIdRequest(): ResultAsync<void, never> {
+    this.walletConnectProviderIdPromiseReject(
+      new BlockchainUnavailableError("Wallet connection is rejected"),
+    );
+    return okAsync(undefined);
+  }
+
   public isMetamask(): boolean {
     if (!this.initialized) {
       throw new Error("Initialization must be completed first!");
@@ -368,8 +380,9 @@ export class BlockchainProvider implements IBlockchainProvider {
       } else {
         // Emit an event for showing wallet connect options
         context.onWalletConnectOptionsDisplayRequested.next();
-        providerIdPromise = new Promise((resolve) => {
+        providerIdPromise = new Promise((resolve, reject) => {
           this.walletConnectProviderIdPromiseResolve = resolve;
+          this.walletConnectProviderIdPromiseReject = reject;
         });
       }
 

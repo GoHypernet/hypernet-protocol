@@ -99,6 +99,10 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     return okAsync(undefined);
   }
 
+  public rejectProviderIdRequest(): ResultAsync<void, never> {
+    return okAsync(undefined);
+  }
+
   public setGovernanceSigner(
     chainId: ChainId,
   ): ResultAsync<

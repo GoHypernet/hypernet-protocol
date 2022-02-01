@@ -126,10 +126,15 @@ export default class HypernetWebUI implements IHypernetWebUI {
     this.dateUtils = new DateUtils();
   }
 
-  private _generateDomElement(selector: string): HTMLElement | null {
-    if (document.getElementById(selector) == null) {
+  private _generateDomElement(
+    selector: string,
+    forceRegenerate?: boolean,
+  ): HTMLElement | null {
+    if (forceRegenerate) {
       this._removeExistedElement(selector);
+    }
 
+    if (document.getElementById(selector) == null) {
       const element = document.createElement("div");
       element.setAttribute("id", selector);
       document.body.appendChild(element);
@@ -263,7 +268,11 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <WalletConnectWidget />,
           config.showInModal,
-          config.closeCallback,
+          () => {
+            if (this.coreInstance) {
+              this.coreInstance.rejectProviderIdRequest();
+            }
+          },
           {
             zIndex: 99999,
           },
@@ -272,6 +281,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || CONNECT_WALLET_WIDGET_SELECTOR,
+          true,
         ),
       );
     };

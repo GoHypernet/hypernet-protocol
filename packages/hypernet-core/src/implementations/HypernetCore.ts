@@ -1878,6 +1878,10 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.provideProviderId(providerId);
   }
 
+  public rejectProviderIdRequest(): ResultAsync<void, never> {
+    return this.blockchainProvider.rejectProviderIdRequest();
+  }
+
   public getTokenInformation(): ResultAsync<TokenInformation[], never> {
     return this.tokenInformationService.getTokenInformation();
   }

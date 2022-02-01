@@ -1096,6 +1096,10 @@ export default class HypernetIFrameProxy
     return this._createCall("provideProviderId", providerId);
   }
 
+  public rejectProviderIdRequest(): ResultAsync<void, ProxyError> {
+    return this._createCall("rejectProviderIdRequest", null);
+  }
+
   public getTokenInformation(): ResultAsync<TokenInformation[], ProxyError> {
     return this._createCall("getTokenInformation", null);
   }
