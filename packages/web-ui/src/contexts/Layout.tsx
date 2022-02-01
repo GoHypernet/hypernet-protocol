@@ -11,6 +11,8 @@ interface ILayout {
   modalStatus: EStatusColor;
   setModalHeader: (header: ReactNode) => void;
   modalHeader?: ReactNode;
+  setHideModalWatermark: (hide: boolean) => void;
+  hideModalWatermark?: boolean;
   closeModal: () => void;
   loading: boolean;
   setLoading: (loading: boolean) => void;
@@ -27,6 +29,8 @@ export function LayoutProvider({ children }: ILayoutProps) {
   const alert = useAlert();
   const [modalWidth, setModalWidth] = useState<number>(900);
   const [loading, setLoading] = useState<boolean>(false);
+  const [hideModalWatermark, setHideModalWatermark] = useState<boolean>(false);
+
   const [modalHeader, setModalHeader] = useState<ReactNode>();
   const [modalStatus, setModalStatus] = useState<EStatusColor>(
     EStatusColor.IDLE,
@@ -62,6 +66,8 @@ export function LayoutProvider({ children }: ILayoutProps) {
     modalStatus,
     setModalHeader,
     modalHeader,
+    setHideModalWatermark,
+    hideModalWatermark,
     closeModal,
     loading,
     setLoading,

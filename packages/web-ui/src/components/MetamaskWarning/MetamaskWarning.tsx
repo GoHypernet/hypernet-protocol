@@ -10,7 +10,13 @@ import {
 import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
 import { useLayoutContext } from "@web-ui/contexts";
 
-export const MetamaskWarning: React.FC = () => {
+interface IMetamaskWarningProps {
+  retry?: () => void;
+}
+
+export const MetamaskWarning: React.FC<IMetamaskWarningProps> = ({
+  retry,
+}: IMetamaskWarningProps) => {
   const classes = useStyles();
   const { setModalHeader } = useLayoutContext();
   const [installClicked, setInstallClicked] = useState(false);
@@ -18,6 +24,19 @@ export const MetamaskWarning: React.FC = () => {
   useEffect(() => {
     setModalHeader("Wallet Connection");
   }, []);
+
+  const redirectToMetamaskInstallation = () => {
+    window.open(METAMASK_DOWNLOAD_URL, "_blank");
+  };
+
+  const handleRetry = () => {
+    // Check if metamask is still not initialized
+    if (!(window as any)?.ethereum) {
+      redirectToMetamaskInstallation();
+      return;
+    }
+    retry?.();
+  };
 
   if (installClicked) {
     return (
@@ -36,9 +55,7 @@ export const MetamaskWarning: React.FC = () => {
           variant="contained"
           size="medium"
           fullWidth
-          onClick={() => {
-            // re-initialize
-          }}
+          onClick={handleRetry}
         >
           Continue
         </GovernanceButton>
@@ -48,9 +65,7 @@ export const MetamaskWarning: React.FC = () => {
           variant="outlined"
           size="medium"
           fullWidth
-          onClick={() => {
-            window.open(METAMASK_DOWNLOAD_URL, "_blank");
-          }}
+          onClick={redirectToMetamaskInstallation}
         >
           Install Metamask
         </GovernanceButton>
@@ -74,7 +89,8 @@ export const MetamaskWarning: React.FC = () => {
         size="medium"
         fullWidth
         onClick={() => {
-          window.open(METAMASK_DOWNLOAD_URL, "_blank");
+          setInstallClicked(true);
+          redirectToMetamaskInstallation();
         }}
       >
         Install Metamask

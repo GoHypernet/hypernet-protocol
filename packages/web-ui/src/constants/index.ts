@@ -43,7 +43,7 @@ export const CHAIN_SELECTOR_WIDGET_ID_SELECTOR =
 export const HYPERNET_PROTOCOL_LOGO_DARK_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hypernet-protocol%20logo-dark.png";
 export const HYPER_TOKEN_LOGO_URL =
-  "https://ipfs.io/ipfs/QmeztCtCmeDg2jj2wcSKa9nwKdqLsSkZq3zfVMG84pocf6?filename=H.svg";
+  "https://ipfs.io/ipfs/QmeztCtCmeDg2jj2wcSKa9nwKdqLsSkZq3zfVMG84pocf6?filename=H.ICON";
 export const HYPER_TOKEN_LOGO_PURPLE_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/protocol-logo-purple.png";
 export const HYPERNET_LOGO_DARK =
@@ -65,4 +65,12 @@ export const INSECURE_CONTENT_IMAGE_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/insecure-content.png";
 export const HYPERPAY_LOGO_URL =
   "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/hyperpay-temp-logo.png";
+
+export const USER_LIGHT_ICON_URL =
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/user-light.svg";
+export const WALLET_LIGHT_ICON_URL =
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/wallet-light.svg";
+export const CREDIT_CARD_LIGHT_ICON_URL =
+  "https://storage.googleapis.com/hypernetlabs-public-assets/hypernet-protocol/credit-card-blank-light.svg";
+
 export const LAUNCHPAD_PROD_URL = "https://launchpad.hypernet.foundation";

@@ -16,13 +16,15 @@ interface IModal {
 
 const Modal: React.FC<IModal> = (props: IModal) => {
   const { children, closeCallback = () => {}, modalStyle = {} } = props;
-  const { modalWidth, modalStatus, modalHeader } = useLayoutContext();
+  const { modalWidth, modalStatus, hideModalWatermark, closeModal } =
+    useLayoutContext();
   const classes = useStyles({
     modalWidth,
   });
 
   // element to which the modal will be rendered
   const elementRef = useRef<HTMLElement>(document.createElement("div"));
+
   const modalRootRef = useRef<HTMLElement>(document.createElement("div"));
 
   useEffect(() => {
@@ -44,9 +46,10 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     };
   }, [modalWidth, modalStatus]);
 
-  const closeModal = () => {
+  const onClose = () => {
     closeCallback();
     modalRootRef.current.removeChild(elementRef.current);
+    closeModal();
   };
 
   return (
@@ -56,12 +59,17 @@ const Modal: React.FC<IModal> = (props: IModal) => {
       content={
         <Box display="flex" flexDirection="column" my={2}>
           {children}
-          <GovernanceTypography className={classes.bottomText} variant="body1">
-            Powered by Hypernet Protocol
-          </GovernanceTypography>
+          {!hideModalWatermark && (
+            <GovernanceTypography
+              className={classes.bottomText}
+              variant="body1"
+            >
+              Powered by Hypernet Protocol
+            </GovernanceTypography>
+          )}
         </Box>
       }
-      onClose={closeModal}
+      onClose={onClose}
       maxWidth="md"
       title={<ModalHeader />}
     />

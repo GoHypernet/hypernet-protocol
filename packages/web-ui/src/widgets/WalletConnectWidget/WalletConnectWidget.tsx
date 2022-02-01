@@ -1,7 +1,11 @@
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import React, { useEffect, useState } from "react";
 
-import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
+import {
+  GovernanceButton,
+  GovernanceTypography,
+  MetamaskWarning,
+} from "@web-ui/components";
 
 import { IRenderParams } from "@web-ui/interfaces";
 import { Box } from "@material-ui/core";
@@ -13,6 +17,7 @@ import {
 import { useStyles } from "@web-ui/widgets/WalletConnectWidget/WalletConnectWidget.style";
 
 import OptionCard from "./OptionCard";
+import MetamaskInstructions from "@web-ui/components/MetamaskInstructions";
 export interface IProvider {
   id: string;
   name: string;
@@ -46,29 +51,57 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
   const { coreProxy } = useStoreContext();
   const { closeModal, setModalHeader } = useLayoutContext();
 
+  const [showMetamaskWarning, setShowMetamaskWarning] =
+    useState<boolean>(false);
+  const [showMetamaskInstructions, setShowMetamaskInstructions] =
+    useState<boolean>(false);
+
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   const [selectedWalletOption, setSelectedWalletOption] =
     useState<IProvider>(METAMASK);
 
   useEffect(() => {
-    setModalHeader("Wallet Option");
+    if (!showMetamaskInstructions && !showMetamaskWarning) {
+      setModalHeader("Wallet Option");
+    }
 
     return () => {
       setModalHeader("");
     };
+  }, [showMetamaskInstructions, showMetamaskWarning]);
+
+  useEffect(() => {
+    coreProxy.waitInitialized().map(() => {
+      closeModal();
+    });
   }, []);
 
-  const handleSubmit = () => {
+  const connectWallet = () => {
     const { id } = selectedWalletOption;
+
+    // if metamask is selected and not installed
+    if (id === METAMASK.id && !(window as any)?.ethereum) {
+      setShowMetamaskWarning(true);
+      return;
+    }
+
+    setShowMetamaskInstructions(true);
     coreProxy.provideProviderId(ProviderId(id)).match(
       () => {
-        closeModal();
+        console.log("Provider id provided.");
       },
       (err) => {
         console.error(err.message || "Err while providePrivateCredentials.");
+        closeModal();
       },
     );
+  };
+
+  const retry = () => {
+    setShowMetamaskWarning(false);
+    setShowMetamaskInstructions(true);
+    connectWallet();
   };
 
   const getFilteredProviders = () => {
@@ -77,6 +110,14 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
     }
     return WALLET_PROVIDERS;
   };
+
+  if (showMetamaskInstructions) {
+    return <MetamaskInstructions />;
+  }
+
+  if (showMetamaskWarning) {
+    return <MetamaskWarning retry={retry} />;
+  }
 
   return (
     <Box className={classes.wrapper}>
@@ -116,7 +157,7 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
           size="medium"
           fullWidth
           onClick={() => {
-            handleSubmit();
+            connectWallet();
           }}
         >
           Connect
