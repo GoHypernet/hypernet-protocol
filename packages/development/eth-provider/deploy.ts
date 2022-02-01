@@ -272,6 +272,21 @@ const func: DeployFunction = async () => {
   await hyperpayTestTx.wait();
   await hyperpayHyperTx.wait();
   await hyperpayEthTx.wait();
+
+  // Hypernet.ID Wallet //////////////////////////////////
+  // Hypernet.ID address is a default address with all the eth in the world
+  const hypernetIDTestTx = await testTokenContract.transfer(
+    hyperKYCAddress,
+    amount,
+  );
+  const hypernetIDHyperTx = await hyperTokenContract.transfer(
+    hyperKYCAddress,
+    amount,
+  );
+
+  await hypernetIDTestTx.wait();
+  await hypernetIDHyperTx.wait();
+
   log.info("Rich uncle is now in the poor house");
 
   ////////////////////////////////////////
