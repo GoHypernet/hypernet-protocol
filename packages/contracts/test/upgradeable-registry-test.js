@@ -567,7 +567,10 @@ it("Test batch minting function.", async function () {
     tx = await registry.grantRole(REGISTRAR_ROLE, buyModule.address);
     tx.wait();
 
-    buyModule.connect(addr1).buyNFI(42069, registry.address)
+    expect(await registry.ownerOf(42069)).to.equal(owner.address);
+    tx = await buyModule.connect(addr1).buyNFI(42069, registry.address);
+    tx.wait();
+    expect(await registry.ownerOf(42069)).to.equal(addr1.address);
 
     // can't buy it once its already been bought
     await expectRevert(buyModule.connect(addr2).buyNFI(42069, registry.address), "BuyModule: token already sold.");
