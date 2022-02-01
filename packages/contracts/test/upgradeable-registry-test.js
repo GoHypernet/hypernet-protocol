@@ -451,7 +451,7 @@ describe("Registry with No Enumeration", function () {
     tx.wait();
   });
 
-  it("Test batch minting function.", async function () {
+it("Test batch minting function.", async function () {
     // first deploy the LazyMintModule
     const BatchModule = await ethers.getContractFactory("BatchModule");
     batchmodule = await BatchModule.deploy("Batch Minting");
@@ -504,6 +504,67 @@ describe("Registry with No Enumeration", function () {
       42069,
     );
     tx.wait();
+  });
+
+it("Test Buy Module.", async function () {
+    // first deploy the BuyModule
+    const BuyModule = await ethers.getContractFactory("BuyModule");
+    buyModule = await BuyModule.deploy("Buy Module");
+    await buyModule.deployTransaction.wait();
+
+    // then add the module as a REGISTRAR
+    const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+    let tx = await registry.grantRole(REGISTRAR_ROLE, buyModule.address);
+    tx.wait();
+
+    // Add a token to purchase
+    tx = await registry.register(
+      owner.address,
+      "DummyLabel",
+      "ipfs://QmeztCtCmeDg2jj2wcSKa9nwKdqLsSkZq3zfVMG84pocf6",
+      42069,
+    );
+    tx.wait();
+
+    const abiCoder = ethers.utils.defaultAbiCoder;
+
+    // set purchase token to hypertoken and set price to 0
+    let params = abiCoder.encode(
+      [
+        "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
+      ],
+      [[[], [], [], [], [hypertoken.address], [0], [], [], []]],
+    );
+
+    registry.setRegistryParameters(params);
+
+    // can't buy the NFI without any payment token
+    await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "BuyModule: purchase price must be greater than 0.");
+
+    // set purchase token to hypertoken and set price to 0
+    params = abiCoder.encode(
+        [
+          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
+        ],
+        [[[], [], [], [], [], [hre.ethers.utils.parseUnits("10.0")], [], [], []]],
+      );
+  
+    registry.setRegistryParameters(params);
+
+    await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "ERC20: transfer amount exceeds balance");
+
+    // can't buy the NFI without calling approve
+    tx = await hypertoken.transfer(addr1.address, await registry.registrationFee());
+    tx.wait();
+    await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "ERC20: transfer amount exceeds allowance");
+
+    // sell the token
+    tx = await hypertoken.connect(addr1).approve(buyModule.address, await registry.registrationFee());
+    tx.wait();
+    buyModule.connect(addr1).buyNFI(42069, registry.address);
+
+    // can't buy it once its already been bought
+    await expectRevert(buyModule.connect(addr2).buyNFI(42069, registry.address), "BuyModule: token already sold.");
   });
 
   it("Test lazy minting.", async function () {
