@@ -181,6 +181,13 @@ async function main() {
   const merklemodule_reciept = await merklemodule.deployTransaction.wait();
   console.log("Merkle Module Address:", merklemodule.address);
   console.log("Merkle Module Gas Fee:", merklemodule_reciept.gasUsed.toString());
+
+  // deploy the Buy NFI module
+  const BuyModule = await ethers.getContractFactory("BuyModule");
+  const buymodule = await BuyModule.deploy("Buy NFI", await gasSettings());
+  const buymodule_reciept = await buymodule.deployTransaction.wait();
+  console.log("Buy NFI Module Address:", buymodule.address);
+  console.log("Buy NFI Module Gas Fee:", buymodule_reciept.gasUsed.toString());
 }
 
 // We recommend this pattern to be able to use async/await everywhere
