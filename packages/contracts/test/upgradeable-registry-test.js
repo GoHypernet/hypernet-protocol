@@ -560,7 +560,7 @@ it("Test batch minting function.", async function () {
     tx.wait();
     tx = await hypertoken.connect(addr2).approve(buyModule.address, await registry.registrationFee());
     tx.wait();
-    // can't sell the token if the Buy Module is not have the REGISTRAR_ROLE
+    // can't sell the token if the Buy Module does the REGISTRAR_ROLE
     await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
 
     // add the module as a REGISTRAR
