@@ -174,6 +174,7 @@ export class RegistryRepository implements IRegistryRepository {
                 this.nonFungibleRegistryContract.primaryRegistry(
                   registryAddress,
                 ),
+                this.nonFungibleRegistryContract.baseURI(registryAddress),
               ]).map((vals) => {
                 const [
                   registrarAddresses,
@@ -188,6 +189,7 @@ export class RegistryRepository implements IRegistryRepository {
                   burnAddress,
                   burnFee,
                   primaryRegistry,
+                  baseURI,
                 ] = vals;
 
                 const batchModule = registryModules.find(
@@ -235,6 +237,7 @@ export class RegistryRepository implements IRegistryRepository {
                     burnAddress,
                     burnFee,
                     primaryRegistry,
+                    baseURI,
                     modulesCapability,
                     null,
                   ),
@@ -295,6 +298,7 @@ export class RegistryRepository implements IRegistryRepository {
             this.nonFungibleRegistryContract.burnAddress(registryAddress),
             this.nonFungibleRegistryContract.burnFee(registryAddress),
             this.nonFungibleRegistryContract.primaryRegistry(registryAddress),
+            this.nonFungibleRegistryContract.baseURI(registryAddress),
           ]).map((vals) => {
             const [
               registrarAddresses,
@@ -310,6 +314,7 @@ export class RegistryRepository implements IRegistryRepository {
               burnAddress,
               burnFee,
               primaryRegistry,
+              baseURI,
             ] = vals;
 
             const batchModule = registryModules.find(
@@ -357,6 +362,7 @@ export class RegistryRepository implements IRegistryRepository {
                 burnAddress,
                 burnFee,
                 primaryRegistry,
+                baseURI,
                 modulesCapability,
                 null,
               ),
@@ -877,7 +883,7 @@ export class RegistryRepository implements IRegistryRepository {
               ? []
               : [registryParams.burnAddress],
             registryParams.burnFee == null ? [] : [registryParams.burnFee],
-            [],
+            registryParams.baseURI == null ? [] : [registryParams.baseURI],
           ],
         ],
       );
@@ -1756,6 +1762,7 @@ export class RegistryRepository implements IRegistryRepository {
           this.nonFungibleRegistryContract.burnAddress(registryAddress),
           this.nonFungibleRegistryContract.burnFee(registryAddress),
           this.nonFungibleRegistryContract.primaryRegistry(registryAddress),
+          this.nonFungibleRegistryContract.baseURI(registryAddress),
         ]).andThen((vals) => {
           const [
             registryName,
@@ -1769,6 +1776,7 @@ export class RegistryRepository implements IRegistryRepository {
             burnAddress,
             burnFee,
             primaryRegistry,
+            baseURI,
           ] = vals;
 
           const modulesCapability = new RegistryModuleCapability(
@@ -1793,6 +1801,7 @@ export class RegistryRepository implements IRegistryRepository {
               burnAddress,
               burnFee,
               primaryRegistry,
+              baseURI,
               modulesCapability,
               index,
             ),

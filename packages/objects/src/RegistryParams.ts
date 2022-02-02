@@ -12,5 +12,6 @@ export class RegistryParams {
     public registrationFee: BigNumberString | null,
     public burnAddress: EthereumAccountAddress | null,
     public burnFee: number | null,
+    public baseURI: string | null,
   ) {}
 }

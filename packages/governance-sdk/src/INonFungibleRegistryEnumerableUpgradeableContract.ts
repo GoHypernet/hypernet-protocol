@@ -149,6 +149,9 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     ownerAddress: EthereumAccountAddress,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError>;
+  baseURI(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<string, NonFungibleRegistryContractError>;
 }
 
 export const INonFungibleRegistryEnumerableUpgradeableContractType = Symbol.for(
