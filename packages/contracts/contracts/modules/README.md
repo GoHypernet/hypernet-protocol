@@ -34,9 +34,9 @@ feature.
 
 ### Buy NFI
 
-This [module](/packages/contracts/contracts/modules/BuyModule.sol) lets creators bulk sell pre-minted NFIs from their NFR. Any NFI held by an 
-address with the `REGISTRAR_ROLE`, can be bought by first approving this contract to pull `registrationFee` amount of `registrationToken` from 
-the purchaser's acount and then calling `buyNFI` with the desired `tokenid` and NFR contract address. Here is an
+This [module](/packages/contracts/contracts/modules/BuyModule.sol) lets `REGISTRAR_ROLE_ADMIN`s bulk sell pre-minted NFIs from their NFR. 
+Any NFI held by an address with the `REGISTRAR_ROLE`, can be bought by first approving this contract to pull `registrationFee` amount of 
+`registrationToken` from the purchaser's account and then calling `buyNFI` with the desired `tokenid` and NFR contract address. Here is an
 [example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L493) of how to buy and sell NFI's with this module. 
 
 ### Lazy Minting
