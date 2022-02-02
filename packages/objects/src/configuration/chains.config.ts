@@ -155,7 +155,11 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x91AE7a63d375CE3869436c1bFE3F7c56ce70c3ad"), // hypernetProfileRegistry
       EthereumContractAddress("0xDC7C87A076ccB379bfB1092B44332278C8B2cbF5"), // modulesRegistry
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
-      [ProviderUrl("https://polygon-rpc.com")],
+      [
+        ProviderUrl(
+          "https://polygon-mainnet.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931",
+        ),
+      ],
     ),
   ],
   [
@@ -180,7 +184,11 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17"), // hypernetProfileRegistry
       EthereumContractAddress("0x9a35a007F08809DED1452C78338CCddbEaa1CEE3"), // modulesRegistry
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
-      [ProviderUrl("https://rpc-mumbai.maticvigil.com/")],
+      [
+        ProviderUrl(
+          "https://polygon-mumbai.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931",
+        ),
+      ],
     ),
   ],
   [
@@ -205,7 +213,11 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0xf51499e303E6Af9895147a170C6b2Cd9e407a868"), // hypernetProfileRegistry
       EthereumContractAddress("0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468"), // modulesRegistry
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
-      [ProviderUrl("https://api.avax-test.network/ext/bc/C/rpc")],
+      [
+        ProviderUrl(
+          "https://f0fa7eba-0c1b-4f3f-bc37-67ba6ae2b60a.hypernetlabs.io/http/ext/bc/C/rpc",
+        ),
+      ],
     ),
   ],
 ]);
