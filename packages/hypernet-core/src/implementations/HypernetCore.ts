@@ -899,37 +899,39 @@ export class HypernetCore implements IHypernetCore {
       const governanceChainId =
         chainId || context.governanceChainInformation.chainId;
 
-      return this.blockchainProvider.initialize(chainId).andThen(() => {
-        context.initializeStatus.blockchainProviderInitialized.set(
-          governanceChainId,
-          true,
-        );
+      return this.blockchainProvider
+        .initialize(governanceChainId)
+        .andThen(() => {
+          context.initializeStatus.blockchainProviderInitialized.set(
+            governanceChainId,
+            true,
+          );
 
-        if (chainId != null) {
-          const chainInfo = config.chainInformation.get(chainId);
+          if (chainId != null) {
+            const chainInfo = config.chainInformation.get(chainId);
 
-          if (!(chainInfo instanceof GovernanceChainInformation)) {
-            return errAsync(
-              new InvalidParametersError(
-                "Provided Chain Id does not have chain information object",
-              ),
-            );
+            if (!(chainInfo instanceof GovernanceChainInformation)) {
+              return errAsync(
+                new InvalidParametersError(
+                  "Provided Chain Id does not have chain information object",
+                ),
+              );
+            }
+
+            context.governanceChainInformation = chainInfo;
+            context.onGovernanceChainChanged.next(governanceChainId);
           }
 
-          context.governanceChainInformation = chainInfo;
-          context.onGovernanceChainChanged.next(governanceChainId);
-        }
-
-        return this.contextProvider
-          .setContext(context)
-          .andThen(() => {
-            // Make sure that main provider network is set to the correct governance chain id
-            return this.switchProviderNetwork(governanceChainId);
-          })
-          .andThen(() => {
-            return this.blockchainListener.initialize();
-          });
-      });
+          return this.contextProvider
+            .setContext(context)
+            .andThen(() => {
+              // Make sure that main provider network is set to the correct governance chain id
+              return this.switchProviderNetwork(governanceChainId);
+            })
+            .andThen(() => {
+              return this.blockchainListener.initialize();
+            });
+        });
     });
   }
 
@@ -2094,9 +2096,16 @@ export class HypernetCore implements IHypernetCore {
         }
       }
 
-      return ResultUtils.combine(initializerList).andThen(() => {
-        return this.switchProviderNetwork(chainId);
-      });
+      return ResultUtils.combine(initializerList)
+        .andThen(() => {
+          return this.switchProviderNetwork(chainId);
+        })
+        .map(() => {
+          return this.localStorageUtils.setItem(
+            "governanceChainId",
+            chainId.toString(),
+          );
+        });
     });
   }
 
@@ -2107,7 +2116,6 @@ export class HypernetCore implements IHypernetCore {
       return this.injectedProviderService
         .switchNetwork(chainId)
         .andThen(() => {
-          console.log("network switchedddd");
           return this.blockchainProvider.setGovernanceSigner(chainId);
         })
         .orElse((e) => {

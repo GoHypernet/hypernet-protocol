@@ -48,12 +48,18 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
 
   useEffect(() => {
     coreProxy
-      .waitInitialized()
-      .map(() => {
-        retrieveGovernanceChainInformation();
-        retrieveChainInformationList();
-        getMainProviderChainId();
-      })
+      .waitPaymentsInitialized()
+      .map(initializeData)
+      .mapErr(handleCoreError);
+
+    coreProxy
+      .waitRegistriesInitialized()
+      .map(initializeData)
+      .mapErr(handleCoreError);
+
+    coreProxy
+      .waitGovernanceInitialized()
+      .map(initializeData)
       .mapErr(handleCoreError);
   }, []);
 
@@ -76,6 +82,12 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
       );
     });
   }, []);
+
+  const initializeData = () => {
+    retrieveGovernanceChainInformation();
+    retrieveChainInformationList();
+    getMainProviderChainId();
+  };
 
   const retrieveGovernanceChainInformation = () => {
     coreProxy
@@ -113,7 +125,12 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   };
 
   const handleSwitchChain = (chainId: ChainId) => {
-    coreProxy.initializeForChainId(chainId).mapErr(handleCoreError);
+    coreProxy
+      .initializeForChainId(chainId)
+      .map(() => {
+        window.location.reload();
+      })
+      .mapErr(handleCoreError);
   };
 
   const handleSwitchMetamaskNetwork = () => {
