@@ -4,7 +4,7 @@ Gateways are independent participants in the Hypernet Protocol payment network. 
 by the [Hypernet Core](/packages/hypernet-core) package. Gateways manage [payment channels](/documentation/gitbook/definitions-and-key-terms.md#payment-channel) and processes 
 payments on behalf of end-users and merchants while never having custody of funds (Gateways never know a user's private key).
 
-![Gateways direct payments from end-users to merchants without having custody of funds.](/documentation/images/gateway-diagram.png)
+![Gateways direct payments from end-users to merchants without having custody of funds.](/documentation/images/digital-payments-user-space.png)
 
 It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
 [Gateway registry](/packages/contracts/contracts/identity/README.md#gateways) (which itself is an instance of an 
