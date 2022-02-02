@@ -27,14 +27,16 @@ contract BuyModule is Context {
         external 
         virtual 
         {
+            address seller = INfr(registry).ownerOf(tokenId);
+            uint256 price = INfr(registry).registrationFee();
             // the current owner of the tokenid must be an account in the REGISTRAR_ROLE
-            require(INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), INfr(registry).ownerOf(tokenId)), "BuyModule: token already sold.");
+            require(INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), seller), "BuyModule: token not for sale.");
             // to use this module, the registrationFee should be non-zero
-            require(INfr(registry).registrationFee() > 0, "BuyModule: purchase price must be greater than 0.");
+            require(price > 0, "BuyModule: purchase price must be greater than 0.");
             // transfer the registrationToken from the purchaser to the burnAddress
-            require(IERC20(INfr(registry).registrationToken()).transferFrom(_msgSender(), INfr(registry).burnAddress(), INfr(registry).registrationFee()), "BuyModule: ERC20 token transfer failed.");
+            require(IERC20(INfr(registry).registrationToken()).transferFrom(_msgSender(), INfr(registry).burnAddress(), price), "BuyModule: ERC20 token transfer failed.");
             // transfer the NFI from the REGISTRAR_ROLE holder to the purchaser
-            INfr(registry).safeTransferFrom(INfr(registry).ownerOf(tokenId), _msgSender(), tokenId);
+            INfr(registry).safeTransferFrom(seller, _msgSender(), tokenId);
             require(INfr(registry).ownerOf(tokenId) == _msgSender(), "BuyModule: NFI purchase transfer failed");
         }
 }

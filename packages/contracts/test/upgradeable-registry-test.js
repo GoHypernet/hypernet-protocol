@@ -555,14 +555,14 @@ it("Test batch minting function.", async function () {
     tx.wait();
     await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "ERC20: transfer amount exceeds allowance");
 
-    // can't sell the token if the Buy Module is not have the REGISTRAR_ROLD
+    // can't sell the token if the Buy Module is not have the REGISTRAR_ROLE
     tx = await hypertoken.connect(addr1).approve(buyModule.address, await registry.registrationFee());
     tx.wait();
     tx = await hypertoken.connect(addr2).approve(buyModule.address, await registry.registrationFee());
     tx.wait();
     await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
 
-    // then add the module as a REGISTRAR
+    // add the module as a REGISTRAR
     const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
     tx = await registry.grantRole(REGISTRAR_ROLE, buyModule.address);
     tx.wait();
@@ -573,7 +573,7 @@ it("Test batch minting function.", async function () {
     expect(await registry.ownerOf(42069)).to.equal(addr1.address);
 
     // can't buy it once its already been bought
-    await expectRevert(buyModule.connect(addr2).buyNFI(42069, registry.address), "BuyModule: token already sold.");
+    await expectRevert(buyModule.connect(addr2).buyNFI(42069, registry.address), "BuyModule: token not for sale.");
   });
 
   it("Test lazy minting.", async function () {
