@@ -33,6 +33,7 @@ interface IRegistryDetailFormValus {
   registrationToken: string;
   burnAddress: string;
   burnFee: string;
+  baseURI: string;
   allowStorageUpdate: boolean;
   allowLabelChange: boolean;
   allowTransfers: boolean;
@@ -97,6 +98,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
     registrationToken,
     burnAddress,
     burnFee,
+    baseURI,
     allowStorageUpdate,
     allowLabelChange,
     allowTransfers,
@@ -113,6 +115,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           registrationFee,
           EthereumAccountAddress(burnAddress),
           Number(burnFee) * 100,
+          baseURI,
         ),
       )
       .map((registry) => {
@@ -249,6 +252,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 registrationToken: registry.registrationToken,
                 burnAddress: registry.burnAddress,
                 burnFee: (registry.burnFee / 100).toString(),
+                baseURI: registry.baseURI,
                 allowStorageUpdate: registry.allowStorageUpdate,
                 allowLabelChange: registry.allowLabelChange,
                 allowTransfers: registry.allowTransfers,
@@ -305,6 +309,13 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                       disabled={!isEditing}
                       name="burnFee"
                       title="Burn Fee"
+                      type="input"
+                    />
+                    <GovernanceField
+                      {...(isEditing && { className: classes.editableField })}
+                      disabled={!isEditing}
+                      name="baseURI"
+                      title="base URI"
                       type="input"
                     />
                   </GovernanceCard>

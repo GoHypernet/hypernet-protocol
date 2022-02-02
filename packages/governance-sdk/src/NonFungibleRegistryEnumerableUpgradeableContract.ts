@@ -374,6 +374,22 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
+  public baseURI(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<string, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
+    return ResultAsync.fromPromise(
+      this.contract?.baseURI() as Promise<string>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call baseURI()",
+          e,
+        );
+      },
+    );
+  }
+
   public tokenByIndex(
     index: number,
     registryAddress?: EthereumContractAddress,
