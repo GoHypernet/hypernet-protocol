@@ -533,10 +533,10 @@ it("Test batch minting function.", async function () {
 
     registry.setRegistryParameters(params);
 
-    // can't buy the NFI without any payment token
+    // can't buy the NFI if the price (registrationFee) is set to zero
     await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "BuyModule: purchase price must be greater than 0.");
 
-    // set purchase token to hypertoken and set price to 0
+    // set registrationFee to 10 tokens
     params = abiCoder.encode(
         [
           "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
@@ -546,20 +546,21 @@ it("Test batch minting function.", async function () {
   
     registry.setRegistryParameters(params);
 
+    // can't buy the NFI if you don't have any registrationToken in your account
     await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "ERC20: transfer amount exceeds balance");
 
-    // can't buy the NFI without calling approve
     tx = await hypertoken.transfer(addr1.address, await registry.registrationFee());
     tx.wait();
     tx = await hypertoken.transfer(addr2.address, await registry.registrationFee());
     tx.wait();
+    // can't buy the NFI without calling approve
     await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "ERC20: transfer amount exceeds allowance");
 
-    // can't sell the token if the Buy Module is not have the REGISTRAR_ROLE
     tx = await hypertoken.connect(addr1).approve(buyModule.address, await registry.registrationFee());
     tx.wait();
     tx = await hypertoken.connect(addr2).approve(buyModule.address, await registry.registrationFee());
     tx.wait();
+    // can't sell the token if the Buy Module is not have the REGISTRAR_ROLE
     await expectRevert(buyModule.connect(addr1).buyNFI(42069, registry.address), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
 
     // add the module as a REGISTRAR
@@ -567,6 +568,7 @@ it("Test batch minting function.", async function () {
     tx = await registry.grantRole(REGISTRAR_ROLE, buyModule.address);
     tx.wait();
 
+    // now you can sell the NFI
     expect(await registry.ownerOf(42069)).to.equal(owner.address);
     tx = await buyModule.connect(addr1).buyNFI(42069, registry.address);
     tx.wait();

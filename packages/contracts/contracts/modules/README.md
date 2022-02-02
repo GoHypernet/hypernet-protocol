@@ -43,7 +43,7 @@ Any NFI held by an address with the `REGISTRAR_ROLE`, can be bought by first app
 
 Lazy Minting is a common technique in many projects for offloading gas cost of an NFT creator to the recipient of the NFT. The 
 [Lazy Minting module](/packages/contracts/contracts/modules/LazyMintModule.sol) checks the given signature against the list of current addresses
-occupying the `REGISTRAR_ROLE` role in the target NFR. An [example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L563) of how 
+occupying the `REGISTRAR_ROLE` role in the target NFR. An [example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L565) of how 
 to use this module can be seen in the unit tests directory. 
 
 ### Merkle drop
@@ -51,4 +51,4 @@ to use this module can be seen in the unit tests directory.
 The [Uniswap](https://github.com/Uniswap/merkle-distributor) team was an early pioneer in setting the standard for large-scale airdrops in settings 
 where gas price is a concern. This module can be added to a NFR to enable merkle drop capability in an NFR. The merkle root must be declared in the NFR 
 (and optionally frozen) using the the [`setMerkleRoot`](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol#L175) function. 
-An example of the life-cycle of a merkle drop can be seen [here](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L663). 
+An example of the life-cycle of a merkle drop can be seen [here](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L665). 
