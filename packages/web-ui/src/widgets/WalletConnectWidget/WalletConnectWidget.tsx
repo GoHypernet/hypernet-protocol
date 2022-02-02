@@ -72,24 +72,34 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
   }, [showMetamaskInstructions, showMetamaskWarning]);
 
   useEffect(() => {
-    coreProxy.waitInitialized().map(() => {
-      closeModal();
-    });
+    coreProxy
+      .waitInitialized()
+      .map(() => {
+        closeModal();
+      })
+      .mapErr(() => {
+        closeModal();
+      });
   }, []);
 
   const connectWallet = () => {
     const { id } = selectedWalletOption;
 
-    // if metamask is selected and not installed
-    if (id === METAMASK.id && !(window as any)?.ethereum) {
-      setShowMetamaskWarning(true);
-      return;
+    if (id === METAMASK.id) {
+      // if metamask is selected and not installed
+      if (!(window as any)?.ethereum) {
+        setShowMetamaskWarning(true);
+        return;
+      }
+      setShowMetamaskInstructions(true);
     }
 
-    setShowMetamaskInstructions(true);
     coreProxy.provideProviderId(ProviderId(id)).match(
       () => {
-        console.log("Provider id provided.");
+        // do not close for metamask for instructions
+        if (id === WALLETCONNECT.id) {
+          closeModal();
+        }
       },
       (err) => {
         console.error(err.message || "Err while providePrivateCredentials.");
