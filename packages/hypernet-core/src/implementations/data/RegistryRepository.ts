@@ -853,7 +853,7 @@ export class RegistryRepository implements IRegistryRepository {
 
       const params = abiCoder.encode(
         [
-          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])",
+          "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
         ],
         [
           [
@@ -877,6 +877,7 @@ export class RegistryRepository implements IRegistryRepository {
               ? []
               : [registryParams.burnAddress],
             registryParams.burnFee == null ? [] : [registryParams.burnFee],
+            [],
           ],
         ],
       );

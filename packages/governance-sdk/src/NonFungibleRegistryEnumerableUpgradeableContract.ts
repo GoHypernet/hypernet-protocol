@@ -600,7 +600,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call setRegistryParameters()",
+          `Unable to call setRegistryParameters() for registryAddress: ${registryAddress} with params: ${params}`,
           e,
         );
       },
