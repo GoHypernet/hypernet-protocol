@@ -40,15 +40,6 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 
   useEffect(() => {
     getProposalsCount();
-
-    const subscription = coreProxy.onGovernanceChainChanged.subscribe(() => {
-      getProposalsCount();
-      handleProposalsRefresh();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   const getProposals = () => {

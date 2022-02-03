@@ -138,7 +138,12 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
       return;
     }
 
-    coreProxy.switchProviderNetwork(governanceChainId).mapErr(handleCoreError);
+    coreProxy
+      .switchProviderNetwork(governanceChainId)
+      .map(() => {
+        window.location.reload();
+      })
+      .mapErr(handleCoreError);
   };
 
   const showSwitchNetworkButton = useMemo(() => {

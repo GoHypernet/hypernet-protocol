@@ -7,6 +7,9 @@ RUN apk add vim
 ARG CHAIN_ID_ARG="1337"
 ENV CHAIN_ID $CHAIN_ID_ARG
 
+ARG INCLUDE_HYPERTOKEN_ARG=1
+ENV INCLUDE_HYPERTOKEN $INCLUDE_HYPERTOKEN_ARG
+
 COPY hardhat.config.ts /app/hardhat.config.ts
 COPY deploy.ts /app/deploy/
 COPY transferDefinitions/Message.json artifacts/src.sol/transferDefinitions/Message.sol/

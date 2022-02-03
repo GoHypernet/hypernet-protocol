@@ -22,6 +22,7 @@ export class Registry {
     public burnAddress: EthereumAccountAddress,
     public burnFee: number,
     public primaryRegistry: EthereumContractAddress,
+    public baseURI: string,
     public modulesCapability: RegistryModuleCapability,
     public index: number | null,
   ) {}
