@@ -125,6 +125,7 @@ services:
         "domainName": "", 
         "production": false        
       }' 
+      VECTOR_FORCE_CONFIG_API: "false"
       VECTOR_ENV: "dev"
       VECTOR_PROD: "true"
       VECTOR_NODE_URL: "http://node:8000"

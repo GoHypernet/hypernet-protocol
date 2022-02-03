@@ -57,7 +57,7 @@ services:
         "production": false         
       }'
       VECTOR_ENV: "dev"
-      VECTOR_PROD: "true"
+      VECTOR_PROD: "false"
       VECTOR_MNEMONIC: "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
       VECTOR_MNEMONIC_FILE: ""
       VECTOR_PG_DATABASE: "vector"
@@ -126,7 +126,7 @@ services:
         "production": false        
       }' 
       VECTOR_ENV: "dev"
-      VECTOR_PROD: "true"
+      VECTOR_PROD: "false"
       VECTOR_NODE_URL: "http://node:8000"
       VECTOR_MNEMONIC: "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
       VECTOR_PG_DATABASE: "vector"
