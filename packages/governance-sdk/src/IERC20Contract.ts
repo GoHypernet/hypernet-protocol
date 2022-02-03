@@ -6,13 +6,17 @@ import {
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+
 export interface IERC20Contract {
   approve(
     registryAddress: EthereumContractAddress,
     registrationFee: BigNumber,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, ERC20ContractError>;
   delegate(
     delegateAddress: EthereumAccountAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, ERC20ContractError>;
   balanceOf(
     account: EthereumAccountAddress,

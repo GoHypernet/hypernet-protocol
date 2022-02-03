@@ -7,6 +7,8 @@ import {
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+
 export interface ILazyMintModuleContract {
   lazyRegister(
     registryAddress: EthereumContractAddress,
@@ -14,6 +16,7 @@ export interface ILazyMintModuleContract {
     tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, LazyMintModuleContractError>;
 }
 
