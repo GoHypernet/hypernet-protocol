@@ -3,6 +3,7 @@ export * from "@objects/errors/AcceptPaymentError";
 export * from "@objects/errors/BalancesUnavailableError";
 export * from "@objects/errors/BlockchainUnavailableError";
 export * from "@objects/errors/ERC20ContractError";
+export * from "@objects/errors/GasPriceError";
 export * from "@objects/errors/GatewayActivationError";
 export * from "@objects/errors/GatewayAuthorizationDeniedError";
 export * from "@objects/errors/GatewayConnectorError";

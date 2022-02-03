@@ -8,10 +8,12 @@ import {
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+import { GasUtils } from "@governance-sdk/GasUtils";
 import { IHypernetGovernorContract } from "@governance-sdk/IHypernetGovernorContract";
 
 export class HypernetGovernorContract implements IHypernetGovernorContract {
-  protected contract: ethers.Contract | null = null;
+  protected contract: ethers.Contract;
   constructor(
     protected providerOrSigner:
       | ethers.providers.Provider
@@ -27,7 +29,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
   }
 
   public getContractAddress(): EthereumContractAddress {
-    return EthereumContractAddress(this.contract?.address || "");
+    return EthereumContractAddress(this.contract.address || "");
   }
 
   public _proposalIdTracker(): ResultAsync<
@@ -35,7 +37,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     HypernetGovernorContractError
   > {
     return ResultAsync.fromPromise(
-      this.contract?._proposalIdTracker() as Promise<BigNumber>,
+      this.contract._proposalIdTracker() as Promise<BigNumber>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract _proposalIdTracker()",
@@ -51,7 +53,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     index: number,
   ): ResultAsync<BigNumber, HypernetGovernorContractError> {
     return ResultAsync.fromPromise(
-      this.contract?._proposalMap(index) as Promise<BigNumber>,
+      this.contract._proposalMap(index) as Promise<BigNumber>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract _proposalMap()",
@@ -65,7 +67,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     proposalId: string,
   ): ResultAsync<string, HypernetGovernorContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.proposals(proposalId) as Promise<string>,
+      this.contract.proposals(proposalId) as Promise<string>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract proposals()",
@@ -79,7 +81,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     proposalId: string,
   ): ResultAsync<string, HypernetGovernorContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.state(proposalId) as Promise<string>,
+      this.contract.state(proposalId) as Promise<string>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract state()",
@@ -93,7 +95,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     proposalId: string,
   ): ResultAsync<string, HypernetGovernorContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.proposalDescriptions(proposalId) as Promise<string>,
+      this.contract.proposalDescriptions(proposalId) as Promise<string>,
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract proposalDescriptions()",
@@ -109,7 +111,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     descriptionHash: string,
   ): ResultAsync<string, HypernetGovernorContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.hashProposal(
+      this.contract.hashProposal(
         [registryFactoryAddress],
         [0],
         [transferCalldata],
@@ -128,25 +130,29 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     registryFactoryAddress: string,
     transferCalldata: string,
     name: string,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, HypernetGovernorContractError> {
-    if (this.contract == null) {
-      throw new Error("HypernetGovernorContract is not available");
-    }
-
-    return ResultAsync.fromPromise(
-      this.contract["propose(address[],uint256[],bytes[],string)"](
-        [registryFactoryAddress],
-        [0],
-        [transferCalldata],
-        name,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new HypernetGovernorContractError(
-          "Unable to call HypernetGovernorContract propose()",
-          e,
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new HypernetGovernorContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract["propose(address[],uint256[],bytes[],string)"](
+            [registryFactoryAddress],
+            [0],
+            [transferCalldata],
+            name,
+            { ...gasFee, ...overrides },
+          ) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new HypernetGovernorContractError(
+              "Unable to call HypernetGovernorContract propose()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
@@ -158,23 +164,26 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
   public castVote(
     proposalId: string,
     support: EProposalVoteSupport,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, HypernetGovernorContractError> {
-    if (this.contract == null) {
-      throw new Error("HypernetGovernorContract is not available");
-    }
-
-    return ResultAsync.fromPromise(
-      this.contract?.castVote(
-        proposalId,
-        support,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new HypernetGovernorContractError(
-          "Unable to call HypernetGovernorContract castVote()",
-          e,
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new HypernetGovernorContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract.castVote(proposalId, support, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new HypernetGovernorContractError(
+              "Unable to call HypernetGovernorContract castVote()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
@@ -195,7 +204,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     HypernetGovernorContractError
   > {
     return ResultAsync.fromPromise(
-      this.contract?.getReceipt(proposalId, voterAddress) as Promise<{
+      this.contract.getReceipt(proposalId, voterAddress) as Promise<{
         hasVoted: boolean;
         support: EProposalVoteSupport;
         votes: number;
@@ -211,22 +220,26 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
 
   public queue(
     proposalId: string,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, HypernetGovernorContractError> {
-    if (this.contract == null) {
-      throw new Error("HypernetGovernorContract is not available");
-    }
-
-    return ResultAsync.fromPromise(
-      this.contract["queue(uint256)"](
-        proposalId,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new HypernetGovernorContractError(
-          "Unable to call HypernetGovernorContract queue()",
-          e,
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new HypernetGovernorContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract["queue(uint256)"](proposalId, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new HypernetGovernorContractError(
+              "Unable to call HypernetGovernorContract queue()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
@@ -237,22 +250,26 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
 
   public cancel(
     proposalId: string,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, HypernetGovernorContractError> {
-    if (this.contract == null) {
-      throw new Error("HypernetGovernorContract is not available");
-    }
-
-    return ResultAsync.fromPromise(
-      this.contract["cancel(uint256)"](
-        proposalId,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new HypernetGovernorContractError(
-          "Unable to call HypernetGovernorContract cancel()",
-          e,
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new HypernetGovernorContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract["cancel(uint256)"](proposalId, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new HypernetGovernorContractError(
+              "Unable to call HypernetGovernorContract cancel()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);
@@ -263,22 +280,26 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
 
   public execute(
     proposalId: string,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, HypernetGovernorContractError> {
-    if (this.contract == null) {
-      throw new Error("HypernetGovernorContract is not available");
-    }
-
-    return ResultAsync.fromPromise(
-      this.contract["execute(uint256)"](
-        proposalId,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new HypernetGovernorContractError(
-          "Unable to call HypernetGovernorContract execute()",
-          e,
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new HypernetGovernorContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract["execute(uint256)"](proposalId, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new HypernetGovernorContractError(
+              "Unable to call HypernetGovernorContract execute()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new HypernetGovernorContractError("Unable to wait for tx", e);

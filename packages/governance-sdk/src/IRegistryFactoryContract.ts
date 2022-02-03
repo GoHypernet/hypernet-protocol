@@ -6,6 +6,8 @@ import {
 import { ethers, BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+
 export interface IRegistryFactoryContract {
   addressToName(
     registryAddress: EthereumContractAddress,
@@ -28,12 +30,14 @@ export interface IRegistryFactoryContract {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, RegistryFactoryContractError>;
   createRegistry(
     name: string,
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, RegistryFactoryContractError>;
   getRegistrarDefaultAdminRoleMember(): ResultAsync<
     EthereumAccountAddress[],

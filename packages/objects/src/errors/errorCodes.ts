@@ -37,6 +37,7 @@ const errorCodes = {
   BatchModuleContractError: "36",
   LazyMintModuleContractError: "37",
   IPFSUnavailableError: "38",
+  GasPriceError: "39",
 };
 
 export default errorCodes;
