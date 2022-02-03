@@ -7,12 +7,14 @@ import {
 import { ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+import { GasUtils } from "@governance-sdk/GasUtils";
 import { IBatchModuleContract } from "@governance-sdk/IBatchModuleContract";
 
 export class BatchModuleContract implements IBatchModuleContract {
-  protected contract: ethers.Contract | null = null;
+  protected contract: ethers.Contract;
   constructor(
-    providerOrSigner:
+    protected providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner
       | ethers.Wallet,
@@ -28,6 +30,7 @@ export class BatchModuleContract implements IBatchModuleContract {
   public batchRegister(
     registryAddress: EthereumContractAddress,
     registryEntries: RegistryEntry[],
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, BatchModuleContractError> {
     const recipients = registryEntries.map(
       (registryEntry) => registryEntry.owner,
@@ -40,21 +43,28 @@ export class BatchModuleContract implements IBatchModuleContract {
       (registryEntry) => registryEntry.tokenId,
     );
 
-    return ResultAsync.fromPromise(
-      this.contract?.batchRegister(
-        recipients,
-        labels,
-        datas,
-        tokenIds,
-        registryAddress,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new BatchModuleContractError(
-          "Unable to call BatchModuleContract batchRegister()",
-          e,
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new BatchModuleContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract.batchRegister(
+            recipients,
+            labels,
+            datas,
+            tokenIds,
+            registryAddress,
+            { ...gasFee, ...overrides },
+          ) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new BatchModuleContractError(
+              "Unable to call BatchModuleContract batchRegister()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new BatchModuleContractError("Unable to wait for tx", e);

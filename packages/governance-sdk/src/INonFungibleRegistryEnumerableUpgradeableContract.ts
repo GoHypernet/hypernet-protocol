@@ -9,6 +9,8 @@ import {
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+
 export interface INonFungibleRegistryEnumerableUpgradeableContract {
   getContractAddress(): EthereumContractAddress;
   getRegistrarRoleMember(
@@ -77,25 +79,30 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     tokenId: RegistryTokenId,
     registrationData: string,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   updateLabel(
     tokenId: RegistryTokenId,
     label: string,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   transferFrom(
     tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     toAddress: EthereumAccountAddress,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   burn(
     tokenId: RegistryTokenId,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   setRegistryParameters(
     params: string,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   registerByToken(
     recipientAddress: EthereumAccountAddress,
@@ -103,6 +110,7 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     data: string | null,
     tokenId: RegistryTokenId,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   register(
     recipientAddress: EthereumAccountAddress,
@@ -110,18 +118,22 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     data: string | null,
     tokenId: RegistryTokenId,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   grantRole(
     address: EthereumAccountAddress | EthereumContractAddress,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   revokeRole(
     address: EthereumAccountAddress | EthereumContractAddress,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   renounceRole(
     address: EthereumAccountAddress | EthereumContractAddress,
     registryAddress?: EthereumContractAddress,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   getRegistryEntryByTokenId(
     tokenId: RegistryTokenId,
