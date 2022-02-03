@@ -49,7 +49,7 @@
     "@glazed/did-datastore": "0.2.1",
     "@hypernetlabs/common-repositories": "^0.0.3",
     "@hypernetlabs/gateway-connector": "^0.0.12",
-    "@hypernetlabs/governance-sdk": "^0.0.3",
+    "@hypernetlabs/governance-sdk": "^0.0.4",
     "@hypernetlabs/objects": "^0.3.15",
     "@hypernetlabs/utils": "^0.5.2",
     "@walletconnect/web3-provider": "^1.5.2",
