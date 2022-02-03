@@ -36,7 +36,7 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
 
   const handleFormSubmit = (values: IValues) => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .delegateVote(values.accountAddress, null)
       .map(() => {
         UIData.onVotesDelegated.next();

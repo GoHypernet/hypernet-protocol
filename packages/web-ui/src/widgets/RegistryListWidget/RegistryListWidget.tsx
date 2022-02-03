@@ -75,7 +75,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   const getNumberOfRegistries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getNumberOfRegistries()
       .map((numberOfRegistries) => {
         setRegistriesCount(numberOfRegistries);
@@ -89,7 +89,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   const getRegistries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistries(
         page,
         REGISTIRES_PER_PAGE,

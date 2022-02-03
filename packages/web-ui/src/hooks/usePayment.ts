@@ -157,7 +157,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
       try {
         if (cancelRequest) return;
         // get data from coreProxy
-        coreProxy?.getBalances().map((balance: Balances) => {
+        coreProxy?.payments.getBalances().map((balance: Balances) => {
           // prepare balances
           dispatch({
             type: EActionTypes.FETCHED,

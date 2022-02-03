@@ -137,7 +137,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     return this.core
       .activate()
-      .andThen(() => this.core.initializeRegistries())
+      .andThen(() => this.core.registries.initializeRegistries())
       .map(() => {
         this.getRegistriesReadyResolved = true;
         window.hypernetCoreInstance = this.core;
@@ -159,7 +159,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     return this.core
       .activate()
-      .andThen(() => this.core.initializeGovernance())
+      .andThen(() => this.core.governance.initializeGovernance())
       .map(() => {
         this.getGovernanceReadyResolved = true;
         window.hypernetCoreInstance = this.core;
@@ -181,7 +181,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     return this.core
       .activate()
-      .andThen(() => this.core.initializePayments())
+      .andThen(() => this.core.payments.initializePayments())
       .map(() => {
         this.getPaymentsReadyResolved = false;
         window.hypernetCoreInstance = this.core;
@@ -198,11 +198,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public displayGatewayIFrame(gatewayUrl: GatewayUrl): void {
-    this.core.displayGatewayIFrame(gatewayUrl);
+    this.core.payments.displayGatewayIFrame(gatewayUrl);
   }
 
   public closeGatewayIFrame(gatewayUrl: GatewayUrl): void {
-    this.core.closeGatewayIFrame(gatewayUrl);
+    this.core.payments.closeGatewayIFrame(gatewayUrl);
   }
 
   private _prepareIFrameContainer(): HTMLElement {
@@ -272,7 +272,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "click",
       (e) => {
         if (this.currentGatewayUrl != null) {
-          this.core.closeGatewayIFrame(this.currentGatewayUrl);
+          this.core.payments.closeGatewayIFrame(this.currentGatewayUrl);
           this.currentGatewayUrl = null;
         }
         iframeContainer.style.display = "none";

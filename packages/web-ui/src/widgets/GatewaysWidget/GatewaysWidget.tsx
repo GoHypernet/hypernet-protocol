@@ -40,7 +40,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
 
   const getGateways = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .getGatewayEntryList()
       .map((gatewayMap) => {
         const gateways = [...gatewayMap.values()];

@@ -47,17 +47,17 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   }, [JSON.stringify(chainInformationList)]);
 
   useEffect(() => {
-    coreProxy
+    coreProxy.payments
       .waitPaymentsInitialized()
       .map(initializeData)
       .mapErr(handleCoreError);
 
-    coreProxy
+    coreProxy.registries
       .waitRegistriesInitialized()
       .map(initializeData)
       .mapErr(handleCoreError);
 
-    coreProxy
+    coreProxy.governance
       .waitGovernanceInitialized()
       .map(initializeData)
       .mapErr(handleCoreError);

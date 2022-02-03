@@ -9,7 +9,7 @@ const Gateways: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderGatewaysWidget({
         selector: "gateways-page-wrapper",
       })

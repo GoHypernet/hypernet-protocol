@@ -14,7 +14,7 @@ const RegistryEntryDetail: React.FC = () => {
     useParams<{ registryName: string; entryTokenId: string }>();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.registries
       .renderRegistryEntryDetailWidget({
         selector: "registry-entry-detail-page-wrapper",
         onRegistryEntryListNavigate: (registryName: string) => {

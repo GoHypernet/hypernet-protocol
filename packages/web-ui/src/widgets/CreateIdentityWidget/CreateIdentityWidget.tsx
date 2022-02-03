@@ -50,7 +50,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   }: ICreateIdentityFormValues) => {
     setLoading(true);
 
-    coreProxy
+    coreProxy.registries
       .createRegistryEntry(
         registryName,
         new RegistryEntry(
@@ -75,7 +75,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   }: ICreateIdentityFormValues) => {
     setLoading(true);
 
-    coreProxy
+    coreProxy.registries
       .submitLazyMintSignature(
         registryName,
         RegistryTokenId(Number(tokenId)),

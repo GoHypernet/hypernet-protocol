@@ -25,7 +25,7 @@ const BurnEntryWidget: React.FC<IBurnEntryWidget> = ({
 
   const burnEntry = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .burnRegistryEntry(registryName, tokenId)
       .map(() => {
         setLoading(false);

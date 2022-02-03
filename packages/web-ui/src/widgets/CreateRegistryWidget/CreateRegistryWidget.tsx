@@ -40,7 +40,7 @@ const CreateRegistryWidget: React.FC<ICreateRegistryWidget> = ({
   }: ICreateRegistryFormValues) => {
     setLoading(true);
 
-    coreProxy
+    coreProxy.registries
       .createRegistryByToken(
         name,
         symbol,

@@ -62,7 +62,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
       );
     }
 
-    coreProxy
+    coreProxy.registries
       .createBatchRegistryEntry(registryName, registryEntries)
       .map(() => {
         setLoading(false);

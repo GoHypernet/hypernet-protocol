@@ -49,10 +49,10 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   useEffect(() => {
     setLoading(true);
     // First initialze the gateway
-    coreProxy.getAuthorizedGateways().match((gatewaysMap) => {
+    coreProxy.payments.getAuthorizedGateways().match((gatewaysMap) => {
       if (gatewaysMap.get(gatewayUrl)) {
         //check for balances
-        coreProxy.getBalances().match((_balances) => {
+        coreProxy.payments.getBalances().match((_balances) => {
           decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
@@ -68,7 +68,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       if (gatewayUrl === _gatewayUrl) {
         alert.success(`Gateway ${gatewayUrl} authorization succeeded!`);
         setLoading(false);
-        coreProxy.getBalances().match((_balances) => {
+        coreProxy.payments.getBalances().match((_balances) => {
           decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
@@ -103,7 +103,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   const handleGatewayAuthorization = () => {
     setLoading(true);
-    coreProxy.authorizeGateway(gatewayUrl).mapErr(handleCoreError);
+    coreProxy.payments.authorizeGateway(gatewayUrl).mapErr(handleCoreError);
   };
 
   const goToFundWalletScreen = () => {

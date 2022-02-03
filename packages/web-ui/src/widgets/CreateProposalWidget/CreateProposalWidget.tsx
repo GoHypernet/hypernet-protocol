@@ -36,7 +36,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   const [votingPower, setVotingPower] = useState<number>();
 
   useEffect(() => {
-    coreProxy
+    coreProxy.governance
       .getProposalThreshold()
       .map((_proposalThreshold) => {
         setProposalThreshold(_proposalThreshold);
@@ -48,7 +48,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
       .map((accounts) => {
         setAccountAddress(accounts[0]);
 
-        coreProxy
+        coreProxy.governance
           .getVotingPower(accounts[0])
           .map((power) => {
             setVotingPower(power);
@@ -63,7 +63,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
     formikHelpers: FormikHelpers<IValues>,
   ) => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .createProposal(
         values.name,
         values.symbol,

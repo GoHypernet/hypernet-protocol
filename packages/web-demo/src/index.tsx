@@ -36,7 +36,7 @@ client
   .getReady()
   .map((coreProxy) => {
     Spinner.hide();
-    client.webUIClient
+    client.webUIClient.payments
       .startOnboardingFlow({
         gatewayUrl: gatewayUrl,
         finalSuccessContent:

@@ -12,7 +12,7 @@ const ProposalDetail: React.FC = (props) => {
   const { proposalId } = useParams<{ proposalId: string }>();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.governance
       .renderProposalDetailWidget({
         selector: "proposal-detail-page-wrapper",
         onProposalListNavigate: () => {
