@@ -1,8 +1,8 @@
 {
   "adminToken": "cxt1234",
   "authUrl": "http://localhost:5040",
-  "natsUrl": "nats://localhost:4322",
-  "messagingUrl": "http://localhost",
+  "natsUrl": "wss://dev-nats.hypernet.foundation:4221",
+  "messagingUrl": "",
   "logLevel": "debug",
   "chainAddresses": {
     "1337": {

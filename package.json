@@ -54,6 +54,8 @@
     "start": "docker-compose up user-dashboard",
     "start-stable": "VECTOR_TAG=latest docker-compose -f docker-compose-vector.yaml up user-dashboard",
     "start-nightly": "VECTOR_TAG=nightly docker-compose -f docker-compose-vector.yaml up user-dashboard",
+    "start-nightly-secure": "VECTOR_TAG=nightly docker-compose -f docker-compose-vector-secure-nats.yaml up user-dashboard",
+    "stop-nightly-secure": "VECTOR_TAG=nightly docker-compose -f docker-compose-vector-secure-nats.yaml down",
     "start-local": "docker-compose -f docker-compose-vector-local.yaml up user-dashboard",
     "dev": "docker-compose --file docker-compose.dev.yaml up --detach && lerna run dev",
     "dev2": "lerna run dev",

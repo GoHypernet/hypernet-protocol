@@ -33,7 +33,7 @@ ENV __BUILD_ENV__ $BUILD_ENV
 ARG IFRAME_SOURCE=http://localhost:5000
 ENV __IFRAME_SOURCE__ $IFRAME_SOURCE
 
-ARG NATS_URL=ws://localhost:4221
+ARG NATS_URL=wss://dev-nats.hypernet.foundation:4221
 ENV __NATS_URL__ $NATS_URL
 
 ARG AUTH_URL=http://localhost:5040
