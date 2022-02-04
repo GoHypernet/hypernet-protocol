@@ -9,7 +9,7 @@ const BalancesSummary: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderBalancesSummaryWidget({
         selector: "balances-summary-wrapper",
       })

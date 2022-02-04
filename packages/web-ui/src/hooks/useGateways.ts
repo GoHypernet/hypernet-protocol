@@ -80,7 +80,7 @@ export function useGateways(): IState {
 
   async function fetchData() {
     dispatch({ type: EActionTypes.FETCHING });
-    coreProxy
+    coreProxy.payments
       .getAuthorizedGatewaysConnectorsStatus()
       .map((gatewaysStatusMap) => {
         dispatch({
@@ -97,7 +97,7 @@ export function useGateways(): IState {
   }
 
   function openGatewayIFrame(gatewayUrl: GatewayUrl) {
-    coreProxy.displayGatewayIFrame(gatewayUrl).mapErr((error) => {
+    coreProxy.payments.displayGatewayIFrame(gatewayUrl).mapErr((error) => {
       alert.error(
         error.message || "An error had happened while pulling gateway list",
       );
@@ -107,7 +107,7 @@ export function useGateways(): IState {
 
   function deauthorizeGateway(gatewayUrl: GatewayUrl) {
     dispatch({ type: EActionTypes.FETCHING });
-    coreProxy
+    coreProxy.payments
       .deauthorizeGateway(gatewayUrl)
       .map(() => {
         alert.success(`Gateway ${gatewayUrl} deauthorized successfully`);
@@ -126,7 +126,7 @@ export function useGateways(): IState {
     successCallback?: Function,
   ) {
     dispatch({ type: EActionTypes.FETCHING });
-    coreProxy
+    coreProxy.payments
       .authorizeGateway(gatewayUrl)
       .map(() => {
         alert.success(`Gateway ${gatewayUrl} authorized successfully`);

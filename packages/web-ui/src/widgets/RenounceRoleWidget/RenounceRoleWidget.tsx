@@ -32,7 +32,7 @@ const RenounceRoleWidget: React.FC<IRenounceRoleWidget> = ({
 
   const handleFormSubmit = (values: IValues) => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .renounceRegistrarRole(registrarName, values.accountAddress)
       .map(() => {
         setLoading(false);

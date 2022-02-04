@@ -9,7 +9,7 @@ const LazyMintingRequests: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.registries
       .renderRegistryLazyMintingRequestsWidget({
         selector: "registry-lazy-minting-requests",
       })

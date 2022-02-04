@@ -44,7 +44,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 
   const getProposals = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .getProposals(page, PROPOSALS_PER_PAGE)
       .map((proposals) => {
         setProposals(proposals);
@@ -55,7 +55,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 
   const getProposalsCount = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .getProposalsCount()
       .map((proposalCount) => {
         setProposalCount(proposalCount);

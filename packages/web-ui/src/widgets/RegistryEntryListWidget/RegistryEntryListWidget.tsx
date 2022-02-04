@@ -92,7 +92,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const getRegistry = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryByName([registryName])
       .map((registryMap) => {
         const registry = registryMap.get(registryName);
@@ -106,7 +106,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const getRegistryEntries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntries(
         registryName,
         page,
@@ -185,7 +185,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByOwnerAddressClick = (value) => {
     setLoading(true);
     setSearchTerm(value);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntryListByOwnerAddress(
         registryName,
         EthereumAccountAddress(value),
@@ -201,7 +201,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByUsernameClick = (value) => {
     setLoading(true);
     setSearchTerm(value);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntryListByUsername(registryName, value)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);

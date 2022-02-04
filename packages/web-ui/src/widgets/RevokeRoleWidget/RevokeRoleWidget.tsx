@@ -32,7 +32,7 @@ const RevokeRoleWidget: React.FC<IRevokeRoleWidget> = ({
 
   const handleFormSubmit = (values: IValues) => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .revokeRegistrarRole(registrarName, values.accountAddress)
       .map(() => {
         setLoading(false);

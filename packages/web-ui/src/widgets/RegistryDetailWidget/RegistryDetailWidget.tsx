@@ -71,7 +71,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
 
   const getRegistryDetails = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryByName([registryName])
       .map((registryMap) => {
         setRegistry(registryMap.get(registryName));
@@ -83,7 +83,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
 
   const getRegistryModules = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryModules()
       .map((registryModules) => {
         setRegistryModules(registryModules);
@@ -104,7 +104,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
     allowTransfers,
   }: IRegistryDetailFormValus) => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .updateRegistryParams(
         new RegistryParams(
           registryName,
@@ -134,14 +134,14 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
     }
     setLoading(true);
     if (value) {
-      coreProxy
+      coreProxy.registries
         .grantRegistrarRole(registry?.name, moduleAddress)
         .map(() => {
           getRegistryDetails();
         })
         .mapErr(handleCoreError);
     } else {
-      coreProxy
+      coreProxy.registries
         .revokeRegistrarRole(registry?.name, moduleAddress)
         .map(() => {
           getRegistryDetails();
