@@ -463,9 +463,7 @@ export class BlockchainProvider implements IBlockchainProvider {
       );
 
       if (initializeProviderResult == null) {
-        throw new Error(
-          "Before must call BlockchainProvider.initialize() first.",
-        );
+        throw new Error("Must call BlockchainProvider.initialize() first.");
       }
 
       return initializeProviderResult;

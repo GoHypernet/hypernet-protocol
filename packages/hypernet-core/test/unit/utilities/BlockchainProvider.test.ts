@@ -107,7 +107,7 @@ describe("BlockchainProvider tests", () => {
     const wrappedResponse = result._unsafeUnwrap();
   });
 
-  test("getProvider returns Must call BlockchainProvider.initialize() first before you can call getProvider()", async () => {
+  test("getProvider returns Must call BlockchainProvider.initialize() first. error", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
@@ -124,9 +124,7 @@ describe("BlockchainProvider tests", () => {
     expect(result).toBeDefined();
     expect(result).toBeInstanceOf(Error);
     expect(result).toStrictEqual(
-      new Error(
-        "Must call BlockchainProvider.initialize() first before you can call getProvider()",
-      ),
+      new Error("Must call BlockchainProvider.initialize() first."),
     );
   });
 
@@ -146,7 +144,7 @@ describe("BlockchainProvider tests", () => {
     expect(result.isErr()).toBeFalsy();
   });
 
-  test("getSigner returns Must call BlockchainProvider.initialize() first before you can call getSigner()", async () => {
+  test("getSigner returns Must call BlockchainProvider.initialize() first. error", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
@@ -163,9 +161,7 @@ describe("BlockchainProvider tests", () => {
     expect(result).toBeDefined();
     expect(result).toBeInstanceOf(Error);
     expect(result).toStrictEqual(
-      new Error(
-        "Must call BlockchainProvider.initialize() first before you can call getSigner()",
-      ),
+      new Error("Must call BlockchainProvider.initialize() first."),
     );
   });
 
@@ -184,7 +180,7 @@ describe("BlockchainProvider tests", () => {
     expect(result.isErr()).toBeFalsy();
   });
 
-  test("getGovernanceProvider returns Must call BlockchainProvider.initialize() first before you can call getGovernanceProvider()", async () => {
+  test("getGovernanceProvider returns Must call BlockchainProvider.initialize() first. error", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
@@ -201,9 +197,7 @@ describe("BlockchainProvider tests", () => {
     expect(result).toBeDefined();
     expect(result).toBeInstanceOf(Error);
     expect(result).toStrictEqual(
-      new Error(
-        "Must call BlockchainProvider.initialize() first before you can call getGovernanceProvider()",
-      ),
+      new Error("Must call BlockchainProvider.initialize() first."),
     );
   });
 
@@ -223,7 +217,7 @@ describe("BlockchainProvider tests", () => {
     expect(wrappedResponse).toBeInstanceOf(CeramicEIP1193Bridge);
   });
 
-  test("getCeramicEIP1193Provider returns Must call BlockchainProvider.initialize() first before you can call getCeramicEIP1193Provider()", async () => {
+  test("getCeramicEIP1193Provider returns Must call BlockchainProvider.initialize() first. error", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
@@ -240,9 +234,7 @@ describe("BlockchainProvider tests", () => {
     expect(result).toBeDefined();
     expect(result).toBeInstanceOf(Error);
     expect(result).toStrictEqual(
-      new Error(
-        "Must call BlockchainProvider.initialize() first before you can call getEIP1193Provider()",
-      ),
+      new Error("Must call BlockchainProvider.initialize() first."),
     );
   });
 
