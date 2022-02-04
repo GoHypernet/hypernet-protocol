@@ -41,6 +41,19 @@ Polygon test network that connects with Ethereum's Goërli Testnet. Metamask net
 - Lazy Mint Module: [`0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf`](https://mumbai.polygonscan.com/address/0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf)
 - Merkle Module: [`0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3`](https://mumbai.polygonscan.com/address/0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3)
 
+## Avalanche Mainnet
+
+Avalanche test network that replicates the functionality of the Avalanche mainnet. Metamask settings can be found 
+[here](https://docs.avax.network/build/tutorials/smart-contracts/deploy-a-smart-contract-on-avalanche-using-remix-and-metamask/#avalanche-mainnet-settings).
+
+- Registry Factory: [`0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`](https://snowtrace.io/address/0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a)
+- Hypernet Profiles: [`0xf51499e303E6Af9895147a170C6b2Cd9e407a868`](https://snowtrace.io/address/0xf51499e303E6Af9895147a170C6b2Cd9e407a868)
+- Registry Modules: [`0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468`](https://snowtrace.io/address/0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468)
+- Batch Module: [`0x3353da0f24fCACd83832b09e9371a937195D2640`](https://snowtrace.io/address/0x3353da0f24fCACd83832b09e9371a937195D2640)
+- Lazy Mint Module: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://snowtrace.io/address/0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899)
+- Merkle Module: [`0x5dbAe4cB356905bdC202B943e1D6386606BAF50d`](https://snowtrace.io/address/0x5dbAe4cB356905bdC202B943e1D6386606BAF50d)
+- Buy Module: [`0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf`](https://snowtrace.io/address/0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf)
+
 ## Fuji
 
 Avalanche test network that replicates the functionality of the Avalanche mainnet. Metamask settings can be found 
