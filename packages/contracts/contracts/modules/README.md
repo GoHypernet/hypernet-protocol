@@ -29,19 +29,26 @@ Hypernet launchpad dashboard. The currently supported modules are as follows:
 This [module](/packages/contracts/contracts/modules/BatchModule.sol) allows for accounts occupying the `REGISTRAR_ROLE` to mint multiple 
 NFIs in a single transaction, thereby reducing gas costs. The number of NFIs that can be minted in a single transaction is limited by the 
 gas limit of the layer 1 blockchain protocol. See the Hypernet Protocol unit tests for an 
-[example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L394) of how to interact with a contract using the batch minting 
+[example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L438) of how to interact with a contract using the batch minting 
 feature. 
+
+### Buy NFI
+
+This [module](/packages/contracts/contracts/modules/BuyModule.sol) lets `REGISTRAR_ROLE_ADMIN`s bulk sell pre-minted NFIs from their NFR. 
+Any NFI held by an address with the `REGISTRAR_ROLE`, can be bought by first approving this contract to pull `registrationFee` amount of 
+`registrationToken` from the purchaser's account and then calling `buyNFI` with the desired `tokenid` and NFR contract address. Here is an
+[example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L493) of how to buy and sell NFI's with this module. 
 
 ### Lazy Minting
 
 Lazy Minting is a common technique in many projects for offloading gas cost of an NFT creator to the recipient of the NFT. The 
 [Lazy Minting module](/packages/contracts/contracts/modules/LazyMintModule.sol) checks the given signature against the list of current addresses
-occupying the `REGISTRAR_ROLE` role in the target NFR. An [example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L449) of how 
+occupying the `REGISTRAR_ROLE` role in the target NFR. An [example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L565) of how 
 to use this module can be seen in the unit tests directory. 
 
 ### Merkle drop
 
 The [Uniswap](https://github.com/Uniswap/merkle-distributor) team was an early pioneer in setting the standard for large-scale airdrops in settings 
 where gas price is a concern. This module can be added to a NFR to enable merkle drop capability in an NFR. The merkle root must be declared in the NFR 
-(and optionally frozen) using the the [`setMerkleRoot`](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol#L168) function. 
-An example of the life-cycle of a merkle drop can be seen [here](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L549). 
+(and optionally frozen) using the the [`setMerkleRoot`](/packages/contracts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol#L175) function. 
+An example of the life-cycle of a merkle drop can be seen [here](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L665). 

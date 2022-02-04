@@ -81,7 +81,7 @@ module.exports = {
         chainId: 43113,
         url: urlOverride || "https://f0fa7eba-0c1b-4f3f-bc37-67ba6ae2b60a.hypernetlabs.io/http/ext/bc/C/rpc",
     },
-    avalanche: { // avalanche testnet
+    avalanche: { // avalanche mainnet
         accounts: { mnemonic },
         chainId: 43114,
         url: urlOverride || "https://053e1c5c-66fd-49c3-b267-42ab5f9202c6.hypernetlabs.io/http/ext/bc/C/rpc",
