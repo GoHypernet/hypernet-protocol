@@ -135,7 +135,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       return isRegistrar || isOwner;
     }, [isRegistrar, isOwner]);
 
-    let headerActions: IHeaderAction[] = [];
+    const headerActions: IHeaderAction[] = [];
 
     if (canBurn) {
       headerActions.push({

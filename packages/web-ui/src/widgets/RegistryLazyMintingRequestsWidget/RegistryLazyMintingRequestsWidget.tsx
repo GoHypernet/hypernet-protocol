@@ -78,7 +78,7 @@ const RegistryLazyMintingRequestsWidget: React.FC<IRegistryLazyMintingRequestsWi
 
         {lazyMintingSignatures?.map((lazyMintingSignature, index) => (
           <GovernanceRegistryListItem
-            key={lazyMintingSignature.tokenId}
+            key={Number(lazyMintingSignature.tokenId)}
             number={(index + 1).toString()}
             title={lazyMintingSignature.tokenId.toString()}
             fieldWithValueList={[

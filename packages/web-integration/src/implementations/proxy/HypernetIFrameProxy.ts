@@ -997,7 +997,7 @@ export default class HypernetIFrameProxy
 
     getRegistryEntryDetailByTokenId: (
       registryName: string,
-      tokenId: number,
+      tokenId: RegistryTokenId,
     ): ResultAsync<
       RegistryEntry,
       | RegistryFactoryContractError
@@ -1012,7 +1012,7 @@ export default class HypernetIFrameProxy
 
     updateRegistryEntryTokenURI: (
       registryName: string,
-      tokenId: number,
+      tokenId: RegistryTokenId,
       registrationData: string,
     ): ResultAsync<
       RegistryEntry,
@@ -1031,7 +1031,7 @@ export default class HypernetIFrameProxy
 
     updateRegistryEntryLabel: (
       registryName: string,
-      tokenId: number,
+      tokenId: RegistryTokenId,
       label: string,
     ): ResultAsync<
       RegistryEntry,
@@ -1089,7 +1089,7 @@ export default class HypernetIFrameProxy
 
     transferRegistryEntry: (
       registryName: string,
-      tokenId: number,
+      tokenId: RegistryTokenId,
       transferToAddress: EthereumAccountAddress,
     ): ResultAsync<
       RegistryEntry,
@@ -1108,7 +1108,7 @@ export default class HypernetIFrameProxy
 
     burnRegistryEntry: (
       registryName: string,
-      tokenId: number,
+      tokenId: RegistryTokenId,
     ): ResultAsync<
       void,
       | NonFungibleRegistryContractError
