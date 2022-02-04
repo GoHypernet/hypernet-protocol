@@ -1,3 +1,4 @@
+import { DIDDataStore } from "@glazed/did-datastore";
 import {
   IRegistryFactoryContract,
   IERC20Contract,
@@ -37,6 +38,7 @@ import {
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IRegistryRepository } from "@interfaces/data";
+import { HypernetContext } from "@interfaces/objects";
 import { BigNumber, ethers } from "ethers";
 import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
@@ -49,8 +51,6 @@ import {
   IDIDDataStoreProvider,
   IDIDDataStoreProviderType,
 } from "@interfaces/utilities";
-import { HypernetContext } from "@interfaces/objects";
-import { DIDDataStore } from "@glazed/did-datastore";
 
 @injectable()
 export class RegistryRepository implements IRegistryRepository {
@@ -932,7 +932,10 @@ export class RegistryRepository implements IRegistryRepository {
         throw new Error("Registry not found!");
       }
 
-      if (newRegistryEntry.tokenId === 0 || isNaN(newRegistryEntry.tokenId)) {
+      if (
+        newRegistryEntry.tokenId === BigInt(0) ||
+        isNaN(Number(newRegistryEntry.tokenId))
+      ) {
         return errAsync(
           new NonFungibleRegistryContractError(
             "Zero number or strings are not allowed as a token ID.",
@@ -1327,7 +1330,7 @@ export class RegistryRepository implements IRegistryRepository {
         if (
           newRegistryEntries.some(
             (newRegistryEntry) =>
-              isNaN(newRegistryEntry.tokenId) ||
+              isNaN(Number(newRegistryEntry.tokenId)) ||
               newRegistryEntry.tokenId == null ||
               newRegistryEntry.owner == null ||
               newRegistryEntry.label == null,

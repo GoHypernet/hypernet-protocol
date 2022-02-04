@@ -67,7 +67,7 @@ export interface IRegistryListWidgetParams extends IRenderParams {
 export interface IRegistryEntryListWidgetParams extends IRenderParams {
   onRegistryEntryDetailsNavigate?: (
     registryName: string,
-    entryTokenId: number,
+    entryTokenId: RegistryTokenId,
   ) => void;
   onRegistryListNavigate?: () => void;
   registryName: string;

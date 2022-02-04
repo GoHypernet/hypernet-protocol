@@ -4,10 +4,10 @@ import {
   RegistryTokenId,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
+import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik, FormikState } from "formik";
 import React, { useState } from "react";
-import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 
 import {
   GovernanceDialog,
@@ -54,7 +54,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
       registryEntries.push(
         new RegistryEntry(
           label,
-          RegistryTokenId(Number(tokenId)),
+          RegistryTokenId(BigInt(tokenId)),
           EthereumAccountAddress(recipientAddress),
           tokenUri,
           null,
@@ -110,7 +110,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
         ...prevState,
         new RegistryEntry(
           values.label,
-          RegistryTokenId(Number(values.tokenId)),
+          RegistryTokenId(BigInt(values.tokenId)),
           EthereumAccountAddress(values.recipientAddress),
           values.tokenUri,
           null,

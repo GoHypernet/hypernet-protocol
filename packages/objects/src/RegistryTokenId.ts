@@ -1,4 +1,4 @@
 import { Brand, make } from "ts-brand";
 
-export type RegistryTokenId = Brand<number, "RegistryTokenId">;
+export type RegistryTokenId = Brand<bigint, "RegistryTokenId">;
 export const RegistryTokenId = make<RegistryTokenId>();
