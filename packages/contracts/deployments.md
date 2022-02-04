@@ -43,7 +43,7 @@ Polygon test network that connects with Ethereum's Goërli Testnet. Metamask net
 
 ## Avalanche Mainnet
 
-Avalanche test network that replicates the functionality of the Avalanche mainnet. Metamask settings can be found 
+Avalanche is a low-cost, EVM-compatible, eco-friendly blockchain network secured by a novel sub-sampled voting consensus mechanism. Metamask settings can be found 
 [here](https://docs.avax.network/build/tutorials/smart-contracts/deploy-a-smart-contract-on-avalanche-using-remix-and-metamask/#avalanche-mainnet-settings).
 
 - Registry Factory: [`0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`](https://snowtrace.io/address/0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a)
