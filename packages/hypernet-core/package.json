@@ -47,7 +47,7 @@
     "@connext/vector-types": "^0.2.5-beta.6",
     "@connext/vector-utils": "^0.2.5-beta.6",
     "@glazed/did-datastore": "0.2.1",
-    "@hypernetlabs/common-repositories": "^0.0.3",
+    "@hypernetlabs/common-repositories": "^0.0.4",
     "@hypernetlabs/gateway-connector": "^0.0.12",
     "@hypernetlabs/governance-sdk": "^0.0.4",
     "@hypernetlabs/objects": "^0.3.17",
