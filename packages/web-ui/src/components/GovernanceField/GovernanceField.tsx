@@ -20,6 +20,7 @@ const CustomizedSelectForFormik = ({ children, form, field }) => {
 
   return (
     <Select
+      {...field?.props}
       required={field?.required}
       name={field?.name}
       value={field?.value}
