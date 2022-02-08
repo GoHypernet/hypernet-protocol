@@ -45,6 +45,9 @@ class TestGatewayConnector implements IGatewayConnector {
   protected paymentToken = EthereumContractAddress(
     "0xAa588d3737B611baFD7bD713445b314BD453a5C8",
   ); // HyperToken
+  // protected paymentToken = EthereumContractAddress(
+  // "0x0000000000000000000000000000000000000000",
+  //   ); // Ethereum
 
   protected privateKey =
     "0x0123456789012345678901234567890123456789012345678901234567890123";
@@ -323,7 +326,7 @@ class TestGatewayConnector implements IGatewayConnector {
       return;
     }
 
-    const amount = BigNumberString("1");
+    const amount = BigNumberString("1000000000000000000");
     const expirationDate = UnixTimestamp(
       Math.floor(new Date().getTime() / 1000 + 1000000),
     );

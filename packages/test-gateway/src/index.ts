@@ -26,6 +26,12 @@ fs.readFile(filename, "utf8", (err, data) => {
 
   // Sign the connector
   blockchainRepository.setConnector(gatewayUrl, connector);
+
+  // setTimeout(() => {
+  //   // Sign the connector
+  //   console.log("Setting up blockchainRepository connector")
+  //   blockchainRepository.setConnector(gatewayUrl, connector);
+  // }, 20000)
 });
 
 app.get("/connector", (req, res) => {
