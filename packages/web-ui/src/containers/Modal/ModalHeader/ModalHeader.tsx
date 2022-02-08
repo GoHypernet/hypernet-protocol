@@ -1,10 +1,10 @@
 import { Box } from "@material-ui/core";
 import React from "react";
 
-import { GovernanceTypography } from "@web-integration/components";
+import { GovernanceTypography } from "@web-ui/components";
 
 import { useLayoutContext } from "@web-ui/contexts";
-import { useStyles } from "./ModalHeader.style";
+import { useStyles } from "@web-ui/containers/Modal/ModalHeader/ModalHeader.style";
 
 import { HYPERNET_PROTOCOL_LOGO_DARK_URL } from "@web-ui/constants";
 

@@ -1,12 +1,16 @@
 import { Box } from "@material-ui/core";
-import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
-import { IOnboardingSuccessButtonProps } from "@web-ui/interfaces";
 import React, { useEffect } from "react";
 
-import { GovernanceBalanceList } from "@web-ui/components";
+import {
+  GovernanceBalanceList,
+  GovernanceButton,
+  GovernanceTypography,
+} from "@web-ui/components";
+
+import { IOnboardingSuccessButtonProps } from "@web-ui/interfaces";
+import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { useStyles } from "@web-ui/flows/OnboardingFlow/screens/OnboardingSuccess/OnboardingSuccess.style";
 import { useBalances } from "@web-ui/hooks";
-import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
 
 interface IOnboardingSuccessProps {
   gatewayName: string;

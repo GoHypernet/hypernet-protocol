@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
-import { Box } from "@material-ui/core";
 
 import { GovernanceButton, GovernanceTypography } from "@web-ui/components";
 
 import { useLayoutContext } from "@web-ui/contexts";
 import { AUTHENTICATION_SUCCESS_IMAGE_URL } from "@web-ui/constants";
-import { useStyles } from "@web-integration/flows/OnboardingFlow/screens/EmptyBalance/EmptyBalance.style";
+import { useStyles } from "@web-ui/flows/OnboardingFlow/screens/EmptyBalance/EmptyBalance.style";
 
 interface IEmptyBalanceProps {
   gatewayName: string;

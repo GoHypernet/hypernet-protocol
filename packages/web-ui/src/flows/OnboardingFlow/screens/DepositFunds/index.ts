@@ -1,1 +1,1 @@
-export { default } from "@web-integration/flows/OnboardingFlow/screens/DepositFunds/DepositFunds";
+export { default } from "@web-ui/flows/OnboardingFlow/screens/DepositFunds/DepositFunds";

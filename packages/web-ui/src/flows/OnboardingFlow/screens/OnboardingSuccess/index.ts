@@ -1,1 +1,1 @@
-export { default } from "@web-integration/flows/OnboardingFlow/screens/OnboardingSuccess/OnboardingSuccess";
+export { default } from "@web-ui/flows/OnboardingFlow/screens/OnboardingSuccess/OnboardingSuccess";

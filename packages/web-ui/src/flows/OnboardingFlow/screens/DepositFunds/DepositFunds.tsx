@@ -1,7 +1,7 @@
-import { useLayoutContext } from "@web-ui/contexts";
 import React, { useEffect } from "react";
 
 import FundWidget from "@web-ui/widgets/FundWidget/FundWidget";
+import { useLayoutContext } from "@web-ui/contexts";
 
 interface IDepositFundsProps {
   excludeCardWrapper: boolean;

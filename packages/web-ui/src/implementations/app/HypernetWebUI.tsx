@@ -272,7 +272,6 @@ export default class HypernetWebUI implements IHypernetWebUI {
     config: IRenderParams,
   ): Result<void, RenderError> {
     const renderReact = () => {
-      console.log("renderWalletConnectWidget");
       return ReactDOM.render(
         this._bootstrapComponent(
           <WalletConnectWidget />,
