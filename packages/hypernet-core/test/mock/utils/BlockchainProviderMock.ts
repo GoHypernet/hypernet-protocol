@@ -113,4 +113,11 @@ export class BlockchainProviderMock implements IBlockchainProvider {
   > {
     return okAsync(undefined);
   }
+
+  public getMainProviderChainId(): ResultAsync<
+    ChainId,
+    BlockchainUnavailableError
+  > {
+    return okAsync(ChainId(1));
+  }
 }

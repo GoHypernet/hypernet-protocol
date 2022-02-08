@@ -22,18 +22,29 @@ import {
   IBlockchainProviderType,
   IConfigProvider,
   IConfigProviderType,
+  IContextProvider,
+  IContextProviderType,
 } from "@interfaces/utilities";
 
 @injectable()
 export class InjectedProviderService implements IInjectedProviderService {
+  protected switchNetworkPromiseResolve: ((value: any) => void) | null = null;
+
   public constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(ILocalStorageUtilsType)
     protected localStorageUtils: ILocalStorageUtils,
-    @inject(ILogUtilsType) protected logUtils: ILogUtils,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
+
+  public generateSwitchNetworkPromise(): Promise<void> {
+    return new Promise((resolve) => {
+      this.switchNetworkPromiseResolve = resolve;
+    });
+  }
 
   public setupInjectedProvider(): ResultAsync<
     void,
@@ -66,13 +77,12 @@ export class InjectedProviderService implements IInjectedProviderService {
     if (this.blockchainProvider.isMetamask()) {
       return ResultUtils.combine([
         this.configProvider.getConfig(),
+        this.contextProvider.getContext(),
         this.blockchainProvider.getProvider(),
-      ]).andThen(([config, provider]) => {
+      ]).andThen(([config, context, provider]) => {
         const chainInformation = config.chainInformation.get(chainId);
 
         if (chainInformation == null) {
-          console.log(`Failed to switch network`);
-
           return errAsync(
             new BlockchainUnavailableError("Failed to switch network."),
           );
@@ -91,13 +101,56 @@ export class InjectedProviderService implements IInjectedProviderService {
             );
           },
         ).orElse((error) => {
-          console.log("error: ", error);
-          if ((error as any)?.src?.code == 4902) {
+          const errorSource = (error as any)?.src;
+
+          if (errorSource?.code == 4902) {
             this.logUtils.info(
               `Adding ${chainInformation.name} network to provider.`,
             );
             return this.addNetwork(chainInformation, provider);
           }
+          if (errorSource?.code == -32002) {
+            this.logUtils.info(
+              errorSource?.message ||
+                "Switching network request already pending.",
+            );
+
+            const switchNetworkPromise = this.generateSwitchNetworkPromise();
+
+            const subscription = context.onChainChanged.subscribe(
+              (newChainId) => {
+                if (
+                  this.switchNetworkPromiseResolve != null &&
+                  newChainId === chainId
+                ) {
+                  this.switchNetworkPromiseResolve(null);
+                }
+              },
+            );
+
+            return ResultUtils.race([
+              ResultAsync.fromSafePromise<void, never>(switchNetworkPromise),
+              ResultUtils.delay(20000),
+            ]).andThen(() => {
+              subscription.unsubscribe();
+
+              return this.blockchainProvider
+                .getMainProviderChainId()
+                .andThen((mainProviderChainId) => {
+                  // Check if the user did actually switched to the correct network
+                  if (mainProviderChainId !== chainId) {
+                    return errAsync(
+                      new BlockchainUnavailableError(
+                        "Unable to switch network",
+                        error.src,
+                      ),
+                    );
+                  }
+                  return okAsync(undefined);
+                });
+            });
+          }
+
           return errAsync(
             new BlockchainUnavailableError(
               "Unable to switch network",

@@ -5,7 +5,8 @@ import { ILocalStorageUtils } from "@utils/ILocalStorageUtils";
 @injectable()
 export class LocalStorageUtils implements ILocalStorageUtils {
   public getItem(key: string): string | null {
-    return window.localStorage.getItem(key);
+    const itemValue = window.localStorage.getItem(key);
+    return itemValue === "null" ? null : itemValue;
   }
 
   public setItem(key: string, value: string): void {

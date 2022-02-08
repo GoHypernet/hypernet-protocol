@@ -32,7 +32,7 @@ const GrantRoleWidget: React.FC<IGrantRoleWidget> = ({
 
   const handleFormSubmit = (values: IValues) => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .grantRegistrarRole(registrarName, values.accountAddress)
       .map(() => {
         setLoading(false);

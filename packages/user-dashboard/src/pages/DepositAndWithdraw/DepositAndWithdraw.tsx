@@ -9,22 +9,21 @@ const DepositAndWithdraw: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderFundWidget({
         selector: "fund-wrapper",
         bodyStyle: { padding: "0 25% 30px 25%" },
-
       })
       .mapErr(handleError);
 
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderWithdrawWidget({
         selector: "withdraw-wrapper",
         bodyStyle: { padding: "0 25% 30px 25%" },
       })
       .mapErr(handleError);
 
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderBalancesWidget({
         selector: "balances-wrapper",
       })

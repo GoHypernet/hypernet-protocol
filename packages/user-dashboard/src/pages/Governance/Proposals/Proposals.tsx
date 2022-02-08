@@ -12,7 +12,7 @@ const Proposals: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.governance
       .renderProposalsWidget({
         selector: "proposals-page-wrapper",
         onProposalCreationNavigate: () => {

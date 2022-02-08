@@ -30,7 +30,7 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
 
   const transferIdentity = (values: { address: string }) => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .transferRegistryEntry(
         registryName,
         tokenId,

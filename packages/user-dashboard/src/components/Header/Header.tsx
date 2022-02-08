@@ -32,7 +32,7 @@ const Header: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.governance
       .renderVotingPowerWidget({
         selector: "voting-power-widget-wrapper",
         hideLoadingSpinner: true,
@@ -41,7 +41,7 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.governance
       .renderHypertokenBalanceWidget({
         selector: "hypertoken-balance-widget-wrapper",
         hideLoadingSpinner: true,

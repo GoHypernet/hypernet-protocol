@@ -17,6 +17,18 @@ Ethereum test network that is based on Proof-of-Authority. Maintained by the Get
 - Lazy Mint Module: [`0x66643a91fD95a8B41Ae673f1861589fb454DEe55`](https://rinkeby.etherscan.io/address/0x66643a91fD95a8B41Ae673f1861589fb454DEe55)
 - Merkle Module: [`0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450`](https://rinkeby.etherscan.io/address/0xE7CE51dba04E0Bd4bE4B264Ea72782D0bF620450)
 
+## Polygon Mainnet
+
+An Ethereum L2 side chain with low transaction fees and fast finality. Set up your metamask with 
+[these](https://docs.polygon.technology/docs/develop/metamask/config-polygon-on-metamask/) instructions.
+
+- Registry Factory: [`0xd93fbc9d330c5a1d242d01c0f10115483a062d7c`](https://polygonscan.com/address/0xd93fbc9d330c5a1d242d01c0f10115483a062d7c)
+- Hypernet Profiles: [`0x91AE7a63d375CE3869436c1bFE3F7c56ce70c3ad`](https://polygonscan.com/address/0x91AE7a63d375CE3869436c1bFE3F7c56ce70c3ad)
+- Registry Modules: [`0xDC7C87A076ccB379bfB1092B44332278C8B2cbF5`](https://polygonscan.com/address/0xDC7C87A076ccB379bfB1092B44332278C8B2cbF5)
+- Batch Module: [`0x4618723e45a0155563a63f26b90bb5dcc491c115`](https://polygonscan.com/address/0x4618723e45a0155563a63f26b90bb5dcc491c115)
+- Lazy Mint Module: [`0x254ab00481f31b40e06544e7ec62df7dee3436d3`](https://polygonscan.com/address/0x254ab00481f31b40e06544e7ec62df7dee3436d3)
+- Merkle Module: [`0xf4d8675f7a557a2718413e724e10b4c02d18eecc`](https://polygonscan.com/address/0xf4d8675f7a557a2718413e724e10b4c02d18eecc)
+
 ## Mumbai 
 
 Polygon test network that connects with Ethereum's Goërli Testnet. Metamask network settings can be found 
@@ -28,6 +40,19 @@ Polygon test network that connects with Ethereum's Goërli Testnet. Metamask net
 - Batch Module: [`0x5dbAe4cB356905bdC202B943e1D6386606BAF50d`](https://mumbai.polygonscan.com/address/0x5dbAe4cB356905bdC202B943e1D6386606BAF50d)
 - Lazy Mint Module: [`0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf`](https://mumbai.polygonscan.com/address/0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf)
 - Merkle Module: [`0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3`](https://mumbai.polygonscan.com/address/0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3)
+
+## Avalanche Mainnet
+
+Avalanche is a low-cost, EVM-compatible, eco-friendly blockchain network secured by a novel sub-sampled voting consensus mechanism. Metamask settings can be found 
+[here](https://docs.avax.network/build/tutorials/smart-contracts/deploy-a-smart-contract-on-avalanche-using-remix-and-metamask/#avalanche-mainnet-settings).
+
+- Registry Factory: [`0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`](https://snowtrace.io/address/0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a)
+- Hypernet Profiles: [`0xf51499e303E6Af9895147a170C6b2Cd9e407a868`](https://snowtrace.io/address/0xf51499e303E6Af9895147a170C6b2Cd9e407a868)
+- Registry Modules: [`0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468`](https://snowtrace.io/address/0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468)
+- Batch Module: [`0x3353da0f24fCACd83832b09e9371a937195D2640`](https://snowtrace.io/address/0x3353da0f24fCACd83832b09e9371a937195D2640)
+- Lazy Mint Module: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://snowtrace.io/address/0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899)
+- Merkle Module: [`0x5dbAe4cB356905bdC202B943e1D6386606BAF50d`](https://snowtrace.io/address/0x5dbAe4cB356905bdC202B943e1D6386606BAF50d)
+- Buy Module: [`0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf`](https://snowtrace.io/address/0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf)
 
 ## Fuji
 

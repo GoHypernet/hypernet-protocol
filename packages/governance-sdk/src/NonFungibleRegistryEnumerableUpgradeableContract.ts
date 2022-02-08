@@ -11,6 +11,8 @@ import { ResultUtils } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+import { GasUtils } from "@governance-sdk/GasUtils";
 import { INonFungibleRegistryEnumerableUpgradeableContract } from "@governance-sdk/INonFungibleRegistryEnumerableUpgradeableContract";
 
 export class NonFungibleRegistryEnumerableUpgradeableContract
@@ -18,65 +20,82 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 {
   protected contract: ethers.Contract | null = null;
   constructor(
-    providerOrSigner:
+    private providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner
       | ethers.Wallet,
-    registryAddress: EthereumContractAddress,
+    private registryAddress: EthereumContractAddress,
   ) {
-    this.contract = new ethers.Contract(
-      registryAddress,
-      GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-      providerOrSigner,
-    );
+    this.reinitializeContract(registryAddress);
   }
 
   public getContractAddress(): EthereumContractAddress {
     return EthereumContractAddress(this.contract?.address || "");
   }
 
-  public getRegistrarRoleMemberCount(): ResultAsync<
-    BigNumber,
-    NonFungibleRegistryContractError
-  > {
-    return this.getRegistrarRole().andThen((registrarRole) => {
-      return ResultAsync.fromPromise(
-        this.contract?.getRoleMemberCount(
-          registrarRole, // Get the registrar role addresses numbers
-        ) as Promise<BigNumber>,
-        (e) => {
-          return new NonFungibleRegistryContractError(
-            "Unable to call getRoleMemberCount REGISTRAR_ROLE",
-            e,
-          );
-        },
-      );
-    });
+  private getRegistrarRoleMemberCount(
+    registrarRole: ethers.providers.TransactionResponse,
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<BigNumber, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
+    return ResultAsync.fromPromise(
+      this.contract?.getRoleMemberCount(
+        registrarRole, // Get the registrar role addresses numbers
+      ) as Promise<BigNumber>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+          e,
+        );
+      },
+    );
   }
 
   public getRegistrarRoleMember(
-    index?: number,
-  ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
-    return this.getRegistrarRole().andThen((registrarRole) => {
-      return ResultAsync.fromPromise(
-        this.contract?.getRoleMember(
-          registrarRole,
-          index || 0,
-        ) as Promise<EthereumAccountAddress>,
-        (e) => {
-          return new NonFungibleRegistryContractError(
-            "Unable to call getRoleMember REGISTRAR_ROLE",
-            e,
+    registryAddress: EthereumContractAddress,
+  ): ResultAsync<EthereumAccountAddress[], NonFungibleRegistryContractError> {
+    return this.getRegistrarRole(registryAddress).andThen((registrarRole) => {
+      return this.getRegistrarRoleMemberCount(
+        registrarRole,
+        registryAddress,
+      ).andThen((countBigNumber) => {
+        const count = countBigNumber.toNumber();
+        this.reinitializeContract(registryAddress);
+
+        const registrarResults: ResultAsync<
+          EthereumAccountAddress,
+          NonFungibleRegistryContractError
+        >[] = [];
+        for (let index = 0; index < count; index++) {
+          registrarResults.push(
+            ResultAsync.fromPromise(
+              this.contract?.getRoleMember(
+                registrarRole,
+                index,
+              ) as Promise<EthereumAccountAddress>,
+              (e) => {
+                return new NonFungibleRegistryContractError(
+                  `Unable to call getRoleMember REGISTRAR_ROLE for registryAddress: ${registryAddress} - registrarRole: ${registrarRole} - count: ${count} - index: ${index}`,
+                  e,
+                );
+              },
+            ),
           );
-        },
-      );
+        }
+        return ResultUtils.combine(registrarResults);
+      });
     });
   }
 
-  private getRegistrarRole(): ResultAsync<
+  private getRegistrarRole(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<
     ethers.providers.TransactionResponse,
     NonFungibleRegistryContractError
   > {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
       (e) => {
@@ -88,48 +107,71 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public getRegistrarRoleAdminMemberCount(): ResultAsync<
-    BigNumber,
-    NonFungibleRegistryContractError
-  > {
-    return this.getRegistrarRoleAdmin().andThen((registrarRoleAdmin) => {
-      return ResultAsync.fromPromise(
-        this.contract?.getRoleMemberCount(
-          registrarRoleAdmin, // Get the registrar role admin addresses numbers
-        ) as Promise<BigNumber>,
-        (e) => {
-          return new NonFungibleRegistryContractError(
-            "Unable to call getRegistrarRoleAdminMemberCount REGISTRAR_ROLE_ADMIN",
-            e,
-          );
-        },
-      );
-    });
+  private getRegistrarRoleAdminMemberCount(
+    registrarRoleAdmin: ethers.providers.TransactionResponse,
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<BigNumber, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
+    return ResultAsync.fromPromise(
+      this.contract?.getRoleMemberCount(
+        registrarRoleAdmin, // Get the registrar role admin addresses numbers
+      ) as Promise<BigNumber>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call getRegistrarRoleAdminMemberCount REGISTRAR_ROLE_ADMIN",
+          e,
+        );
+      },
+    );
   }
 
   public getRegistrarRoleAdminMember(
-    index?: number,
-  ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
-    return this.getRegistrarRoleAdmin().andThen((registrarRoleAdmin) => {
-      return ResultAsync.fromPromise(
-        this.contract?.getRoleMember(
+    registryAddress: EthereumContractAddress,
+  ): ResultAsync<EthereumAccountAddress[], NonFungibleRegistryContractError> {
+    return this.getRegistrarRoleAdmin(registryAddress).andThen(
+      (registrarRoleAdmin) => {
+        return this.getRegistrarRoleAdminMemberCount(
           registrarRoleAdmin,
-          index || 0,
-        ) as Promise<EthereumAccountAddress>,
-        (e) => {
-          return new NonFungibleRegistryContractError(
-            "Unable to call getRegistrarRoleAdminMember REGISTRAR_ROLE_ADMIN",
-            e,
-          );
-        },
-      );
-    });
+          registryAddress,
+        ).andThen((countBigNumber) => {
+          const count = countBigNumber.toNumber();
+          this.reinitializeContract(registryAddress);
+
+          const registrarResults: ResultAsync<
+            EthereumAccountAddress,
+            NonFungibleRegistryContractError
+          >[] = [];
+          for (let index = 0; index < count; index++) {
+            registrarResults.push(
+              ResultAsync.fromPromise(
+                this.contract?.getRoleMember(
+                  registrarRoleAdmin,
+                  index,
+                ) as Promise<EthereumAccountAddress>,
+                (e) => {
+                  return new NonFungibleRegistryContractError(
+                    `Unable to call getRegistrarRoleAdminMember REGISTRAR_ROLE_ADMIN for registryAddress: ${registryAddress} - registrarRoleAdmin: ${registrarRoleAdmin} - count: ${count} - index: ${index}`,
+                    e,
+                  );
+                },
+              ),
+            );
+          }
+          return ResultUtils.combine(registrarResults);
+        });
+      },
+    );
   }
 
-  private getRegistrarRoleAdmin(): ResultAsync<
+  private getRegistrarRoleAdmin(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<
     ethers.providers.TransactionResponse,
     NonFungibleRegistryContractError
   > {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.REGISTRAR_ROLE_ADMIN() as Promise<ethers.providers.TransactionResponse>,
       (e) => {
@@ -141,7 +183,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public name(): ResultAsync<string, NonFungibleRegistryContractError> {
+  public name(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<string, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.name() as Promise<string>,
       (e) => {
@@ -150,7 +196,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public symbol(): ResultAsync<string, NonFungibleRegistryContractError> {
+  public symbol(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<string, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.symbol() as Promise<string>,
       (e) => {
@@ -162,7 +212,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public totalSupply(): ResultAsync<number, NonFungibleRegistryContractError> {
+  public totalSupply(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<number, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.totalSupply() as Promise<BigNumber>,
       (e) => {
@@ -174,10 +228,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     ).map((totalSupply) => totalSupply.toNumber());
   }
 
-  public allowStorageUpdate(): ResultAsync<
-    boolean,
-    NonFungibleRegistryContractError
-  > {
+  public allowStorageUpdate(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<boolean, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.allowStorageUpdate() as Promise<boolean>,
       (e) => {
@@ -189,10 +244,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public allowLabelChange(): ResultAsync<
-    boolean,
-    NonFungibleRegistryContractError
-  > {
+  public allowLabelChange(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<boolean, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.allowLabelChange() as Promise<boolean>,
       (e) => {
@@ -204,10 +260,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public allowTransfers(): ResultAsync<
-    boolean,
-    NonFungibleRegistryContractError
-  > {
+  public allowTransfers(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<boolean, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.allowTransfers() as Promise<boolean>,
       (e) => {
@@ -219,10 +276,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public registrationToken(): ResultAsync<
-    EthereumContractAddress,
-    NonFungibleRegistryContractError
-  > {
+  public registrationToken(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<EthereumContractAddress, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.registrationToken() as Promise<EthereumContractAddress>,
       (e) => {
@@ -234,10 +292,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public registrationFee(): ResultAsync<
-    BigNumberString,
-    NonFungibleRegistryContractError
-  > {
+  public registrationFee(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<BigNumberString, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.registrationFee() as Promise<BigNumber>,
       (e) => {
@@ -251,10 +310,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     });
   }
 
-  public registrationFeeBigNumber(): ResultAsync<
-    BigNumber,
-    NonFungibleRegistryContractError
-  > {
+  public registrationFeeBigNumber(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<BigNumber, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.registrationFee() as Promise<BigNumber>,
       (e) => {
@@ -266,10 +326,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public burnAddress(): ResultAsync<
-    EthereumAccountAddress,
-    NonFungibleRegistryContractError
-  > {
+  public burnAddress(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.burnAddress() as Promise<EthereumAccountAddress>,
       (e) => {
@@ -281,7 +342,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public burnFee(): ResultAsync<number, NonFungibleRegistryContractError> {
+  public burnFee(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<number, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.burnFee() as Promise<BigNumber>,
       (e) => {
@@ -295,10 +360,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     });
   }
 
-  public primaryRegistry(): ResultAsync<
-    EthereumContractAddress,
-    NonFungibleRegistryContractError
-  > {
+  public primaryRegistry(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<EthereumContractAddress, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.primaryRegistry() as Promise<EthereumContractAddress>,
       (e) => {
@@ -310,9 +376,28 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
+  public baseURI(
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<string, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
+    return ResultAsync.fromPromise(
+      this.contract?.baseURI() as Promise<string>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call baseURI()",
+          e,
+        );
+      },
+    );
+  }
+
   public tokenByIndex(
     index: number,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.tokenByIndex(index) as Promise<BigNumber>,
       (e) => {
@@ -321,13 +406,16 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           e,
         );
       },
-    ).map((tokenId) => RegistryTokenId(tokenId.toNumber()));
+    ).map((tokenId) => RegistryTokenId(tokenId.toBigInt()));
   }
 
   public tokenOfOwnerByIndex(
     ownerAddress: EthereumAccountAddress,
     index: number,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.tokenOfOwnerByIndex(
         ownerAddress,
@@ -339,12 +427,15 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           e,
         );
       },
-    ).map((tokenId) => RegistryTokenId(tokenId.toNumber()));
+    ).map((tokenId) => RegistryTokenId(tokenId.toBigInt()));
   }
 
   public registryMap(
     label: string,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryTokenId, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.registryMap(label) as Promise<RegistryTokenId>,
       (e) => {
@@ -358,7 +449,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public reverseRegistryMap(
     tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<string, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.reverseRegistryMap(tokenId) as Promise<string>,
       (e) => {
@@ -372,7 +466,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public ownerOf(
     tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.ownerOf(tokenId) as Promise<EthereumAccountAddress>,
       (e) => {
@@ -386,7 +483,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public tokenURI(
     tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<string, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.tokenURI(tokenId) as Promise<string>,
       (e) => {
@@ -401,19 +501,30 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public updateRegistration(
     tokenId: RegistryTokenId,
     registrationData: string,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.updateRegistration(
-        BigNumber.from(tokenId),
-        registrationData,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call updateRegistration()",
-          e,
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.updateRegistration(
+            BigNumber.from(tokenId),
+            registrationData,
+            { ...gasFee, ...overrides },
+          ) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              "Unable to call updateRegistration()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
@@ -428,19 +539,29 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public updateLabel(
     tokenId: RegistryTokenId,
     label: string,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.updateLabel(
-        BigNumber.from(tokenId),
-        label,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call updateLabel()",
-          e,
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.updateLabel(BigNumber.from(tokenId), label, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              "Unable to call updateLabel()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
@@ -456,20 +577,29 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     toAddress: EthereumAccountAddress,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.transferFrom(
-        ownerAddress,
-        toAddress,
-        tokenId,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call transferFrom()",
-          e,
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.transferFrom(ownerAddress, toAddress, tokenId, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              "Unable to call transferFrom()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
@@ -483,31 +613,65 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public burn(
     tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.burn(
-        tokenId,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError("Unable to call burn()", e);
-      },
-    ).map(() => {});
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.burn(tokenId, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              "Unable to call burn()",
+              e,
+            );
+          },
+        );
+      })
+      .andThen((tx) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
+          return new NonFungibleRegistryContractError(
+            "Unable to wait for tx",
+            e,
+          );
+        });
+      })
+      .map(() => {});
   }
 
   public setRegistryParameters(
     params: string,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.setRegistryParameters(
-        params,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call setRegistryParameters()",
-          e,
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.setRegistryParameters(params, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              `Unable to call setRegistryParameters() for registryAddress: ${registryAddress} with params: ${params}`,
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
@@ -524,21 +688,32 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.registerByToken(
-        recipientAddress,
-        label,
-        data,
-        tokenId,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call registerByToken()",
-          e,
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.registerByToken(
+            recipientAddress,
+            label,
+            data,
+            tokenId,
+            { ...gasFee, ...overrides },
+          ) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              "Unable to call registerByToken()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
@@ -555,21 +730,29 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.register(
-        recipientAddress,
-        label,
-        data,
-        tokenId,
-      ) as Promise<ethers.providers.TransactionResponse>,
-      (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call register()",
-          e,
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.register(recipientAddress, label, data, tokenId, {
+            ...gasFee,
+            ...overrides,
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              "Unable to call register()",
+              e,
+            );
+          },
         );
-      },
-    )
+      })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
@@ -583,21 +766,30 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public grantRole(
     address: EthereumAccountAddress | EthereumContractAddress,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return this.getRegistrarRole()
-      .andThen((registrarRole) => {
-        return ResultAsync.fromPromise(
-          this.contract?.grantRole(
-            registrarRole,
-            address,
-          ) as Promise<ethers.providers.TransactionResponse>,
-          (e) => {
-            return new NonFungibleRegistryContractError(
-              "Unable to call grantRole",
-              e,
-            );
-          },
-        );
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return this.getRegistrarRole().andThen((registrarRole) => {
+          return ResultAsync.fromPromise(
+            this.contract?.grantRole(registrarRole, address, {
+              ...gasFee,
+              ...overrides,
+            }) as Promise<ethers.providers.TransactionResponse>,
+            (e) => {
+              return new NonFungibleRegistryContractError(
+                "Unable to call grantRole",
+                e,
+              );
+            },
+          );
+        });
       })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
@@ -612,21 +804,30 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public revokeRole(
     address: EthereumAccountAddress | EthereumContractAddress,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return this.getRegistrarRole()
-      .andThen((registrarRole) => {
-        return ResultAsync.fromPromise(
-          this.contract?.revokeRole(
-            registrarRole,
-            address,
-          ) as Promise<ethers.providers.TransactionResponse>,
-          (e) => {
-            return new NonFungibleRegistryContractError(
-              "Unable to call revokeRole",
-              e,
-            );
-          },
-        );
+    this.reinitializeContract(registryAddress);
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return this.getRegistrarRole().andThen((registrarRole) => {
+          return ResultAsync.fromPromise(
+            this.contract?.revokeRole(registrarRole, address, {
+              ...gasFee,
+              ...overrides,
+            }) as Promise<ethers.providers.TransactionResponse>,
+            (e) => {
+              return new NonFungibleRegistryContractError(
+                "Unable to call revokeRole",
+                e,
+              );
+            },
+          );
+        });
       })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
@@ -641,21 +842,34 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public renounceRole(
     address: EthereumAccountAddress | EthereumContractAddress,
+    registryAddress?: EthereumContractAddress,
+    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
-    return this.getRegistrarRole()
+    return this.getRegistrarRole(registryAddress)
       .andThen((registrarRole) => {
-        return ResultAsync.fromPromise(
-          this.contract?.renounceRole(
-            registrarRole,
-            address,
-          ) as Promise<ethers.providers.TransactionResponse>,
-          (e) => {
+        this.reinitializeContract(registryAddress);
+
+        return GasUtils.getGasFee(this.providerOrSigner)
+          .mapErr((e) => {
             return new NonFungibleRegistryContractError(
-              "Unable to call renounceRole",
+              "Error getting gas fee",
               e,
             );
-          },
-        );
+          })
+          .andThen((gasFee) => {
+            return ResultAsync.fromPromise(
+              this.contract?.renounceRole(registrarRole, address, {
+                ...gasFee,
+                ...overrides,
+              }) as Promise<ethers.providers.TransactionResponse>,
+              (e) => {
+                return new NonFungibleRegistryContractError(
+                  "Unable to call renounceRole",
+                  e,
+                );
+              },
+            );
+          });
       })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {
@@ -670,11 +884,12 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public getRegistryEntryByTokenId(
     tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
     return ResultUtils.combine([
-      this.reverseRegistryMap(tokenId),
-      this.ownerOf(tokenId),
-      this.tokenURI(tokenId),
+      this.reverseRegistryMap(tokenId, registryAddress),
+      this.ownerOf(tokenId, registryAddress),
+      this.tokenURI(tokenId, registryAddress),
     ]).andThen((vals) => {
       const [label, owner, tokenURI] = vals;
       return okAsync(new RegistryEntry(label, tokenId, owner, tokenURI, null));
@@ -683,7 +898,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public balanceOf(
     address: EthereumAccountAddress,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<number, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
     return ResultAsync.fromPromise(
       this.contract?.balanceOf(address) as Promise<BigNumber>,
       (e) => {
@@ -697,11 +915,12 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public getRegistryEntryByLabel(
     label: string,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
     return this.registryMap(label).andThen((tokenId) => {
       return ResultUtils.combine([
-        this.ownerOf(tokenId),
-        this.tokenURI(tokenId),
+        this.ownerOf(tokenId, registryAddress),
+        this.tokenURI(tokenId, registryAddress),
       ]).andThen(([owner, tokenURI]) => {
         return okAsync(
           new RegistryEntry(label, tokenId, owner, tokenURI, null),
@@ -713,34 +932,53 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public getRegistryEntryByOwnerAddress(
     ownerAddress: EthereumAccountAddress,
     index: number,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError> {
-    return this.balanceOf(ownerAddress).andThen((numberOfTokens) => {
-      if (numberOfTokens == 0 || index >= numberOfTokens) {
-        return okAsync(null);
-      }
+    return this.balanceOf(ownerAddress, registryAddress).andThen(
+      (numberOfTokens) => {
+        if (numberOfTokens == 0 || index >= numberOfTokens) {
+          return okAsync(null);
+        }
 
-      return ResultAsync.fromPromise(
-        this.contract?.tokenOfOwnerByIndex(
-          ownerAddress,
-          index,
-        ) as Promise<BigNumber>,
-        (e) => {
-          return new NonFungibleRegistryContractError(
-            "Unable to call tokenOfOwnerByIndex()",
-            e,
+        this.reinitializeContract(registryAddress);
+
+        return ResultAsync.fromPromise(
+          this.contract?.tokenOfOwnerByIndex(
+            ownerAddress,
+            index,
+          ) as Promise<BigNumber>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              "Unable to call tokenOfOwnerByIndex()",
+              e,
+            );
+          },
+        ).andThen((tokenId) => {
+          return this.getRegistryEntryByTokenId(
+            RegistryTokenId(tokenId.toBigInt()),
+            registryAddress,
           );
-        },
-      ).andThen((tokenId) => {
-        return this.getRegistryEntryByTokenId(
-          RegistryTokenId(tokenId.toNumber()),
-        );
-      });
-    });
+        });
+      },
+    );
   }
 
   public getFirstRegistryEntryByOwnerAddress(
     ownerAddress: EthereumAccountAddress,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError> {
-    return this.getRegistryEntryByOwnerAddress(ownerAddress, 0);
+    return this.getRegistryEntryByOwnerAddress(
+      ownerAddress,
+      0,
+      registryAddress,
+    );
+  }
+
+  private reinitializeContract(registryAddress?: EthereumContractAddress) {
+    this.contract = new ethers.Contract(
+      registryAddress || this.registryAddress,
+      GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+      this.providerOrSigner,
+    );
   }
 }

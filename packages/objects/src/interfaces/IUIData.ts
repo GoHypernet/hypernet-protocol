@@ -6,6 +6,5 @@ import { ChainId } from "@objects/ChainId";
 export interface IUIData {
   onSelectedStateChannelChanged: Subject<ActiveStateChannel>;
   onVotesDelegated: Subject<void>;
-  onCoreGovernanceChainChanged: Subject<ChainId>;
   getSelectedStateChannel: () => ActiveStateChannel;
 }

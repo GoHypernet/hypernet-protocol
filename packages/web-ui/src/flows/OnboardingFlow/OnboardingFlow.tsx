@@ -47,10 +47,10 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   useEffect(() => {
     setLoading(true);
     // First initialze the gateway
-    coreProxy.getAuthorizedGateways().match((gatewaysMap) => {
+    coreProxy.payments.getAuthorizedGateways().match((gatewaysMap) => {
       if (gatewaysMap.get(gatewayUrl)) {
         //check for balances
-        coreProxy.getBalances().match((_balances) => {
+        coreProxy.payments.getBalances().match((_balances) => {
           decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
@@ -66,7 +66,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       if (gatewayUrl === _gatewayUrl) {
         alert.success(`Gateway ${gatewayUrl} authorization succeeded!`);
         setLoading(false);
-        coreProxy.getBalances().match((_balances) => {
+        coreProxy.payments.getBalances().match((_balances) => {
           decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
@@ -101,7 +101,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   const handleGatewayAuthorization = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .authorizeGateway(gatewayUrl)
       .map(() => {
         setLoading(false);
@@ -150,7 +150,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   return (
     <Box className={classes.container}>
-      <Box display="flex" flexDirection="column" width={480} margin="auto" >
+      <Box display="flex" flexDirection="column" width={480} margin="auto">
         {renderScreen()}
         <ModalFooter url={launchpadUrl} />
       </Box>

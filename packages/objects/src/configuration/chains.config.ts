@@ -50,7 +50,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x610178dA211FEF7D417bC0e6FeD39F05609AD788"), // registryFactory
       EthereumContractAddress("0x6408D38D12F97C33e31D3D7C698FfDb6870e8217"), // gatewayRegistry
       EthereumContractAddress("0x29A5Df5784eC1e58a03557e825470A217534C816"), // liquidityRegistry
-      EthereumContractAddress("0x10C6FA5fb8A6C6b97126501E24b70F5e9CcF2E80"), // tokenRegistry
+      EthereumContractAddress("0xa0E2E37c8bA56cD19fe3BD70f8c9390C0e3Dd5d8"), // tokenRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
       EthereumContractAddress("0xbb55fe723929CcB45a12C03fc91EBeD5407C8a6A"), // modulesRegistry
@@ -64,7 +64,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Dev Environment Chain",
       ChainId(1369),
       true,
-      true,
+      false,
       EthereumContractAddress("0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da"), // channelFactory
       EthereumContractAddress("0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"), // transferRegistry
       EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"), // hypertoken
@@ -89,7 +89,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "Rinkeby",
       ChainId(4),
       true,
-      true,
+      false,
       EthereumContractAddress("0xC82e22B0Ef5808DE0F7E9CeB265499e29012b02c"), // channelFactory
       EthereumContractAddress("0x4b86a332d76b21933d245fEF7636B1019EE6C824"), // transferRegistry
       EthereumContractAddress("0x6D4eE7f794103672490830e15308A99eB7a89024"), // hypertoken
@@ -114,7 +114,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       "MainNet",
       ChainId(1),
       true,
-      true,
+      false,
       EthereumContractAddress("TODO"), // channelFactory
       EthereumContractAddress("TODO"), // transferRegistry
       EthereumContractAddress("TODO"), // hypertoken
@@ -131,6 +131,93 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // modulesRegistry
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("https://mainnet.hypernet.foundation")],
+    ),
+  ],
+  [
+    ChainId(137),
+    new GovernanceChainInformation(
+      "Polygon Mainnet",
+      ChainId(137),
+      true,
+      false,
+      EthereumContractAddress("TODO"), // channelFactory
+      EthereumContractAddress("TODO"), // transferRegistry
+      EthereumContractAddress("TODO"), // hypertoken
+      EthereumContractAddress("TODO"), // messageTransfer
+      EthereumContractAddress("TODO"), // insuranceTransfer
+      EthereumContractAddress("TODO"), // parameterizedTransfer
+      EthereumContractAddress("TODO"), // hypernetGovernor
+      EthereumContractAddress("0xd93fbc9d330c5a1d242d01c0f10115483a062d7c"), // registryFactory
+      EthereumContractAddress("TODO"), // gatewayRegistry
+      EthereumContractAddress("TODO"), // liquidityRegistry
+      EthereumContractAddress("TODO"), // tokenRegistry
+      EthereumContractAddress("TODO"), // chainRegistry
+      EthereumContractAddress("0x91AE7a63d375CE3869436c1bFE3F7c56ce70c3ad"), // hypernetProfileRegistry
+      EthereumContractAddress("0xDC7C87A076ccB379bfB1092B44332278C8B2cbF5"), // modulesRegistry
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
+      [
+        ProviderUrl(
+          "https://polygon-mainnet.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931",
+        ),
+      ],
+    ),
+  ],
+  [
+    ChainId(80001),
+    new GovernanceChainInformation(
+      "Polygon Mumbai",
+      ChainId(80001),
+      true,
+      false,
+      EthereumContractAddress("TODO"), // channelFactory
+      EthereumContractAddress("TODO"), // transferRegistry
+      EthereumContractAddress("TODO"), // hypertoken
+      EthereumContractAddress("TODO"), // messageTransfer
+      EthereumContractAddress("TODO"), // insuranceTransfer
+      EthereumContractAddress("TODO"), // parameterizedTransfer
+      EthereumContractAddress("TODO"), // hypernetGovernor
+      EthereumContractAddress("0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899"), // registryFactory
+      EthereumContractAddress("TODO"), // gatewayRegistry
+      EthereumContractAddress("TODO"), // liquidityRegistry
+      EthereumContractAddress("TODO"), // tokenRegistry
+      EthereumContractAddress("TODO"), // chainRegistry
+      EthereumContractAddress("0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17"), // hypernetProfileRegistry
+      EthereumContractAddress("0x9a35a007F08809DED1452C78338CCddbEaa1CEE3"), // modulesRegistry
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
+      [
+        ProviderUrl(
+          "https://polygon-mumbai.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931",
+        ),
+      ],
+    ),
+  ],
+  [
+    ChainId(43113),
+    new GovernanceChainInformation(
+      "Avalanche Fuji",
+      ChainId(43113),
+      true,
+      false,
+      EthereumContractAddress("TODO"), // channelFactory
+      EthereumContractAddress("TODO"), // transferRegistry
+      EthereumContractAddress("TODO"), // hypertoken
+      EthereumContractAddress("TODO"), // messageTransfer
+      EthereumContractAddress("TODO"), // insuranceTransfer
+      EthereumContractAddress("TODO"), // parameterizedTransfer
+      EthereumContractAddress("TODO"), // hypernetGovernor
+      EthereumContractAddress("0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"), // registryFactory
+      EthereumContractAddress("TODO"), // gatewayRegistry
+      EthereumContractAddress("TODO"), // liquidityRegistry
+      EthereumContractAddress("TODO"), // tokenRegistry
+      EthereumContractAddress("TODO"), // chainRegistry
+      EthereumContractAddress("0xf51499e303E6Af9895147a170C6b2Cd9e407a868"), // hypernetProfileRegistry
+      EthereumContractAddress("0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468"), // modulesRegistry
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
+      [
+        ProviderUrl(
+          "https://f0fa7eba-0c1b-4f3f-bc37-67ba6ae2b60a.hypernetlabs.io/http/ext/bc/C/rpc",
+        ),
+      ],
     ),
   ],
 ]);

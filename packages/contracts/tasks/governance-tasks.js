@@ -1,4 +1,4 @@
-const {  HT, HG, RF, NFR, govAddress, timelockAddress, factoryAddress, hAddress}  = require("./constants.js");
+const {  HT, HG, RF, NFR, IBEACON, govAddress, timelockAddress, factoryAddress, hAddress, gasSettings }  = require("./constants.js");
 
 task("delegateVote", "Delegate your voting power")
   .addParam("delegate", "Address of the delegate (can be self)")
@@ -7,14 +7,16 @@ task("delegateVote", "Delegate your voting power")
 
     const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, owner);
     const delegate = taskArgs.delegate;
-    const amount = taskArgs.amount;
-    const tx = await hypertoken.delegate(delegate);
-    await tx.wait();
+
+    const tx = await hypertoken.delegate(delegate, await gasSettings());
+    const txrcpt = await tx.wait();
+
     const votePowerDelegate = await hypertoken.getVotes(delegate)
     const votePowerOwner = await hypertoken.getVotes(owner.address)
 
     console.log("Voting power of Owner:", votePowerOwner.toString());
     console.log("Voting power of Delegate:", votePowerDelegate.toString());
+    console.log("Gas Used:", txrcpt.gasUsed.toString());
 });
 
 task("governanceParameters", "Prints Governance parameters.")
@@ -84,6 +86,7 @@ task("castVote", "Cast a vote for an existing proposal")
     console.log("Proposal Votes For:", proposal[5].toString());
     console.log("Proposal Votes Against:", proposal[6].toString());
     console.log("Proposal Executed:", proposal[8]);
+    console.log("Gas Used:", tx_rcpt.gasUsed.toString());
 });
 
 task("queueProposal", "queue a proposal that has been successfully passed.")
@@ -96,13 +99,15 @@ task("queueProposal", "queue a proposal that has been successfully passed.")
     const proposalID = taskArgs.id;
     const { targets, values, signatures, calldatas } =
       await govHandle.getActions(proposalID);
+
     console.log("Queueing Proposal:", proposalID);
     console.log("Target Addresses:", targets);
     console.log("Proposal Values:", values);
     console.log("Proposal Signatures:", signatures);
     console.log("Call Datas:", calldatas);
-    const tx = await govHandle["queue(uint256)"](proposalID);
+    const tx = await govHandle["queue(uint256)"](proposalID, await gasSettings());
     const tx_rcp = await tx.wait();
+    console.log("Gas Used:", tx_rcp.gasUsed.toString());
 });
 
 task("executeProposal", "Execute a proposal that has been successfully passed.")
@@ -116,10 +121,12 @@ task("executeProposal", "Execute a proposal that has been successfully passed.")
     const descriptionHash = taskArgs.hash;
     const { targets, values, signatures, calldatas } =
       await govHandle.getActions(proposalID);
+
     console.log("Executing Proposal:", proposalID);
     console.log("Target Addresses:", targets);
-    const tx = await govHandle["execute(uint256)"](proposalID);
+    const tx = await govHandle["execute(uint256)"](proposalID, await gasSettings());
     const tx_rcp = await tx.wait();
+    console.log("Gas Used:", tx_rcp.gasUsed.toString());
 });
 
 task("cancelProposal", "Cancel a proposal if it is your or if proposer is below proposal threshold.")
@@ -131,8 +138,113 @@ task("cancelProposal", "Cancel a proposal if it is your or if proposer is below 
 
     const proposalID = taskArgs.id;
     console.log("Cancelling Proposal:", proposalID);
-    const tx = await govHandle["cancel(uint256)"](proposalID);
+    const tx = await govHandle["cancel(uint256)"](proposalID, await gasSettings());
     const tx_rcp = await tx.wait();
+    console.log("Gas Used:", tx_rcp.gasUsed.toString());
+});
+
+task("proposeNewEnumeratedNFRBeacon", "Propose a new beacon implementation for all NFRs.")
+  .addParam("address", "Address of the proposed NFR Beacon.")
+  .addParam("ipfshash", "IPFS hash of the proposal description.")
+  .addParam("proposalname", "Display name of the proposal for UI.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const address = taskArgs.address;
+    const ipfshash = taskArgs.ipfshash;
+    const proposalname = taskArgs.proposalname;
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(
+        factoryAddress(),
+        RF.abi,
+        accounts[0],
+      );
+
+    const enumRegBeaconAddr = await factoryHandle.enumerableRegistryBeacon();
+    const enumRegBeaconHandle = new hre.ethers.Contract(
+        enumRegBeaconAddr,
+        IBEACON.abi,
+        accounts[0],
+      );
+
+    const proposalDescription = `${proposalname}:${ipfshash}`;
+    console.log("Proposal Description:", proposalDescription);
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = enumRegBeaconHandle.interface.encodeFunctionData(
+      "upgradeTo",
+      [address],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [enumRegBeaconAddr],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [enumRegBeaconAddr],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+      await gasSettings()
+    );
+    const tx_rcp = await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_rcp.gasUsed.toString());
+});
+
+task("proposeNewNonEnumeratedNFRBeacon", "Propose a new beacon implementation for all NFRs.")
+  .addParam("address", "Address of the proposed NFR Beacon.")
+  .addParam("ipfshash", "IPFS hash of the proposal description.")
+  .addParam("proposalname", "Display name of the proposal for UI.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const address = taskArgs.address;
+    const ipfshash = taskArgs.ipfshash;
+    const proposalname = taskArgs.proposalname;
+
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(
+        factoryAddress(),
+        RF.abi,
+        accounts[0],
+      );
+
+    const regBeaconAddr = await factoryHandle.registryBeacon();
+    const regBeaconHandle = new hre.ethers.Contract(
+        regBeaconAddr,
+        IBEACON.abi,
+        accounts[0],
+      );
+
+    const proposalDescription = `${proposalname}:${ipfshash}`;
+    console.log("Proposal Description:", proposalDescription);
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = regBeaconHandle.interface.encodeFunctionData(
+      "upgradeTo",
+      [address],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [regBeaconAddr],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [regBeaconAddr],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+      await gasSettings(),
+    );
+    const tx_rcp = await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_rcp.gasUsed.toString());
 });
 
 task("proposeDAOProfileRegistry", "Propose a registry to serve as profile accounts for the DAO.")
@@ -163,10 +275,12 @@ task("proposeDAOProfileRegistry", "Propose a registry to serve as profile accoun
       [0],
       [transferCalldata],
       proposalDescription,
+      await gasSettings(),
     );
-    const tx_reciept = await tx.wait();
+    const tx_rcp = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_rcp.gasUsed.toString());
 });
 
 task("proposeVotingPeriod", "Propose a new voting period (in blocks) for the DAO.")
@@ -197,10 +311,12 @@ task("proposeVotingPeriod", "Propose a new voting period (in blocks) for the DAO
       [0],
       [transferCalldata],
       proposalDescription,
+      await gasSettings(),
     );
     const tx_reciept = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_reciept.gasUsed.toString());
 });
 
 task("proposeVotingThreshold", "Propose a new voting threshold (in tokens) for the DAO.")
@@ -231,10 +347,12 @@ task("proposeVotingThreshold", "Propose a new voting threshold (in tokens) for t
       [0],
       [transferCalldata],
       proposalDescription,
+      await gasSettings(),
     );
     const tx_reciept = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_reciept.gasUsed.toString());
 });
 
 task("proposeModule", "Propose a new module for use with Hypernet Registries.")
@@ -270,10 +388,12 @@ task("proposeModule", "Propose a new module for use with Hypernet Registries.")
       [0],
       [transferCalldata],
       proposalDescription,
+      await gasSettings(),
     );
     const tx_reciept = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_reciept.gasUsed.toString());
 });
 
 task("proposeRegistry", "Propose a new NonFungibleRegistry via the DAO.")
@@ -311,10 +431,12 @@ task("proposeRegistry", "Propose a new NonFungibleRegistry via the DAO.")
       [0],
       [transferCalldata],
       proposalDescription,
+      await gasSettings(),
     );
     const tx_reciept = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_reciept.gasUsed.toString());
 });
 
 task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance Contract is owner.")
@@ -358,10 +480,12 @@ task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance
       [0],
       [transferCalldata],
       proposalDescription,
+      await gasSettings(),
     );
     const tx_reciept = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_reciept.gasUsed.toString());
 });
 
 task("proposeRegistryEntryStorageUpdate", "Propose an update to a NonFungibleIdentity's tokenURI.")
@@ -401,11 +525,13 @@ task("proposeRegistryEntryStorageUpdate", "Propose an update to a NonFungibleIde
       [0],
       [transferCalldata],
       proposalDescription,
+      await gasSettings(),
     );
     const tx_reciept = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description:", proposalDescription);
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_reciept.gasUsed.toString());
 });
 
 task("proposePaymentToken", "Propose a new Payment Token for the Hypernet Protocol.")
@@ -466,6 +592,7 @@ task("proposePaymentToken", "Propose a new Payment Token for the Hypernet Protoc
       [0],
       [transferCalldata],
       descriptionHash,
+      await gasSettings(),
     );
     // propose a new registry
     const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
@@ -478,6 +605,7 @@ task("proposePaymentToken", "Propose a new Payment Token for the Hypernet Protoc
     console.log("Proposal Description:", proposalDescription);
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_reciept.gasUsed.toString());
 });
 
 task("proposeRegistryParameterUpdate", "Propose updates to a registries parameters.")
@@ -553,8 +681,10 @@ task("proposeRegistryParameterUpdate", "Propose updates to a registries paramete
       [0],
       [transferCalldata],
       proposalDescription,
+      await gasSettings(),
     );
     const tx_reciept = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
     console.log("Description Hash:", descriptionHash.toString());
+    console.log("Gas Used:", tx_reciept.gasUsed.toString());
 });

@@ -19,8 +19,8 @@ const theme = new Theme(
 const client: IHypernetWebIntegration = new HypernetWebIntegration(
   "http://localhost:5020",
   ChainId(1337),
-  true,
   false,
+  true,
   theme,
   null,
 );
@@ -51,8 +51,8 @@ const getReady = () => {
     .getReady()
     .map((coreProxy) => {
       Spinner.hide();
-      client.webUIClient
-        .startOnboardingFlow({
+      client.webUIClient.payments
+      .startOnboardingFlow({
           gatewayUrl: gatewayUrl,
           finalSuccessContent:
             'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',

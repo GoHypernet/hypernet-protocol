@@ -1,7 +1,17 @@
-const {  HT, hAddress, timelockAddress}  = require("./constants.js");
+const {  HT, hAddress, timelockAddress, gasSettings }  = require("./constants.js");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
+
+task("transactionCount", "Get the nonce of the current account.")
+  .setAction(async (taskArgs) => {
+    const [owner] = await hre.ethers.getSigners();
+
+    const txCount = await owner.getTransactionCount();
+
+    console.log("Transaction count is:", txCount);
+});
+
 task("sendhypertoken", "Send hypertoken to another account")
   .addParam("recipient", "Address of the recipient")
   .addParam("amount", "Amount of Hypertoken to send")
@@ -11,6 +21,7 @@ task("sendhypertoken", "Send hypertoken to another account")
   const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, owner);
   const recipient = taskArgs.recipient;
   const amount = taskArgs.amount;
+
   const tx = await hypertoken.transfer(recipient, amount);
   const tx_rcpt = await tx.wait();
   const balR = await hypertoken.balanceOf(recipient);
@@ -21,27 +32,55 @@ task("sendhypertoken", "Send hypertoken to another account")
   console.log("Balance of recipient:", balR.toString());
 });
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("sendEth", "Send ethereum another account")
-  .addParam("recipient", "Address of the recipient")
-  .addParam("amount", "Amount of Hypertoken to send")
+task("cancelTx", "Send 0 ETH to cancel a transaction")
+  .addParam("nonce", "current transaction count of the account")
   .setAction(async (taskArgs) => {
     const [owner] = await hre.ethers.getSigners();
 
-  const recipient = taskArgs.recipient;
-  const amount = taskArgs.amount;
-  const tx = await owner.sendTransaction({
-    to: recipient,
-    value: ethers.utils.parseEther(amount)
-  });
+    const txCount = parseInt(taskArgs.nonce);
+    const feeData = await owner.getFeeData();
+    console.log(feeData);
+
+    const tx = await owner.sendTransaction({
+      from: owner.address,
+      to: owner.address,
+      value: ethers.utils.parseEther("0"),
+      nonce: txCount,
+      maxFeePerGas: feeData.maxFeePerGas,
+    });
+  
+  console.log(tx);
   await tx.wait();
-  const balR = await owner.provider.getBalance(recipient);
+
   const balS = await owner.provider.getBalance(owner.address);
+  console.log("Balance of sender:", hre.ethers.utils.formatUnits(balS.toString()));
+});
 
+task("sendEth", "Send ethereum another account")
+  .addParam("recipient", "Address of the recipient")
+  .addParam("amount", "Amount of eth to send")
+  .setAction(async (taskArgs) => {
+    const [owner] = await hre.ethers.getSigners();
 
-  console.log("Balance of sender:", balS.toString());
-  console.log("Balance of recipient:", balR.toString());
+    const recipient = taskArgs.recipient;
+    const amount = taskArgs.amount;
+    const feeData = owner.feeData();
+
+    const txData =  {
+      from: owner.address,
+      to: recipient,
+      value: ethers.utils.parseEther(amount),
+      maxFeePerGas: feeData.maxFeePerGas,
+    };
+
+    const tx = await owner.sendTransaction(txData);
+
+    await tx.wait();
+    const balR = await owner.provider.getBalance(recipient);
+    const balS = await owner.provider.getBalance(owner.address);
+
+    console.log("Balance of sender:", balS.toString());
+    console.log("Balance of recipient:", balR.toString());
 });
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -58,8 +97,6 @@ task("hypertokenBalance", "Get the hypertoken balance of an address.")
   console.log("Balance of", address, "is", hre.ethers.utils.formatEther(balance));
 });
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
 task("DAOBalance", "Get the hypertoken balance of the timelock of the DAO.")
   .setAction(async (taskArgs) => {
     const [owner] = await hre.ethers.getSigners();
@@ -70,8 +107,6 @@ task("DAOBalance", "Get the hypertoken balance of the timelock of the DAO.")
   console.log("DAO Balance is:", hre.ethers.utils.formatEther(balance));
 });
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
 
@@ -88,3 +123,11 @@ task("account", "Prints the first account", async (taskArgs, hre) => {
     console.log(account.address, "balance:", hre.ethers.utils.formatEther(accountBalance));
   });
 
+task("gasSettings", "Prints the EIP1159 standard gas settings", async (taskArgs, hre) => {
+    const [account] = await hre.ethers.getSigners();
+
+    const feeData = await account.getFeeData();
+    console.log("maxFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"), "GWei");
+    console.log("maxPriorityFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxPriorityFeePerGas, "gwei"), "GWei");
+    console.log("gasPrice:",hre.ethers.utils.formatUnits(feeData.gasPrice, "gwei"), "GWei");
+});

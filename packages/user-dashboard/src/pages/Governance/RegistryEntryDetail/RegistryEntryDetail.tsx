@@ -14,14 +14,14 @@ const RegistryEntryDetail: React.FC = () => {
     useParams<{ registryName: string; entryTokenId: string }>();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.registries
       .renderRegistryEntryDetailWidget({
         selector: "registry-entry-detail-page-wrapper",
         onRegistryEntryListNavigate: (registryName: string) => {
           history.push(`/registries/${registryName}/entries`);
         },
         registryName,
-        entryTokenId: RegistryTokenId(parseInt(entryTokenId)),
+        entryTokenId: RegistryTokenId(BigInt(entryTokenId)),
       })
       .mapErr(handleError);
   }, []);

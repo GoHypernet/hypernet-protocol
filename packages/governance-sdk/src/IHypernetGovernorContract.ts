@@ -7,6 +7,8 @@ import {
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+
 export interface IHypernetGovernorContract {
   getContractAddress(): EthereumContractAddress;
   _proposalIdTracker(): ResultAsync<number, HypernetGovernorContractError>;
@@ -29,10 +31,12 @@ export interface IHypernetGovernorContract {
     registryFactoryAddress: string,
     transferCalldata: string,
     name: string,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, HypernetGovernorContractError>;
   castVote(
     proposalId: string,
     support: EProposalVoteSupport,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, HypernetGovernorContractError>;
   getReceipt(
     proposalId: string,
@@ -45,9 +49,18 @@ export interface IHypernetGovernorContract {
     },
     HypernetGovernorContractError
   >;
-  queue(proposalId: string): ResultAsync<void, HypernetGovernorContractError>;
-  cancel(proposalId: string): ResultAsync<void, HypernetGovernorContractError>;
-  execute(proposalId: string): ResultAsync<void, HypernetGovernorContractError>;
+  queue(
+    proposalId: string,
+    overrides?: ContractOverrides,
+  ): ResultAsync<void, HypernetGovernorContractError>;
+  cancel(
+    proposalId: string,
+    overrides?: ContractOverrides,
+  ): ResultAsync<void, HypernetGovernorContractError>;
+  execute(
+    proposalId: string,
+    overrides?: ContractOverrides,
+  ): ResultAsync<void, HypernetGovernorContractError>;
   proposalThreshold(): ResultAsync<BigNumber, HypernetGovernorContractError>;
 }
 

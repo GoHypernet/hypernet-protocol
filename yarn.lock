@@ -3010,26 +3010,16 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@hypernetlabs/common-repositories@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@hypernetlabs/common-repositories/-/common-repositories-0.0.1.tgz#e68c2c27b043363ea139286b08fe3575173896b5"
-  integrity sha512-L7HDetYo1pP5yAmiRgKFFm+tHTc4sPqbxrl6rp7JWaqc2/Yb1dPpfigXgDHSDwzaugJNg/z3ugAPtQsQMjDkVg==
+"@hypernetlabs/common-repositories@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/common-repositories/-/common-repositories-0.0.4.tgz#6d9da6a590a8d81edca9ebd740f31d37f61f319b"
+  integrity sha512-RKsD6IFdrUC6ERFI82yTMSMqjqFBZJA7jE6k59i9OEvBo5JWZt1qumwmFb3lTt5PfA0Ksrf+LQ0jelz9+lydWA==
   dependencies:
-    "@hypernetlabs/contracts" "^0.0.8"
-    "@hypernetlabs/objects" "^0.3.11"
+    "@hypernetlabs/governance-sdk" "^0.0.5"
+    "@hypernetlabs/objects" "^0.3.17"
     ethers "^5.4.7"
     inversify "^5.1.1"
     neverthrow "^4.2.2"
-
-"@hypernetlabs/contracts@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@hypernetlabs/contracts/-/contracts-0.0.8.tgz#310ad76abc1c4d561ee93f0ba92309444b54a170"
-  integrity sha512-fYcJ5CcnUy2wps/GGpIXYHANZUnurULcEnWjujImBmp8O/Sw48GMVVqIDxTUC8jPe5MrUN+6gmibwd9hXjg8oA==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.0"
-    "@openzeppelin/contracts-upgradeable" "^4.3.2"
-    ethers "^5.4.7"
-    hardhat-contract-sizer "^2.0.3"
 
 "@hypernetlabs/gateway-connector@^0.0.12":
   version "0.0.12"
@@ -3038,6 +3028,17 @@
   dependencies:
     "@hypernetlabs/objects" "^0.3.10"
     ethers "^5.4.7"
+
+"@hypernetlabs/governance-sdk@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/governance-sdk/-/governance-sdk-0.0.4.tgz#d3de8ce18c8735b3b2fc3bd96df14deb73a1656c"
+  integrity sha512-gmxnERHeQ+/cBsdS8GBDziCwAWBNTQzVloq7W6JSs0Cf2vH1bLgnnFtJuMO8+tNjUqsbipCy6sEMBQWj6AWeKw==
+  dependencies:
+    "@hypernetlabs/gateway-connector" "^0.0.12"
+    "@hypernetlabs/objects" "^0.3.15"
+    "@hypernetlabs/utils" "^0.5.2"
+    ethers "^5.4.7"
+    neverthrow "^4.2.2"
 
 "@icons/material@^0.2.4":
   version "0.2.4"
@@ -4465,20 +4466,10 @@
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
 
-"@openzeppelin/contracts-upgradeable@^4.3.2":
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.3.3.tgz#dfd8ac012fd7f53ece4b31b736fcab09565a2615"
-  integrity sha512-2ELsJkBQ0xirVQnx0utl3N+/iTPF+S0r3j0IVQIMG0HgAWreFXumY+yhGcwSV5JZ/yNNAXWR4mjIYRH/FEgu2Q==
-
 "@openzeppelin/contracts@3.2.1-solc-0.7":
   version "3.2.1-solc-0.7"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-3.2.1-solc-0.7.tgz#067a60918b935d4733208edb3d7e35cd1d51026b"
   integrity sha512-VfKZE9L2HNaZVBR7l5yHbRmap3EiVw9F5iVXRRDdgfnA9vQ1yFanrs0VYmdo2VIXC+EsI9wPPYZY9Ic7/qDBdw==
-
-"@openzeppelin/contracts@^4.3.0":
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.3.3.tgz#ff6ee919fc2a1abaf72b22814bfb72ed129ec137"
-  integrity sha512-tDBopO1c98Yk7Cv/PZlHqrvtVjlgK5R4J6jxLwoO7qxK4xqOiZG+zSkIvGFpPZ0ikc3QOED3plgdqjgNTnBc7g==
 
 "@overnightjs/logger@^1.2.0":
   version "1.2.1"
@@ -15702,14 +15693,6 @@ hard-rejection@^2.1.0:
   resolved "https://registry.yarnpkg.com/hard-rejection/-/hard-rejection-2.1.0.tgz#1c6eda5c1685c63942766d79bb40ae773cecd883"
   integrity sha512-VIZB+ibDhx7ObhAe7OVtoEbuP4h/MuOTHJ+J8h/eBXotJYl0fBgR72xDFCKgIh22OJZIOVNxBMWuhAr10r8HdA==
 
-hardhat-contract-sizer@^2.0.3:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/hardhat-contract-sizer/-/hardhat-contract-sizer-2.1.1.tgz#d861bfac8dff00cca859e14c5a4843367dd0f068"
-  integrity sha512-QgfuwdUkKT7Ugn6Zja26Eie7h6OLcBfWBewaaQtYMCzyglNafQPgUIznN2C42/iFmGrlqFPbqv4B98Iev89KSQ==
-  dependencies:
-    cli-table3 "^0.6.0"
-    colors "^1.4.0"
-
 hardhat-deploy-ethers@0.3.0-beta.7:
   version "0.3.0-beta.7"
   resolved "https://registry.yarnpkg.com/hardhat-deploy-ethers/-/hardhat-deploy-ethers-0.3.0-beta.7.tgz#860d86b84ed3c4fdef64283ccf1e8d5623454d02"
@@ -21014,7 +20997,7 @@ nested-error-stacks@^2.0.0, nested-error-stacks@^2.1.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.0.tgz#0fbdcf3e13fe4994781280524f8b96b0cdff9c61"
   integrity sha512-AO81vsIO1k1sM4Zrd6Hu7regmJN1NSiAja10gc4bX3F0wd+9rQmcuHQaHVQCYIEC8iFXnE+mavh23GOt7wBgug==
 
-neverthrow@^4.1.0, neverthrow@^4.1.1, neverthrow@^4.2.2:
+neverthrow@^4.2.2:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/neverthrow/-/neverthrow-4.3.1.tgz#04c4c15e7f6fc45faad36885fa7a42b85f8f39ab"
   integrity sha512-+vxjSaiDWjAj6kR6KKW0YDuV6O4UCNWGAO8m8ITjFKPWcTmU1GVnL+J5TAUTKpPnUAHCKDxXpOHVaERid223Ww==

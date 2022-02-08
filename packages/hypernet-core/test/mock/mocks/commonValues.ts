@@ -183,8 +183,8 @@ export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   [ProviderUrl("http://localhost:8545")],
 );
 
-export const tokenRegistryId1 = RegistryTokenId(70916);
-export const tokenRegistryId2 = RegistryTokenId(103182);
+export const tokenRegistryId1 = RegistryTokenId(BigInt(70916));
+export const tokenRegistryId2 = RegistryTokenId(BigInt(103182));
 
 export const tokenRegistryEntry1 = new RegistryEntry(
   "TokenRegistryEntry1",

@@ -24,7 +24,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalCreationNavigate,
   onProposalDetailsNavigate,
 }: IProposalsWidgetParams) => {
-  const { coreProxy, viewUtils, UIData } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
@@ -40,20 +40,11 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 
   useEffect(() => {
     getProposalsCount();
-
-    const subscription = UIData.onCoreGovernanceChainChanged.subscribe(() => {
-      getProposalsCount();
-      handleProposalsRefresh();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   const getProposals = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .getProposals(page, PROPOSALS_PER_PAGE)
       .map((proposals) => {
         setProposals(proposals);
@@ -64,7 +55,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 
   const getProposalsCount = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .getProposalsCount()
       .map((proposalCount) => {
         setProposalCount(proposalCount);

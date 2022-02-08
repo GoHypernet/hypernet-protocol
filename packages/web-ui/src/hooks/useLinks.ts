@@ -142,7 +142,7 @@ export function useLinks(): IState {
   function fetchData() {
     fetchPayments();
 
-    coreProxy.getPublicIdentifier().match((publicIdentifier) => {
+    coreProxy.payments.getPublicIdentifier().match((publicIdentifier) => {
       dispatch({
         type: EActionTypes.PUBLIC_IDENTIFIER_FETCHED,
         payload: publicIdentifier,
@@ -160,7 +160,7 @@ export function useLinks(): IState {
   function fetchPayments() {
     setLoading(true);
     dispatch({ type: EActionTypes.FETCHING });
-    coreProxy.getLinks().match((links) => {
+    coreProxy.payments.getLinks().match((links) => {
       dispatch({ type: EActionTypes.FETCHED, payload: [...links] });
       setLoading(false);
     }, handleError);
@@ -168,7 +168,7 @@ export function useLinks(): IState {
 
   function acceptPayment(paymentId: PaymentId) {
     setLoading(true);
-    coreProxy.acceptOffer(paymentId).match(
+    coreProxy.payments.acceptOffer(paymentId).match(
       () => {
         fetchPayments();
         alert.success("Payment accepted successfully.");
@@ -182,7 +182,7 @@ export function useLinks(): IState {
 
   function pullFunds(paymentId: PaymentId) {
     setLoading(true);
-    coreProxy.pullFunds(paymentId, BigNumberString("1")).match(() => {
+    coreProxy.payments.pullFunds(paymentId, BigNumberString("1")).match(() => {
       fetchPayments();
       alert.success("Payment disputed successfully.");
     }, handleError);

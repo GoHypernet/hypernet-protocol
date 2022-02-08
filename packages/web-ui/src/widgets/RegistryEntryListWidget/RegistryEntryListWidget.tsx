@@ -1,5 +1,3 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import { Form, Formik } from "formik";
 import {
   ERegistrySortOrder,
   EthereumAccountAddress,
@@ -9,6 +7,8 @@ import {
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
+import { Form, Formik } from "formik";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 
 import {
   GovernanceRegistryListItem,
@@ -20,8 +20,8 @@ import {
   GovernanceSearchFilter,
   GovernanceDialogSelectField,
 } from "@web-ui/components";
-import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import CreateBatchIdentityWidget from "@web-ui/widgets/CreateBatchIdentityWidget";
+import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import { useStyles } from "@web-ui/widgets/RegistryEntryListWidget/RegistryEntryListWidget.style";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
@@ -92,7 +92,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const getRegistry = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryByName([registryName])
       .map((registryMap) => {
         const registry = registryMap.get(registryName);
@@ -106,7 +106,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const getRegistryEntries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntries(
         registryName,
         page,
@@ -144,7 +144,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const cansubmitLazyMintSignature =
       isRegistrar && registry?.modulesCapability.lazyMintEnabled;
 
-    let headerActions: IHeaderAction[] = [];
+    const headerActions: IHeaderAction[] = [];
 
     if (cansubmitLazyMintSignature) {
       headerActions.push({
@@ -185,7 +185,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByOwnerAddressClick = (value) => {
     setLoading(true);
     setSearchTerm(value);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntryListByOwnerAddress(
         registryName,
         EthereumAccountAddress(value),
@@ -201,7 +201,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByUsernameClick = (value) => {
     setLoading(true);
     setSearchTerm(value);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntryListByUsername(registryName, value)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);

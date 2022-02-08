@@ -38,20 +38,28 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   const [mainProviderChainId, setMainProviderChainId] = useState<ChainId>();
 
   const chainOptions = useMemo(() => {
-    return chainInformationList.map(({ chainId: value, name }) => ({
-      name,
-      value,
-    }));
+    return chainInformationList
+      .filter(({ isDev }) => isDev === false)
+      .map(({ chainId, name }) => ({
+        name: `${name} - ${chainId}`,
+        value: chainId,
+      }));
   }, [JSON.stringify(chainInformationList)]);
 
   useEffect(() => {
-    coreProxy
-      .waitInitialized()
-      .map(() => {
-        retrieveGovernanceChainInformation();
-        retrieveChainInformationList();
-        getMainProviderChainId();
-      })
+    coreProxy.payments
+      .waitPaymentsInitialized()
+      .map(initializeData)
+      .mapErr(handleCoreError);
+
+    coreProxy.registries
+      .waitRegistriesInitialized()
+      .map(initializeData)
+      .mapErr(handleCoreError);
+
+    coreProxy.governance
+      .waitGovernanceInitialized()
+      .map(initializeData)
       .mapErr(handleCoreError);
   }, []);
 
@@ -63,17 +71,23 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
 
     // Main provider chain id change evet
     coreProxy.onChainChanged.subscribe((chainId) => {
-      console.log("onChainChanged chainId: ", chainId);
       setMainProviderChainId(chainId);
     });
 
     // Check for governance signer unavailable events
-    coreProxy.onGovernanceSignerUnavailable.subscribe(() => {
+    coreProxy.onGovernanceSignerUnavailable.subscribe((error) => {
       alert.info(
-        "Your signer is not available for the selected chain, please switch your chain in metamask!",
+        error?.message ||
+          "Your signer is not available for the selected chain, please switch your network in metamask!",
       );
     });
   }, []);
+
+  const initializeData = () => {
+    retrieveGovernanceChainInformation();
+    retrieveChainInformationList();
+    getMainProviderChainId();
+  };
 
   const retrieveGovernanceChainInformation = () => {
     coreProxy
@@ -114,7 +128,7 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
     coreProxy
       .initializeForChainId(chainId)
       .map(() => {
-        UIData.onCoreGovernanceChainChanged.next(chainId);
+        window.location.reload();
       })
       .mapErr(handleCoreError);
   };
@@ -124,12 +138,15 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
       return;
     }
 
-    coreProxy.switchProviderNetwork(governanceChainId).mapErr(handleCoreError);
+    coreProxy
+      .switchProviderNetwork(governanceChainId)
+      .map(() => {
+        window.location.reload();
+      })
+      .mapErr(handleCoreError);
   };
 
   const showSwitchNetworkButton = useMemo(() => {
-    console.log("useMemo governanceChainId", governanceChainId);
-    console.log("useMemo mainProviderChainId", mainProviderChainId);
     if (governanceChainId == null || mainProviderChainId == null) {
       return false;
     }
@@ -233,7 +250,7 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
           className={classes.switchChainButton}
           onClick={handleSwitchMetamaskNetwork}
         >
-          <Typography>Switch Metamask Network</Typography>
+          <Typography>Switch Network</Typography>
         </Box>
       )}
     </Box>

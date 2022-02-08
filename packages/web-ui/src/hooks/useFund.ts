@@ -159,8 +159,8 @@ export function useFund(): IReducerStateReducer {
       try {
         if (cancelRequest) return;
         // get data from coreProxy
-        coreProxy
-          ?.getTokenInformation()
+        coreProxy?.payments
+          .getTokenInformation()
           .map((tokenInformation: TokenInformation[]) => {
             const tokenInformationList = tokenInformation.filter(
               (tokenInfo) => tokenInfo.chainId == defaultGovernanceChainId,
@@ -185,7 +185,7 @@ export function useFund(): IReducerStateReducer {
           },
         );
 
-        coreProxy.getActiveStateChannels().match(
+        coreProxy.payments.getActiveStateChannels().match(
           (stateChannels) => {
             dispatch({
               type: EActionTypes.FETCHED_STATE_CHANNELS,
@@ -242,7 +242,7 @@ export function useFund(): IReducerStateReducer {
     stateChannelAddress: EthereumContractAddress,
   ) => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .depositFunds(
         stateChannelAddress,
         tokenAddress,
@@ -272,7 +272,7 @@ export function useFund(): IReducerStateReducer {
     stateChannelAddress: EthereumContractAddress,
   ) => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .withdrawFunds(
         stateChannelAddress,
         tokenAddress,
@@ -293,7 +293,7 @@ export function useFund(): IReducerStateReducer {
 
   const mintTokens = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .mintTestToken(
         BigNumberString(
           ethers.utils.parseEther(state.amount || "1").toString(),

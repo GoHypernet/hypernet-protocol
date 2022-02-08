@@ -172,7 +172,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
 
   const getTokenInformation = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .getTokenInformation()
       .map((tokenInformationList) => {
         setTokenInformationList(tokenInformationList);
@@ -183,7 +183,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
 
   const repairPayment = (paymentId: PaymentId) => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .repairPayments([paymentId])
       .map(() => {
         setLoading(false);

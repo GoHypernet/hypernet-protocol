@@ -25,7 +25,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryDetailNavigate,
   onLazyMintRequestsNavigate,
 }: IRegistryListWidgetParams) => {
-  const { coreProxy, UIData } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [registries, setRegistries] = useState<Registry[]>([]);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
@@ -42,15 +42,6 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   useEffect(() => {
     getNumberOfRegistries();
-
-    const subscription = UIData.onCoreGovernanceChainChanged.subscribe(() => {
-      getNumberOfRegistries();
-      handleRegistryListRefresh();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   useEffect(() => {
@@ -73,7 +64,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   const getNumberOfRegistries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getNumberOfRegistries()
       .map((numberOfRegistries) => {
         setRegistriesCount(numberOfRegistries);
@@ -87,7 +78,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   const getRegistries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistries(
         page,
         REGISTIRES_PER_PAGE,
@@ -192,8 +183,8 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.numberOfEntries.toString(),
             },
             {
-              fieldTitle: "Registrar Addresses",
-              fieldValue: registry.registrarAddresses.join("-"),
+              fieldTitle: "Registration Fee",
+              fieldValue: registry.registrationFee,
             },
           ]}
           actionButtonList={

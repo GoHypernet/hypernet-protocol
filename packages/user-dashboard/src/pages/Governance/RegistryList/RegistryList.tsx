@@ -11,7 +11,7 @@ const RegistryList: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.registries
       .renderRegistryListWidget({
         selector: "registry-list-page-wrapper",
         onRegistryEntryListNavigate: (registryName: string) => {

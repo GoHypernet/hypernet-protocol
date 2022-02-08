@@ -49,7 +49,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       setAccountAddress(accounts[0]);
 
       // delegate votes, createProposal and then list all proposals
-      coreProxy
+      coreProxy.governance
         .getProposalDetails(proposalId)
         .map((proposal) => {
           setProposal(proposal);
@@ -62,7 +62,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           const descriptionHash = viewUtils.getProposalDescriptionHash(
             proposal.description,
           );
-          coreProxy
+          coreProxy.governance
             .getProposalDescription(IpfsCID(descriptionHash))
             .map((description) => {
               setProposalDescriptionFromIPFS(description);
@@ -89,7 +89,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const getProposalVotesReceipt = (account: EthereumAccountAddress) => {
     setLoading(true);
 
-    coreProxy
+    coreProxy.governance
       .getProposalVotesReceipt(proposalId, account)
       .map((proposalVoteReceipt) => {
         if (proposalVoteReceipt.hasVoted) {
@@ -123,7 +123,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const queueProposal = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .queueProposal(proposalId)
       .map((proposal) => {
         setProposal(proposal);
@@ -134,7 +134,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const cancelProposal = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .cancelProposal(proposalId)
       .map((proposal) => {
         setProposal(proposal);
@@ -145,7 +145,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const executeProposal = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .executeProposal(proposalId)
       .map((proposal) => {
         setProposal(proposal);
@@ -156,7 +156,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const castVote = (voteSupport: EProposalVoteSupport) => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .castVote(proposalId, voteSupport)
       .map((proposal) => {
         setProposal(proposal);

@@ -10,6 +10,7 @@ import {
   InitializeStatus,
   chainConfig,
   GovernanceChainInformation,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -98,8 +99,9 @@ export class ContextProviderMock implements IContextProvider {
   public onGovernanceChainChangedActivations: ChainId[] = [];
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceAccountChangedActivations: EthereumAccountAddress[] = [];
-  public onGovernanceSignerUnavailable: Subject<void>;
-  public onGovernanceSignerUnavailableActivationCount = 0;
+  public onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>;
+  public onGovernanceSignerUnavailableActivations: GovernanceSignerUnavailableError[] =
+    [];
 
   constructor(
     context: HypernetContext | null = null,
@@ -282,8 +284,8 @@ export class ContextProviderMock implements IContextProvider {
     });
 
     this.onGovernanceSignerUnavailable = new Subject();
-    this.onGovernanceSignerUnavailable.subscribe(() => {
-      this.onGovernanceSignerUnavailableActivationCount++;
+    this.onGovernanceSignerUnavailable.subscribe((val) => {
+      this.onGovernanceSignerUnavailableActivations.push(val);
     });
 
     if (context != null) {
@@ -554,7 +556,7 @@ export class ContextProviderMock implements IContextProvider {
       counts.onGovernanceAccountChanged,
     );
 
-    expect(this.onGovernanceSignerUnavailableActivationCount).toBe(
+    expect(this.onGovernanceSignerUnavailableActivations.length).toBe(
       counts.onGovernanceSignerUnavailable,
     );
   }
