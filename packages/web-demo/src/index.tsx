@@ -19,7 +19,7 @@ const theme = new Theme(
 const client: IHypernetWebIntegration = new HypernetWebIntegration(
   "http://localhost:5020",
   ChainId(1337),
-  false,
+  true,
   true,
   theme,
   null,
@@ -35,11 +35,9 @@ style.innerHTML = `body {
   background-color: #F9F9F9;
 }`;
 
-
 // Get the first script tag
 const ref = document.querySelector("script");
 ref?.parentNode?.insertBefore(style, ref);
-
 
 Spinner();
 // Spinner.show();
@@ -52,16 +50,15 @@ const getReady = () => {
     .map((coreProxy) => {
       Spinner.hide();
       client.webUIClient.payments
-      .startOnboardingFlow({
+        .startOnboardingFlow({
           gatewayUrl: gatewayUrl,
-          finalSuccessContent:
-            'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',
           showInModal: true,
-          excludeCardWrapper: true,
+          renderGatewayApprovalContent: () =>
+            "You are good to go now and purchase credits.",
           successButtonProps: {
-            label: `Sucess baby`,
+            label: "Success",
             action: () => {
-              console.log(`done`);
+              console.log("Success action.");
             },
           },
         })
@@ -69,15 +66,15 @@ const getReady = () => {
           Spinner.hide();
         })
         .mapErr((err) => {
-          console.log("startOnboardingFlow errerrerr", err);
+          console.log("startOnboardingFlow error", err);
         });
     })
     .mapErr((err) => {
-      console.log("getReady errerrerr", err);
+      console.log("getReady error", err);
     });
 };
 
 const button = document.createElement("button");
 button.innerHTML = "init";
-button.onclick=getReady
+button.onclick = getReady;
 document.body.appendChild(button);

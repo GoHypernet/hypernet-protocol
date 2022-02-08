@@ -523,9 +523,8 @@ export default class HypernetWebUI implements IHypernetWebUI {
               gatewayUrl={config.gatewayUrl}
               gatewayName={config.gatewayName}
               gatewayLogoUrl={config.gatewayLogoUrl}
-              finalSuccessContent={config.finalSuccessContent}
               closeCallback={config.closeCallback}
-              excludeCardWrapper={config.excludeCardWrapper}
+              excludeCardWrapper={true}
               launchpadUrl={config.launchpadUrl}
               renderGatewayApprovalContent={
                 config?.renderGatewayApprovalContent

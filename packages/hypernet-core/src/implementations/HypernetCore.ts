@@ -907,7 +907,6 @@ export class HypernetCore implements IHypernetCore {
     return this.blockchainProvider.rejectProviderIdRequest();
   }
 
-
   public retrieveChainInformationList(): ResultAsync<
     Map<ChainId, ChainInformation>,
     never
