@@ -128,9 +128,6 @@ export const insuranceTransferAddress = EthereumContractAddress(
 export const parameterizedTransferAddress = EthereumContractAddress(
   "parameterizedTransferAddress",
 );
-export const gatewayRegistryAddress = EthereumContractAddress(
-  "gatewayRegistryAddress",
-);
 export const liquidityRegistryAddress = EthereumContractAddress(
   "liquidityRegistryAddress",
 );
@@ -184,7 +181,6 @@ export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   parameterizedTransferAddress,
   hypernetGovernorAddress,
   registryFactoryAddress,
-  gatewayRegistryAddress,
   liquidityRegistryAddress,
   tokenRegistryAddress,
   chainRegistryAddress,

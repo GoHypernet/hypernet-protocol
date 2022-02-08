@@ -1288,6 +1288,7 @@ export class HypernetCore implements IHypernetCore {
       | InvalidPaymentIdError
       | PaymentCreationError
       | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
     > => {
       return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
         this.logUtils.error(e);
@@ -1365,6 +1366,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayActivationError
       | VectorError
       | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .authorizeGateway(gatewayUrl)
@@ -1388,6 +1390,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayValidationError
       | NonFungibleRegistryContractError
       | InactiveGatewayError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .deauthorizeGateway(gatewayUrl)
@@ -1423,6 +1426,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayValidationError
       | NonFungibleRegistryContractError
       | InactiveGatewayError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .getGatewayTokenInfo(gatewayUrls)
@@ -1445,7 +1449,7 @@ export class HypernetCore implements IHypernetCore {
 
     getGatewayEntryList: (): ResultAsync<
       Map<GatewayUrl, GatewayRegistrationInfo>,
-      NonFungibleRegistryContractError
+      NonFungibleRegistryContractError | RegistryFactoryContractError
     > => {
       return this.gatewayRegistrationRepository.getGatewayEntryList();
     },
@@ -1495,6 +1499,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayValidationError
       | NonFungibleRegistryContractError
       | InactiveGatewayError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .closeGatewayIFrame(gatewayUrl)
@@ -1519,6 +1524,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayValidationError
       | NonFungibleRegistryContractError
       | InactiveGatewayError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .displayGatewayIFrame(gatewayUrl)

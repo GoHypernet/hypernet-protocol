@@ -683,7 +683,9 @@ export default class HypernetIFrameProxy
 
     getGatewayEntryList: (): ResultAsync<
       Map<GatewayUrl, GatewayRegistrationInfo>,
-      NonFungibleRegistryContractError | ProxyError
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | ProxyError
     > => {
       return this._createCall("getGatewayEntryList", null);
     },

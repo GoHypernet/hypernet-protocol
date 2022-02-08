@@ -3,6 +3,7 @@ import {
   GatewayRegistrationInfo,
   GatewayUrl,
   NonFungibleRegistryContractError,
+  RegistryFactoryContractError,
   PersistenceError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
@@ -16,7 +17,7 @@ export interface IGatewayRegistrationRepository {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   >;
 
   /**
@@ -24,7 +25,7 @@ export interface IGatewayRegistrationRepository {
    */
   getGatewayEntryList(): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   >;
 
   getFilteredGatewayRegistrationInfo(
