@@ -78,7 +78,6 @@ import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
-import { lightTheme, darkTheme } from "@web-ui/theme";
 import CreateProposalWidget from "@web-ui/widgets/CreateProposalWidget";
 import ProposalDetailWidget from "@web-ui/widgets/ProposalDetailWidget";
 import RegistryListWidget from "@web-ui/widgets/RegistryListWidget";
@@ -91,6 +90,11 @@ import ConnectedAccountWidget from "@web-ui/widgets/ConnectedAccountWidget";
 import WalletConnectWidget from "@web-ui/widgets/WalletConnectWidget";
 import RegistryLazyMintingRequestsWidget from "@web-ui/widgets/RegistryLazyMintingRequestsWidget";
 import ChainSelectorWidget from "@web-ui/widgets/ChainSelectorWidget";
+import {
+  lightTheme,
+  darkTheme,
+  injectCustomPaletteToTheme,
+} from "@web-ui/theme";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -159,6 +163,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     modalStyle?: React.CSSProperties,
     hasTheme?: boolean,
     hideLoadingSpinner?: boolean,
+    useDarkTheme?: boolean,
   ) {
     if (this.coreInstance == null) {
       throw new Error("core instance is required");
@@ -182,10 +187,18 @@ export default class HypernetWebUI implements IHypernetWebUI {
       seed: widgetUniqueIdentifier,
     });
 
-    const lightPalette = this.theme?.light || undefined;
-    const darkPalette = this.theme?.dark || undefined;
+    const themeObjectArr = [
+      { palette: this.theme?.dark, theme: darkTheme },
+      { palette: this.theme?.light, theme: lightTheme },
+    ];
+    const themeIndex = Number(useDarkTheme);
 
-    const theme = true ? lightTheme(lightPalette) : darkTheme(darkPalette);
+    const selectedTheme = themeObjectArr[themeIndex].theme;
+    const customPalette = themeObjectArr[themeIndex].palette;
+
+    const theme = customPalette
+      ? injectCustomPaletteToTheme(selectedTheme, customPalette)
+      : selectedTheme;
 
     return (
       <StoreProvider

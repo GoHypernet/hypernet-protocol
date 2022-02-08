@@ -1,6 +1,7 @@
 import { Palette } from "@hypernetlabs/objects";
 import {
   createTheme,
+  Theme,
   ThemeProvider as MuiThemeProvider,
 } from "@material-ui/core";
 
@@ -273,56 +274,64 @@ const typography = {
   },
 };
 
-export const lightTheme = (palette?: Palette) => {
-  return createTheme({
-    typography,
-    palette: {
-      primary: {
-        main: colors.PURPLE400,
-        light: colors.PURPLE300,
-        dark: colors.PURPLE700,
-        contrastText: colors.WHITE,
-        ...palette?.primary,
-      },
-      text: {
-        primary: colors.GRAY700,
-        secondary: colors.GRAY500,
-        ...palette?.text,
-      },
-      divider: palette?.divider || colors.GRAY200,
+export const lightTheme = createTheme({
+  typography,
+  palette: {
+    primary: {
+      main: colors.PURPLE400,
+      light: colors.PURPLE300,
+      dark: colors.PURPLE700,
+      contrastText: colors.WHITE,
     },
-    overrides: {
-      // @ts-ignore
-      MuiTypography,
-      MuiButton,
-      MuiTextField,
-      MuiLinearProgress,
-      MuiAutocomplete,
-      MuiChip,
-      MuiCheckbox,
+    text: {
+      primary: colors.GRAY700,
+      secondary: colors.GRAY500,
     },
-    props: {
-      MuiButtonBase,
-    },
-  });
-};
+    divider: colors.GRAY200,
+  },
+  overrides: {
+    // @ts-ignore
+    MuiTypography,
+    MuiButton,
+    MuiTextField,
+    MuiLinearProgress,
+    MuiAutocomplete,
+    MuiChip,
+    MuiCheckbox,
+  },
+  props: {
+    MuiButtonBase,
+  },
+});
 
-export const darkTheme = (palette?: Palette) => {
-  return createTheme({
-    typography,
-    palette: {
-      type: "dark",
-      ...palette,
-    },
-    overrides: {
-      // @ts-ignore
-      MuiTypography,
-      MuiButton,
-    },
-    props: {
-      MuiButtonBase,
-    },
-  });
+export const darkTheme = createTheme({
+  typography,
+  palette: {
+    type: "dark",
+  },
+  overrides: {
+    // @ts-ignore
+    MuiTypography,
+    MuiButton,
+  },
+  props: {
+    MuiButtonBase,
+  },
+});
+
+export const injectCustomPaletteToTheme = (
+  theme: Theme,
+  customPalette: Palette,
+) => {
+  const { palette } = theme;
+  
+  const injectedPalette = {
+    primary: { ...palette.primary, ...customPalette?.primary },
+    text: { ...palette.text, ...customPalette?.text },
+    divider: customPalette?.divider || palette.divider,
+  };
+
+  return createTheme({ ...theme, palette: injectedPalette });
 };
 
 export const ThemeProvider = MuiThemeProvider;
