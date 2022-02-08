@@ -166,7 +166,6 @@ export default class HypernetWebUI implements IHypernetWebUI {
     modalStyle?: React.CSSProperties,
     hasTheme?: boolean,
     hideLoadingSpinner?: boolean,
-    useDarkTheme?: boolean,
   ) {
     if (this.coreInstance == null) {
       throw new Error("core instance is required");
@@ -190,18 +189,11 @@ export default class HypernetWebUI implements IHypernetWebUI {
       seed: widgetUniqueIdentifier,
     });
 
-    const themeObjectArr = [
-      { palette: this.theme?.dark, theme: darkTheme },
-      { palette: this.theme?.light, theme: lightTheme },
-    ];
-    const themeIndex = Number(useDarkTheme);
-
-    const selectedTheme = themeObjectArr[themeIndex].theme;
-    const customPalette = themeObjectArr[themeIndex].palette;
-
-    const theme = customPalette
-      ? injectCustomPaletteToTheme(selectedTheme, customPalette)
-      : selectedTheme;
+    // TODO: Add theme switching.
+    const customTheme = this.theme?.light;
+    const theme = customTheme
+      ? injectCustomPaletteToTheme(lightTheme, customTheme)
+      : lightTheme;
 
     return (
       <StoreProvider
@@ -280,6 +272,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     config: IRenderParams,
   ): Result<void, RenderError> {
     const renderReact = () => {
+      console.log("renderWalletConnectWidget");
       return ReactDOM.render(
         this._bootstrapComponent(
           <WalletConnectWidget />,
