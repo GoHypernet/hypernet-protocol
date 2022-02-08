@@ -1022,7 +1022,10 @@ export class HypernetCore implements IHypernetCore {
 
   private initializeTokenInformation(
     context: HypernetContext,
-  ): ResultAsync<void, never> {
+  ): ResultAsync<
+    void,
+    NonFungibleRegistryContractError | RegistryFactoryContractError
+  > {
     const paymentTokensName =
       context.governanceChainInformation.registryNames.paymentTokens;
     if (paymentTokensName == null) {
@@ -1038,10 +1041,6 @@ export class HypernetCore implements IHypernetCore {
             return this.tokenInformationRepository.initialize(
               tokenRegistryAddress,
             );
-          })
-          .orElse((e) => {
-            this.logUtils.error(e);
-            return okAsync(undefined);
           });
       });
   }
@@ -1807,8 +1806,6 @@ export class HypernetCore implements IHypernetCore {
         // It's important to retrieve the context after initializing blockchain provider
         return this.contextProvider.getContext().andThen((context) => {
           return ResultUtils.combine([
-            this.configProvider.getConfig(),
-            this.blockchainProvider.getProvider(),
             this.registryRepository.initializeReadOnly(),
             this.registryRepository.initializeForWrite().orElse((e) => {
               context.onGovernanceSignerUnavailable.next(
@@ -1820,8 +1817,11 @@ export class HypernetCore implements IHypernetCore {
               return okAsync(undefined);
             }),
             this.governance.initializeGovernance(chainId),
-            this.initializeTokenInformation(context),
-          ]).andThen(([config, provider]) => {
+            this.initializeTokenInformation(context).orElse((e) => {
+              this.logUtils.error(e);
+              return okAsync(undefined);
+            }),
+          ]).andThen(() => {
             const governanceChainId =
               chainId || context.governanceChainInformation.chainId;
             const registriesInitializePromiseResolve =
