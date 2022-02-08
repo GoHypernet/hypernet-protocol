@@ -3,6 +3,7 @@ import {
   EthereumContractAddress,
   GovernanceAbis,
   RegistryFactoryContractError,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
@@ -69,7 +70,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   }
 
   public nameToAddress(
-    registryName: string,
+    registryName: RegistryName,
   ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
       this.contract.nameToAddress(

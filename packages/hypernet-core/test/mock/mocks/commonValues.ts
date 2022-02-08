@@ -28,6 +28,8 @@ import {
   TransferId,
   UnixTimestamp,
   RegistryModulesNames,
+  RegistryNames,
+  RegistryName,
 } from "@hypernetlabs/objects";
 
 export const account = EthereumAccountAddress("account-address-1");
@@ -160,6 +162,15 @@ const registryModulesNames = new RegistryModulesNames(
   "Merkle Drop",
 );
 
+const registryNames = new RegistryNames(
+  RegistryName("Hypernet Profiles"),
+  RegistryName("Gateways"),
+  RegistryName("Liquidity Providers"),
+  RegistryName("Payment Tokens"),
+  RegistryName("Registry Modules"),
+  RegistryName("Hypernet.ID"),
+);
+
 export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   "Mock Chain",
   chainId,
@@ -179,6 +190,7 @@ export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   chainRegistryAddress,
   hypernetProfileRegistryAddress,
   modulesRegistryAddress,
+  registryNames,
   registryModulesNames,
   [ProviderUrl("http://localhost:8545")],
 );

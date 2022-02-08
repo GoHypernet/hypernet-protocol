@@ -62,6 +62,7 @@ import {
   IHypernetPayments,
   IHypernetGovernance,
   IHypernetRegistries,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -944,9 +945,9 @@ export default class HypernetIFrameProxy
     },
 
     getRegistryByName: (
-      registryNames: string[],
+      registryNames: RegistryName[],
     ): ResultAsync<
-      Map<string, Registry>,
+      Map<RegistryName, Registry>,
       | RegistryFactoryContractError
       | NonFungibleRegistryContractError
       | ProxyError
@@ -966,9 +967,9 @@ export default class HypernetIFrameProxy
     },
 
     getRegistryEntriesTotalCount: (
-      registryNames: string[],
+      registryNames: RegistryName[],
     ): ResultAsync<
-      Map<string, number>,
+      Map<RegistryName, number>,
       | RegistryFactoryContractError
       | NonFungibleRegistryContractError
       | ProxyError
@@ -977,7 +978,7 @@ export default class HypernetIFrameProxy
     },
 
     getRegistryEntries: (
-      registryName: string,
+      registryName: RegistryName,
       pageNumber: number,
       pageSize: number,
       sortOrder: ERegistrySortOrder,
@@ -996,7 +997,7 @@ export default class HypernetIFrameProxy
     },
 
     getRegistryEntryDetailByTokenId: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
     ): ResultAsync<
       RegistryEntry,
@@ -1011,7 +1012,7 @@ export default class HypernetIFrameProxy
     },
 
     updateRegistryEntryTokenURI: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
       registrationData: string,
     ): ResultAsync<
@@ -1030,7 +1031,7 @@ export default class HypernetIFrameProxy
     },
 
     updateRegistryEntryLabel: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
       label: string,
     ): ResultAsync<
@@ -1071,7 +1072,7 @@ export default class HypernetIFrameProxy
     },
 
     createRegistryEntry: (
-      registryName: string,
+      registryName: RegistryName,
       newRegistryEntry: RegistryEntry,
     ): ResultAsync<
       void,
@@ -1088,7 +1089,7 @@ export default class HypernetIFrameProxy
     },
 
     transferRegistryEntry: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
       transferToAddress: EthereumAccountAddress,
     ): ResultAsync<
@@ -1107,7 +1108,7 @@ export default class HypernetIFrameProxy
     },
 
     burnRegistryEntry: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
     ): ResultAsync<
       void,
@@ -1144,7 +1145,7 @@ export default class HypernetIFrameProxy
     },
 
     grantRegistrarRole: (
-      registryName: string,
+      registryName: RegistryName,
       address: EthereumAccountAddress | EthereumContractAddress,
     ): ResultAsync<
       void,
@@ -1161,7 +1162,7 @@ export default class HypernetIFrameProxy
     },
 
     revokeRegistrarRole: (
-      registryName: string,
+      registryName: RegistryName,
       address: EthereumAccountAddress,
     ): ResultAsync<
       void,
@@ -1178,7 +1179,7 @@ export default class HypernetIFrameProxy
     },
 
     renounceRegistrarRole: (
-      registryName: string,
+      registryName: RegistryName,
       address: EthereumAccountAddress,
     ): ResultAsync<
       void,
@@ -1195,7 +1196,7 @@ export default class HypernetIFrameProxy
     },
 
     getRegistryEntryByOwnerAddress: (
-      registryName: string,
+      registryName: RegistryName,
       ownerAddress: EthereumAccountAddress,
       index: number,
     ): ResultAsync<
@@ -1213,13 +1214,15 @@ export default class HypernetIFrameProxy
 
     getRegistryModules: (): ResultAsync<
       RegistryModule[],
-      NonFungibleRegistryContractError | ProxyError
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | ProxyError
     > => {
       return this._createCall("getRegistryModules", null);
     },
 
     createBatchRegistryEntry: (
-      registryName: string,
+      registryName: RegistryName,
       newRegistryEntries: RegistryEntry[],
     ): ResultAsync<
       void,
@@ -1304,6 +1307,7 @@ export default class HypernetIFrameProxy
       | BlockchainUnavailableError
       | LazyMintModuleContractError
       | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
       | ProxyError
     > => {
       return this._createCall("executeLazyMint", lazyMintingSignature);

@@ -2,6 +2,7 @@ import {
   EthereumAccountAddress,
   RegistryEntry,
   RegistryTokenId,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -52,7 +53,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
 
     coreProxy.registries
       .createRegistryEntry(
-        registryName,
+        RegistryName(registryName),
         new RegistryEntry(
           label,
           RegistryTokenId(BigInt(tokenId)),
@@ -77,7 +78,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
 
     coreProxy.registries
       .submitLazyMintSignature(
-        registryName,
+        RegistryName(registryName),
         RegistryTokenId(BigInt(tokenId)),
         EthereumAccountAddress(recipientAddress),
         tokenUri,

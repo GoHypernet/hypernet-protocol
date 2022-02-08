@@ -1,4 +1,8 @@
-import { EthereumAccountAddress, RegistryTokenId } from "@hypernetlabs/objects";
+import {
+  EthereumAccountAddress,
+  RegistryTokenId,
+  RegistryName,
+} from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
@@ -14,7 +18,7 @@ import { useStyles } from "@web-ui/widgets/TransferIdentityWidget/TransferIdenti
 interface ITransferIdentityWidget {
   onCloseCallback: () => void;
   onSuccessCallback: () => void;
-  registryName: string;
+  registryName: RegistryName;
   tokenId: RegistryTokenId;
 }
 

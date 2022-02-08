@@ -428,7 +428,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 getRegistryDetails();
                 setGrantRoleModalOpen(false);
               }}
-              registrarName={registryName}
+              registryName={registryName}
             />
           )}
           {revokeRoleModalOpen && (
@@ -437,7 +437,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 getRegistryDetails();
                 setRevokeRoleModalOpen(false);
               }}
-              registrarName={registryName}
+              registryName={registryName}
             />
           )}
           {renounceRoleModalOpen && (
@@ -446,7 +446,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 getRegistryDetails();
                 setRenounceRoleModalOpen(false);
               }}
-              registrarName={registryName}
+              registryName={registryName}
             />
           )}
         </>

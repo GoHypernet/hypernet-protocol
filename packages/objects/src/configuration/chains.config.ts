@@ -6,6 +6,8 @@ import {
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { ProviderUrl } from "@objects/ProviderUrl";
 import { RegistryModulesNames } from "@objects/RegistryModulesNames";
+import { RegistryNames } from "@objects/RegistryNames";
+import { RegistryName } from "@objects/RegistryName";
 
 export const chainConfig = new Map<ChainId, ChainInformation>([
   [
@@ -29,6 +31,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // modulesRegistry
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("http://localhost:8545")],
     ),
@@ -54,6 +64,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
       EthereumContractAddress("0xbb55fe723929CcB45a12C03fc91EBeD5407C8a6A"), // modulesRegistry
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("http://localhost:8545")],
     ),
@@ -79,6 +97,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("0xCdFa906b330485021fD37d5E3Ceab4F11D5101c6"), // chainRegistry
       EthereumContractAddress("0x48005e7dDF065DE036Bf0D693DDb0011aE7a041c"), // hypernetProfileRegistry
       EthereumContractAddress("0x973d5Ab6084B2c6AB30762d7137204287e7f0276"), // modulesRegistry
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("https://eth-provider-dev.hypernetlabs.io")],
     ),
@@ -104,6 +130,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // chainRegistry
       EthereumContractAddress("0x6c355Ad248477eeDcadf1d6724154C6152C0edca"), // hypernetProfileRegistry
       EthereumContractAddress("0xfEb1CA801C76Fd1b81b851C7E6d2544ce9DAdCA8"), // modulesRegistry
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("https://rinkeby.hypernet.foundation")],
     ),
@@ -129,6 +163,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // chainRegistry
       EthereumContractAddress("T0D0"), // hypernetProfileRegistry
       EthereumContractAddress("TODO"), // modulesRegistry
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [ProviderUrl("https://mainnet.hypernet.foundation")],
     ),
@@ -154,6 +196,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // chainRegistry
       EthereumContractAddress("0x91AE7a63d375CE3869436c1bFE3F7c56ce70c3ad"), // hypernetProfileRegistry
       EthereumContractAddress("0xDC7C87A076ccB379bfB1092B44332278C8B2cbF5"), // modulesRegistry
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [
         ProviderUrl(
@@ -183,6 +233,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // chainRegistry
       EthereumContractAddress("0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17"), // hypernetProfileRegistry
       EthereumContractAddress("0x9a35a007F08809DED1452C78338CCddbEaa1CEE3"), // modulesRegistry
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [
         ProviderUrl(
@@ -212,6 +270,14 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // chainRegistry
       EthereumContractAddress("0xf51499e303E6Af9895147a170C6b2Cd9e407a868"), // hypernetProfileRegistry
       EthereumContractAddress("0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468"), // modulesRegistry
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
       [
         ProviderUrl(
