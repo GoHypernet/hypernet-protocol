@@ -1250,7 +1250,7 @@ export class RegistryRepository implements IRegistryRepository {
 
       if (registryModulesName == null) {
         return errAsync(
-          new NonFungibleRegistryContractError(
+          new RegistryFactoryContractError(
             "registryModules name is not defined!",
           ),
         );
@@ -1693,24 +1693,34 @@ export class RegistryRepository implements IRegistryRepository {
       this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
     ]).andThen(([context, provider]) => {
-      this.provider = provider;
+      const hypernetProfilesName =
+        context.governanceChainInformation.registryNames.hypernetProfiles;
 
-      const registryAddress =
-        context.governanceChainInformation.hypernetProfileRegistryAddress;
-
-      const hypernetProfileRegistryContract =
-        new NonFungibleRegistryEnumerableUpgradeableContract(
-          provider,
-          registryAddress,
+      if (hypernetProfilesName == null) {
+        return errAsync(
+          new RegistryFactoryContractError(
+            "hypernetProfiles name is not defined!",
+          ),
         );
+      }
 
-      return hypernetProfileRegistryContract
-        .getRegistryEntryByLabel(username, registryAddress)
-        .andThen((registryEntry) => {
-          return this.getRegistryEntryListByOwnerAddress(
-            registryName,
-            registryEntry.owner,
-          );
+      return this.registryFactoryContract
+        .nameToAddress(hypernetProfilesName)
+        .andThen((registryAddress) => {
+          const hypernetProfileRegistryContract =
+            new NonFungibleRegistryEnumerableUpgradeableContract(
+              provider,
+              registryAddress,
+            );
+
+          return hypernetProfileRegistryContract
+            .getRegistryEntryByLabel(username, registryAddress)
+            .andThen((registryEntry) => {
+              return this.getRegistryEntryListByOwnerAddress(
+                registryName,
+                registryEntry.owner,
+              );
+            });
         });
     });
   }

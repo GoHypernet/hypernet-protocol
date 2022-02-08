@@ -378,6 +378,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | VectorError
     | BlockchainUnavailableError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     if (routerPublicIdentifiers.length < 1) {
       return errAsync(
@@ -1052,7 +1053,9 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     routerPublicIdentifier: PublicIdentifier,
   ): ResultAsync<
     void,
-    NonFungibleRegistryContractError | RouterUnauthorizedError
+    | NonFungibleRegistryContractError
+    | RouterUnauthorizedError
+    | RegistryFactoryContractError
   > {
     return this.routerRepository
       .getRouterDetails([routerPublicIdentifier])

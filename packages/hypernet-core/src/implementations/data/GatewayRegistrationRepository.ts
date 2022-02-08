@@ -84,14 +84,16 @@ export class GatewayRegistrationRepository
         context.governanceChainInformation.registryFactoryAddress,
       );
 
-      if (context.governanceChainInformation.registryNames.gateways == null) {
-        throw new Error("Gateways registry name not found!");
+      const gatewaysRegistryName =
+        context.governanceChainInformation.registryNames.gateways;
+      if (gatewaysRegistryName == null) {
+        return errAsync(
+          new RegistryFactoryContractError("Gateways registry name not found!"),
+        );
       }
 
       return registryFactoryContract
-        .nameToAddress(
-          context.governanceChainInformation.registryNames.gateways,
-        )
+        .nameToAddress(gatewaysRegistryName)
         .andThen((gatewayRegistryAddress) => {
           const gatewayRegistryContract =
             new NonFungibleRegistryEnumerableUpgradeableContract(

@@ -91,6 +91,7 @@ export interface IGatewayConnectorService {
     | VectorError
     | BlockchainUnavailableError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   >;
 
   getGatewayTokenInfo(

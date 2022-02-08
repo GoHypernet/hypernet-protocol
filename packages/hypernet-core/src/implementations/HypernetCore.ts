@@ -173,6 +173,7 @@ import {
   BrowserNodeFactory,
   InternalProviderFactory,
   NonFungibleRegistryContractFactory,
+  RegistryFactoryContractFactory,
 } from "@implementations/utilities/factory";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
@@ -196,6 +197,7 @@ import {
   IInternalProviderFactory,
   IGatewayConnectorProxyFactory,
   INonFungibleRegistryContractFactory,
+  IRegistryFactoryContractFactory,
 } from "@interfaces/utilities/factory";
 
 /**
@@ -267,6 +269,7 @@ export class HypernetCore implements IHypernetCore {
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
   protected nonFungibleRegistryContractFactory: INonFungibleRegistryContractFactory;
+  protected registryFactoryContractFactory: IRegistryFactoryContractFactory;
   protected didDataStoreProvider: IDIDDataStoreProvider;
 
   // Data Layer Stuff
@@ -439,6 +442,11 @@ export class HypernetCore implements IHypernetCore {
 
     this.nonFungibleRegistryContractFactory =
       new NonFungibleRegistryContractFactory(this.blockchainProvider);
+
+    this.registryFactoryContractFactory = new RegistryFactoryContractFactory(
+      this.contextProvider,
+      this.blockchainProvider,
+    );
 
     this.browserNodeFactory = new BrowserNodeFactory(
       this.configProvider,
@@ -1010,6 +1018,32 @@ export class HypernetCore implements IHypernetCore {
     BlockchainUnavailableError
   > {
     return this.blockchainProvider.getMainProviderChainId();
+  }
+
+  private initializeTokenInformation(
+    context: HypernetContext,
+  ): ResultAsync<void, never> {
+    const paymentTokensName =
+      context.governanceChainInformation.registryNames.paymentTokens;
+    if (paymentTokensName == null) {
+      throw new Error("paymentTokens name is not found!");
+    }
+
+    return this.registryFactoryContractFactory
+      .factoryRegistryFactoryContract()
+      .andThen((registryFactoryContract) => {
+        return registryFactoryContract
+          .nameToAddress(paymentTokensName)
+          .andThen((tokenRegistryAddress) => {
+            return this.tokenInformationRepository.initialize(
+              tokenRegistryAddress,
+            );
+          })
+          .orElse((e) => {
+            this.logUtils.error(e);
+            return okAsync(undefined);
+          });
+      });
   }
 
   public payments: IHypernetPayments = {
@@ -1774,6 +1808,7 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.getContext().andThen((context) => {
           return ResultUtils.combine([
             this.configProvider.getConfig(),
+            this.blockchainProvider.getProvider(),
             this.registryRepository.initializeReadOnly(),
             this.registryRepository.initializeForWrite().orElse((e) => {
               context.onGovernanceSignerUnavailable.next(
@@ -1785,16 +1820,8 @@ export class HypernetCore implements IHypernetCore {
               return okAsync(undefined);
             }),
             this.governance.initializeGovernance(chainId),
-            this.tokenInformationRepository
-              .initialize(
-                context.governanceChainInformation.tokenRegistryAddress,
-              )
-              .orElse((e) => {
-                this.logUtils.error(e);
-                return okAsync(undefined);
-              }),
-          ]).andThen((vals) => {
-            const [config] = vals;
+            this.initializeTokenInformation(context),
+          ]).andThen(([config, provider]) => {
             const governanceChainId =
               chainId || context.governanceChainInformation.chainId;
             const registriesInitializePromiseResolve =

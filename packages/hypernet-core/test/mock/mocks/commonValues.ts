@@ -128,23 +128,6 @@ export const insuranceTransferAddress = EthereumContractAddress(
 export const parameterizedTransferAddress = EthereumContractAddress(
   "parameterizedTransferAddress",
 );
-export const liquidityRegistryAddress = EthereumContractAddress(
-  "liquidityRegistryAddress",
-);
-export const tokenRegistryAddress = EthereumContractAddress(
-  "tokenRegistryAddress",
-);
-export const chainRegistryAddress = EthereumContractAddress(
-  "chainRegistryAddress",
-);
-
-export const hypernetProfileRegistryAddress = EthereumContractAddress(
-  "hypernetProfileRegistryAddress",
-);
-
-export const modulesRegistryAddress = EthereumContractAddress(
-  "modulesRegistryAddress",
-);
 export const hypernetGovernorAddress = EthereumContractAddress(
   "hypernetGovernorAddress",
 );
@@ -181,11 +164,6 @@ export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   parameterizedTransferAddress,
   hypernetGovernorAddress,
   registryFactoryAddress,
-  liquidityRegistryAddress,
-  tokenRegistryAddress,
-  chainRegistryAddress,
-  hypernetProfileRegistryAddress,
-  modulesRegistryAddress,
   registryNames,
   registryModulesNames,
   [ProviderUrl("http://localhost:8545")],
