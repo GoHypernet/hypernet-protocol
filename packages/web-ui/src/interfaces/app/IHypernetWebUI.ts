@@ -13,6 +13,7 @@ import React from "react";
 export interface IRenderParams {
   selector?: string;
   showInModal?: boolean;
+  noHeader?: boolean;
   noLabel?: boolean;
   excludeCardWrapper?: boolean;
   bodyStyle?: React.CSSProperties;
@@ -26,12 +27,18 @@ export interface IConnectorAuthorizationFlowParams extends IRenderParams {
   connectorLogoUrl?: string;
 }
 
+export interface IOnboardingSuccessButtonProps {
+  label: string;
+  action: () => void;
+}
+
 export interface IOnboardingFlowParams extends IRenderParams {
   gatewayUrl: GatewayUrl;
   gatewayName?: string;
   gatewayLogoUrl?: string;
-  finalSuccessContent?: string;
+  renderGatewayApprovalContent?: () => React.ReactNode;
   launchpadUrl?: string;
+  successButtonProps?: IOnboardingSuccessButtonProps;
 }
 
 export interface IRenderPaymentWidgetParams extends IRenderParams {

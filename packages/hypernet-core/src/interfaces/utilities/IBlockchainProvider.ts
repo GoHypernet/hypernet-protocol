@@ -48,7 +48,7 @@ export interface IBlockchainProvider {
   supplyProviderId(
     providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError>;
-
+  rejectProviderIdRequest(): ResultAsync<void, never>;
   isMetamask(): boolean;
   setGovernanceSigner(
     chainId: ChainId,

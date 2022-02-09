@@ -441,6 +441,10 @@ export default class HypernetIFrameProxy
     return this._createCall("provideProviderId", providerId);
   }
 
+  public rejectProviderIdRequest(): ResultAsync<void, ProxyError> {
+    return this._createCall("rejectProviderIdRequest", null);
+  }
+
   public retrieveChainInformationList(): ResultAsync<
     Map<ChainId, ChainInformation>,
     ProxyError

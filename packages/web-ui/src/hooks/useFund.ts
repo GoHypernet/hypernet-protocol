@@ -48,6 +48,7 @@ interface IReducerStateReducer {
   ) => void;
   activeStateChannels?: ActiveStateChannel[];
   selectedStateChennel?: ActiveStateChannel;
+  stateChannelsFetched: boolean;
 }
 
 interface IReducerState {
@@ -58,6 +59,7 @@ interface IReducerState {
   selectedPaymentToken?: ITokenSelectorOption;
   activeStateChannels?: ActiveStateChannel[];
   selectedStateChennel?: ActiveStateChannel;
+  stateChannelsFetched: boolean;
 }
 
 type Action =
@@ -88,6 +90,7 @@ export function useFund(): IReducerStateReducer {
     amount: "1",
     destinationAddress: EthereumAccountAddress(""),
     activeStateChannels: [],
+    stateChannelsFetched: false,
   };
 
   const [state, dispatch] = useReducer(
@@ -98,6 +101,7 @@ export function useFund(): IReducerStateReducer {
             ...state,
             error: false,
             tokenSelectorOptions: action.payload,
+            dataFetched: true
           };
         case EActionTypes.TOKEN_SELECTED:
           return {
@@ -122,6 +126,7 @@ export function useFund(): IReducerStateReducer {
             ...state,
             error: false,
             activeStateChannels: action.payload,
+            stateChannelsFetched: true
           };
         case EActionTypes.STATE_CHANNEL_SELECTED:
           return {

@@ -3,6 +3,7 @@ import {
   IHypernetCore,
   IUIData,
   RenderError,
+  Theme,
 } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import {
@@ -80,7 +81,6 @@ import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
-import { lightTheme, darkTheme } from "@web-ui/theme";
 import CreateProposalWidget from "@web-ui/widgets/CreateProposalWidget";
 import ProposalDetailWidget from "@web-ui/widgets/ProposalDetailWidget";
 import RegistryListWidget from "@web-ui/widgets/RegistryListWidget";
@@ -93,6 +93,11 @@ import ConnectedAccountWidget from "@web-ui/widgets/ConnectedAccountWidget";
 import WalletConnectWidget from "@web-ui/widgets/WalletConnectWidget";
 import RegistryLazyMintingRequestsWidget from "@web-ui/widgets/RegistryLazyMintingRequestsWidget";
 import ChainSelectorWidget from "@web-ui/widgets/ChainSelectorWidget";
+import {
+  lightTheme,
+  darkTheme,
+  injectCustomPaletteToTheme,
+} from "@web-ui/theme";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -101,11 +106,13 @@ export default class HypernetWebUI implements IHypernetWebUI {
   protected viewUtils: IViewUtils;
   protected dateUtils: IDateUtils;
   protected defaultGovernanceChainId: ChainId;
+  protected theme: Theme | null = null;
   constructor(
     _coreInstance: IHypernetCore,
     _UIData: IUIData,
     iframeURL: string | null,
     defaultGovernanceChainId: number | null,
+    theme: Theme | null,
     debug: boolean | null,
   ) {
     if (_coreInstance) {
@@ -117,7 +124,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     }
 
     this.defaultGovernanceChainId = ChainId(defaultGovernanceChainId || 1);
-
+    this.theme = theme;
     // This is to cache web ui instance in window so it may prevent from having multiple web ui instances
     window.hypernetWebUIInstance = HypernetWebUI.instance;
 
@@ -126,10 +133,15 @@ export default class HypernetWebUI implements IHypernetWebUI {
     this.dateUtils = new DateUtils();
   }
 
-  private _generateDomElement(selector: string): HTMLElement | null {
-    if (document.getElementById(selector) == null) {
+  private _generateDomElement(
+    selector: string,
+    forceRegenerate?: boolean,
+  ): HTMLElement | null {
+    if (forceRegenerate) {
       this._removeExistedElement(selector);
+    }
 
+    if (document.getElementById(selector) == null) {
       const element = document.createElement("div");
       element.setAttribute("id", selector);
       document.body.appendChild(element);
@@ -177,7 +189,11 @@ export default class HypernetWebUI implements IHypernetWebUI {
       seed: widgetUniqueIdentifier,
     });
 
-    const theme = true ? lightTheme : darkTheme;
+    // TODO: Add theme switching.
+    const customTheme = this.theme?.light;
+    const theme = customTheme
+      ? injectCustomPaletteToTheme(lightTheme, customTheme)
+      : lightTheme;
 
     return (
       <StoreProvider
@@ -260,7 +276,11 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <WalletConnectWidget />,
           config.showInModal,
-          config.closeCallback,
+          () => {
+            if (this.coreInstance) {
+              this.coreInstance.rejectProviderIdRequest();
+            }
+          },
           {
             zIndex: 99999,
           },
@@ -269,6 +289,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || CONNECT_WALLET_WIDGET_SELECTOR,
+          true,
         ),
       );
     };
@@ -501,10 +522,12 @@ export default class HypernetWebUI implements IHypernetWebUI {
               gatewayUrl={config.gatewayUrl}
               gatewayName={config.gatewayName}
               gatewayLogoUrl={config.gatewayLogoUrl}
-              finalSuccessContent={config.finalSuccessContent}
               closeCallback={config.closeCallback}
-              excludeCardWrapper={config.excludeCardWrapper}
+              excludeCardWrapper={true}
               launchpadUrl={config.launchpadUrl}
+              renderGatewayApprovalContent={
+                config?.renderGatewayApprovalContent
+              }
             />,
             config.showInModal,
             config.closeCallback,
