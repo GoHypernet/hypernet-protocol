@@ -12,6 +12,7 @@ import {
   NonFungibleRegistryContractError,
   RegistryEntry,
   RegistryFactoryContractError,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -24,7 +25,12 @@ import { IGatewayRegistrationRepository } from "@interfaces/data";
 import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
-import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
+import {
+  IRegistryUtils,
+  IRegistryUtilsType,
+  IStorageUtils,
+  IStorageUtilsType,
+} from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
@@ -57,6 +63,7 @@ export class GatewayRegistrationRepository
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
+    @inject(IRegistryUtilsType) protected registryUtils: IRegistryUtils,
     @inject(IGatewayConnectorProxyFactoryType)
     protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
@@ -70,82 +77,65 @@ export class GatewayRegistrationRepository
     Map<GatewayUrl, GatewayRegistrationInfo>,
     NonFungibleRegistryContractError | RegistryFactoryContractError
   > {
+    const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
+    const newGatewayResults = new Array<
+      ResultAsync<void, NonFungibleRegistryContractError>
+    >();
+
     return ResultUtils.combine([
-      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([context, provider]) => {
-      const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
-      const newGatewayResults = new Array<
-        ResultAsync<void, NonFungibleRegistryContractError>
-      >();
-
-      const registryFactoryContract = new RegistryFactoryContract(
-        provider,
-        context.governanceChainInformation.registryFactoryAddress,
-      );
-
-      const gatewaysRegistryName =
-        context.governanceChainInformation.registryNames.gateways;
-      if (gatewaysRegistryName == null) {
-        return errAsync(
-          new RegistryFactoryContractError("Gateways registry name not found!"),
+      this.getGatewayRegistryAddress(),
+    ]).andThen(([provider, gatewayRegistryAddress]) => {
+      const gatewayRegistryContract =
+        new NonFungibleRegistryEnumerableUpgradeableContract(
+          provider,
+          gatewayRegistryAddress,
         );
+
+      // Check for entries that are already cached.
+      for (const gatewayUrl of gatewayUrls) {
+        const cachedRegistration =
+          this.gatewayRegistrationInfoMap.get(gatewayUrl);
+        if (cachedRegistration != null) {
+          returnInfo.set(gatewayUrl, cachedRegistration);
+        } else {
+          // We need to get the registration info that's not in the cache
+          newGatewayResults.push(
+            gatewayRegistryContract
+              .getRegistryEntryByLabel(gatewayUrl)
+              .map((registryEntry) => {
+                // Convert the registry entry
+                if (registryEntry.tokenURI == null) {
+                  throw new Error(
+                    `Gateway registry entry for ${gatewayUrl} is invalid, it does not have a tokenURI`,
+                  );
+                }
+
+                const parsedEntry = JSON.parse(
+                  registryEntry.tokenURI,
+                ) as IGatewayRegistryEntry;
+
+                const registrationInfo = new GatewayRegistrationInfo(
+                  gatewayUrl,
+                  parsedEntry.address,
+                  parsedEntry.signature,
+                );
+
+                // Set it into the return info
+                returnInfo.set(gatewayUrl, registrationInfo);
+                this.gatewayRegistrationInfoMap.set(
+                  gatewayUrl,
+                  registrationInfo,
+                );
+              }),
+          );
+        }
       }
 
-      return registryFactoryContract
-        .nameToAddress(gatewaysRegistryName)
-        .andThen((gatewayRegistryAddress) => {
-          const gatewayRegistryContract =
-            new NonFungibleRegistryEnumerableUpgradeableContract(
-              provider,
-              gatewayRegistryAddress,
-            );
-
-          // Check for entries that are already cached.
-          for (const gatewayUrl of gatewayUrls) {
-            const cachedRegistration =
-              this.gatewayRegistrationInfoMap.get(gatewayUrl);
-            if (cachedRegistration != null) {
-              returnInfo.set(gatewayUrl, cachedRegistration);
-            } else {
-              // We need to get the registration info that's not in the cache
-              newGatewayResults.push(
-                gatewayRegistryContract
-                  .getRegistryEntryByLabel(gatewayUrl)
-                  .map((registryEntry) => {
-                    // Convert the registry entry
-                    if (registryEntry.tokenURI == null) {
-                      throw new Error(
-                        `Gateway registry entry for ${gatewayUrl} is invalid, it does not have a tokenURI`,
-                      );
-                    }
-
-                    const parsedEntry = JSON.parse(
-                      registryEntry.tokenURI,
-                    ) as IGatewayRegistryEntry;
-
-                    const registrationInfo = new GatewayRegistrationInfo(
-                      gatewayUrl,
-                      parsedEntry.address,
-                      parsedEntry.signature,
-                    );
-
-                    // Set it into the return info
-                    returnInfo.set(gatewayUrl, registrationInfo);
-                    this.gatewayRegistrationInfoMap.set(
-                      gatewayUrl,
-                      registrationInfo,
-                    );
-                  }),
-              );
-            }
-          }
-
-          // Wait for all the new results, and return the final list
-          return ResultUtils.combine(newGatewayResults).map(() => {
-            return returnInfo;
-          });
-        });
+      // Wait for all the new results, and return the final list
+      return ResultUtils.combine(newGatewayResults).map(() => {
+        return returnInfo;
+      });
     });
   }
 
@@ -154,98 +144,80 @@ export class GatewayRegistrationRepository
     NonFungibleRegistryContractError | RegistryFactoryContractError
   > {
     return ResultUtils.combine([
-      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([context, provider]) => {
-      const registryFactoryContract = new RegistryFactoryContract(
-        provider,
-        context.governanceChainInformation.registryFactoryAddress,
-      );
+      this.getGatewayRegistryAddress(),
+    ]).andThen(([provider, gatewayRegistryAddress]) => {
+      const gatewayRegistryContract =
+        new NonFungibleRegistryEnumerableUpgradeableContract(
+          provider,
+          gatewayRegistryAddress,
+        );
 
-      if (context.governanceChainInformation.registryNames.gateways == null) {
-        throw new Error("Gateways registry name not found!");
-      }
+      return gatewayRegistryContract.totalSupply().andThen((totalCount) => {
+        // if all gateways are cached, we return them directly.
+        if (this.gatewayRegistrationInfoMap.size === totalCount) {
+          return okAsync(this.gatewayRegistrationInfoMap);
+        } else {
+          const registryEntryListResults: ResultAsync<
+            RegistryEntry,
+            NonFungibleRegistryContractError
+          >[] = [];
 
-      return registryFactoryContract
-        .nameToAddress(
-          context.governanceChainInformation.registryNames.gateways,
-        )
-        .andThen((gatewayRegistryAddress) => {
-          const gatewayRegistryContract =
-            new NonFungibleRegistryEnumerableUpgradeableContract(
-              provider,
-              gatewayRegistryAddress,
-            );
+          for (let i = 0; i < totalCount; i++) {
+            const registryEntryResult = gatewayRegistryContract
+              .tokenByIndex(i)
+              .andThen((tokenId) => {
+                return gatewayRegistryContract.getRegistryEntryByTokenId(
+                  tokenId,
+                );
+              });
 
-          return gatewayRegistryContract.totalSupply().andThen((totalCount) => {
-            // if all gateways are cached, we return them directly.
-            if (this.gatewayRegistrationInfoMap.size === totalCount) {
-              return okAsync(this.gatewayRegistrationInfoMap);
-            } else {
-              const registryEntryListResults: ResultAsync<
-                RegistryEntry,
-                NonFungibleRegistryContractError
-              >[] = [];
+            registryEntryListResults.push(registryEntryResult);
+          }
 
-              for (let i = 0; i < totalCount; i++) {
-                const registryEntryResult = gatewayRegistryContract
-                  .tokenByIndex(i)
-                  .andThen((tokenId) => {
-                    return gatewayRegistryContract.getRegistryEntryByTokenId(
-                      tokenId,
+          return ResultUtils.combine(registryEntryListResults).map(
+            (registryEntries) => {
+              const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
+
+              // Check for entries that are already cached.
+              for (const registryEntry of registryEntries) {
+                const gatewayUrl = GatewayUrl(registryEntry.label);
+                const cachedRegistration =
+                  this.gatewayRegistrationInfoMap.get(gatewayUrl);
+                if (cachedRegistration != null) {
+                  returnInfo.set(gatewayUrl, cachedRegistration);
+                } else {
+                  // Convert the registry entry
+                  if (registryEntry.tokenURI == null) {
+                    throw new Error(
+                      `Gateway registry entry for ${gatewayUrl} is invalid, it does not have a tokenURI`,
                     );
-                  });
-
-                registryEntryListResults.push(registryEntryResult);
-              }
-
-              return ResultUtils.combine(registryEntryListResults).map(
-                (registryEntries) => {
-                  const returnInfo = new Map<
-                    GatewayUrl,
-                    GatewayRegistrationInfo
-                  >();
-
-                  // Check for entries that are already cached.
-                  for (const registryEntry of registryEntries) {
-                    const gatewayUrl = GatewayUrl(registryEntry.label);
-                    const cachedRegistration =
-                      this.gatewayRegistrationInfoMap.get(gatewayUrl);
-                    if (cachedRegistration != null) {
-                      returnInfo.set(gatewayUrl, cachedRegistration);
-                    } else {
-                      // Convert the registry entry
-                      if (registryEntry.tokenURI == null) {
-                        throw new Error(
-                          `Gateway registry entry for ${gatewayUrl} is invalid, it does not have a tokenURI`,
-                        );
-                      }
-
-                      const parsedEntry = JSON.parse(
-                        registryEntry.tokenURI,
-                      ) as IGatewayRegistryEntry;
-
-                      const registrationInfo = new GatewayRegistrationInfo(
-                        gatewayUrl,
-                        parsedEntry.address,
-                        parsedEntry.signature,
-                      );
-
-                      // Set it into the return info
-                      returnInfo.set(gatewayUrl, registrationInfo);
-                      this.gatewayRegistrationInfoMap.set(
-                        gatewayUrl,
-                        registrationInfo,
-                      );
-                    }
                   }
 
-                  return returnInfo;
-                },
-              );
-            }
-          });
-        });
+                  const parsedEntry = JSON.parse(
+                    registryEntry.tokenURI,
+                  ) as IGatewayRegistryEntry;
+
+                  const registrationInfo = new GatewayRegistrationInfo(
+                    gatewayUrl,
+                    parsedEntry.address,
+                    parsedEntry.signature,
+                  );
+
+                  // Set it into the return info
+                  returnInfo.set(gatewayUrl, registrationInfo);
+                  this.gatewayRegistrationInfoMap.set(
+                    gatewayUrl,
+                    registrationInfo,
+                  );
+                }
+              }
+
+              return returnInfo;
+            },
+          );
+        }
+      });
     });
   }
 
@@ -253,6 +225,21 @@ export class GatewayRegistrationRepository
     filter?: GatewayRegistrationFilter,
   ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> {
     throw new Error("Method not implemented.");
+  }
+
+  private getGatewayRegistryAddress(): ResultAsync<
+    EthereumContractAddress,
+    RegistryFactoryContractError
+  > {
+    return this.contextProvider.getContext().andThen((context) => {
+      const gatewaysRegistryName =
+        context.governanceChainInformation.registryNames.gateways;
+      if (gatewaysRegistryName == null) {
+        throw new Error("Gateways registry name not found!");
+      }
+
+      return this.registryUtils.getRegistryNameAddress(gatewaysRegistryName);
+    });
   }
 }
 

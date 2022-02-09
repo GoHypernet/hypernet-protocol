@@ -1,7 +1,4 @@
-import {
-  NonFungibleRegistryEnumerableUpgradeableContract,
-  RegistryFactoryContract,
-} from "@hypernetlabs/governance-sdk";
+import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
 import {
   GatewayUrl,
   NonFungibleRegistryContractError,
@@ -23,6 +20,7 @@ import {
   IContextProvider,
   IContextProviderType,
 } from "@interfaces/utilities";
+import { IRegistryUtils, IRegistryUtilsType } from "@interfaces/data/utilities";
 
 @injectable()
 export class RouterRepository implements IRouterRepository {
@@ -30,6 +28,7 @@ export class RouterRepository implements IRouterRepository {
 
   constructor(
     @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
+    @inject(IRegistryUtilsType) protected registryUtils: IRegistryUtils,
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
@@ -52,11 +51,6 @@ export class RouterRepository implements IRouterRepository {
         ResultAsync<void, NonFungibleRegistryContractError>
       >();
 
-      const registryFactoryContract = new RegistryFactoryContract(
-        provider,
-        context.governanceChainInformation.registryFactoryAddress,
-      );
-
       const liquidityProvidersName =
         context.governanceChainInformation.registryNames.liquidityProviders;
       if (liquidityProvidersName == null) {
@@ -67,8 +61,8 @@ export class RouterRepository implements IRouterRepository {
         );
       }
 
-      return registryFactoryContract
-        .nameToAddress(liquidityProvidersName)
+      return this.registryUtils
+        .getRegistryNameAddress(liquidityProvidersName)
         .andThen((gatewayRegistryAddress) => {
           const routerRegistryContract =
             new NonFungibleRegistryEnumerableUpgradeableContract(

@@ -44,6 +44,7 @@ import { BigNumber, ethers } from "ethers";
 import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
+import { IRegistryUtils, IRegistryUtilsType } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
@@ -71,6 +72,7 @@ export class RegistryRepository implements IRegistryRepository {
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(IRegistryUtilsType) protected registryUtils: IRegistryUtils,
     @inject(IDIDDataStoreProviderType)
     protected didDataStoreProvider: IDIDDataStoreProvider,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
@@ -193,12 +195,14 @@ export class RegistryRepository implements IRegistryRepository {
                   baseURI,
                 ] = vals;
 
+                console.log("registryModules", registryModules);
                 const batchModule = registryModules.find(
                   (registryModule) =>
                     registryModule.name ===
                     context.governanceChainInformation.registryModulesNames
                       .batchMintingModule,
                 );
+                console.log("batchModule", batchModule);
 
                 const lazyMintModule = registryModules.find(
                   (registryModule) =>
@@ -206,6 +210,8 @@ export class RegistryRepository implements IRegistryRepository {
                     context.governanceChainInformation.registryModulesNames
                       .lazyMintingModule,
                 );
+                console.log("lazyMintModule", lazyMintModule);
+                console.log("registrarAddresses", registrarAddresses);
 
                 const modulesCapability = new RegistryModuleCapability(
                   registryAddress,
@@ -220,6 +226,7 @@ export class RegistryRepository implements IRegistryRepository {
                       lazyMintModule?.address,
                   ),
                 );
+                console.log("modulesCapability", modulesCapability);
 
                 registriesMap.set(
                   registryName,
@@ -1256,9 +1263,9 @@ export class RegistryRepository implements IRegistryRepository {
         );
       }
 
-      return this.registryFactoryContract
-        .nameToAddress(registryModulesName)
-        .andThen((registryAddress) => {
+      return this.registryUtils
+        .getRegistryNameAddress(registryModulesName)
+        .andThen((registryModulesAddress) => {
           if (this.provider == null) {
             throw new Error("No provider available!");
           }
@@ -1267,11 +1274,11 @@ export class RegistryRepository implements IRegistryRepository {
           this.nonFungibleRegistryContract =
             new NonFungibleRegistryEnumerableUpgradeableContract(
               this.provider,
-              registryAddress,
+              registryModulesAddress,
             );
 
           return this.nonFungibleRegistryContract
-            .totalSupply(registryAddress)
+            .totalSupply(registryModulesAddress)
             .andThen((totalCount) => {
               const registryEntryListResult: ResultAsync<
                 RegistryEntry,
@@ -1281,11 +1288,11 @@ export class RegistryRepository implements IRegistryRepository {
               for (let i = 0; i < totalCount; i++) {
                 registryEntryListResult.push(
                   this.nonFungibleRegistryContract
-                    .tokenByIndex(i, registryAddress)
+                    .tokenByIndex(i, registryModulesAddress)
                     .andThen((tokenId) => {
                       return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
                         tokenId,
-                        registryAddress,
+                        registryModulesAddress,
                       );
                     }),
                 );
@@ -1704,17 +1711,17 @@ export class RegistryRepository implements IRegistryRepository {
         );
       }
 
-      return this.registryFactoryContract
-        .nameToAddress(hypernetProfilesName)
-        .andThen((registryAddress) => {
+      return this.registryUtils
+        .getRegistryNameAddress(hypernetProfilesName)
+        .andThen((hypernetProfilesRegistryAddress) => {
           const hypernetProfileRegistryContract =
             new NonFungibleRegistryEnumerableUpgradeableContract(
               provider,
-              registryAddress,
+              hypernetProfilesRegistryAddress,
             );
 
           return hypernetProfileRegistryContract
-            .getRegistryEntryByLabel(username, registryAddress)
+            .getRegistryEntryByLabel(username, hypernetProfilesRegistryAddress)
             .andThen((registryEntry) => {
               return this.getRegistryEntryListByOwnerAddress(
                 registryName,

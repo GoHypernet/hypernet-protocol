@@ -151,7 +151,7 @@ import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
-import { StorageUtils } from "@implementations/data/utilities";
+import { RegistryUtils, StorageUtils } from "@implementations/data/utilities";
 import {
   BrowserNodeProvider,
   ConfigProvider,
@@ -175,7 +175,7 @@ import {
   NonFungibleRegistryContractFactory,
   RegistryFactoryContractFactory,
 } from "@implementations/utilities/factory";
-import { IStorageUtils } from "@interfaces/data/utilities";
+import { IRegistryUtils, IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -255,6 +255,7 @@ export class HypernetCore implements IHypernetCore {
   protected localStorageUtils: ILocalStorageUtils;
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
+  protected registryUtils: IRegistryUtils;
   protected messagingProvider: IMessagingProvider;
 
   // Dependent on the browser node
@@ -487,6 +488,12 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
+    this.registryUtils = new RegistryUtils(
+      this.registryFactoryContractFactory,
+      this.contextProvider,
+      this.logUtils,
+    );
+
     this.blockchainUtils = new EthersBlockchainUtils(
       this.blockchainProvider,
       this.configProvider,
@@ -566,6 +573,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.vectorUtils,
       this.storageUtils,
+      this.registryUtils,
       this.gatewayConnectorProxyFactory,
       this.logUtils,
     );
@@ -576,6 +584,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.routerRepository = new RouterRepository(
       this.blockchainUtils,
+      this.registryUtils,
       this.blockchainProvider,
       this.contextProvider,
     );
@@ -590,6 +599,7 @@ export class HypernetCore implements IHypernetCore {
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
       this.contextProvider,
+      this.registryUtils,
       this.didDataStoreProvider,
       this.logUtils,
     );
@@ -1029,19 +1039,13 @@ export class HypernetCore implements IHypernetCore {
     const paymentTokensName =
       context.governanceChainInformation.registryNames.paymentTokens;
     if (paymentTokensName == null) {
-      throw new Error("paymentTokens name is not found!");
+      throw new Error("paymentTokens name not found!");
     }
 
-    return this.registryFactoryContractFactory
-      .factoryRegistryFactoryContract()
-      .andThen((registryFactoryContract) => {
-        return registryFactoryContract
-          .nameToAddress(paymentTokensName)
-          .andThen((tokenRegistryAddress) => {
-            return this.tokenInformationRepository.initialize(
-              tokenRegistryAddress,
-            );
-          });
+    return this.registryUtils
+      .getRegistryNameAddress(paymentTokensName)
+      .andThen((tokenRegistryAddress) => {
+        return this.tokenInformationRepository.initialize(tokenRegistryAddress);
       });
   }
 
@@ -1799,6 +1803,7 @@ export class HypernetCore implements IHypernetCore {
       | BlockchainUnavailableError
       | InvalidParametersError
       | IPFSUnavailableError
+      | RegistryFactoryContractError
       | ProxyError
     > => {
       // Initialize registries contracts
@@ -1817,6 +1822,7 @@ export class HypernetCore implements IHypernetCore {
               return okAsync(undefined);
             }),
             this.governance.initializeGovernance(chainId),
+            this.registryUtils.initializeRegistryNameAddresses(),
             this.initializeTokenInformation(context).orElse((e) => {
               this.logUtils.error(e);
               return okAsync(undefined);
