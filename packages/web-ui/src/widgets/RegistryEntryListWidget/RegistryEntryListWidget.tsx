@@ -3,6 +3,7 @@ import {
   EthereumAccountAddress,
   Registry,
   RegistryEntry,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -93,9 +94,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const getRegistry = () => {
     setLoading(true);
     coreProxy.registries
-      .getRegistryByName([registryName])
+      .getRegistryByName([RegistryName(registryName)])
       .map((registryMap) => {
-        const registry = registryMap.get(registryName);
+        const registry = registryMap.get(RegistryName(registryName));
         setRegistryFetched(true);
         setRegistry(registry);
         setHasEmptyState(!registry?.numberOfEntries);
@@ -108,7 +109,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     setLoading(true);
     coreProxy.registries
       .getRegistryEntries(
-        registryName,
+        RegistryName(registryName),
         page,
         REGISTRY_ENTRIES_PER_PAGE,
         reversedSortingEnabled
@@ -187,7 +188,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     setSearchTerm(value);
     coreProxy.registries
       .getRegistryEntryListByOwnerAddress(
-        registryName,
+        RegistryName(registryName),
         EthereumAccountAddress(value),
       )
       .map((registryEntries) => {
@@ -202,7 +203,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     setLoading(true);
     setSearchTerm(value);
     coreProxy.registries
-      .getRegistryEntryListByUsername(registryName, value)
+      .getRegistryEntryListByUsername(RegistryName(registryName), value)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
         setPage(1);
@@ -352,7 +353,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
                 onClick: () =>
                   onRegistryEntryDetailsNavigate &&
                   onRegistryEntryDetailsNavigate(
-                    registryName,
+                    RegistryName(registryName),
                     registryEntry.tokenId,
                   ),
               },

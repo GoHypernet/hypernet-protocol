@@ -35,6 +35,7 @@ import {
   paymentSigningDomain,
   pushPaymentSigningTypes,
   NonFungibleRegistryContractError,
+  RegistryFactoryContractError,
   PersistenceError,
   pullPaymentSigningTypes,
 } from "@hypernetlabs/objects";
@@ -205,6 +206,7 @@ export class PaymentService implements IPaymentService {
     | PersistenceError
     | ProxyError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
@@ -487,6 +489,7 @@ export class PaymentService implements IPaymentService {
     | ProxyError
     | InvalidParametersError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
     | TransferCreationError
   > {
     return this._validatePushPayment(
@@ -674,6 +677,7 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentIdError
     | PaymentCreationError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),

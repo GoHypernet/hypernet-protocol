@@ -5,6 +5,7 @@ import {
   EthereumAddress,
   RenderError,
   RegistryTokenId,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
 import React from "react";
@@ -59,29 +60,29 @@ export interface IProposalCreateWidgetParams extends IRenderParams {
 }
 
 export interface IRegistryListWidgetParams extends IRenderParams {
-  onRegistryEntryListNavigate?: (registryName: string) => void;
-  onRegistryDetailNavigate?: (registryName: string) => void;
+  onRegistryEntryListNavigate?: (registryName: RegistryName) => void;
+  onRegistryDetailNavigate?: (registryName: RegistryName) => void;
   onLazyMintRequestsNavigate?: () => void;
 }
 
 export interface IRegistryEntryListWidgetParams extends IRenderParams {
   onRegistryEntryDetailsNavigate?: (
-    registryName: string,
+    registryName: RegistryName,
     entryTokenId: RegistryTokenId,
   ) => void;
   onRegistryListNavigate?: () => void;
-  registryName: string;
+  registryName: RegistryName;
 }
 
 export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
-  onRegistryEntryListNavigate?: (registryName: string) => void;
-  registryName: string;
+  onRegistryEntryListNavigate?: (registryName: RegistryName) => void;
+  registryName: RegistryName;
   entryTokenId: RegistryTokenId;
 }
 
 export interface IRegistryDetailWidgetParams extends IRenderParams {
   onRegistryListNavigate?: () => void;
-  registryName: string;
+  registryName: RegistryName;
 }
 
 export interface IHypernetWebUI {

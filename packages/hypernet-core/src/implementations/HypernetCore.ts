@@ -70,6 +70,7 @@ import {
   GovernanceChainInformation,
   IHypernetGovernance,
   IHypernetRegistries,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -172,6 +173,7 @@ import {
   BrowserNodeFactory,
   InternalProviderFactory,
   NonFungibleRegistryContractFactory,
+  RegistryFactoryContractFactory,
 } from "@implementations/utilities/factory";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
@@ -195,6 +197,7 @@ import {
   IInternalProviderFactory,
   IGatewayConnectorProxyFactory,
   INonFungibleRegistryContractFactory,
+  IRegistryFactoryContractFactory,
 } from "@interfaces/utilities/factory";
 
 /**
@@ -266,6 +269,7 @@ export class HypernetCore implements IHypernetCore {
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
   protected nonFungibleRegistryContractFactory: INonFungibleRegistryContractFactory;
+  protected registryFactoryContractFactory: IRegistryFactoryContractFactory;
   protected didDataStoreProvider: IDIDDataStoreProvider;
 
   // Data Layer Stuff
@@ -438,6 +442,11 @@ export class HypernetCore implements IHypernetCore {
 
     this.nonFungibleRegistryContractFactory =
       new NonFungibleRegistryContractFactory(this.blockchainProvider);
+
+    this.registryFactoryContractFactory = new RegistryFactoryContractFactory(
+      this.contextProvider,
+      this.blockchainProvider,
+    );
 
     this.browserNodeFactory = new BrowserNodeFactory(
       this.configProvider,
@@ -1011,6 +1020,31 @@ export class HypernetCore implements IHypernetCore {
     return this.blockchainProvider.getMainProviderChainId();
   }
 
+  private initializeTokenInformation(
+    context: HypernetContext,
+  ): ResultAsync<
+    void,
+    NonFungibleRegistryContractError | RegistryFactoryContractError
+  > {
+    const paymentTokensName =
+      context.governanceChainInformation.registryNames.paymentTokens;
+    if (paymentTokensName == null) {
+      throw new Error("paymentTokens name is not found!");
+    }
+
+    return this.registryFactoryContractFactory
+      .factoryRegistryFactoryContract()
+      .andThen((registryFactoryContract) => {
+        return registryFactoryContract
+          .nameToAddress(paymentTokensName)
+          .andThen((tokenRegistryAddress) => {
+            return this.tokenInformationRepository.initialize(
+              tokenRegistryAddress,
+            );
+          });
+      });
+  }
+
   public payments: IHypernetPayments = {
     paymentsInitialized: (chainId?: ChainId): ResultAsync<boolean, never> => {
       return this.contextProvider.getContext().map((context) => {
@@ -1287,6 +1321,7 @@ export class HypernetCore implements IHypernetCore {
       | InvalidPaymentIdError
       | PaymentCreationError
       | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
     > => {
       return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
         this.logUtils.error(e);
@@ -1364,6 +1399,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayActivationError
       | VectorError
       | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .authorizeGateway(gatewayUrl)
@@ -1387,6 +1423,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayValidationError
       | NonFungibleRegistryContractError
       | InactiveGatewayError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .deauthorizeGateway(gatewayUrl)
@@ -1422,6 +1459,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayValidationError
       | NonFungibleRegistryContractError
       | InactiveGatewayError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .getGatewayTokenInfo(gatewayUrls)
@@ -1444,7 +1482,7 @@ export class HypernetCore implements IHypernetCore {
 
     getGatewayEntryList: (): ResultAsync<
       Map<GatewayUrl, GatewayRegistrationInfo>,
-      NonFungibleRegistryContractError
+      NonFungibleRegistryContractError | RegistryFactoryContractError
     > => {
       return this.gatewayRegistrationRepository.getGatewayEntryList();
     },
@@ -1494,6 +1532,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayValidationError
       | NonFungibleRegistryContractError
       | InactiveGatewayError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .closeGatewayIFrame(gatewayUrl)
@@ -1518,6 +1557,7 @@ export class HypernetCore implements IHypernetCore {
       | GatewayValidationError
       | NonFungibleRegistryContractError
       | InactiveGatewayError
+      | RegistryFactoryContractError
     > => {
       return this.gatewayConnectorService
         .displayGatewayIFrame(gatewayUrl)
@@ -1766,7 +1806,6 @@ export class HypernetCore implements IHypernetCore {
         // It's important to retrieve the context after initializing blockchain provider
         return this.contextProvider.getContext().andThen((context) => {
           return ResultUtils.combine([
-            this.configProvider.getConfig(),
             this.registryRepository.initializeReadOnly(),
             this.registryRepository.initializeForWrite().orElse((e) => {
               context.onGovernanceSignerUnavailable.next(
@@ -1778,16 +1817,11 @@ export class HypernetCore implements IHypernetCore {
               return okAsync(undefined);
             }),
             this.governance.initializeGovernance(chainId),
-            this.tokenInformationRepository
-              .initialize(
-                context.governanceChainInformation.tokenRegistryAddress,
-              )
-              .orElse((e) => {
-                this.logUtils.error(e);
-                return okAsync(undefined);
-              }),
-          ]).andThen((vals) => {
-            const [config] = vals;
+            this.initializeTokenInformation(context).orElse((e) => {
+              this.logUtils.error(e);
+              return okAsync(undefined);
+            }),
+          ]).andThen(() => {
             const governanceChainId =
               chainId || context.governanceChainInformation.chainId;
             const registriesInitializePromiseResolve =
@@ -1826,9 +1860,9 @@ export class HypernetCore implements IHypernetCore {
     },
 
     getRegistryByName: (
-      registryNames: string[],
+      registryNames: RegistryName[],
     ): ResultAsync<
-      Map<string, Registry>,
+      Map<RegistryName, Registry>,
       RegistryFactoryContractError | NonFungibleRegistryContractError
     > => {
       return this.registryService.getRegistryByName(registryNames);
@@ -1844,16 +1878,16 @@ export class HypernetCore implements IHypernetCore {
     },
 
     getRegistryEntriesTotalCount: (
-      registryNames: string[],
+      registryNames: RegistryName[],
     ): ResultAsync<
-      Map<string, number>,
+      Map<RegistryName, number>,
       RegistryFactoryContractError | NonFungibleRegistryContractError
     > => {
       return this.registryService.getRegistryEntriesTotalCount(registryNames);
     },
 
     getRegistryEntries: (
-      registryName: string,
+      registryName: RegistryName,
       pageNumber: number,
       pageSize: number,
       sortOrder: ERegistrySortOrder,
@@ -1870,7 +1904,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     getRegistryEntryDetailByTokenId: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
     ): ResultAsync<
       RegistryEntry,
@@ -1883,7 +1917,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     updateRegistryEntryTokenURI: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
       registrationData: string,
     ): ResultAsync<
@@ -1902,7 +1936,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     updateRegistryEntryLabel: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
       label: string,
     ): ResultAsync<
@@ -1941,7 +1975,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     createRegistryEntry: (
-      registryName: string,
+      registryName: RegistryName,
       newRegistryEntry: RegistryEntry,
     ): ResultAsync<
       void,
@@ -1959,7 +1993,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     transferRegistryEntry: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
       transferToAddress: EthereumAccountAddress,
     ): ResultAsync<
@@ -1978,7 +2012,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     burnRegistryEntry: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
     ): ResultAsync<
       void,
@@ -2011,7 +2045,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     grantRegistrarRole: (
-      registryName: string,
+      registryName: RegistryName,
       address: EthereumAccountAddress | EthereumContractAddress,
     ): ResultAsync<
       void,
@@ -2025,7 +2059,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     revokeRegistrarRole: (
-      registryName: string,
+      registryName: RegistryName,
       address: EthereumAccountAddress | EthereumContractAddress,
     ): ResultAsync<
       void,
@@ -2039,7 +2073,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     renounceRegistrarRole: (
-      registryName: string,
+      registryName: RegistryName,
       address: EthereumAccountAddress | EthereumContractAddress,
     ): ResultAsync<
       void,
@@ -2053,7 +2087,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     getRegistryEntryByOwnerAddress: (
-      registryName: string,
+      registryName: RegistryName,
       ownerAddress: EthereumAccountAddress,
       index: number,
     ): ResultAsync<
@@ -2069,13 +2103,13 @@ export class HypernetCore implements IHypernetCore {
 
     getRegistryModules: (): ResultAsync<
       RegistryModule[],
-      NonFungibleRegistryContractError
+      NonFungibleRegistryContractError | RegistryFactoryContractError
     > => {
       return this.registryService.getRegistryModules();
     },
 
     createBatchRegistryEntry: (
-      registryName: string,
+      registryName: RegistryName,
       newRegistryEntries: RegistryEntry[],
     ): ResultAsync<
       void,
@@ -2090,7 +2124,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     getRegistryEntryListByOwnerAddress: (
-      registryName: string,
+      registryName: RegistryName,
       ownerAddress: EthereumAccountAddress,
     ): ResultAsync<
       RegistryEntry[],
@@ -2103,7 +2137,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     getRegistryEntryListByUsername: (
-      registryName: string,
+      registryName: RegistryName,
       username: EthereumAccountAddress,
     ): ResultAsync<
       RegistryEntry[],
@@ -2116,7 +2150,7 @@ export class HypernetCore implements IHypernetCore {
     },
 
     submitLazyMintSignature: (
-      registryName: string,
+      registryName: RegistryName,
       tokenId: RegistryTokenId,
       ownerAddress: EthereumAccountAddress,
       registrationData: string,
@@ -2154,6 +2188,7 @@ export class HypernetCore implements IHypernetCore {
       | BlockchainUnavailableError
       | LazyMintModuleContractError
       | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
     > => {
       return this.registryService.executeLazyMint(lazyMintingSignature);
     },
