@@ -63,6 +63,8 @@ export * from "@objects/LazyMintingSignature";
 export * from "@objects/IpfsCID";
 export * from "@objects/Palette";
 export * from "@objects/Theme";
+export * from "@objects/RegistryName";
+export * from "@objects/RegistryNames";
 
 export * from "@objects/errors";
 export * from "@objects/interfaces";

@@ -1,4 +1,4 @@
-import { EthereumAccountAddress } from "@hypernetlabs/objects";
+import { EthereumAccountAddress, RegistryName } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
@@ -16,12 +16,12 @@ interface IValues {
 }
 interface IGrantRoleWidget {
   onCloseCallback: () => void;
-  registrarName: string;
+  registryName: RegistryName;
 }
 
 const GrantRoleWidget: React.FC<IGrantRoleWidget> = ({
   onCloseCallback,
-  registrarName,
+  registryName,
 }: IGrantRoleWidget) => {
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
@@ -33,7 +33,7 @@ const GrantRoleWidget: React.FC<IGrantRoleWidget> = ({
   const handleFormSubmit = (values: IValues) => {
     setLoading(true);
     coreProxy.registries
-      .grantRegistrarRole(registrarName, values.accountAddress)
+      .grantRegistrarRole(registryName, values.accountAddress)
       .map(() => {
         setLoading(false);
         onCloseCallback();

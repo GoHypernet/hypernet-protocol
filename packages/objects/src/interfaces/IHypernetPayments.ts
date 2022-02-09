@@ -186,6 +186,7 @@ export interface IHypernetPayments {
     | InvalidPaymentIdError
     | PaymentCreationError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   >;
 
   /**
@@ -251,6 +252,7 @@ export interface IHypernetPayments {
     | ProxyError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   >;
 
   deauthorizeGateway(
@@ -267,6 +269,7 @@ export interface IHypernetPayments {
     | GatewayValidationError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   >;
 
   getAuthorizedGateways(): ResultAsync<
@@ -298,6 +301,7 @@ export interface IHypernetPayments {
     | GatewayValidationError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   >;
 
   /**
@@ -317,7 +321,7 @@ export interface IHypernetPayments {
    */
   getGatewayEntryList(): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    NonFungibleRegistryContractError | ProxyError
+    NonFungibleRegistryContractError | RegistryFactoryContractError | ProxyError
   >;
 
   getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
@@ -346,6 +350,7 @@ export interface IHypernetPayments {
     | ProxyError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
@@ -363,5 +368,6 @@ export interface IHypernetPayments {
     | ProxyError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   >;
 }
