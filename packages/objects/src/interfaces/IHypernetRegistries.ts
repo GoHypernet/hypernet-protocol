@@ -41,6 +41,7 @@ export interface IHypernetRegistries {
     | BlockchainUnavailableError
     | InvalidParametersError
     | IPFSUnavailableError
+    | RegistryFactoryContractError
     | ProxyError
   >;
 

@@ -72,6 +72,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   public nameToAddress(
     registryName: RegistryName,
   ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError> {
+    console.log("called for registryName:", registryName);
     return ResultAsync.fromPromise(
       this.contract.nameToAddress(
         registryName,

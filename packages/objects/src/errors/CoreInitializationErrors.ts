@@ -16,6 +16,7 @@ import { PaymentStakeError } from "@objects/errors/PaymentStakeError";
 import { PaymentFinalizeError } from "@objects/errors/PaymentFinalizeError";
 import { NonFungibleRegistryContractError } from "@objects/errors/NonFungibleRegistryContractError";
 import { IPFSUnavailableError } from "@objects/errors/IPFSUnavailableError";
+import { RegistryFactoryContractError } from "@objects/errors/RegistryFactoryContractError";
 
 export type CoreInitializationErrors =
   | MessagingError
@@ -35,4 +36,5 @@ export type CoreInitializationErrors =
   | PaymentStakeError
   | PaymentFinalizeError
   | NonFungibleRegistryContractError
+  | RegistryFactoryContractError
   | IPFSUnavailableError;
