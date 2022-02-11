@@ -194,7 +194,7 @@ services:
 
   
   iframe:
-    image: vector_iframe_app:latest
+    image: hypernetlabs/vector_iframe_app:${VECTOR_TAG}
     ports:
       - 5000:5000
     environment:
