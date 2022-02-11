@@ -1105,7 +1105,12 @@ export class HypernetCore implements IHypernetCore {
             return this.contextProvider.setContext(context);
           })
           .andThen(() => {
-            return this.ceramicUtils.initialize();
+            return this.ceramicUtils.initialize().orElse((e) => {
+              this.logUtils.error(
+                e.message || "Ceramic initialization failed!",
+              );
+              return okAsync(undefined);
+            });
           })
           .andThen(() => {
             return ResultUtils.combine([
@@ -1825,7 +1830,6 @@ export class HypernetCore implements IHypernetCore {
               );
               return okAsync(undefined);
             }),
-            this.governance.initializeGovernance(chainId),
             this.registryUtils.initializeRegistryNameAddresses(),
             this.initializeTokenInformation(context).orElse((e) => {
               this.logUtils.error(e);
