@@ -216,9 +216,16 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
       });
     }
 
-    return this.storageUtils.write<IAuthorizedGatewayEntry[]>(
-      AuthorizedGatewaysSchema.title,
-      authorizedGatewayEntries,
-    );
+    return this.storageUtils
+      .write<IAuthorizedGatewayEntry[]>(
+        AuthorizedGatewaysSchema.title,
+        authorizedGatewayEntries,
+      )
+      .orElse((e) => {
+        this.logUtils.error(
+          e.message || "_setAuthorizedGateways storage write not working!",
+        );
+        return okAsync(undefined);
+      });
   }
 }
