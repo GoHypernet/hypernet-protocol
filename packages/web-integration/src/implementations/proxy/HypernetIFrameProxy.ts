@@ -217,13 +217,13 @@ export default class HypernetIFrameProxy
       });
 
       child.on("onCeramicAuthenticationStarted", () => {
-        this._displayCoreIFrame();
+        //this._displayCoreIFrame();
 
         this.onCeramicAuthenticationStarted.next();
       });
 
       child.on("onCeramicAuthenticationSucceeded", () => {
-        this._closeCoreIFrame();
+        //this._closeCoreIFrame();
 
         this.onCeramicAuthenticationSucceeded.next();
       });
