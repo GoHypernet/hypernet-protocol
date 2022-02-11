@@ -113,7 +113,14 @@ export class AccountsRepository implements IAccountsRepository {
 
       if (existingActiveRouter == null) {
         activeRouters.push(routerPublicIdentifier);
-        return this.storageUtils.write(this.activeRoutersKey, activeRouters);
+        return this.storageUtils
+          .write(this.activeRoutersKey, activeRouters)
+          .orElse((e) => {
+            this.logUtils.error(
+              e.message || "addActiveRouter storage write not working!",
+            );
+            return okAsync(undefined);
+          });
       }
       return okAsync(undefined);
     });
