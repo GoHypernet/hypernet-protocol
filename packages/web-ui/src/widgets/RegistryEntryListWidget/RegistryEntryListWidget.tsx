@@ -1,14 +1,15 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Form, Formik } from "formik";
 import {
   ERegistrySortOrder,
   EthereumAccountAddress,
   Registry,
   RegistryEntry,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
+import { Form, Formik } from "formik";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 
 import {
   GovernanceRegistryListItem,
@@ -20,8 +21,8 @@ import {
   GovernanceSearchFilter,
   GovernanceDialogSelectField,
 } from "@web-ui/components";
-import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import CreateBatchIdentityWidget from "@web-ui/widgets/CreateBatchIdentityWidget";
+import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import { useStyles } from "@web-ui/widgets/RegistryEntryListWidget/RegistryEntryListWidget.style";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
@@ -46,28 +47,34 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   );
   const [reversedSortingEnabled, setReversedSortingEnabled] =
     useState<boolean>(false);
-
   const [createIdentityModalOpen, setCreateIdentityModalOpen] =
     useState<boolean>(false);
   const [createBatchIdentityModalOpen, setCreateBatchIdentityModalOpen] =
     useState<boolean>(false);
-
+  const [lazyMintModeEnabled, setLazyMintModeEnabled] =
+    useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [registryFetched, setRegistryFetched] = useState<boolean>(false);
+  const mounted = useRef(false);
 
   useEffect(() => {
     getRegistry();
   }, []);
 
   useEffect(() => {
-    if (registry?.numberOfEntries) {
-      getRegistryEntries(page);
+    if (registry?.numberOfEntries && registryFetched) {
+      getRegistryEntries();
     }
   }, [registry?.numberOfEntries, page, REGISTRY_ENTRIES_PER_PAGE]);
 
   useEffect(() => {
-    getRegistryEntries(1);
+    if (mounted.current) {
+      handleRegistryEntriesRefresh();
+    } else {
+      mounted.current = true;
+    }
   }, [reversedSortingEnabled]);
 
   useEffect(() => {
@@ -76,12 +83,21 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     });
   }, []);
 
+  const handleRegistryEntriesRefresh = () => {
+    if (page === 1) {
+      getRegistryEntries();
+    } else {
+      setPage(1);
+    }
+  };
+
   const getRegistry = () => {
     setLoading(true);
-    coreProxy
-      .getRegistryByName([registryName])
+    coreProxy.registries
+      .getRegistryByName([RegistryName(registryName)])
       .map((registryMap) => {
-        const registry = registryMap.get(registryName);
+        const registry = registryMap.get(RegistryName(registryName));
+        setRegistryFetched(true);
         setRegistry(registry);
         setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
@@ -89,12 +105,12 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .mapErr(handleCoreError);
   };
 
-  const getRegistryEntries = (pageNumber: number) => {
+  const getRegistryEntries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntries(
-        registryName,
-        pageNumber,
+        RegistryName(registryName),
+        page,
         REGISTRY_ENTRIES_PER_PAGE,
         reversedSortingEnabled
           ? ERegistrySortOrder.REVERSED_ORDER
@@ -102,7 +118,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       )
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
-        setPage(pageNumber);
         setLoading(false);
       })
       .mapErr(handleCoreError);
@@ -127,7 +142,22 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const canCreateNewBatchRegistryEntry =
       isRegistrar && registry?.modulesCapability.batchMintEnabled;
 
-    let headerActions: IHeaderAction[] = [];
+    const cansubmitLazyMintSignature =
+      isRegistrar && registry?.modulesCapability.lazyMintEnabled;
+
+    const headerActions: IHeaderAction[] = [];
+
+    if (cansubmitLazyMintSignature) {
+      headerActions.push({
+        label: "Lazy Mint Identity",
+        onClick: () => {
+          setCreateIdentityModalOpen(true);
+          setLazyMintModeEnabled(true);
+        },
+        variant: "contained",
+        color: "primary",
+      });
+    }
 
     if (canCreateNewBatchRegistryEntry) {
       headerActions.push({
@@ -141,7 +171,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     if (canCreateNewRegistryEntry) {
       headerActions.push({
         label: "Create New Identity",
-        onClick: () => setCreateIdentityModalOpen(true),
+        onClick: () => {
+          setCreateIdentityModalOpen(true);
+          setLazyMintModeEnabled(false);
+        },
         variant: "contained",
         color: "primary",
       });
@@ -153,9 +186,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByOwnerAddressClick = (value) => {
     setLoading(true);
     setSearchTerm(value);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntryListByOwnerAddress(
-        registryName,
+        RegistryName(registryName),
         EthereumAccountAddress(value),
       )
       .map((registryEntries) => {
@@ -169,8 +202,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByUsernameClick = (value) => {
     setLoading(true);
     setSearchTerm(value);
-    coreProxy
-      .getRegistryEntryListByUsername(registryName, value)
+    coreProxy.registries
+      .getRegistryEntryListByUsername(RegistryName(registryName), value)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
         setPage(1);
@@ -192,7 +225,13 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const onRestartClick = () => {
     setSearchTerm("");
-    getRegistryEntries(1);
+    handleRegistryEntriesRefresh();
+  };
+
+  const handleIdentityCallback = () => {
+    getRegistry();
+    setLazyMintModeEnabled(false);
+    setCreateIdentityModalOpen(false);
   };
 
   return (
@@ -314,7 +353,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
                 onClick: () =>
                   onRegistryEntryDetailsNavigate &&
                   onRegistryEntryDetailsNavigate(
-                    registryName,
+                    RegistryName(registryName),
                     registryEntry.tokenId,
                   ),
               },
@@ -336,10 +375,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       )}
       {createIdentityModalOpen && (
         <CreateIdentityWidget
-          onCloseCallback={() => {
-            getRegistry();
-            setCreateIdentityModalOpen(false);
-          }}
+          onCloseCallback={handleIdentityCallback}
+          lazyMintModeEnabled={lazyMintModeEnabled}
           registryName={registryName}
           currentAccountAddress={accountAddress}
         />

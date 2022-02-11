@@ -1,11 +1,12 @@
-import React from "react";
+import { RegistryTokenId } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
+import React from "react";
 
 import { useStyles } from "@web-ui/components/GovernanceValueWithTitle/GovernanceValueWithTitle.style";
 
 export interface IGovernanceValueWithTitle {
   title: string;
-  value: string | number | undefined;
+  value: string | number | RegistryTokenId | undefined;
   topRightContent?: React.ReactNode;
   bottomRightContent?: React.ReactNode;
 }

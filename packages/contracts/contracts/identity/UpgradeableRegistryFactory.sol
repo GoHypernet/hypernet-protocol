@@ -26,9 +26,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     // extra array storage fascilitates paginated UI
     address[] public registries;
 
-    // array to store addresses of governance approved modules
-    address[] public modules;
-
     // enable registry discovery by human-readable name
     mapping (string => address) public nameToAddress;
 
@@ -103,40 +100,11 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         numReg = registries.length;
     }
 
-    /// @notice getNumberOfModules getter function for reading the number of modules
-    /// @dev useful for paginated UIs
-    function getNumberOfModules() public view returns (uint256 numModules) {
-        numModules = modules.length;
-    }
-
-    /// @notice addModule setter function for adding an approved module to the protocol
-    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
-    /// @param _module address of goverance approved module contract
-    function addModule(address _module) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to add module");
-        modules.push(_module);
-    }
-
-    /// @notice removeModule function for removing a module from the protocol's supported list
-    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
-    /// @param _index index module contract to remove from module list
-    function removeModule(uint _index) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to remove module");
-        require(_index < modules.length, "RegistryFactory: index must be less than module list length");
-
-        uint256 lastModuleIndex = modules.length - 1;
-        address lastModuleAddress = modules[lastModuleIndex];
-
-        // Move the last module to the slot of the to-delete token
-        modules[_index] = lastModuleAddress; 
-        modules.pop();
-    }
-
     /// @notice setProfileRegistryAddress change the address of the profile registry contract
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _hypernetProfileRegistry address of ERC721 token to use as profile contract
     function setProfileRegistryAddress(address _hypernetProfileRegistry) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         hypernetProfileRegistry = _hypernetProfileRegistry;
     }
 
@@ -144,7 +112,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationToken address of ERC20 token burned during registration
     function setRegistrationToken(address _registrationToken) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         registrationToken = _registrationToken;
     }
 
@@ -152,7 +120,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationFee burn fee amount
     function setRegistrationFee(uint256 _registrationFee) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         require(registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
         registrationFee = _registrationFee;
     }
@@ -161,7 +129,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _burnAddress address where creation fee is to be sent
     function setBurnAddress(address _burnAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         burnAddress = _burnAddress;
     }
 
@@ -188,9 +156,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     function createRegistryByToken(string memory _name, string memory _symbol, address _registrar, bool _enumerable) external {
         require(_preRegistered(_msgSender()), "RegistryFactory: caller must have a Hypernet Profile.");
         require(registrationToken != address(0), "RegistryFactory: registration by token not enabled.");
-
         // user must call approve first
-        IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), burnAddress, registrationFee);
+        require(IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), burnAddress, registrationFee), "RegistryFactory: token transfer failed.");
+
         if (_enumerable) {
             _createEnumerableRegistry(_name, _symbol, _registrar);
         } else {

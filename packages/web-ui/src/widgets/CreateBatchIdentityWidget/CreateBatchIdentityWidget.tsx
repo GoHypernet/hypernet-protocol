@@ -2,12 +2,13 @@ import {
   EthereumAccountAddress,
   RegistryEntry,
   RegistryTokenId,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
+import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik, FormikState } from "formik";
 import React, { useState } from "react";
-import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 
 import {
   GovernanceDialog,
@@ -19,7 +20,7 @@ import { useStyles } from "@web-ui/widgets/CreateBatchIdentityWidget/CreateBatch
 
 interface CreateBatchIdentityWidget {
   onCloseCallback: () => void;
-  registryName: string;
+  registryName: RegistryName;
   currentAccountAddress: EthereumAccountAddress;
 }
 
@@ -54,7 +55,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
       registryEntries.push(
         new RegistryEntry(
           label,
-          RegistryTokenId(Number(tokenId)),
+          RegistryTokenId(BigInt(tokenId)),
           EthereumAccountAddress(recipientAddress),
           tokenUri,
           null,
@@ -62,7 +63,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
       );
     }
 
-    coreProxy
+    coreProxy.registries
       .createBatchRegistryEntry(registryName, registryEntries)
       .map(() => {
         setLoading(false);
@@ -110,7 +111,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
         ...prevState,
         new RegistryEntry(
           values.label,
-          RegistryTokenId(Number(values.tokenId)),
+          RegistryTokenId(BigInt(values.tokenId)),
           EthereumAccountAddress(values.recipientAddress),
           values.tokenUri,
           null,
@@ -143,7 +144,9 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
           <Box className={classes.createdEntries}>
             {createdEntries.map((registryEntry, index) => (
               <Box key={index} display="flex" justifyContent="space-between">
-                <Typography>{registryEntry.label}</Typography>
+                <Typography>{`${registryEntry.tokenId} ${
+                  registryEntry.label ? ` - ${registryEntry.label}` : ""
+                }`}</Typography>
                 <Box
                   onClick={() => removeCreatedEntry(index)}
                   className={classes.removeIcon}
@@ -222,12 +225,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
                       variant="contained"
                       color="primary"
                       onClick={handleSubmit}
-                      disabled={
-                        (!values.recipientAddress ||
-                          !values.tokenId ||
-                          !values.label) &&
-                        createdEntries.length === 0
-                      }
+                      disabled={!values.tokenId && createdEntries.length === 0}
                     >
                       Submit
                     </GovernanceButton>

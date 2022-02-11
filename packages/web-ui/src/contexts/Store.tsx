@@ -8,7 +8,7 @@ interface IStore {
   viewUtils: IViewUtils;
   dateUtils: IDateUtils;
   widgetUniqueIdentifier: string;
-  governanceChainId: ChainId;
+  defaultGovernanceChainId: ChainId;
 }
 
 interface IStoreProps extends IStore {
@@ -23,7 +23,7 @@ export function StoreProvider({
   viewUtils,
   dateUtils,
   widgetUniqueIdentifier,
-  governanceChainId,
+  defaultGovernanceChainId,
   children,
 }: IStoreProps) {
   const initialState: IStore = {
@@ -32,7 +32,7 @@ export function StoreProvider({
     viewUtils,
     dateUtils,
     widgetUniqueIdentifier,
-    governanceChainId,
+    defaultGovernanceChainId,
   };
 
   return (

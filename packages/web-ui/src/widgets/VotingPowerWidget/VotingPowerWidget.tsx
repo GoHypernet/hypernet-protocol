@@ -21,13 +21,13 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
   }, []);
 
   const getVotingPower = () => {
-    coreProxy
-      .waitInitialized()
+    coreProxy.governance
+      .waitGovernanceInitialized()
       .map(() => {
         coreProxy
           .getEthereumAccounts()
           .map((accounts) => {
-            coreProxy
+            coreProxy.governance
               .getVotingPower(accounts[0])
               .map((votingPower) => {
                 setVotingPower(votingPower);

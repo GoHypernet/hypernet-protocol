@@ -1,41 +1,24 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import CeramicClient from "@ceramicnetwork/http-client";
 import { DIDDataStore } from "@glazed/did-datastore";
 import {
   PersistenceError,
   BlockchainUnavailableError,
   VectorError,
-  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
-import {
-  ResultUtils,
-  ILogUtils,
-  ILogUtilsType,
-  CryptoUtils,
-} from "@hypernetlabs/utils";
-import { Resolver } from "did-resolver";
-import { DID } from "dids";
+import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { inject, injectable } from "inversify";
-import { Ed25519Provider } from "key-did-provider-ed25519";
-import KeyDidResolver from "key-did-resolver";
 import { okAsync, ResultAsync } from "neverthrow";
 
 import {
   ICeramicUtils,
-  IConfigProvider,
   IContextProvider,
   IRecordWithDataKey,
-  IBrowserNodeProvider,
-  IConfigProviderType,
   IContextProviderType,
-  IBrowserNodeProviderType,
+  IDIDDataStoreProvider,
+  IDIDDataStoreProviderType,
 } from "@interfaces/utilities";
 
 @injectable()
 export class CeramicUtils implements ICeramicUtils {
-  protected ceramic: CeramicClient | null = null;
-  protected didAuthProvider: Ed25519Provider | null = null;
-  protected didResolver: Resolver | null = null;
   protected didDataStore: DIDDataStore | null = null;
   protected initializeResult: ResultAsync<
     void,
@@ -43,21 +26,18 @@ export class CeramicUtils implements ICeramicUtils {
   > | null = null;
 
   constructor(
-    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
-    @inject(IBrowserNodeProviderType)
-    protected browserNodeProvider: IBrowserNodeProvider,
+    @inject(IDIDDataStoreProviderType)
+    protected didDataStoreProvider: IDIDDataStoreProvider,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
-  public initialize(
-    accountAddress?: EthereumAccountAddress,
-  ): ResultAsync<
+  public initialize(): ResultAsync<
     void,
     PersistenceError | VectorError | BlockchainUnavailableError
   > {
     if (this.initializeResult == null) {
-      this.initializeResult = this._authenticateUser(accountAddress);
+      this.initializeResult = this._authenticateUser();
     }
 
     return this.initializeResult;
@@ -129,22 +109,11 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
-  private _authenticateUser(
-    accountAddress?: EthereumAccountAddress,
-  ): ResultAsync<
+  private _authenticateUser(): ResultAsync<
     void,
     PersistenceError | VectorError | BlockchainUnavailableError
   > {
-    this.logUtils.debug(`Authenticating user with Ceramic`);
-    return ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getContext(),
-      accountAddress
-        ? okAsync(CryptoUtils.randomBytes(32, accountAddress))
-        : this.getProviderSeed(),
-    ]).andThen((vals) => {
-      const [config, context, seed] = vals;
-
+    return this.contextProvider.getContext().andThen((context) => {
       if (context.account == null) {
         throw new Error(
           "Must have established account before trying to setup Ceramic!",
@@ -155,33 +124,13 @@ export class CeramicUtils implements ICeramicUtils {
         `Setting up Ceramic client for account ${context.account}`,
       );
 
-      // Create the CeramicClient
-      this.ceramic = new CeramicClient(config.ceramicNodeUrl);
-
-      // Create a KeyDID provider
-      this.didAuthProvider = new Ed25519Provider(seed);
-
-      // Set DID instance on the client
-      this.ceramic.did = new DID({
-        provider: this.didAuthProvider,
-        resolver: KeyDidResolver.getResolver(),
-      });
-
-      this.logUtils.debug(`Starting Ceramic authentication`);
       context.onCeramicAuthenticationStarted.next();
-      return ResultAsync.fromPromise(this.ceramic.did.authenticate(), (e) => {
-        return new PersistenceError("Could not authenticate with Ceramic", e);
-      })
-        .andThen(() => {
-          this.logUtils.info(
-            `ceramic logged in, ceramic did id: ${this.ceramic?.did?.id.toString()}`,
-          );
+      return this.didDataStoreProvider
+        .initializeDIDDataStoreProvider()
+        .andThen((didDataStore) => {
           context.onCeramicAuthenticationSucceeded.next();
 
-          this.didDataStore = new DIDDataStore({
-            ceramic: this.ceramic!,
-            model: config.ceramicDataModel,
-          });
+          this.didDataStore = didDataStore;
 
           return okAsync(undefined);
         })
@@ -194,20 +143,5 @@ export class CeramicUtils implements ICeramicUtils {
           return new PersistenceError("Storage authentication failed", e);
         });
     });
-  }
-
-  private getProviderSeed(): ResultAsync<
-    Uint8Array,
-    VectorError | BlockchainUnavailableError
-  > {
-    return this.browserNodeProvider
-      .getBrowserNode()
-      .andThen((browserNode) => {
-        // We will sign a utility message with the browser node to get a fixed key signature
-        return browserNode.signUtilityMessage("Hypernet Protocol Persistence");
-      })
-      .map((signature) => {
-        return CryptoUtils.randomBytes(32, signature);
-      });
   }
 }

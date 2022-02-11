@@ -10,18 +10,19 @@ import { HYPER_TOKEN_LOGO_URL } from "@web-ui/constants";
 interface GovernanceBalanceListProps {
   balances?: AssetBalance[];
   viewUtils: IViewUtils;
+  containerClassName?: string;
 }
 
 export const GovernanceBalanceList: React.FC<GovernanceBalanceListProps> = (
   props: GovernanceBalanceListProps,
 ) => {
-  const { balances, viewUtils } = props;
+  const { balances, viewUtils, containerClassName } = props;
 
   const tokenLogoRef = useRef<HTMLImageElement>(null);
   const classes = useStyles();
 
   return (
-    <Box className={classes.container}>
+    <Box className={`${classes.container} ${containerClassName}`}>
       {balances?.map((balance, index) => (
         <Box key={index} className={`${classes.itemWrapper}`}>
           <Box display="flex" alignItems="center">

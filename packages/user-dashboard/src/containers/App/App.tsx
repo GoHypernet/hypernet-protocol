@@ -31,6 +31,7 @@ const integration: IHypernetWebIntegration = new HypernetWebIntegration(
   true,
   false,
   null,
+  null,
 );
 
 const App: React.FC = () => {
@@ -47,9 +48,13 @@ const App: React.FC = () => {
     setLoading(true);
     let readyResult: ResultAsync<IHypernetCore, Error>;
 
-    if (pathname === ROUTES.ROOT || pathname.includes(ROUTES.PAYMENTS)) {
+    if (pathname.includes(ROUTES.PAYMENTS)) {
       readyResult = integration.getPaymentsReady();
-    } else if (pathname.includes(ROUTES.REGISTRIES)) {
+    } else if (
+      pathname === ROUTES.ROOT ||
+      pathname.includes(ROUTES.REGISTRIES) ||
+      pathname.includes(ROUTES.LAZY_MINTING_REQUEST)
+    ) {
       readyResult = integration.getRegistriesReady();
     } else if (
       pathname.includes(ROUTES.PROPOSALS) ||

@@ -7,6 +7,9 @@ RUN apk add vim
 ARG CHAIN_ID_ARG="1337"
 ENV CHAIN_ID $CHAIN_ID_ARG
 
+ARG INCLUDE_HYPERTOKEN_ARG=1
+ENV INCLUDE_HYPERTOKEN $INCLUDE_HYPERTOKEN_ARG
+
 COPY hardhat.config.ts /app/hardhat.config.ts
 COPY deploy.ts /app/deploy/
 COPY transferDefinitions/Message.json artifacts/src.sol/transferDefinitions/Message.sol/
@@ -18,5 +21,8 @@ COPY HypernetGovernor/HypernetGovernor.json artifacts/src.sol/testing/HypernetGo
 COPY UpgradeableRegistryFactory/UpgradeableRegistryFactory.json artifacts/src.sol/testing/UpgradeableRegistryFactory.sol/
 COPY NonFungibleRegistryEnumerableUpgradeable/NonFungibleRegistryEnumerableUpgradeable.json artifacts/src.sol/testing/NonFungibleRegistryEnumerableUpgradeable.sol/
 COPY NonFungibleRegistryUpgradeable/NonFungibleRegistryUpgradeable.json artifacts/src.sol/testing/NonFungibleRegistryUpgradeable.sol/
+COPY BatchModule/BatchModule.json artifacts/src.sol/testing/BatchModule.sol/
+COPY LazyMintModule/LazyMintModule.json artifacts/src.sol/testing/LazyMintModule.sol/
+COPY MerkleModule/MerkleModule.json artifacts/src.sol/testing/MerkleModule.sol/
 COPY src.ts/ src.ts/
 EXPOSE 8545

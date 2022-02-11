@@ -1,5 +1,7 @@
 import { ILogUtils } from "@hypernetlabs/utils";
 import td from "testdouble";
+import { DIDDataStore } from "@glazed/did-datastore";
+import { okAsync } from "neverthrow";
 
 import { CeramicUtils } from "@implementations/utilities/CeramicUtils";
 import { ICeramicUtils } from "@interfaces/utilities/ICeramicUtils";
@@ -9,25 +11,26 @@ import {
   ContextProviderMock,
   BrowserNodeProviderMock,
 } from "@mock/utils";
+import { IDIDDataStoreProvider } from "@interfaces/utilities";
 
 class CeramicUtilsMocks {
   public blockchainProvider = new BlockchainProviderMock();
   public configProvider = new ConfigProviderMock();
   public contextProviderMock = new ContextProviderMock();
   public browserNodeProviderMock = new BrowserNodeProviderMock();
+  public didDataStoreProvider = td.object<IDIDDataStoreProvider>();
   public logUtils = td.object<ILogUtils>();
 
   constructor() {
-    /* td.when(this.gatewayConnectorProxy.activateProxy()).thenReturn(
-      okAsync(undefined),
-    ); */
+    td.when(
+      this.didDataStoreProvider.initializeDIDDataStoreProvider(),
+    ).thenReturn(okAsync({} as DIDDataStore));
   }
 
   public factoryRepository(): ICeramicUtils {
     return new CeramicUtils(
-      this.configProvider,
       this.contextProviderMock,
-      this.browserNodeProviderMock,
+      this.didDataStoreProvider,
       this.logUtils,
     );
   }

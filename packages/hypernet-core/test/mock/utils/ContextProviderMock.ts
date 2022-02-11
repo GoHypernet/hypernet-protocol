@@ -8,6 +8,9 @@ import {
   PushPayment,
   EthereumAccountAddress,
   InitializeStatus,
+  chainConfig,
+  GovernanceChainInformation,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -96,6 +99,9 @@ export class ContextProviderMock implements IContextProvider {
   public onGovernanceChainChangedActivations: ChainId[] = [];
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceAccountChangedActivations: EthereumAccountAddress[] = [];
+  public onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>;
+  public onGovernanceSignerUnavailableActivations: GovernanceSignerUnavailableError[] =
+    [];
 
   constructor(
     context: HypernetContext | null = null,
@@ -277,6 +283,11 @@ export class ContextProviderMock implements IContextProvider {
       this.onGovernanceAccountChangedActivations.push(val);
     });
 
+    this.onGovernanceSignerUnavailable = new Subject();
+    this.onGovernanceSignerUnavailable.subscribe((val) => {
+      this.onGovernanceSignerUnavailableActivations.push(val);
+    });
+
     if (context != null) {
       this.context = context;
     } else {
@@ -285,7 +296,8 @@ export class ContextProviderMock implements IContextProvider {
         null,
         [activeStateChannel],
         false,
-        new InitializeStatus(false, false, false, false),
+        new InitializeStatus(new Map(), new Map(), new Map(), new Map()),
+        chainConfig.get(ChainId(1)) as GovernanceChainInformation,
         this.onControlClaimed,
         this.onControlYielded,
         this.onPushPaymentSent,
@@ -321,6 +333,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onAccountChanged,
         this.onGovernanceChainChanged,
         this.onGovernanceAccountChanged,
+        this.onGovernanceSignerUnavailable,
       );
     }
 
@@ -332,7 +345,13 @@ export class ContextProviderMock implements IContextProvider {
         publicIdentifier,
         [activeStateChannel],
         true,
-        new InitializeStatus(true, true, true, true),
+        new InitializeStatus(
+          new Map([[ChainId(1), true]]),
+          new Map([[ChainId(1), true]]),
+          new Map([[ChainId(1), true]]),
+          new Map([[ChainId(1), true]]),
+        ),
+        chainConfig.get(ChainId(1)) as GovernanceChainInformation,
         this.onControlClaimed,
         this.onControlYielded,
         this.onPushPaymentSent,
@@ -368,6 +387,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onAccountChanged,
         this.onGovernanceChainChanged,
         this.onGovernanceAccountChanged,
+        this.onGovernanceSignerUnavailable,
       );
     }
   }
@@ -428,6 +448,7 @@ export class ContextProviderMock implements IContextProvider {
       onAccountChanged: 0,
       onGovernanceChainChanged: 0,
       onGovernanceAccountChanged: 0,
+      onGovernanceSignerUnavailable: 0,
     };
 
     // Merge the passed in counts with the basic counts
@@ -531,10 +552,13 @@ export class ContextProviderMock implements IContextProvider {
       counts.onGovernanceChainChanged,
     );
 
-    this.onGovernanceAccountChanged,
-      expect(this.onGovernanceAccountChangedActivations.length).toBe(
-        counts.onGovernanceAccountChanged,
-      );
+    expect(this.onGovernanceAccountChangedActivations.length).toBe(
+      counts.onGovernanceAccountChanged,
+    );
+
+    expect(this.onGovernanceSignerUnavailableActivations.length).toBe(
+      counts.onGovernanceSignerUnavailable,
+    );
   }
 }
 
@@ -572,4 +596,5 @@ export interface IExpectedEventCounts {
   onAccountChanged?: number;
   onGovernanceChainChanged?: number;
   onGovernanceAccountChanged?: number;
+  onGovernanceSignerUnavailable?: number;
 }

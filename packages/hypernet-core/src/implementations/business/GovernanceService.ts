@@ -5,6 +5,10 @@ import {
   HypernetGovernorContractError,
   ERC20ContractError,
   EthereumAccountAddress,
+  IPFSUnavailableError,
+  GovernanceSignerUnavailableError,
+  BlockchainUnavailableError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { IGovernanceService } from "@interfaces/business";
 import {
@@ -39,7 +43,10 @@ export class GovernanceService implements IGovernanceService {
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<
+    Proposal,
+    IPFSUnavailableError | HypernetGovernorContractError
+  > {
     return this.governanceRepository.createProposal(
       name,
       symbol,
@@ -59,6 +66,12 @@ export class GovernanceService implements IGovernanceService {
     proposalId: string,
   ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceRepository.getProposalDetails(proposalId);
+  }
+
+  public getProposalDescription(
+    descriptionHash: string,
+  ): ResultAsync<string, IPFSUnavailableError | HypernetGovernorContractError> {
+    return this.governanceRepository.getProposalDescription(descriptionHash);
   }
 
   public castVote(
@@ -113,5 +126,18 @@ export class GovernanceService implements IGovernanceService {
     account: EthereumAccountAddress,
   ): ResultAsync<number, ERC20ContractError> {
     return this.governanceRepository.getHyperTokenBalance(account);
+  }
+
+  public initializeReadOnly(): ResultAsync<void, never> {
+    return this.governanceRepository.initializeReadOnly();
+  }
+
+  public initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
+    return this.governanceRepository.initializeForWrite();
   }
 }

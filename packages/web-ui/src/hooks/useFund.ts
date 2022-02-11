@@ -48,6 +48,7 @@ interface IReducerStateReducer {
   ) => void;
   activeStateChannels?: ActiveStateChannel[];
   selectedStateChennel?: ActiveStateChannel;
+  stateChannelsFetched: boolean;
 }
 
 interface IReducerState {
@@ -58,6 +59,7 @@ interface IReducerState {
   selectedPaymentToken?: ITokenSelectorOption;
   activeStateChannels?: ActiveStateChannel[];
   selectedStateChennel?: ActiveStateChannel;
+  stateChannelsFetched: boolean;
 }
 
 type Action =
@@ -77,7 +79,7 @@ type Action =
     };
 
 export function useFund(): IReducerStateReducer {
-  const { coreProxy, UIData, governanceChainId } = useStoreContext();
+  const { coreProxy, UIData, defaultGovernanceChainId } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -88,6 +90,7 @@ export function useFund(): IReducerStateReducer {
     amount: "1",
     destinationAddress: EthereumAccountAddress(""),
     activeStateChannels: [],
+    stateChannelsFetched: false,
   };
 
   const [state, dispatch] = useReducer(
@@ -98,6 +101,7 @@ export function useFund(): IReducerStateReducer {
             ...state,
             error: false,
             tokenSelectorOptions: action.payload,
+            dataFetched: true
           };
         case EActionTypes.TOKEN_SELECTED:
           return {
@@ -122,6 +126,7 @@ export function useFund(): IReducerStateReducer {
             ...state,
             error: false,
             activeStateChannels: action.payload,
+            stateChannelsFetched: true
           };
         case EActionTypes.STATE_CHANNEL_SELECTED:
           return {
@@ -154,11 +159,11 @@ export function useFund(): IReducerStateReducer {
       try {
         if (cancelRequest) return;
         // get data from coreProxy
-        coreProxy
-          ?.getTokenInformation()
+        coreProxy?.payments
+          .getTokenInformation()
           .map((tokenInformation: TokenInformation[]) => {
             const tokenInformationList = tokenInformation.filter(
-              (tokenInfo) => tokenInfo.chainId == governanceChainId,
+              (tokenInfo) => tokenInfo.chainId == defaultGovernanceChainId,
             );
             // prepare balances
             setLoading(false);
@@ -180,7 +185,7 @@ export function useFund(): IReducerStateReducer {
           },
         );
 
-        coreProxy.getActiveStateChannels().match(
+        coreProxy.payments.getActiveStateChannels().match(
           (stateChannels) => {
             dispatch({
               type: EActionTypes.FETCHED_STATE_CHANNELS,
@@ -237,7 +242,7 @@ export function useFund(): IReducerStateReducer {
     stateChannelAddress: EthereumContractAddress,
   ) => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .depositFunds(
         stateChannelAddress,
         tokenAddress,
@@ -267,7 +272,7 @@ export function useFund(): IReducerStateReducer {
     stateChannelAddress: EthereumContractAddress,
   ) => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .withdrawFunds(
         stateChannelAddress,
         tokenAddress,
@@ -288,7 +293,7 @@ export function useFund(): IReducerStateReducer {
 
   const mintTokens = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .mintTestToken(
         BigNumberString(
           ethers.utils.parseEther(state.amount || "1").toString(),

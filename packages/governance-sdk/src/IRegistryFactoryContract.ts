@@ -6,6 +6,8 @@ import {
 import { ethers, BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
+import { ContractOverrides } from "@governance-sdk/ContractOverrides";
+
 export interface IRegistryFactoryContract {
   addressToName(
     registryAddress: EthereumContractAddress,
@@ -28,14 +30,19 @@ export interface IRegistryFactoryContract {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
+    overrides?: ContractOverrides,
   ): ResultAsync<void, RegistryFactoryContractError>;
-  modules(
-    index: number,
-  ): ResultAsync<EthereumContractAddress, RegistryFactoryContractError>;
-  getModuleName(
-    moduleAddress: EthereumContractAddress,
-  ): ResultAsync<string, RegistryFactoryContractError>;
-  getNumberOfModules(): ResultAsync<number, RegistryFactoryContractError>;
+  createRegistry(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAccountAddress,
+    enumerable: boolean,
+    overrides?: ContractOverrides,
+  ): ResultAsync<void, RegistryFactoryContractError>;
+  getRegistrarDefaultAdminRoleMember(): ResultAsync<
+    EthereumAccountAddress[],
+    RegistryFactoryContractError
+  >;
 }
 
 export const IRegistryFactoryContractType = Symbol.for(

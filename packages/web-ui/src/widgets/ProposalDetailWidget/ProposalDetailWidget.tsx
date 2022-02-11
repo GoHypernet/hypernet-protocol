@@ -3,6 +3,7 @@ import {
   Proposal,
   EthereumAccountAddress,
   EProposalVoteSupport,
+  IpfsCID,
 } from "@hypernetlabs/objects";
 import { Box, Typography, Grid } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -16,6 +17,7 @@ import {
   GovernanceStatusTag,
   GovernanceButton,
 } from "@web-ui/components";
+import { hasProposalDescriptionHash } from "@web-ui/widgets/ProposalsWidget/ProposalsWidget";
 import { useStyles } from "@web-ui/widgets/ProposalDetailWidget/ProposalDetailWidget.style";
 
 const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
@@ -23,13 +25,18 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   proposalId,
 }: IProposalDetailWidgetParams) => {
   const classes = useStyles();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
   const [blockNumber, setBlockNumber] = useState<number>();
   const [accountAddress, setAccountAddress] =
     useState<EthereumAccountAddress>();
   const [supportStatus, setSupportStatus] = useState<EProposalVoteSupport>();
+  const [proposalDescriptionFromIPFS, setProposalDescriptionFromIPFS] =
+    useState<string>();
+
+  // This is set to true for some existing proposals in rinkeby.
+  const [showRawDescription, setShowRawDescription] = useState<boolean>();
 
   useEffect(() => {
     getProposalDetail();
@@ -42,10 +49,25 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       setAccountAddress(accounts[0]);
 
       // delegate votes, createProposal and then list all proposals
-      coreProxy
+      coreProxy.governance
         .getProposalDetails(proposalId)
         .map((proposal) => {
           setProposal(proposal);
+
+          if (!hasProposalDescriptionHash(proposal.description)) {
+            setShowRawDescription(true);
+            return;
+          }
+
+          const descriptionHash = viewUtils.getProposalDescriptionHash(
+            proposal.description,
+          );
+          coreProxy.governance
+            .getProposalDescription(IpfsCID(descriptionHash))
+            .map((description) => {
+              setProposalDescriptionFromIPFS(description);
+            })
+            .mapErr(handleCoreError);
         })
         .mapErr(handleCoreError);
 
@@ -67,7 +89,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const getProposalVotesReceipt = (account: EthereumAccountAddress) => {
     setLoading(true);
 
-    coreProxy
+    coreProxy.governance
       .getProposalVotesReceipt(proposalId, account)
       .map((proposalVoteReceipt) => {
         if (proposalVoteReceipt.hasVoted) {
@@ -101,7 +123,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const queueProposal = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .queueProposal(proposalId)
       .map((proposal) => {
         setProposal(proposal);
@@ -112,7 +134,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const cancelProposal = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .cancelProposal(proposalId)
       .map((proposal) => {
         setProposal(proposal);
@@ -123,7 +145,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const executeProposal = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .executeProposal(proposalId)
       .map((proposal) => {
         setProposal(proposal);
@@ -134,7 +156,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const castVote = (voteSupport: EProposalVoteSupport) => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
       .castVote(proposalId, voteSupport)
       .map((proposal) => {
         setProposal(proposal);
@@ -314,7 +336,13 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             {proposal?.endBlock}
           </Typography>
         </Box>
-        <GovernanceMarkdown source={proposal?.description} />
+        <GovernanceMarkdown
+          source={
+            showRawDescription
+              ? proposal?.description
+              : proposalDescriptionFromIPFS
+          }
+        />
       </Box>
     </Box>
   );

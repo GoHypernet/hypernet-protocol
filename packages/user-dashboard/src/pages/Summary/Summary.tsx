@@ -9,31 +9,31 @@ const Summary: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderBalancesWidget({
         selector: "balances-wrapper",
       })
       .mapErr(handleError);
 
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderGatewaysWidget({
         selector: "gateway-list-wrapper",
       })
       .mapErr(handleError);
 
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderLinksWidget({
         selector: "payments-wrapper",
       })
       .mapErr(handleError);
 
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderStateChannelsWidget({
         selector: "state-channels",
       })
       .mapErr(handleError);
 
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.payments
       .renderPublicIdentifierWidget({
         selector: "public-identifier",
       })

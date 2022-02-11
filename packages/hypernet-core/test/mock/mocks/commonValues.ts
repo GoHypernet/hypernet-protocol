@@ -27,6 +27,9 @@ import {
   Signature,
   TransferId,
   UnixTimestamp,
+  RegistryModulesNames,
+  RegistryNames,
+  RegistryName,
 } from "@hypernetlabs/objects";
 
 export const account = EthereumAccountAddress("account-address-1");
@@ -125,23 +128,6 @@ export const insuranceTransferAddress = EthereumContractAddress(
 export const parameterizedTransferAddress = EthereumContractAddress(
   "parameterizedTransferAddress",
 );
-export const gatewayRegistryAddress = EthereumContractAddress(
-  "gatewayRegistryAddress",
-);
-export const liquidityRegistryAddress = EthereumContractAddress(
-  "liquidityRegistryAddress",
-);
-export const tokenRegistryAddress = EthereumContractAddress(
-  "tokenRegistryAddress",
-);
-export const chainRegistryAddress = EthereumContractAddress(
-  "chainRegistryAddress",
-);
-
-export const hypernetProfileRegistryAddress = EthereumContractAddress(
-  "hypernetProfileRegistryAddress",
-);
-
 export const hypernetGovernorAddress = EthereumContractAddress(
   "hypernetGovernorAddress",
 );
@@ -150,13 +136,25 @@ export const registryFactoryAddress = EthereumContractAddress(
   "registryFactoryAddress",
 );
 
-export const batchModuleContract = EthereumContractAddress(
-  "batchModuleContract",
+const registryModulesNames = new RegistryModulesNames(
+  "Batch Minting",
+  "Lazy Minting",
+  "Merkle Drop",
 );
 
-export const governanceChainInformation = new GovernanceChainInformation(
+const registryNames = new RegistryNames(
+  RegistryName("Hypernet Profiles"),
+  RegistryName("Gateways"),
+  RegistryName("Liquidity Providers"),
+  RegistryName("Payment Tokens"),
+  RegistryName("Registry Modules"),
+  RegistryName("Hypernet.ID"),
+);
+
+export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   "Mock Chain",
   chainId,
+  true,
   true,
   channelFactoryAddress,
   transferRegistryAddress,
@@ -166,17 +164,13 @@ export const governanceChainInformation = new GovernanceChainInformation(
   parameterizedTransferAddress,
   hypernetGovernorAddress,
   registryFactoryAddress,
-  gatewayRegistryAddress,
-  liquidityRegistryAddress,
-  tokenRegistryAddress,
-  chainRegistryAddress,
-  hypernetProfileRegistryAddress,
-  batchModuleContract,
+  registryNames,
+  registryModulesNames,
   [ProviderUrl("http://localhost:8545")],
 );
 
-export const tokenRegistryId1 = RegistryTokenId(70916);
-export const tokenRegistryId2 = RegistryTokenId(103182);
+export const tokenRegistryId1 = RegistryTokenId(BigInt(70916));
+export const tokenRegistryId2 = RegistryTokenId(BigInt(103182));
 
 export const tokenRegistryEntry1 = new RegistryEntry(
   "TokenRegistryEntry1",

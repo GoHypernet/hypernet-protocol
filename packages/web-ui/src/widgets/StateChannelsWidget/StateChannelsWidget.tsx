@@ -24,7 +24,7 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
       useState<EthereumContractAddress>(EthereumContractAddress(""));
 
     useEffect(() => {
-      coreProxy.getActiveStateChannels().map((_stateChannels) => {
+      coreProxy.payments.getActiveStateChannels().map((_stateChannels) => {
         setStateChannels(_stateChannels);
         if (_stateChannels[0] != null) {
           setSelectedStateChannelAddress(_stateChannels[0].channelAddress);

@@ -9,6 +9,7 @@ import {
   PaymentId,
   GatewayUrl,
   IHypernetCore,
+  IHypernetPayments,
   Signature,
   PrivateCredentials,
   AcceptPaymentError,
@@ -59,8 +60,17 @@ import {
   InactiveGatewayError,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
   InitializeStatus,
   CoreInitializationErrors,
+  LazyMintingSignature,
+  IPFSUnavailableError,
+  ChainInformation,
+  chainConfig,
+  GovernanceChainInformation,
+  IHypernetGovernance,
+  IHypernetRegistries,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -91,6 +101,7 @@ import {
   GovernanceService,
   RegistryService,
   TokenInformationService,
+  InjectedProviderService,
 } from "@implementations/business";
 import {
   AccountsRepository,
@@ -123,6 +134,7 @@ import {
   IGovernanceService,
   IRegistryService,
   ITokenInformationService,
+  IInjectedProviderService,
 } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -139,7 +151,7 @@ import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
-import { StorageUtils } from "@implementations/data/utilities";
+import { RegistryUtils, StorageUtils } from "@implementations/data/utilities";
 import {
   BrowserNodeProvider,
   ConfigProvider,
@@ -153,15 +165,17 @@ import {
   CeramicUtils,
   MessagingProvider,
   BlockchainTimeUtils,
+  DIDDataStoreProvider,
+  IPFSUtils,
 } from "@implementations/utilities";
 import {
   GatewayConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
-  CeramicUtilsFactory,
   NonFungibleRegistryContractFactory,
+  RegistryFactoryContractFactory,
 } from "@implementations/utilities/factory";
-import { IStorageUtils } from "@interfaces/data/utilities";
+import { IRegistryUtils, IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -175,13 +189,15 @@ import {
   ICeramicUtils,
   IMessagingProvider,
   IBlockchainTimeUtils,
+  IDIDDataStoreProvider,
+  IIPFSUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
-  ICeramicUtilsFactory,
   IGatewayConnectorProxyFactory,
   INonFungibleRegistryContractFactory,
+  IRegistryFactoryContractFactory,
 } from "@interfaces/utilities/factory";
 
 /**
@@ -223,6 +239,7 @@ export class HypernetCore implements IHypernetCore {
   public onAccountChanged: Subject<EthereumAccountAddress>;
   public onGovernanceChainChanged: Subject<ChainId>;
   public onGovernanceAccountChanged: Subject<EthereumAccountAddress>;
+  public onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -238,6 +255,7 @@ export class HypernetCore implements IHypernetCore {
   protected localStorageUtils: ILocalStorageUtils;
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
+  protected registryUtils: IRegistryUtils;
   protected messagingProvider: IMessagingProvider;
 
   // Dependent on the browser node
@@ -245,13 +263,15 @@ export class HypernetCore implements IHypernetCore {
   protected vectorUtils: IVectorUtils;
   protected paymentUtils: IPaymentUtils;
   protected ceramicUtils: ICeramicUtils;
+  protected ipfsUtils: IIPFSUtils;
 
   // Factories
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
   protected nonFungibleRegistryContractFactory: INonFungibleRegistryContractFactory;
-  protected ceramicUtilsFactory: ICeramicUtilsFactory;
+  protected registryFactoryContractFactory: IRegistryFactoryContractFactory;
+  protected didDataStoreProvider: IDIDDataStoreProvider;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -275,6 +295,7 @@ export class HypernetCore implements IHypernetCore {
   protected governanceService: IGovernanceService;
   protected registryService: IRegistryService;
   protected tokenInformationService: ITokenInformationService;
+  protected injectedProviderService: IInjectedProviderService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -282,25 +303,22 @@ export class HypernetCore implements IHypernetCore {
   protected messagingListener: IMessagingListener;
   protected blockchainListener: IBlockchainListener;
 
-  protected _initializeResult: ResultAsync<
-    InitializeStatus,
-    CoreInitializationErrors
-  > | null;
-  protected _initialized: boolean;
-  protected _initializePromise: Promise<void>;
-  protected _initializePromiseResolve: (() => void) | null;
+  protected _registriesInitialized: Map<ChainId, boolean> = new Map();
+  protected _registriesInitializePromise: Map<ChainId, Promise<void>> =
+    new Map();
+  protected _registriesInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
 
-  protected _registriesInitialized: boolean;
-  protected _registriesInitializePromise: Promise<void>;
-  protected _registriesInitializePromiseResolve: (() => void) | null;
+  protected _governanceInitialized: Map<ChainId, boolean> = new Map();
+  protected _governanceInitializePromise: Map<ChainId, Promise<void>> =
+    new Map();
+  protected _governanceInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
 
-  protected _governanceInitialized: boolean;
-  protected _governanceInitializePromise: Promise<void>;
-  protected _governanceInitializePromiseResolve: (() => void) | null;
-
-  protected _paymentsInitialized: boolean;
-  protected _paymentsInitializePromise: Promise<void>;
-  protected _paymentsInitializePromiseResolve: (() => void) | null;
+  protected _paymentsInitialized: Map<ChainId, boolean> = new Map();
+  protected _paymentsInitializePromise: Map<ChainId, Promise<void>> = new Map();
+  protected _paymentsInitializePromiseResolve: Map<ChainId, () => void> =
+    new Map();
 
   protected _inControl: boolean;
 
@@ -346,6 +364,7 @@ export class HypernetCore implements IHypernetCore {
     this.onAccountChanged = new Subject();
     this.onGovernanceChainChanged = new Subject();
     this.onGovernanceAccountChanged = new Subject();
+    this.onGovernanceSignerUnavailable = new Subject();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -400,12 +419,14 @@ export class HypernetCore implements IHypernetCore {
       this.onAccountChanged,
       this.onGovernanceChainChanged,
       this.onGovernanceAccountChanged,
+      this.onGovernanceSignerUnavailable,
+      config?.defaultGovernanceChainId,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
     this.internalProviderFactory = new InternalProviderFactory(
-      this.configProvider,
+      this.contextProvider,
     );
     this.gatewayConnectorProxyFactory = new GatewayConnectorProxyFactory(
       this.configProvider,
@@ -422,6 +443,11 @@ export class HypernetCore implements IHypernetCore {
 
     this.nonFungibleRegistryContractFactory =
       new NonFungibleRegistryContractFactory(this.blockchainProvider);
+
+    this.registryFactoryContractFactory = new RegistryFactoryContractFactory(
+      this.contextProvider,
+      this.blockchainProvider,
+    );
 
     this.browserNodeFactory = new BrowserNodeFactory(
       this.configProvider,
@@ -442,7 +468,7 @@ export class HypernetCore implements IHypernetCore {
       this.browserNodeFactory,
     );
 
-    this.ceramicUtilsFactory = new CeramicUtilsFactory(
+    this.didDataStoreProvider = new DIDDataStoreProvider(
       this.configProvider,
       this.contextProvider,
       this.browserNodeProvider,
@@ -450,9 +476,8 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.ceramicUtils = new CeramicUtils(
-      this.configProvider,
       this.contextProvider,
-      this.browserNodeProvider,
+      this.didDataStoreProvider,
       this.logUtils,
     );
 
@@ -460,6 +485,12 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.ceramicUtils,
       this.localStorageUtils,
+      this.logUtils,
+    );
+
+    this.registryUtils = new RegistryUtils(
+      this.registryFactoryContractFactory,
+      this.contextProvider,
       this.logUtils,
     );
 
@@ -484,6 +515,12 @@ export class HypernetCore implements IHypernetCore {
       this.vectorUtils,
       this.browserNodeProvider,
       this.timeUtils,
+    );
+
+    this.ipfsUtils = new IPFSUtils(
+      this.configProvider,
+      this.localStorageUtils,
+      this.logUtils,
     );
 
     this.messagingProvider = new MessagingProvider(
@@ -536,6 +573,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.vectorUtils,
       this.storageUtils,
+      this.registryUtils,
       this.gatewayConnectorProxyFactory,
       this.logUtils,
     );
@@ -546,19 +584,23 @@ export class HypernetCore implements IHypernetCore {
 
     this.routerRepository = new RouterRepository(
       this.blockchainUtils,
+      this.registryUtils,
       this.blockchainProvider,
-      this.configProvider,
+      this.contextProvider,
     );
 
     this.governanceRepository = new GovernanceRepository(
       this.blockchainProvider,
-      this.configProvider,
+      this.contextProvider,
       this.logUtils,
+      this.ipfsUtils,
     );
 
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
-      this.configProvider,
+      this.contextProvider,
+      this.registryUtils,
+      this.didDataStoreProvider,
       this.logUtils,
     );
 
@@ -612,6 +654,13 @@ export class HypernetCore implements IHypernetCore {
     this.tokenInformationService = new TokenInformationService(
       this.tokenInformationRepository,
     );
+    this.injectedProviderService = new InjectedProviderService(
+      this.blockchainProvider,
+      this.localStorageUtils,
+      this.configProvider,
+      this.contextProvider,
+      this.logUtils,
+    );
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -647,97 +696,186 @@ export class HypernetCore implements IHypernetCore {
 
     // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()
     // before the call to initialize() is made
-    this._initializeResult = null;
-    this._initializePromiseResolve = null;
-    this._initialized = false;
-    this._initializePromise = new Promise((resolve) => {
-      this._initializePromiseResolve = resolve;
-    });
+    chainConfig.forEach((chainInformation, chainId) => {
+      this._registriesInitializePromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this._registriesInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
 
-    this._registriesInitialized = false;
-    this._registriesInitializePromiseResolve = null;
-    this._registriesInitializePromise = new Promise((resolve) => {
-      this._registriesInitializePromiseResolve = resolve;
-    });
+      this._governanceInitializePromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this._governanceInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
 
-    this._governanceInitialized = false;
-    this._governanceInitializePromiseResolve = null;
-    this._governanceInitializePromise = new Promise((resolve) => {
-      this._governanceInitializePromiseResolve = resolve;
-    });
-
-    this._paymentsInitialized = false;
-    this._paymentsInitializePromiseResolve = null;
-    this._paymentsInitializePromise = new Promise((resolve) => {
-      this._paymentsInitializePromiseResolve = resolve;
+      this._paymentsInitializePromise.set(
+        chainId,
+        new Promise((resolve) => {
+          this._paymentsInitializePromiseResolve.set(chainId, resolve);
+        }),
+      );
     });
   }
 
   /**
    * Returns the initialized status of this instance of Hypernet Core.
    */
-  public initialized(): ResultAsync<boolean, never> {
-    return this.configProvider.getConfig().andThen((config) => {
+  public initialized(chainId?: ChainId): ResultAsync<boolean, never> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
       if (
         config.governanceRequired == true &&
         config.paymentsRequired == true
       ) {
-        return ok(this._governanceInitialized && this._paymentsInitialized);
+        return ok(
+          this._governanceInitialized.get(governanceChainId) === true &&
+            this._paymentsInitialized.get(governanceChainId) === true,
+        );
       } else {
-        return ok(this._governanceInitialized || this._paymentsInitialized);
+        return ok(
+          this._governanceInitialized.get(governanceChainId) === true ||
+            this._paymentsInitialized.get(governanceChainId) === true,
+        );
       }
     });
   }
 
-  public waitInitialized(): ResultAsync<void, never> {
-    return this.configProvider.getConfig().andThen((config) => {
+  public waitInitialized(chainId?: ChainId): ResultAsync<void, never> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      const governanceInitializePromise =
+        this._governanceInitializePromise.get(governanceChainId);
+      const paymentsInitializePromise =
+        this._paymentsInitializePromise.get(governanceChainId);
+
+      if (
+        governanceInitializePromise == null ||
+        paymentsInitializePromise == null
+      ) {
+        throw new Error("Chain Id is not supported in chain config!");
+      }
+
       if (
         config.governanceRequired == true &&
         config.paymentsRequired == true
       ) {
         return ResultUtils.combine([
-          ResultAsync.fromSafePromise<void, never>(
-            this._governanceInitializePromise,
-          ),
-          ResultAsync.fromSafePromise<void, never>(
-            this._paymentsInitializePromise,
-          ),
+          ResultAsync.fromSafePromise<void, never>(governanceInitializePromise),
+          ResultAsync.fromSafePromise<void, never>(paymentsInitializePromise),
         ]).map(() => {});
       } else {
         return ResultUtils.race([
-          ResultAsync.fromSafePromise<void, never>(
-            this._governanceInitializePromise,
-          ),
-          ResultAsync.fromSafePromise<void, never>(
-            this._paymentsInitializePromise,
-          ),
+          ResultAsync.fromSafePromise<void, never>(governanceInitializePromise),
+          ResultAsync.fromSafePromise<void, never>(paymentsInitializePromise),
         ]).map(() => {});
       }
     });
   }
 
-  public registriesInitialized(): Result<boolean, never> {
-    return ok(this._registriesInitialized);
+  /**
+   * Initialize this instance of Hypernet Core
+   */
+  public initialize(
+    chainId?: ChainId,
+  ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+      this.registries.initializeRegistries(chainId),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      this.logUtils.debug(`Initializing Hypernet Protocol Core`);
+
+      return ResultUtils.combine([
+        this.governance.initializeGovernance(chainId).orElse((e) => {
+          this.logUtils.error(e);
+          if (config.governanceRequired === true) {
+            return errAsync(e);
+          } else {
+            return okAsync(context.initializeStatus);
+          }
+        }),
+        this.payments.initializePayments(chainId).orElse((e) => {
+          this.logUtils.error(e);
+          if (config.paymentsRequired === true) {
+            return errAsync(e);
+          } else {
+            return okAsync(context.initializeStatus);
+          }
+        }),
+      ]).andThen(() => {
+        return okAsync(context.initializeStatus);
+      });
+    });
   }
 
-  public waitRegistriesInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._registriesInitializePromise);
+  private initializeBlockchainProvider(
+    chainId?: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
+    // Initialize blockchain provider
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [context, config] = vals;
+      const governanceChainId =
+        chainId || context.governanceChainInformation.chainId;
+
+      return this.blockchainProvider
+        .initialize(governanceChainId)
+        .andThen(() => {
+          context.initializeStatus.blockchainProviderInitialized.set(
+            governanceChainId,
+            true,
+          );
+
+          if (chainId != null) {
+            const chainInfo = config.chainInformation.get(chainId);
+
+            if (!(chainInfo instanceof GovernanceChainInformation)) {
+              return errAsync(
+                new InvalidParametersError(
+                  "Provided Chain Id does not have chain information object",
+                ),
+              );
+            }
+
+            context.governanceChainInformation = chainInfo;
+            context.onGovernanceChainChanged.next(governanceChainId);
+          }
+
+          return this.contextProvider
+            .setContext(context)
+            .andThen(() => {
+              // Make sure that main provider network is set to the correct governance chain id
+              return this.switchProviderNetwork(governanceChainId);
+            })
+            .andThen(() => {
+              return this.blockchainListener.initialize();
+            });
+        });
+    });
   }
 
-  public governanceInitialized(): Result<boolean, never> {
-    return ok(this._governanceInitialized);
-  }
-
-  public waitGovernanceInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._governanceInitializePromise);
-  }
-
-  public paymentsInitialized(): Result<boolean, never> {
-    return ok(this._paymentsInitialized);
-  }
-
-  public waitPaymentsInitialized(): ResultAsync<void, never> {
-    return ResultAsync.fromSafePromise(this._paymentsInitializePromise);
+  public getInitializationStatus(): ResultAsync<InitializeStatus, never> {
+    return this.contextProvider.getContext().map((context) => {
+      return context.initializeStatus;
+    });
   }
 
   /**
@@ -760,585 +898,6 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  /**
-   * Returns the (vector) pubId associated with this instance of HypernetCore.
-   */
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, never> {
-    return this.contextProvider
-      .getInitializedContext()
-      .map((context) => {
-        return context.publicIdentifier;
-      })
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  public getActiveStateChannels(): ResultAsync<
-    ActiveStateChannel[],
-    VectorError | BlockchainUnavailableError | PersistenceError
-  > {
-    return this.accountService.getActiveStateChannels().mapErr((e) => {
-      this.logUtils.error(e);
-      return e;
-    });
-  }
-
-  public createStateChannel(
-    routerPublicIdentifiers: PublicIdentifier[],
-    chainId: ChainId,
-  ): ResultAsync<
-    ActiveStateChannel,
-    BlockchainUnavailableError | VectorError | PersistenceError
-  > {
-    return this.accountService
-      .createStateChannel(routerPublicIdentifiers, chainId)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  /**
-   * Deposit funds into Hypernet Core.
-   * @param assetAddress the Ethereum address of the token to deposit
-   * @param amount the amount of the token to deposit
-   */
-  public depositFunds(
-    channelAddress: EthereumContractAddress,
-    assetAddress: EthereumContractAddress,
-    amount: BigNumberString,
-  ): ResultAsync<
-    Balances,
-    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
-  > {
-    return this.accountService
-      .depositFunds(channelAddress, assetAddress, amount)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  /**
-   * Withdraw funds from Hypernet Core to a specified destination (Ethereum) address.
-   * @param assetAddress the address of the token to withdraw
-   * @param amount the amount of the token to withdraw
-   * @param destinationAddress the (Ethereum) address to withdraw to
-   */
-  public withdrawFunds(
-    channelAddress: EthereumContractAddress,
-    assetAddress: EthereumContractAddress,
-    amount: BigNumberString,
-    destinationAddress: EthereumAccountAddress,
-  ): ResultAsync<
-    Balances,
-    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
-  > {
-    return this.accountService
-      .withdrawFunds(channelAddress, assetAddress, amount, destinationAddress)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  /**
-   * Returns the current balances for this instance of Hypernet Core.
-   */
-  public getBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | BlockchainUnavailableError
-  > {
-    return this.accountService.getBalances().mapErr((e) => {
-      this.logUtils.error(e);
-      return e;
-    });
-  }
-
-  /**
-   * Return all Hypernet Links.
-   */
-  public getLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
-    return this.linkService.getLinks().mapErr((e) => {
-      this.logUtils.error(e);
-      return e;
-    });
-  }
-
-  /**
-   * Return all *active* Hypernet Links.
-   */
-  public getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
-    return this.linkService.getLinks().mapErr((e) => {
-      this.logUtils.error(e);
-      return e;
-    });
-  }
-
-  /**
-   * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
-   * @param paymentId
-   */
-  public acceptOffer(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | TransferCreationError
-    | VectorError
-    | BalancesUnavailableError
-    | BlockchainUnavailableError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | PaymentStakeError
-    | TransferResolutionError
-    | AcceptPaymentError
-    | InsufficientBalanceError
-    | InvalidPaymentIdError
-    | PaymentCreationError
-    | NonFungibleRegistryContractError
-  > {
-    return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
-      this.logUtils.error(e);
-      return e;
-    });
-  }
-
-  /**
-   * Pull funds for a given payment
-   * @param paymentId the payment for which to pull funds from
-   * @param amount the amount of funds to pull
-   */
-  public pullFunds(
-    paymentId: PaymentId,
-    amount: BigNumberString,
-  ): ResultAsync<Payment, VectorError | Error> {
-    return this.paymentService.pullFunds(paymentId, amount).mapErr((e) => {
-      this.logUtils.error(e);
-      return e;
-    });
-  }
-
-  /**
-   * Finalize a pull-payment.
-   */
-  // TODO
-  public async finalizePullPayment(
-    paymentId: PaymentId,
-    finalAmount: BigNumberString,
-  ): Promise<HypernetLink> {
-    throw new Error("Method not yet implemented.");
-  }
-
-  public repairPayments(
-    paymentIds: PaymentId[],
-  ): ResultAsync<
-    void,
-    | VectorError
-    | BlockchainUnavailableError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-    | InvalidPaymentIdError
-    | ProxyError
-  > {
-    return this.paymentService.repairPayments(paymentIds).map(() => {});
-  }
-
-  /**
-   * Initialize this instance of Hypernet Core
-   */
-  public initialize(): ResultAsync<InitializeStatus, CoreInitializationErrors> {
-    if (this._initializeResult != null) {
-      return this._initializeResult;
-    }
-
-    this._initializeResult = ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getContext(),
-      this.initializeRegistries(),
-    ]).andThen((vals) => {
-      const [config, context] = vals;
-      this.logUtils.debug(`Initializing Hypernet Protocol Core`);
-
-      return ResultUtils.combine([
-        this.initializeGovernance().orElse((e) => {
-          this.logUtils.error(e);
-          if (config.governanceRequired === true) {
-            return errAsync(e);
-          } else {
-            return okAsync(undefined);
-          }
-        }),
-        this.initializePayments().orElse((e) => {
-          this.logUtils.error(e);
-          if (config.paymentsRequired === true) {
-            return errAsync(e);
-          } else {
-            return okAsync(undefined);
-          }
-        }),
-      ]).andThen(() => {
-        return okAsync(context.initializeStatus);
-      });
-    });
-
-    return this._initializeResult;
-  }
-
-  private initializeBlockchainProvider(): ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError
-  > {
-    // Initialize blockchain provider
-    return this.contextProvider.getContext().andThen((context) => {
-      return this.blockchainProvider.initialize().andThen(() => {
-        context.initializeStatus.blockchainProviderInitialized = true;
-        return this.contextProvider.setContext(context);
-      });
-    });
-  }
-
-  public initializeRegistries(): ResultAsync<
-    void,
-    | GovernanceSignerUnavailableError
-    | BlockchainUnavailableError
-    | InvalidParametersError
-  > {
-    // Initialize registries contracts
-    return ResultUtils.combine([
-      this.contextProvider.getContext(),
-      this.configProvider.getConfig(),
-      this.initializeBlockchainProvider(),
-    ]).andThen((vals) => {
-      const [context, config] = vals;
-      if (context.initializeStatus.registriesInitialized === true) {
-        return okAsync(undefined);
-      }
-
-      return ResultUtils.combine([
-        this.registryRepository.initializeReadOnly(),
-        this.registryRepository.initializeForWrite(),
-      ]).andThen(() => {
-        if (this._registriesInitializePromiseResolve != null) {
-          this._registriesInitializePromiseResolve();
-        }
-
-        context.initializeStatus.registriesInitialized = true;
-        return this.contextProvider.setContext(context).andThen(() => {
-          return this.tokenInformationRepository
-            .initialize(config.governanceChainInformation.tokenRegistryAddress)
-            .orElse((e) => {
-              this.logUtils.error(e);
-              return okAsync(undefined);
-            });
-        });
-      });
-    });
-  }
-
-  public initializeGovernance(): ResultAsync<
-    void,
-    | GovernanceSignerUnavailableError
-    | BlockchainUnavailableError
-    | InvalidParametersError
-  > {
-    // Initialize governance contracts
-    return ResultUtils.combine([
-      this.contextProvider.getContext(),
-      this.initializeBlockchainProvider(),
-    ]).andThen((vals) => {
-      const [context] = vals;
-      if (context.initializeStatus.governanceInitialized === true) {
-        return okAsync(undefined);
-      }
-
-      return ResultUtils.combine([
-        this.governanceRepository.initializeReadOnly(),
-        this.governanceRepository.initializeForWrite(),
-      ]).andThen(() => {
-        if (this._governanceInitializePromiseResolve != null) {
-          this._governanceInitializePromiseResolve();
-        }
-
-        context.initializeStatus.governanceInitialized = true;
-        return this.contextProvider.setContext(context);
-      });
-    });
-  }
-
-  public initializePayments(): ResultAsync<void, CoreInitializationErrors> {
-    return ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getContext(),
-      this.initializeBlockchainProvider(),
-    ]).andThen((vals) => {
-      const [config, context] = vals;
-      if (context.initializeStatus.paymentsInitialized === true) {
-        return okAsync(undefined);
-      }
-
-      return this.initializeRegistries()
-        .andThen(() => {
-          this.logUtils.debug("Getting Ethereum accounts");
-          return this.accountRepository.getAccounts();
-        })
-        .andThen((accounts) => {
-          context.account = accounts[0];
-          this.logUtils.debug(`Obtained accounts: ${accounts}`);
-          return this.contextProvider.setContext(context);
-        })
-        .andThen(() => {
-          return this.ceramicUtils.initialize();
-        })
-        .andThen(() => {
-          return ResultUtils.combine([
-            this.accountRepository.getPublicIdentifier(),
-            this.accountRepository.getActiveStateChannels(),
-          ]);
-        })
-        .andThen((vals) => {
-          const [publicIdentifier, activeStateChannels] = vals;
-
-          this.logUtils.debug(
-            `Obtained active state channels: ${activeStateChannels}`,
-          );
-
-          context.publicIdentifier = publicIdentifier;
-          context.activeStateChannels = activeStateChannels;
-
-          return this.contextProvider.setContext(context);
-        })
-        .andThen(() => {
-          // By doing some active initialization, we can avoid whole categories
-          // of errors occuring post-initialization (ie, runtime), which makes the
-          // whole thing more reliable in operation.
-          this.logUtils.debug("Initializing payments utilities");
-          this.logUtils.debug("Initializing payments services");
-          return this.gatewayConnectorService.initialize();
-        })
-        .andThen(() => {
-          this.logUtils.debug("Initializing API listeners");
-          // Initialize anything that wants an initialized context
-          return ResultUtils.combine([
-            this.vectorAPIListener.initialize(),
-            this.gatewayConnectorListener.initialize(),
-            this.messagingListener.initialize(),
-            this.blockchainListener.initialize(),
-          ]);
-        })
-        .andThen(() => {
-          this.logUtils.debug("Initialized all internal services");
-          return this.gatewayConnectorService.activateAuthorizedGateways();
-        })
-
-        .andThen(() => {
-          // If we are in debug mode, we'll print the registered transfers out.
-          if (config.debug) {
-            return this.browserNodeProvider
-              .getBrowserNode()
-              .andThen((browserNode) => {
-                return browserNode.getRegisteredTransfers(
-                  config.governanceChainId,
-                );
-              })
-              .map((registeredTransfers) => {
-                this.logUtils.debug("Registered Transfers");
-                this.logUtils.debug(registeredTransfers);
-              });
-          }
-          return okAsync(undefined);
-        })
-        .andThen(() => {
-          if (this._paymentsInitializePromiseResolve != null) {
-            this._paymentsInitializePromiseResolve();
-          }
-
-          context.initializeStatus.paymentsInitialized = true;
-          return this.contextProvider.setContext(context);
-        });
-    });
-  }
-
-  public getInitializationStatus(): ResultAsync<InitializeStatus, never> {
-    return this.contextProvider.getContext().map((context) => {
-      return context.initializeStatus;
-    });
-  }
-
-  /**
-   * Mints the test token to the Ethereum address associated with the Core account.
-   * @param amount the amount of test token to mint
-   */
-  public mintTestToken(
-    amount: BigNumberString,
-  ): ResultAsync<void, BlockchainUnavailableError> {
-    return this.contextProvider
-      .getInitializedContext()
-      .andThen((context) => {
-        return this.developmentService.mintTestToken(amount, context.account);
-      })
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  public authorizeGateway(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    | PersistenceError
-    | BalancesUnavailableError
-    | BlockchainUnavailableError
-    | GatewayAuthorizationDeniedError
-    | GatewayActivationError
-    | VectorError
-    | NonFungibleRegistryContractError
-  > {
-    return this.gatewayConnectorService
-      .authorizeGateway(gatewayUrl)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  public deauthorizeGateway(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    | PersistenceError
-    | ProxyError
-    | GatewayAuthorizationDeniedError
-    | BalancesUnavailableError
-    | BlockchainUnavailableError
-    | GatewayActivationError
-    | VectorError
-    | GatewayValidationError
-    | NonFungibleRegistryContractError
-    | InactiveGatewayError
-  > {
-    return this.gatewayConnectorService
-      .deauthorizeGateway(gatewayUrl)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
-    Map<GatewayUrl, boolean>,
-    PersistenceError | VectorError | BlockchainUnavailableError
-  > {
-    return this.gatewayConnectorService
-      .getAuthorizedGatewaysConnectorsStatus()
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  public getGatewayTokenInfo(
-    gatewayUrls: GatewayUrl[],
-  ): ResultAsync<
-    Map<GatewayUrl, GatewayTokenInfo[]>,
-    | ProxyError
-    | PersistenceError
-    | GatewayAuthorizationDeniedError
-    | BalancesUnavailableError
-    | BlockchainUnavailableError
-    | GatewayActivationError
-    | VectorError
-    | GatewayValidationError
-    | NonFungibleRegistryContractError
-    | InactiveGatewayError
-  > {
-    return this.gatewayConnectorService
-      .getGatewayTokenInfo(gatewayUrls)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  public getGatewayRegistrationInfo(
-    filter?: GatewayRegistrationFilter,
-  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> {
-    return this.gatewayConnectorService
-      .getGatewayRegistrationInfo(filter)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  public getGatewayEntryList(): ResultAsync<
-    Map<GatewayUrl, GatewayRegistrationInfo>,
-    NonFungibleRegistryContractError
-  > {
-    return this.gatewayRegistrationRepository.getGatewayEntryList();
-  }
-
-  public getAuthorizedGateways(): ResultAsync<
-    Map<GatewayUrl, Signature>,
-    PersistenceError | VectorError | BlockchainUnavailableError
-  > {
-    return this.gatewayConnectorService.getAuthorizedGateways().mapErr((e) => {
-      this.logUtils.error(e);
-      return e;
-    });
-  }
-
-  public closeGatewayIFrame(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    | GatewayConnectorError
-    | PersistenceError
-    | VectorError
-    | BlockchainUnavailableError
-    | ProxyError
-    | GatewayAuthorizationDeniedError
-    | BalancesUnavailableError
-    | GatewayActivationError
-    | GatewayValidationError
-    | NonFungibleRegistryContractError
-    | InactiveGatewayError
-  > {
-    return this.gatewayConnectorService
-      .closeGatewayIFrame(gatewayUrl)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
-  public displayGatewayIFrame(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    | GatewayConnectorError
-    | PersistenceError
-    | VectorError
-    | BlockchainUnavailableError
-    | ProxyError
-    | GatewayAuthorizationDeniedError
-    | BalancesUnavailableError
-    | GatewayActivationError
-    | GatewayValidationError
-    | NonFungibleRegistryContractError
-    | InactiveGatewayError
-  > {
-    return this.gatewayConnectorService
-      .displayGatewayIFrame(gatewayUrl)
-      .mapErr((e) => {
-        this.logUtils.error(e);
-        return e;
-      });
-  }
-
   public providePrivateCredentials(
     privateKey: string | null,
     mnemonic: string | null,
@@ -1357,418 +916,1304 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public getProposals(
-    pageNumber: number,
-    pageSize: number,
-  ): ResultAsync<Proposal[], HypernetGovernorContractError> {
-    return this.governanceService.getProposals(pageNumber, pageSize);
-  }
-
-  public createProposal(
-    name: string,
-    symbol: string,
-    owner: EthereumAccountAddress,
-    enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
-    return this.governanceService.createProposal(
-      name,
-      symbol,
-      owner,
-      enumerable,
-    );
-  }
-
-  public delegateVote(
-    delegateAddress: EthereumAccountAddress,
-    amount: number | null,
-  ): ResultAsync<void, ERC20ContractError> {
-    return this.governanceService.delegateVote(delegateAddress, amount);
-  }
-
-  public getProposalDetails(
-    proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
-    return this.governanceService.getProposalDetails(proposalId);
-  }
-
-  public castVote(
-    proposalId: string,
-    support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
-    return this.governanceService.castVote(proposalId, support);
-  }
-
-  public getProposalVotesReceipt(
-    proposalId: string,
-    voterAddress: EthereumAccountAddress,
-  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
-    return this.governanceService.getProposalVotesReceipt(
-      proposalId,
-      voterAddress,
-    );
-  }
-
-  public getRegistries(
-    pageNumber: number,
-    pageSize: number,
-    sortOrder: ERegistrySortOrder,
-  ): ResultAsync<
-    Registry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getRegistries(pageNumber, pageSize, sortOrder);
-  }
-
-  public getRegistryByName(
-    registryNames: string[],
-  ): ResultAsync<
-    Map<string, Registry>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getRegistryByName(registryNames);
-  }
-
-  public getRegistryByAddress(
-    registryAddresses: EthereumContractAddress[],
-  ): ResultAsync<
-    Map<EthereumContractAddress, Registry>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getRegistryByAddress(registryAddresses);
-  }
-
-  public getRegistryEntriesTotalCount(
-    registryNames: string[],
-  ): ResultAsync<
-    Map<string, number>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getRegistryEntriesTotalCount(registryNames);
-  }
-
-  public getRegistryEntries(
-    registryName: string,
-    pageNumber: number,
-    pageSize: number,
-    sortOrder: ERegistrySortOrder,
-  ): ResultAsync<
-    RegistryEntry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getRegistryEntries(
-      registryName,
-      pageNumber,
-      pageSize,
-      sortOrder,
-    );
-  }
-
-  public getRegistryEntryDetailByTokenId(
-    registryName: string,
-    tokenId: RegistryTokenId,
-  ): ResultAsync<
-    RegistryEntry,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getRegistryEntryDetailByTokenId(
-      registryName,
-      tokenId,
-    );
-  }
-
-  public queueProposal(
-    proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
-    return this.governanceService.queueProposal(proposalId);
-  }
-
-  public cancelProposal(
-    proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
-    return this.governanceService.cancelProposal(proposalId);
-  }
-
-  public executeProposal(
-    proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
-    return this.governanceService.executeProposal(proposalId);
-  }
-
-  public updateRegistryEntryTokenURI(
-    registryName: string,
-    tokenId: RegistryTokenId,
-    registrationData: string,
-  ): ResultAsync<
-    RegistryEntry,
-    | BlockchainUnavailableError
-    | RegistryFactoryContractError
-    | NonFungibleRegistryContractError
-    | RegistryPermissionError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.updateRegistryEntryTokenURI(
-      registryName,
-      tokenId,
-      registrationData,
-    );
-  }
-
-  public updateRegistryEntryLabel(
-    registryName: string,
-    tokenId: RegistryTokenId,
-    label: string,
-  ): ResultAsync<
-    RegistryEntry,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.updateRegistryEntryLabel(
-      registryName,
-      tokenId,
-      label,
-    );
-  }
-
-  public getProposalsCount(): ResultAsync<
-    number,
-    HypernetGovernorContractError
-  > {
-    return this.governanceService.getProposalsCount();
-  }
-
-  public getProposalThreshold(): ResultAsync<
-    number,
-    HypernetGovernorContractError
-  > {
-    return this.governanceService.getProposalThreshold();
-  }
-
-  public getVotingPower(
-    account: EthereumAccountAddress,
-  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
-    return this.governanceService.getVotingPower(account);
-  }
-
-  public getHyperTokenBalance(
-    account: EthereumAccountAddress,
-  ): ResultAsync<number, ERC20ContractError> {
-    return this.governanceService.getHyperTokenBalance(account);
-  }
-
-  public getNumberOfRegistries(): ResultAsync<
-    number,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getNumberOfRegistries();
-  }
-
-  public updateRegistryParams(
-    registryParams: RegistryParams,
-  ): ResultAsync<
-    Registry,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.updateRegistryParams(registryParams);
-  }
-
-  public createRegistryEntry(
-    registryName: string,
-    newRegistryEntry: RegistryEntry,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | ERC20ContractError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.createRegistryEntry(
-      registryName,
-      newRegistryEntry,
-    );
-  }
-
-  public transferRegistryEntry(
-    registryName: string,
-    tokenId: RegistryTokenId,
-    transferToAddress: EthereumAccountAddress,
-  ): ResultAsync<
-    RegistryEntry,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.transferRegistryEntry(
-      registryName,
-      tokenId,
-      transferToAddress,
-    );
-  }
-
-  public burnRegistryEntry(
-    registryName: string,
-    tokenId: RegistryTokenId,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.burnRegistryEntry(registryName, tokenId);
-  }
-
-  public createRegistryByToken(
-    name: string,
-    symbol: string,
-    registrarAddress: EthereumAccountAddress,
-    enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
-    return this.registryService.createRegistryByToken(
-      name,
-      symbol,
-      registrarAddress,
-      enumerable,
-    );
-  }
-
-  public grantRegistrarRole(
-    registryName: string,
-    address: EthereumAccountAddress | EthereumContractAddress,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.grantRegistrarRole(registryName, address);
-  }
-
-  public revokeRegistrarRole(
-    registryName: string,
-    address: EthereumAccountAddress | EthereumContractAddress,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.revokeRegistrarRole(registryName, address);
-  }
-
-  public renounceRegistrarRole(
-    registryName: string,
-    address: EthereumAccountAddress | EthereumContractAddress,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | GovernanceSignerUnavailableError
-  > {
-    return this.registryService.renounceRegistrarRole(registryName, address);
-  }
-
   public provideProviderId(
     providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError> {
     return this.accountService.provideProviderId(providerId);
   }
 
-  public getTokenInformation(): ResultAsync<TokenInformation[], never> {
-    return this.tokenInformationService.getTokenInformation();
+  public rejectProviderIdRequest(): ResultAsync<void, never> {
+    return this.blockchainProvider.rejectProviderIdRequest();
   }
 
-  public getTokenInformationForChain(
+  public retrieveChainInformationList(): ResultAsync<
+    Map<ChainId, ChainInformation>,
+    never
+  > {
+    return this.configProvider.getConfig().map((config) => {
+      return config.chainInformation;
+    });
+  }
+
+  public retrieveGovernanceChainInformation(): ResultAsync<
+    ChainInformation,
+    never
+  > {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).map((vals) => {
+      const [config, context] = vals;
+      const governanceChainId =
+        context.governanceChainInformation.chainId ||
+        config.defaultGovernanceChainId;
+
+      return config.chainInformation.get(governanceChainId) as ChainInformation;
+    });
+  }
+
+  public initializeForChainId(
     chainId: ChainId,
-  ): ResultAsync<TokenInformation[], never> {
-    return this.tokenInformationService.getTokenInformationForChain(chainId);
+  ): ResultAsync<void, CoreInitializationErrors> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      const [config, context] = vals;
+      if (config.chainInformation.get(chainId) == null) {
+        return errAsync(
+          new InvalidParametersError(
+            "Provided Chain Id does not have chain information object",
+          ),
+        );
+      }
+
+      let initializerList: ResultAsync<
+        InitializeStatus,
+        CoreInitializationErrors
+      >[] = [];
+
+      // Check if any of registries, governance or payments is initialized for the requested chain
+      for (let initializeStatus of context.initializeStatus.registriesInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.registries.initializeRegistries(chainId));
+          break;
+        }
+      }
+      for (let initializeStatus of context.initializeStatus.governanceInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.governance.initializeGovernance(chainId));
+          break;
+        }
+      }
+      for (let initializeStatus of context.initializeStatus.paymentsInitialized.values()) {
+        if (initializeStatus === true) {
+          initializerList.push(this.payments.initializePayments(chainId));
+          break;
+        }
+      }
+
+      return ResultUtils.combine(initializerList)
+        .andThen(() => {
+          return this.switchProviderNetwork(chainId);
+        })
+        .map(() => {
+          return this.localStorageUtils.setItem(
+            "governanceChainId",
+            chainId.toString(),
+          );
+        });
+    });
   }
 
-  public getTokenInformationByAddress(
-    tokenAddress: EthereumContractAddress,
-  ): ResultAsync<TokenInformation | null, never> {
-    return this.tokenInformationService.getTokenInformationByAddress(
-      tokenAddress,
-    );
+  public switchProviderNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.contextProvider.getContext().andThen((context) => {
+      return this.injectedProviderService
+        .switchNetwork(chainId)
+        .andThen(() => {
+          return this.blockchainProvider.setGovernanceSigner(chainId);
+        })
+        .orElse((e) => {
+          const errorMessage =
+            "Could not set Governance signer, switch to the correct network!";
+          this.logUtils.error(errorMessage);
+          context.onGovernanceSignerUnavailable.next(
+            new GovernanceSignerUnavailableError(e?.message || errorMessage, e),
+          );
+          return okAsync(undefined);
+        });
+    });
   }
 
-  public getRegistryEntryByOwnerAddress(
-    registryName: string,
-    ownerAddress: EthereumAccountAddress,
-    index: number,
-  ): ResultAsync<
-    RegistryEntry | null,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+  public getMainProviderChainId(): ResultAsync<
+    ChainId,
+    BlockchainUnavailableError
   > {
-    return this.registryService.getRegistryEntryByOwnerAddress(
-      registryName,
-      ownerAddress,
-      index,
-    );
+    return this.blockchainProvider.getMainProviderChainId();
   }
 
-  public getRegistryModules(): ResultAsync<
-    RegistryModule[],
-    RegistryFactoryContractError
-  > {
-    return this.registryService.getRegistryModules();
-  }
-
-  public createBatchRegistryEntry(
-    registryName: string,
-    newRegistryEntries: RegistryEntry[],
+  private initializeTokenInformation(
+    context: HypernetContext,
   ): ResultAsync<
     void,
-    | BatchModuleContractError
-    | RegistryFactoryContractError
-    | NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   > {
-    return this.registryService.createBatchRegistryEntry(
-      registryName,
-      newRegistryEntries,
-    );
+    const paymentTokensName =
+      context.governanceChainInformation.registryNames.paymentTokens;
+    if (paymentTokensName == null) {
+      throw new Error("paymentTokens name not found!");
+    }
+
+    return this.registryUtils
+      .getRegistryNameAddress(paymentTokensName)
+      .andThen((tokenRegistryAddress) => {
+        return this.tokenInformationRepository.initialize(tokenRegistryAddress);
+      });
   }
 
-  public getRegistryEntryListByOwnerAddress(
-    registryName: string,
-    ownerAddress: EthereumAccountAddress,
-  ): ResultAsync<
-    RegistryEntry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getRegistryEntryListByOwnerAddress(
-      registryName,
-      ownerAddress,
-    );
-  }
+  public payments: IHypernetPayments = {
+    paymentsInitialized: (chainId?: ChainId): ResultAsync<boolean, never> => {
+      return this.contextProvider.getContext().map((context) => {
+        const governanceChainId =
+          chainId || context.governanceChainInformation.chainId;
 
-  public getRegistryEntryListByUsername(
-    registryName: string,
-    username: EthereumAccountAddress,
-  ): ResultAsync<
-    RegistryEntry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError
-  > {
-    return this.registryService.getRegistryEntryListByUsername(
-      registryName,
-      username,
-    );
-  }
+        return this._paymentsInitialized.get(governanceChainId) === true;
+      });
+    },
+
+    waitPaymentsInitialized: (chainId?: ChainId): ResultAsync<void, never> => {
+      return this.contextProvider.getContext().andThen((context) => {
+        const governanceChainId =
+          chainId || context.governanceChainInformation.chainId;
+
+        const paymentsInitializePromise =
+          this._paymentsInitializePromise.get(governanceChainId);
+
+        if (paymentsInitializePromise == null) {
+          throw new Error("Chain Id is not supported in chain config!");
+        }
+
+        return ResultAsync.fromSafePromise<void, never>(
+          paymentsInitializePromise,
+        );
+      });
+    },
+
+    initializePayments: (
+      chainId?: ChainId,
+    ): ResultAsync<InitializeStatus, CoreInitializationErrors> => {
+      return ResultUtils.combine([
+        this.configProvider.getConfig(),
+        this.contextProvider.getContext(),
+        this.initializeBlockchainProvider(chainId),
+      ]).andThen((vals) => {
+        const [config, context] = vals;
+        const governanceChainId =
+          chainId || context.governanceChainInformation.chainId;
+
+        return this.registries
+          .initializeRegistries(chainId)
+          .andThen(() => {
+            this.logUtils.debug("Getting Ethereum accounts");
+            return this.accountRepository.getAccounts();
+          })
+          .andThen((accounts) => {
+            context.account = accounts[0];
+            this.logUtils.debug(`Obtained accounts: ${accounts}`);
+            return this.contextProvider.setContext(context);
+          })
+          .andThen(() => {
+            return this.ceramicUtils.initialize().orElse((e) => {
+              this.logUtils.error(
+                e.message || "Ceramic initialization failed!",
+              );
+              return okAsync(undefined);
+            });
+          })
+          .andThen(() => {
+            return ResultUtils.combine([
+              this.accountRepository.getPublicIdentifier(),
+              this.accountRepository.getActiveStateChannels(),
+            ]);
+          })
+          .andThen((vals) => {
+            const [publicIdentifier, activeStateChannels] = vals;
+
+            this.logUtils.debug(
+              `Obtained active state channels: ${activeStateChannels}`,
+            );
+
+            context.publicIdentifier = publicIdentifier;
+            context.activeStateChannels = activeStateChannels;
+
+            return this.contextProvider.setContext(context);
+          })
+          .andThen(() => {
+            // By doing some active initialization, we can avoid whole categories
+            // of errors occuring post-initialization (ie, runtime), which makes the
+            // whole thing more reliable in operation.
+            this.logUtils.debug("Initializing payments utilities");
+            this.logUtils.debug("Initializing payments services");
+            return this.gatewayConnectorService.initialize();
+          })
+          .andThen(() => {
+            this.logUtils.debug("Initializing API listeners");
+            // Initialize anything that wants an initialized context
+            return ResultUtils.combine([
+              this.vectorAPIListener.initialize(),
+              this.gatewayConnectorListener.initialize(),
+              this.messagingListener.initialize(),
+            ]);
+          })
+          .andThen(() => {
+            this.logUtils.debug("Initialized all internal services");
+            return this.gatewayConnectorService.activateAuthorizedGateways();
+          })
+
+          .andThen(() => {
+            // If we are in debug mode, we'll print the registered transfers out.
+            if (config.debug) {
+              return this.browserNodeProvider
+                .getBrowserNode()
+                .andThen((browserNode) => {
+                  return browserNode.getRegisteredTransfers(
+                    context.governanceChainInformation.chainId,
+                  );
+                })
+                .map((registeredTransfers) => {
+                  this.logUtils.debug("Registered Transfers");
+                  this.logUtils.debug(registeredTransfers);
+                });
+            }
+            return okAsync(undefined);
+          })
+          .andThen(() => {
+            const paymentsInitializePromiseResolve =
+              this._paymentsInitializePromiseResolve.get(governanceChainId);
+            if (paymentsInitializePromiseResolve != null) {
+              paymentsInitializePromiseResolve();
+            }
+
+            context.initializeStatus.paymentsInitialized.set(
+              governanceChainId,
+              true,
+            );
+            this._paymentsInitialized.set(governanceChainId, true);
+
+            return this.contextProvider.setContext(context);
+          })
+          .andThen(() => {
+            return okAsync(context.initializeStatus);
+          });
+      });
+    },
+
+    /**
+     * Returns the (vector) pubId associated with this instance of HypernetCore.
+     */
+    getPublicIdentifier: (): ResultAsync<PublicIdentifier, never> => {
+      return this.contextProvider
+        .getInitializedContext()
+        .map((context) => {
+          return context.publicIdentifier;
+        })
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    getActiveStateChannels: (): ResultAsync<
+      ActiveStateChannel[],
+      VectorError | BlockchainUnavailableError | PersistenceError
+    > => {
+      return this.accountService.getActiveStateChannels().mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
+    },
+
+    createStateChannel: (
+      routerPublicIdentifiers: PublicIdentifier[],
+      chainId: ChainId,
+    ): ResultAsync<
+      ActiveStateChannel,
+      BlockchainUnavailableError | VectorError | PersistenceError
+    > => {
+      return this.accountService
+        .createStateChannel(routerPublicIdentifiers, chainId)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    /**
+     * Deposit funds into Hypernet Core.
+     * @param assetAddress the Ethereum address of the token to deposit
+     * @param amount the amount of the token to deposit
+     */
+    depositFunds: (
+      channelAddress: EthereumContractAddress,
+      assetAddress: EthereumContractAddress,
+      amount: BigNumberString,
+    ): ResultAsync<
+      Balances,
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | VectorError
+      | Error
+    > => {
+      return this.accountService
+        .depositFunds(channelAddress, assetAddress, amount)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    /**
+     * Withdraw funds from Hypernet Core to a specified destination (Ethereum) address.
+     * @param assetAddress the address of the token to withdraw
+     * @param amount the amount of the token to withdraw
+     * @param destinationAddress the (Ethereum) address to withdraw to
+     */
+    withdrawFunds: (
+      channelAddress: EthereumContractAddress,
+      assetAddress: EthereumContractAddress,
+      amount: BigNumberString,
+      destinationAddress: EthereumAccountAddress,
+    ): ResultAsync<
+      Balances,
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | VectorError
+      | Error
+    > => {
+      return this.accountService
+        .withdrawFunds(channelAddress, assetAddress, amount, destinationAddress)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    /**
+     * Returns the current balances for this instance of Hypernet Core.
+     */
+    getBalances: (): ResultAsync<
+      Balances,
+      BalancesUnavailableError | VectorError | BlockchainUnavailableError
+    > => {
+      return this.accountService.getBalances().mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
+    },
+
+    /**
+     * Return all Hypernet Links.
+     */
+    getLinks: (): ResultAsync<HypernetLink[], VectorError | Error> => {
+      return this.linkService.getLinks().mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
+    },
+
+    /**
+     * Return all *active* Hypernet Links.
+     */
+    getActiveLinks: (): ResultAsync<HypernetLink[], VectorError | Error> => {
+      return this.linkService.getLinks().mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
+    },
+
+    /**
+     * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
+     * @param paymentId
+     */
+    acceptOffer: (
+      paymentId: PaymentId,
+    ): ResultAsync<
+      Payment,
+      | TransferCreationError
+      | VectorError
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | InvalidPaymentError
+      | InvalidParametersError
+      | PaymentStakeError
+      | TransferResolutionError
+      | AcceptPaymentError
+      | InsufficientBalanceError
+      | InvalidPaymentIdError
+      | PaymentCreationError
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+    > => {
+      return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
+    },
+
+    /**
+     * Pull funds for a given payment
+     * @param paymentId the payment for which to pull funds from
+     * @param amount the amount of funds to pull
+     */
+    pullFunds: (
+      paymentId: PaymentId,
+      amount: BigNumberString,
+    ): ResultAsync<Payment, VectorError | Error> => {
+      return this.paymentService.pullFunds(paymentId, amount).mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
+    },
+
+    /**
+     * Finalize a pull-payment.
+     */
+    // TODO
+    finalizePullPayment: (
+      paymentId: PaymentId,
+      finalAmount: BigNumberString,
+    ): Promise<HypernetLink> => {
+      throw new Error("Method not yet implemented.");
+    },
+
+    repairPayments: (
+      paymentIds: PaymentId[],
+    ): ResultAsync<
+      void,
+      | VectorError
+      | BlockchainUnavailableError
+      | InvalidPaymentError
+      | InvalidParametersError
+      | TransferResolutionError
+      | InvalidPaymentIdError
+      | ProxyError
+    > => {
+      return this.paymentService.repairPayments(paymentIds).map(() => {});
+    },
+
+    /**
+     * Mints the test token to the Ethereum address associated with the Core account.
+     * @param amount the amount of test token to mint
+     */
+    mintTestToken: (
+      amount: BigNumberString,
+    ): ResultAsync<void, BlockchainUnavailableError> => {
+      return this.contextProvider
+        .getInitializedContext()
+        .andThen((context) => {
+          return this.developmentService.mintTestToken(amount, context.account);
+        })
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    authorizeGateway: (
+      gatewayUrl: GatewayUrl,
+    ): ResultAsync<
+      void,
+      | PersistenceError
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | GatewayAuthorizationDeniedError
+      | GatewayActivationError
+      | VectorError
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+    > => {
+      return this.gatewayConnectorService
+        .authorizeGateway(gatewayUrl)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    deauthorizeGateway: (
+      gatewayUrl: GatewayUrl,
+    ): ResultAsync<
+      void,
+      | PersistenceError
+      | ProxyError
+      | GatewayAuthorizationDeniedError
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | GatewayActivationError
+      | VectorError
+      | GatewayValidationError
+      | NonFungibleRegistryContractError
+      | InactiveGatewayError
+      | RegistryFactoryContractError
+    > => {
+      return this.gatewayConnectorService
+        .deauthorizeGateway(gatewayUrl)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    getAuthorizedGatewaysConnectorsStatus: (): ResultAsync<
+      Map<GatewayUrl, boolean>,
+      PersistenceError | VectorError | BlockchainUnavailableError
+    > => {
+      return this.gatewayConnectorService
+        .getAuthorizedGatewaysConnectorsStatus()
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    getGatewayTokenInfo: (
+      gatewayUrls: GatewayUrl[],
+    ): ResultAsync<
+      Map<GatewayUrl, GatewayTokenInfo[]>,
+      | ProxyError
+      | PersistenceError
+      | GatewayAuthorizationDeniedError
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | GatewayActivationError
+      | VectorError
+      | GatewayValidationError
+      | NonFungibleRegistryContractError
+      | InactiveGatewayError
+      | RegistryFactoryContractError
+    > => {
+      return this.gatewayConnectorService
+        .getGatewayTokenInfo(gatewayUrls)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    getGatewayRegistrationInfo: (
+      filter?: GatewayRegistrationFilter,
+    ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> => {
+      return this.gatewayConnectorService
+        .getGatewayRegistrationInfo(filter)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    getGatewayEntryList: (): ResultAsync<
+      Map<GatewayUrl, GatewayRegistrationInfo>,
+      NonFungibleRegistryContractError | RegistryFactoryContractError
+    > => {
+      return this.gatewayRegistrationRepository.getGatewayEntryList();
+    },
+
+    getAuthorizedGateways: (): ResultAsync<
+      Map<GatewayUrl, Signature>,
+      PersistenceError | VectorError | BlockchainUnavailableError
+    > => {
+      return this.gatewayConnectorService
+        .getAuthorizedGateways()
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    getTokenInformation: (): ResultAsync<TokenInformation[], never> => {
+      return this.tokenInformationService.getTokenInformation();
+    },
+
+    getTokenInformationForChain: (
+      chainId: ChainId,
+    ): ResultAsync<TokenInformation[], never> => {
+      return this.tokenInformationService.getTokenInformationForChain(chainId);
+    },
+
+    getTokenInformationByAddress: (
+      tokenAddress: EthereumContractAddress,
+    ): ResultAsync<TokenInformation | null, never> => {
+      return this.tokenInformationService.getTokenInformationByAddress(
+        tokenAddress,
+      );
+    },
+
+    closeGatewayIFrame: (
+      gatewayUrl: GatewayUrl,
+    ): ResultAsync<
+      void,
+      | GatewayConnectorError
+      | PersistenceError
+      | VectorError
+      | BlockchainUnavailableError
+      | ProxyError
+      | GatewayAuthorizationDeniedError
+      | BalancesUnavailableError
+      | GatewayActivationError
+      | GatewayValidationError
+      | NonFungibleRegistryContractError
+      | InactiveGatewayError
+      | RegistryFactoryContractError
+    > => {
+      return this.gatewayConnectorService
+        .closeGatewayIFrame(gatewayUrl)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+
+    displayGatewayIFrame: (
+      gatewayUrl: GatewayUrl,
+    ): ResultAsync<
+      void,
+      | GatewayConnectorError
+      | PersistenceError
+      | VectorError
+      | BlockchainUnavailableError
+      | ProxyError
+      | GatewayAuthorizationDeniedError
+      | BalancesUnavailableError
+      | GatewayActivationError
+      | GatewayValidationError
+      | NonFungibleRegistryContractError
+      | InactiveGatewayError
+      | RegistryFactoryContractError
+    > => {
+      return this.gatewayConnectorService
+        .displayGatewayIFrame(gatewayUrl)
+        .mapErr((e) => {
+          this.logUtils.error(e);
+          return e;
+        });
+    },
+  };
+
+  public governance: IHypernetGovernance = {
+    governanceInitialized: (chainId?: ChainId): ResultAsync<boolean, never> => {
+      return this.contextProvider.getContext().map((context) => {
+        const governanceChainId =
+          chainId || context.governanceChainInformation.chainId;
+
+        return this._governanceInitialized.get(governanceChainId) === true;
+      });
+    },
+
+    waitGovernanceInitialized: (
+      chainId?: ChainId,
+    ): ResultAsync<void, never> => {
+      return this.contextProvider.getContext().andThen((context) => {
+        const governanceChainId =
+          chainId || context.governanceChainInformation.chainId;
+
+        const governanceInitializePromise =
+          this._governanceInitializePromise.get(governanceChainId);
+
+        if (governanceInitializePromise == null) {
+          throw new Error("Chain Id is not supported in chain config!");
+        }
+
+        return ResultAsync.fromSafePromise<void, never>(
+          governanceInitializePromise,
+        );
+      });
+    },
+
+    initializeGovernance: (
+      chainId?: ChainId,
+    ): ResultAsync<
+      InitializeStatus,
+      | GovernanceSignerUnavailableError
+      | BlockchainUnavailableError
+      | InvalidParametersError
+      | IPFSUnavailableError
+    > => {
+      // Initialize governance contracts
+      return ResultUtils.combine([
+        this.contextProvider.getContext(),
+        this.initializeBlockchainProvider(chainId),
+      ]).andThen((vals) => {
+        const [context] = vals;
+        const governanceChainId =
+          chainId || context.governanceChainInformation.chainId;
+
+        return ResultUtils.combine([
+          this.ipfsUtils.initialize(),
+          this.governanceRepository.initializeReadOnly(),
+          this.governanceRepository.initializeForWrite().orElse((e) => {
+            context.onGovernanceSignerUnavailable.next(
+              new GovernanceSignerUnavailableError(
+                e?.message || "Signer is not available",
+                e,
+              ),
+            );
+            return okAsync(undefined);
+          }),
+        ])
+          .andThen(() => {
+            const governanceInitializePromiseResolve =
+              this._governanceInitializePromiseResolve.get(governanceChainId);
+            if (governanceInitializePromiseResolve != null) {
+              governanceInitializePromiseResolve();
+            }
+
+            context.initializeStatus.governanceInitialized.set(
+              governanceChainId,
+              true,
+            );
+            this._governanceInitialized.set(governanceChainId, true);
+
+            return this.contextProvider.setContext(context);
+          })
+          .andThen(() => {
+            return okAsync(context.initializeStatus);
+          });
+      });
+    },
+
+    getProposals: (
+      pageNumber: number,
+      pageSize: number,
+    ): ResultAsync<Proposal[], HypernetGovernorContractError> => {
+      return this.governanceService.getProposals(pageNumber, pageSize);
+    },
+
+    createProposal: (
+      name: string,
+      symbol: string,
+      owner: EthereumAccountAddress,
+      enumerable: boolean,
+    ): ResultAsync<
+      Proposal,
+      IPFSUnavailableError | HypernetGovernorContractError
+    > => {
+      return this.governanceService.createProposal(
+        name,
+        symbol,
+        owner,
+        enumerable,
+      );
+    },
+
+    delegateVote: (
+      delegateAddress: EthereumAccountAddress,
+      amount: number | null,
+    ): ResultAsync<void, ERC20ContractError> => {
+      return this.governanceService.delegateVote(delegateAddress, amount);
+    },
+
+    getProposalDetails: (
+      proposalId: string,
+    ): ResultAsync<Proposal, HypernetGovernorContractError> => {
+      return this.governanceService.getProposalDetails(proposalId);
+    },
+
+    getProposalDescription: (
+      descriptionHash: string,
+    ): ResultAsync<
+      string,
+      IPFSUnavailableError | HypernetGovernorContractError
+    > => {
+      return this.governanceService.getProposalDescription(descriptionHash);
+    },
+
+    castVote: (
+      proposalId: string,
+      support: EProposalVoteSupport,
+    ): ResultAsync<Proposal, HypernetGovernorContractError> => {
+      return this.governanceService.castVote(proposalId, support);
+    },
+
+    getProposalVotesReceipt: (
+      proposalId: string,
+      voterAddress: EthereumAccountAddress,
+    ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> => {
+      return this.governanceService.getProposalVotesReceipt(
+        proposalId,
+        voterAddress,
+      );
+    },
+
+    getProposalsCount: (): ResultAsync<
+      number,
+      HypernetGovernorContractError
+    > => {
+      return this.governanceService.getProposalsCount();
+    },
+
+    getProposalThreshold: (): ResultAsync<
+      number,
+      HypernetGovernorContractError
+    > => {
+      return this.governanceService.getProposalThreshold();
+    },
+
+    getVotingPower: (
+      account: EthereumAccountAddress,
+    ): ResultAsync<
+      number,
+      HypernetGovernorContractError | ERC20ContractError
+    > => {
+      return this.governanceService.getVotingPower(account);
+    },
+
+    getHyperTokenBalance: (
+      account: EthereumAccountAddress,
+    ): ResultAsync<number, ERC20ContractError> => {
+      return this.governanceService.getHyperTokenBalance(account);
+    },
+
+    queueProposal: (
+      proposalId: string,
+    ): ResultAsync<Proposal, HypernetGovernorContractError> => {
+      return this.governanceService.queueProposal(proposalId);
+    },
+
+    cancelProposal: (
+      proposalId: string,
+    ): ResultAsync<Proposal, HypernetGovernorContractError> => {
+      return this.governanceService.cancelProposal(proposalId);
+    },
+
+    executeProposal: (
+      proposalId: string,
+    ): ResultAsync<Proposal, HypernetGovernorContractError> => {
+      return this.governanceService.executeProposal(proposalId);
+    },
+  };
+
+  public registries: IHypernetRegistries = {
+    registriesInitialized: (chainId?: ChainId): ResultAsync<boolean, never> => {
+      return this.contextProvider.getContext().map((context) => {
+        const governanceChainId =
+          chainId || context.governanceChainInformation.chainId;
+
+        return this._registriesInitialized.get(governanceChainId) === true;
+      });
+    },
+
+    waitRegistriesInitialized: (
+      chainId?: ChainId,
+    ): ResultAsync<void, never> => {
+      return this.contextProvider.getContext().andThen((context) => {
+        const governanceChainId =
+          chainId || context.governanceChainInformation.chainId;
+
+        const registriesInitializePromise =
+          this._registriesInitializePromise.get(governanceChainId);
+
+        if (registriesInitializePromise == null) {
+          throw new Error("Chain Id is not supported in chain config!");
+        }
+
+        return ResultAsync.fromSafePromise<void, never>(
+          registriesInitializePromise,
+        );
+      });
+    },
+
+    initializeRegistries: (
+      chainId?: ChainId,
+    ): ResultAsync<
+      InitializeStatus,
+      | GovernanceSignerUnavailableError
+      | BlockchainUnavailableError
+      | InvalidParametersError
+      | IPFSUnavailableError
+      | RegistryFactoryContractError
+      | ProxyError
+    > => {
+      // Initialize registries contracts
+      return this.initializeBlockchainProvider(chainId).andThen(() => {
+        // It's important to retrieve the context after initializing blockchain provider
+        return this.contextProvider.getContext().andThen((context) => {
+          return ResultUtils.combine([
+            this.registryRepository.initializeReadOnly(),
+            this.registryRepository.initializeForWrite().orElse((e) => {
+              context.onGovernanceSignerUnavailable.next(
+                new GovernanceSignerUnavailableError(
+                  e?.message || "Signer is not available",
+                  e,
+                ),
+              );
+              return okAsync(undefined);
+            }),
+            this.registryUtils.initializeRegistryNameAddresses(),
+            this.initializeTokenInformation(context).orElse((e) => {
+              this.logUtils.error(e);
+              return okAsync(undefined);
+            }),
+          ]).andThen(() => {
+            const governanceChainId =
+              chainId || context.governanceChainInformation.chainId;
+            const registriesInitializePromiseResolve =
+              this._registriesInitializePromiseResolve.get(governanceChainId);
+            if (registriesInitializePromiseResolve != null) {
+              registriesInitializePromiseResolve();
+            }
+
+            context.initializeStatus.registriesInitialized.set(
+              governanceChainId,
+              true,
+            );
+            this._registriesInitialized.set(governanceChainId, true);
+
+            return this.contextProvider.setContext(context).andThen(() => {
+              return okAsync(context.initializeStatus);
+            });
+          });
+        });
+      });
+    },
+
+    getRegistries: (
+      pageNumber: number,
+      pageSize: number,
+      sortOrder: ERegistrySortOrder,
+    ): ResultAsync<
+      Registry[],
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistries(
+        pageNumber,
+        pageSize,
+        sortOrder,
+      );
+    },
+
+    getRegistryByName: (
+      registryNames: RegistryName[],
+    ): ResultAsync<
+      Map<RegistryName, Registry>,
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistryByName(registryNames);
+    },
+
+    getRegistryByAddress: (
+      registryAddresses: EthereumContractAddress[],
+    ): ResultAsync<
+      Map<EthereumContractAddress, Registry>,
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistryByAddress(registryAddresses);
+    },
+
+    getRegistryEntriesTotalCount: (
+      registryNames: RegistryName[],
+    ): ResultAsync<
+      Map<RegistryName, number>,
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistryEntriesTotalCount(registryNames);
+    },
+
+    getRegistryEntries: (
+      registryName: RegistryName,
+      pageNumber: number,
+      pageSize: number,
+      sortOrder: ERegistrySortOrder,
+    ): ResultAsync<
+      RegistryEntry[],
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistryEntries(
+        registryName,
+        pageNumber,
+        pageSize,
+        sortOrder,
+      );
+    },
+
+    getRegistryEntryDetailByTokenId: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+    ): ResultAsync<
+      RegistryEntry,
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistryEntryDetailByTokenId(
+        registryName,
+        tokenId,
+      );
+    },
+
+    updateRegistryEntryTokenURI: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+      registrationData: string,
+    ): ResultAsync<
+      RegistryEntry,
+      | BlockchainUnavailableError
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | RegistryPermissionError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.updateRegistryEntryTokenURI(
+        registryName,
+        tokenId,
+        registrationData,
+      );
+    },
+
+    updateRegistryEntryLabel: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+      label: string,
+    ): ResultAsync<
+      RegistryEntry,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.updateRegistryEntryLabel(
+        registryName,
+        tokenId,
+        label,
+      );
+    },
+
+    getNumberOfRegistries: (): ResultAsync<
+      number,
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getNumberOfRegistries();
+    },
+
+    updateRegistryParams: (
+      registryParams: RegistryParams,
+    ): ResultAsync<
+      Registry,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.updateRegistryParams(registryParams);
+    },
+
+    createRegistryEntry: (
+      registryName: RegistryName,
+      newRegistryEntry: RegistryEntry,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | ERC20ContractError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.createRegistryEntry(
+        registryName,
+        newRegistryEntry,
+      );
+    },
+
+    transferRegistryEntry: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+      transferToAddress: EthereumAccountAddress,
+    ): ResultAsync<
+      RegistryEntry,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.transferRegistryEntry(
+        registryName,
+        tokenId,
+        transferToAddress,
+      );
+    },
+
+    burnRegistryEntry: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.burnRegistryEntry(registryName, tokenId);
+    },
+
+    createRegistryByToken: (
+      name: string,
+      symbol: string,
+      registrarAddress: EthereumAccountAddress,
+      enumerable: boolean,
+    ): ResultAsync<
+      void,
+      | RegistryFactoryContractError
+      | ERC20ContractError
+      | BlockchainUnavailableError
+    > => {
+      return this.registryService.createRegistryByToken(
+        name,
+        symbol,
+        registrarAddress,
+        enumerable,
+      );
+    },
+
+    grantRegistrarRole: (
+      registryName: RegistryName,
+      address: EthereumAccountAddress | EthereumContractAddress,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.grantRegistrarRole(registryName, address);
+    },
+
+    revokeRegistrarRole: (
+      registryName: RegistryName,
+      address: EthereumAccountAddress | EthereumContractAddress,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.revokeRegistrarRole(registryName, address);
+    },
+
+    renounceRegistrarRole: (
+      registryName: RegistryName,
+      address: EthereumAccountAddress | EthereumContractAddress,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | GovernanceSignerUnavailableError
+    > => {
+      return this.registryService.renounceRegistrarRole(registryName, address);
+    },
+
+    getRegistryEntryByOwnerAddress: (
+      registryName: RegistryName,
+      ownerAddress: EthereumAccountAddress,
+      index: number,
+    ): ResultAsync<
+      RegistryEntry | null,
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistryEntryByOwnerAddress(
+        registryName,
+        ownerAddress,
+        index,
+      );
+    },
+
+    getRegistryModules: (): ResultAsync<
+      RegistryModule[],
+      NonFungibleRegistryContractError | RegistryFactoryContractError
+    > => {
+      return this.registryService.getRegistryModules();
+    },
+
+    createBatchRegistryEntry: (
+      registryName: RegistryName,
+      newRegistryEntries: RegistryEntry[],
+    ): ResultAsync<
+      void,
+      | BatchModuleContractError
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.createBatchRegistryEntry(
+        registryName,
+        newRegistryEntries,
+      );
+    },
+
+    getRegistryEntryListByOwnerAddress: (
+      registryName: RegistryName,
+      ownerAddress: EthereumAccountAddress,
+    ): ResultAsync<
+      RegistryEntry[],
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistryEntryListByOwnerAddress(
+        registryName,
+        ownerAddress,
+      );
+    },
+
+    getRegistryEntryListByUsername: (
+      registryName: RegistryName,
+      username: EthereumAccountAddress,
+    ): ResultAsync<
+      RegistryEntry[],
+      RegistryFactoryContractError | NonFungibleRegistryContractError
+    > => {
+      return this.registryService.getRegistryEntryListByUsername(
+        registryName,
+        username,
+      );
+    },
+
+    submitLazyMintSignature: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+      ownerAddress: EthereumAccountAddress,
+      registrationData: string,
+    ): ResultAsync<
+      void,
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | PersistenceError
+      | VectorError
+    > => {
+      return this.registryService.submitLazyMintSignature(
+        registryName,
+        tokenId,
+        ownerAddress,
+        registrationData,
+      );
+    },
+
+    retrieveLazyMintingSignatures: (): ResultAsync<
+      LazyMintingSignature[],
+      PersistenceError | BlockchainUnavailableError | VectorError
+    > => {
+      return this.registryService.retrieveLazyMintingSignatures();
+    },
+
+    executeLazyMint: (
+      lazyMintingSignature: LazyMintingSignature,
+    ): ResultAsync<
+      void,
+      | InvalidParametersError
+      | PersistenceError
+      | VectorError
+      | BlockchainUnavailableError
+      | LazyMintModuleContractError
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+    > => {
+      return this.registryService.executeLazyMint(lazyMintingSignature);
+    },
+
+    revokeLazyMintSignature: (
+      lazyMintingSignature: LazyMintingSignature,
+    ): ResultAsync<
+      void,
+      PersistenceError | VectorError | BlockchainUnavailableError
+    > => {
+      return this.registryService.revokeLazyMintSignature(lazyMintingSignature);
+    },
+  };
 }

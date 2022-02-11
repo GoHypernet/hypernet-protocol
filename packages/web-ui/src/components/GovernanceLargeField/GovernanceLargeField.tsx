@@ -12,7 +12,7 @@ export interface GovernanceLargeFieldProps extends FieldAttributes<any> {
 }
 
 export interface ISelectOption {
-  label: string;
+  label: React.ReactNode;
   value: any;
 }
 

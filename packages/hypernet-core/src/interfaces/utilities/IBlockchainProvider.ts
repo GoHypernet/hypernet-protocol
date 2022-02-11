@@ -1,5 +1,6 @@
 import {
   BlockchainUnavailableError,
+  ChainId,
   GovernanceSignerUnavailableError,
   InvalidParametersError,
   PrivateCredentials,
@@ -17,10 +18,9 @@ export interface IBlockchainProvider {
   /**
    * This initializes the blockchain provider, and makes sure
    */
-  initialize(): ResultAsync<
-    void,
-    BlockchainUnavailableError | InvalidParametersError
-  >;
+  initialize(
+    chainId?: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError>;
 
   getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, never>;
   getGovernanceSigner(): ResultAsync<
@@ -48,8 +48,17 @@ export interface IBlockchainProvider {
   supplyProviderId(
     providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError>;
-
+  rejectProviderIdRequest(): ResultAsync<void, never>;
   isMetamask(): boolean;
+  setGovernanceSigner(
+    chainId: ChainId,
+  ): ResultAsync<
+    void,
+    | BlockchainUnavailableError
+    | InvalidParametersError
+    | GovernanceSignerUnavailableError
+  >;
+  getMainProviderChainId(): ResultAsync<ChainId, BlockchainUnavailableError>;
 }
 
 export const IBlockchainProviderType = Symbol.for("IBlockchainProvider");

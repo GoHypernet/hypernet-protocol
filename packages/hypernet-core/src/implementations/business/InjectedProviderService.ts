@@ -1,8 +1,9 @@
 import {
   BlockchainUnavailableError,
   EthereumContractAddress,
-  GovernanceChainInformation,
   NonFungibleRegistryContractError,
+  ChainId,
+  ChainInformation,
 } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
@@ -14,25 +15,36 @@ import {
 import { IInjectedProviderService } from "@interfaces/business";
 import { ethers } from "ethers";
 import { inject, injectable } from "inversify";
-import { okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
   IConfigProvider,
   IConfigProviderType,
+  IContextProvider,
+  IContextProviderType,
 } from "@interfaces/utilities";
 
 @injectable()
 export class InjectedProviderService implements IInjectedProviderService {
+  protected switchNetworkPromiseResolve: ((value: any) => void) | null = null;
+
   public constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(ILocalStorageUtilsType)
     protected localStorageUtils: ILocalStorageUtils,
-    @inject(ILogUtilsType) protected logUtils: ILogUtils,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
+
+  public generateSwitchNetworkPromise(): Promise<void> {
+    return new Promise((resolve) => {
+      this.switchNetworkPromiseResolve = resolve;
+    });
+  }
 
   public setupInjectedProvider(): ResultAsync<
     void,
@@ -45,10 +57,10 @@ export class InjectedProviderService implements IInjectedProviderService {
       ])
         .andThen(([config, provider]) => {
           return ResultUtils.combine([
-            this.addNetwork(config.governanceChainInformation, provider),
+            this.addNetwork(config.defaultGovernanceChainInformation, provider),
             this.addTokenAddress(
               "HyperToken",
-              config.governanceChainInformation.hypertokenAddress,
+              config.defaultGovernanceChainInformation.hypertokenAddress,
               provider,
             ),
           ]);
@@ -59,8 +71,100 @@ export class InjectedProviderService implements IInjectedProviderService {
     return okAsync(undefined);
   }
 
+  public switchNetwork(
+    chainId: ChainId,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    if (this.blockchainProvider.isMetamask()) {
+      return ResultUtils.combine([
+        this.configProvider.getConfig(),
+        this.contextProvider.getContext(),
+        this.blockchainProvider.getProvider(),
+      ]).andThen(([config, context, provider]) => {
+        const chainInformation = config.chainInformation.get(chainId);
+
+        if (chainInformation == null) {
+          return errAsync(
+            new BlockchainUnavailableError("Failed to switch network."),
+          );
+        }
+
+        return ResultAsync.fromPromise(
+          provider.send("wallet_switchEthereumChain", [
+            {
+              chainId: `0x${chainId.toString(16)}`,
+            },
+          ]),
+          (switchError) => {
+            return new BlockchainUnavailableError(
+              "wallet_switchEthereumChain has failed!",
+              switchError,
+            );
+          },
+        ).orElse((error) => {
+          const errorSource = (error as any)?.src;
+
+          if (errorSource?.code == 4902) {
+            this.logUtils.info(
+              `Adding ${chainInformation.name} network to provider.`,
+            );
+            return this.addNetwork(chainInformation, provider);
+          }
+          if (errorSource?.code == -32002) {
+            this.logUtils.info(
+              errorSource?.message ||
+                "Switching network request already pending.",
+            );
+
+            const switchNetworkPromise = this.generateSwitchNetworkPromise();
+
+            const subscription = context.onChainChanged.subscribe(
+              (newChainId) => {
+                if (
+                  this.switchNetworkPromiseResolve != null &&
+                  newChainId === chainId
+                ) {
+                  this.switchNetworkPromiseResolve(null);
+                }
+              },
+            );
+
+            return ResultUtils.race([
+              ResultAsync.fromSafePromise<void, never>(switchNetworkPromise),
+              ResultUtils.delay(20000),
+            ]).andThen(() => {
+              subscription.unsubscribe();
+
+              return this.blockchainProvider
+                .getMainProviderChainId()
+                .andThen((mainProviderChainId) => {
+                  // Check if the user did actually switched to the correct network
+                  if (mainProviderChainId !== chainId) {
+                    return errAsync(
+                      new BlockchainUnavailableError(
+                        "Unable to switch network",
+                        error.src,
+                      ),
+                    );
+                  }
+                  return okAsync(undefined);
+                });
+            });
+          }
+
+          return errAsync(
+            new BlockchainUnavailableError(
+              "Unable to switch network",
+              error.src,
+            ),
+          );
+        });
+      });
+    }
+    return okAsync(undefined);
+  }
+
   protected addNetwork(
-    governanceChainInfo: GovernanceChainInformation,
+    governanceChainInfo: ChainInformation,
     provider: ethers.providers.JsonRpcProvider,
   ): ResultAsync<void, BlockchainUnavailableError> {
     const network = governanceChainInfo.providerUrls[0];

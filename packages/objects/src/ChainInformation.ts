@@ -1,12 +1,15 @@
 import { ChainId } from "@objects/ChainId";
 import { EthereumContractAddress } from "@objects/EthereumContractAddress";
+import { RegistryModulesNames } from "@objects/RegistryModulesNames";
 import { ProviderUrl } from "@objects/ProviderUrl";
+import { RegistryNames } from "@objects/RegistryNames";
 
 export class ChainInformation {
   constructor(
     public name: string,
     public chainId: ChainId,
     public hasGovernance: boolean,
+    public isDev: boolean,
     public channelFactoryAddress: EthereumContractAddress,
     public transferRegistryAddress: EthereumContractAddress,
     public hypertokenAddress: EthereumContractAddress,
@@ -15,12 +18,8 @@ export class ChainInformation {
     public parameterizedTransferAddress: EthereumContractAddress,
     public hypernetGovernorAddress: EthereumContractAddress | null,
     public registryFactoryAddress: EthereumContractAddress | null,
-    public gatewayRegistryAddress: EthereumContractAddress | null,
-    public liquidityRegistryAddress: EthereumContractAddress | null,
-    public tokenRegistryAddress: EthereumContractAddress | null,
-    public chainRegistryAddress: EthereumContractAddress | null,
-    public hypernetProfileRegistryAddress: EthereumContractAddress | null,
-    public batchModuleAddress: EthereumContractAddress | null,
+    public registryNames: RegistryNames,
+    public registryModulesNames: RegistryModulesNames,
     public providerUrls: ProviderUrl[],
   ) {}
 }
@@ -30,6 +29,7 @@ export class GovernanceChainInformation extends ChainInformation {
     public name: string,
     public chainId: ChainId,
     public hasGovernance: boolean,
+    public isDev: boolean,
     public channelFactoryAddress: EthereumContractAddress,
     public transferRegistryAddress: EthereumContractAddress,
     public hypertokenAddress: EthereumContractAddress,
@@ -38,18 +38,15 @@ export class GovernanceChainInformation extends ChainInformation {
     public parameterizedTransferAddress: EthereumContractAddress,
     public hypernetGovernorAddress: EthereumContractAddress,
     public registryFactoryAddress: EthereumContractAddress,
-    public gatewayRegistryAddress: EthereumContractAddress,
-    public liquidityRegistryAddress: EthereumContractAddress,
-    public tokenRegistryAddress: EthereumContractAddress,
-    public chainRegistryAddress: EthereumContractAddress,
-    public hypernetProfileRegistryAddress: EthereumContractAddress,
-    public batchModuleAddress: EthereumContractAddress,
+    public registryNames: RegistryNames,
+    public registryModulesNames: RegistryModulesNames,
     public providerUrls: ProviderUrl[],
   ) {
     super(
       name,
       chainId,
       hasGovernance,
+      isDev,
       channelFactoryAddress,
       transferRegistryAddress,
       hypertokenAddress,
@@ -58,12 +55,8 @@ export class GovernanceChainInformation extends ChainInformation {
       parameterizedTransferAddress,
       hypernetGovernorAddress,
       registryFactoryAddress,
-      gatewayRegistryAddress,
-      liquidityRegistryAddress,
-      tokenRegistryAddress,
-      chainRegistryAddress,
-      hypernetProfileRegistryAddress,
-      batchModuleAddress,
+      registryNames,
+      registryModulesNames,
       providerUrls,
     );
   }

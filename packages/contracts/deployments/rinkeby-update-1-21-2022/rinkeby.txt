@@ -1,0 +1,6 @@
+Deployment Wallet Address: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+RPC URL: https://station-hundred-assure-neighborhood.trycloudflare.com/http/
+Enumerable Registry Beacon Address: 0x83EdB20E1DCd6bC551687E4b7a2AaE45e99AC2c4
+Factory Gas Fee: 4154256
+Registry Beacon Address: 0xA07F6402a94AF42d7C293B22f8f97AeC201b2b1d
+Registry Gas Fee: 3898580

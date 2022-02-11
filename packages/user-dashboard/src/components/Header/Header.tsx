@@ -32,7 +32,7 @@ const Header: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.governance
       .renderVotingPowerWidget({
         selector: "voting-power-widget-wrapper",
         hideLoadingSpinner: true,
@@ -41,7 +41,7 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.governance
       .renderHypertokenBalanceWidget({
         selector: "hypertoken-balance-widget-wrapper",
         hideLoadingSpinner: true,
@@ -57,6 +57,13 @@ const Header: React.FC = () => {
           hideLoadingSpinner: true,
         })
         .mapErr(handleError);
+
+      hypernetWebIntegration.webUIClient
+        .renderChainSelectorWidget({
+          selector: "chain-selector-widget-wrapper",
+          hideLoadingSpinner: true,
+        })
+        .mapErr(handleError);
     }
   }, [isLargeScreen]);
 
@@ -67,6 +74,10 @@ const Header: React.FC = () => {
   const isHeaderItemSelected = (itemPath: string): boolean => {
     if (itemPath === ROUTES.PAYMENTS) {
       return pathname.startsWith(ROUTES.PAYMENTS);
+    }
+
+    if (itemPath === ROUTES.REGISTRIES) {
+      return pathname.startsWith(ROUTES.REGISTRIES) || pathname === ROUTES.ROOT;
     }
 
     return !!pathToRegexp(itemPath).exec(pathname);
@@ -122,10 +133,16 @@ const Header: React.FC = () => {
         />
 
         {isLargeScreen ? (
-          <Box
-            className={classes.widgetWrapper}
-            id="connected-account-widget-wrapper"
-          />
+          <>
+            <Box
+              className={classes.widgetWrapper}
+              id="connected-account-widget-wrapper"
+            />
+            <Box
+              className={classes.widgetWrapper}
+              id="chain-selector-widget-wrapper"
+            />
+          </>
         ) : (
           <MobileSidebarMenu />
         )}

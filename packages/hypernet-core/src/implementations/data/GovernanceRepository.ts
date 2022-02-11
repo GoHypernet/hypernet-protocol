@@ -18,6 +18,8 @@ import {
   ERC20ContractError,
   GovernanceSignerUnavailableError,
   InvalidParametersError,
+  IPFSUnavailableError,
+  IpfsCID,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGovernanceRepository } from "@interfaces/data";
@@ -28,8 +30,10 @@ import { ResultAsync } from "neverthrow";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
-  IConfigProvider,
-  IConfigProviderType,
+  IContextProvider,
+  IContextProviderType,
+  IIPFSUtils,
+  IIPFSUtilsType,
 } from "@interfaces/utilities";
 
 @injectable()
@@ -45,8 +49,9 @@ export class GovernanceRepository implements IGovernanceRepository {
   constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
-    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
+    @inject(IIPFSUtilsType) protected ipfsUtils: IIPFSUtils,
   ) {}
 
   public getProposals(
@@ -86,34 +91,50 @@ export class GovernanceRepository implements IGovernanceRepository {
     symbol: string,
     owner: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
-    const descriptionHash = ethers.utils.id(name);
+  ): ResultAsync<
+    Proposal,
+    IPFSUnavailableError | HypernetGovernorContractError
+  > {
+    const description = JSON.stringify({
+      name,
+      symbol,
+      owner,
+      enumerable,
+    });
+    return this.saveProposalDescriptionToIPFS(description).andThen((cid) => {
+      const nameWithDescriptionCID = name + ":" + cid;
+      const descriptionHash = ethers.utils.id(nameWithDescriptionCID);
 
-    const transferCalldata = this.registryFactoryContract
-      .getContract()
-      ?.interface.encodeFunctionData("createRegistry", [
-        name,
-        symbol,
-        owner,
-        enumerable,
-      ]);
+      const transferCalldata = this.registryFactoryContract
+        .getContract()
+        ?.interface.encodeFunctionData("createRegistry", [
+          name,
+          symbol,
+          owner,
+          enumerable,
+        ]);
 
-    const registryFactoryAddress =
-      this.registryFactoryContract.getContractAddress();
+      const registryFactoryAddress =
+        this.registryFactoryContract.getContractAddress();
 
-    return this.hypernetGovernorContract
-      .hashProposal(
-        registryFactoryAddress,
-        transferCalldata as string,
-        descriptionHash,
-      )
-      .andThen((proposalID) => {
-        return this.hypernetGovernorContract
-          .propose(registryFactoryAddress, transferCalldata as string, name)
-          .andThen(() => {
-            return this.getProposalDetails(proposalID);
-          });
-      });
+      return this.hypernetGovernorContract
+        .hashProposal(
+          registryFactoryAddress,
+          transferCalldata as string,
+          descriptionHash,
+        )
+        .andThen((proposalID) => {
+          return this.hypernetGovernorContract
+            .propose(
+              registryFactoryAddress,
+              transferCalldata as string,
+              nameWithDescriptionCID,
+            )
+            .andThen(() => {
+              return this.getProposalDetails(proposalID);
+            });
+        });
+    });
   }
 
   public delegateVote(
@@ -144,6 +165,20 @@ export class GovernanceRepository implements IGovernanceRepository {
         Number(proposal[3]), // proposalStartBlock
         Number(proposal[4]), // proposalEndBlock
       );
+    });
+  }
+
+  public getProposalDescription(
+    descriptionHash: IpfsCID,
+  ): ResultAsync<string, IPFSUnavailableError | HypernetGovernorContractError> {
+    return this.ipfsUtils.getFile(descriptionHash).andThen((res) => {
+      return ResultAsync.fromPromise(res.text(), (e) => {
+        this.logUtils.error(e);
+        return new IPFSUnavailableError(
+          "Failed to parse proposal description from IPFS",
+          e,
+        );
+      });
     });
   }
 
@@ -237,22 +272,22 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public initializeReadOnly(): ResultAsync<void, never> {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).map(([config, provider]) => {
+    ]).map(([context, provider]) => {
       this.provider = provider;
 
       this.hypernetGovernorContract = new HypernetGovernorContract(
         provider,
-        config.governanceChainInformation.hypernetGovernorAddress,
+        context.governanceChainInformation.hypernetGovernorAddress,
       );
       this.registryFactoryContract = new RegistryFactoryContract(
         provider,
-        config.governanceChainInformation.registryFactoryAddress,
+        context.governanceChainInformation.registryFactoryAddress,
       );
       this.hypertokenContract = new ERC20Contract(
         provider,
-        config.governanceChainInformation.hypertokenAddress,
+        context.governanceChainInformation.hypertokenAddress,
       );
     });
   }
@@ -264,23 +299,29 @@ export class GovernanceRepository implements IGovernanceRepository {
     | InvalidParametersError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceSigner(),
-    ]).map(([config, signer]) => {
+    ]).map(([context, signer]) => {
       this.signer = signer;
 
       this.hypernetGovernorContract = new HypernetGovernorContract(
         signer,
-        config.governanceChainInformation.hypernetGovernorAddress,
+        context.governanceChainInformation.hypernetGovernorAddress,
       );
       this.registryFactoryContract = new RegistryFactoryContract(
         signer,
-        config.governanceChainInformation.registryFactoryAddress,
+        context.governanceChainInformation.registryFactoryAddress,
       );
       this.hypertokenContract = new ERC20Contract(
         signer,
-        config.governanceChainInformation.hypertokenAddress,
+        context.governanceChainInformation.hypertokenAddress,
       );
     });
+  }
+
+  private saveProposalDescriptionToIPFS(
+    description: string,
+  ): ResultAsync<IpfsCID, IPFSUnavailableError> {
+    return this.ipfsUtils.saveFile({ content: description });
   }
 }

@@ -1,25 +1,26 @@
 import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
 import {
-  BlockchainUnavailableError,
   GatewayUrl,
   NonFungibleRegistryContractError,
   PublicIdentifier,
   RouterDetails,
   RouterSupportedToken,
+  RegistryFactoryContractError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { IRouterRepository } from "@interfaces/data";
 import { inject, injectable } from "inversify";
-import { errAsync, ResultAsync } from "neverthrow";
+import { ResultAsync, errAsync } from "neverthrow";
 
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
   IBlockchainUtils,
   IBlockchainUtilsType,
-  IConfigProvider,
-  IConfigProviderType,
+  IContextProvider,
+  IContextProviderType,
 } from "@interfaces/utilities";
+import { IRegistryUtils, IRegistryUtilsType } from "@interfaces/data/utilities";
 
 @injectable()
 export class RouterRepository implements IRouterRepository {
@@ -27,9 +28,10 @@ export class RouterRepository implements IRouterRepository {
 
   constructor(
     @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
+    @inject(IRegistryUtilsType) protected registryUtils: IRegistryUtils,
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
-    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     this.routerRegistrationInfoMap = new Map();
   }
@@ -38,65 +40,79 @@ export class RouterRepository implements IRouterRepository {
     publicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
     Map<PublicIdentifier, RouterDetails>,
-    NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   > {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([config, provider]) => {
+    ]).andThen(([context, provider]) => {
       const returnInfo = new Map<PublicIdentifier, RouterDetails>();
       const newRouterResults = new Array<
         ResultAsync<void, NonFungibleRegistryContractError>
       >();
 
-      const routerRegistryContract =
-        new NonFungibleRegistryEnumerableUpgradeableContract(
-          provider,
-          config.governanceChainInformation.liquidityRegistryAddress,
+      const liquidityProvidersName =
+        context.governanceChainInformation.registryNames.liquidityProviders;
+      if (liquidityProvidersName == null) {
+        return errAsync(
+          new RegistryFactoryContractError(
+            "liquidityProviders registry name not found!",
+          ),
         );
-
-      // Check for entries that are already cached.
-      for (const publicIdentifier of publicIdentifiers) {
-        const cachedRegistration =
-          this.routerRegistrationInfoMap.get(publicIdentifier);
-        if (cachedRegistration != null) {
-          returnInfo.set(publicIdentifier, cachedRegistration);
-        } else {
-          // We need to get the registration info that's not in the cache
-          newRouterResults.push(
-            routerRegistryContract
-              .getRegistryEntryByLabel(publicIdentifier)
-              .map((registryEntry) => {
-                if (registryEntry.tokenURI == null) {
-                  throw new Error(
-                    `Invalid registry entry in Liquidity Providers registry. Entry for ${publicIdentifier} has no tokenURI`,
-                  );
-                }
-                const parsedEntry = JSON.parse(
-                  registryEntry.tokenURI,
-                ) as IRouterDetailsEntry;
-
-                const routerDetails = new RouterDetails(
-                  publicIdentifier,
-                  parsedEntry.supportedTokens,
-                  parsedEntry.allowedGateways,
-                );
-
-                // Set it into the return info
-                returnInfo.set(publicIdentifier, routerDetails);
-                this.routerRegistrationInfoMap.set(
-                  publicIdentifier,
-                  routerDetails,
-                );
-              }),
-          );
-        }
       }
 
-      // Wait for all the new results, and return the final list
-      return ResultUtils.combine(newRouterResults).map(() => {
-        return returnInfo;
-      });
+      return this.registryUtils
+        .getRegistryNameAddress(liquidityProvidersName)
+        .andThen((gatewayRegistryAddress) => {
+          const routerRegistryContract =
+            new NonFungibleRegistryEnumerableUpgradeableContract(
+              provider,
+              gatewayRegistryAddress,
+            );
+
+          // Check for entries that are already cached.
+          for (const publicIdentifier of publicIdentifiers) {
+            const cachedRegistration =
+              this.routerRegistrationInfoMap.get(publicIdentifier);
+            if (cachedRegistration != null) {
+              returnInfo.set(publicIdentifier, cachedRegistration);
+            } else {
+              // We need to get the registration info that's not in the cache
+              newRouterResults.push(
+                routerRegistryContract
+                  .getRegistryEntryByLabel(publicIdentifier)
+                  .map((registryEntry) => {
+                    if (registryEntry.tokenURI == null) {
+                      throw new Error(
+                        `Invalid registry entry in Liquidity Providers registry. Entry for ${publicIdentifier} has no tokenURI`,
+                      );
+                    }
+                    const parsedEntry = JSON.parse(
+                      registryEntry.tokenURI,
+                    ) as IRouterDetailsEntry;
+
+                    const routerDetails = new RouterDetails(
+                      publicIdentifier,
+                      parsedEntry.supportedTokens,
+                      parsedEntry.allowedGateways,
+                    );
+
+                    // Set it into the return info
+                    returnInfo.set(publicIdentifier, routerDetails);
+                    this.routerRegistrationInfoMap.set(
+                      publicIdentifier,
+                      routerDetails,
+                    );
+                  }),
+              );
+            }
+          }
+
+          // Wait for all the new results, and return the final list
+          return ResultUtils.combine(newRouterResults).map(() => {
+            return returnInfo;
+          });
+        });
     });
   }
 }

@@ -11,7 +11,7 @@ const RegistryList: React.FC = () => {
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.registries
       .renderRegistryListWidget({
         selector: "registry-list-page-wrapper",
         onRegistryEntryListNavigate: (registryName: string) => {
@@ -19,6 +19,9 @@ const RegistryList: React.FC = () => {
         },
         onRegistryDetailNavigate: (registryName: string) => {
           history.push(`/registries/${registryName}`);
+        },
+        onLazyMintRequestsNavigate: () => {
+          history.push(`/lazy-minting-requests`);
         },
       })
       .mapErr(handleError);

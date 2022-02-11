@@ -35,6 +35,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         uint256[]  _registrationFee;
         address[] _burnAddress;
         uint256[] _burnFee;
+        string[] _baseURI;
     }
 
     // DFDL schema definition for metadata stored in tokenURI
@@ -83,6 +84,11 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     // flag used in conjunction with merkleRoot, if true then the merkleRoot can no 
     // longer be updated by the REGISTRAR_ROLE
     bool public frozen;
+
+    // base URI for computing {tokenURI}. If set, the resulting URI for each
+    // token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+    // by default, can be overriden in child contracts.
+    string public baseURI;
 
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
@@ -160,6 +166,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
             "NonFungibleRegistry: burnFee must be le 10000.");
             burnFee = params._burnFee[0]; 
         }
+        if (params._baseURI.length > 0) { baseURI = params._baseURI[0]; }
     }
 
     /// @notice setMerkleRoot enable or disable requirement for pre-registration
@@ -222,9 +229,9 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
-
         // user must approve the registry to collect the registration fee from their wallet
-        IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee);
+        require(IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee), "NonFungibleRegistry: token transfer failed.");
+
         _createLabeledToken(to, label, registrationData, tokenId);
 
         uint256 burnAmount = registrationFee * burnFee / 10000;
@@ -260,7 +267,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @param registrationData new data to store in the tokenURI
     function updateRegistration(uint256 tokenId, string calldata registrationData) external virtual {
         require(_storageCanBeUpdated(), "NonFungibleRegistry: Storage updating is disabled.");
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _setTokenURI(tokenId, registrationData);
         emit StorageUpdated(tokenId, keccak256(abi.encodePacked(registrationData)));
     }
@@ -271,7 +278,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @param label new data to associate with the token label
     function updateLabel(uint256 tokenId, string calldata label) external virtual {
         require(_labelCanBeChanged(), "NonFungibleRegistry: Label updating is disabled.");
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
         registryMap[label] = tokenId;
@@ -290,7 +297,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         uint256 tokenId
     ) public virtual override {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
 
         _transfer(from, to, tokenId);
@@ -307,7 +314,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         uint256 tokenId,
         bytes memory _data
     ) public virtual override {
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
         _safeTransfer(from, to, tokenId, _data);
     }
@@ -317,14 +324,14 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @param tokenId unique id to refence the target token
     function burn(uint256 tokenId) public virtual {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _burn(tokenId);
 
         // when burning, check if there is a registration fee tied to the token identity 
         if (identityStakes[tokenId].amount != 0) {
             // send the registration fee to the token burner
             // don't set a registration token you do not control/trust, otherwise, this could be used for re-entrancy attack
-            IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount);
+            require(IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount), "NonFungibleRegistry: token tansfer failed.");
             delete identityStakes[tokenId];
         }
     }
@@ -344,10 +351,17 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         delete registryMap[label];
     }
 
-    function _isApprovedOrOwnerOrRegistrar(address spender, uint256 tokenId) internal view virtual returns (bool) {
-        require(_exists(tokenId), "ERC721: operator query for nonexistent token");
-        address owner = ERC721Upgradeable.ownerOf(tokenId);
-        return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender) || hasRole(REGISTRAR_ROLE, spender));
+    // REGISTRAR_ROLE is approved for all transactions by default
+    function isApprovedForAll(
+        address _owner,
+        address _operator
+    ) public override view returns (bool isOperator) {
+
+        if (hasRole(REGISTRAR_ROLE, _operator)) {
+            return true;
+        }
+
+        return ERC721Upgradeable.isApprovedForAll(_owner, _operator);
     }
 
     /// @notice tokenURI view function that returns tokenURI associated with the target token
@@ -362,6 +376,36 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         returns (string memory) 
     {
         return ERC721URIStorageUpgradeable.tokenURI(tokenId);
+    }
+
+    /// @notice tokenURINoBase view function that strips baseURI from the output of tokenURI if it exists
+    /// @param tokenId unique id to refence the target token
+    function tokenURINoBase(
+        uint256 tokenId
+    ) 
+        external 
+        view 
+        virtual 
+        returns (string memory) 
+    {
+        bytes memory basebytes = bytes(baseURI);
+
+        if (basebytes.length == 0) {
+            // if there is no baseURI, return the full tokenURI
+            return ERC721URIStorageUpgradeable.tokenURI(tokenId);
+        } else {
+            // if there is a baseURI, strip it from the tokenURI
+            bytes memory uribytes = bytes(ERC721URIStorageUpgradeable.tokenURI(tokenId));
+            bytes memory uri = new bytes(uribytes.length-basebytes.length);
+            for (uint i = 0; i<uribytes.length-basebytes.length; ++i) {
+                uri[i] = uribytes[i+basebytes.length];
+            }
+            return string(uri);
+        }
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
     }
 
     function _beforeTokenTransfer(

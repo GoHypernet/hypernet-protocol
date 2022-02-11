@@ -47,6 +47,7 @@ import NonFungibleRegistryEnumerableUpgradeableAbi from "./artifacts/NonFungible
 import ParameterizedAbi from "./artifacts/Parameterized";
 import UpgradeableRegistryFactoryAbi from "./artifacts/UpgradeableRegistryFactory";
 import BatchModuleAbi from "./artifacts/BatchModule";
+import LazyMintModuleAbi from "./artifacts/LazyMintModule";
 
 const TransferAbis = {
   ERC721: ERC721Abi,
@@ -62,6 +63,7 @@ const GovernanceAbis = {
   NonFungibleRegistryEnumerableUpgradeable:
     NonFungibleRegistryEnumerableUpgradeableAbi,
   BatchModule: BatchModuleAbi,
+  LazyMintModule: LazyMintModuleAbi,
 };
 
 export { TransferAbis, GovernanceAbis };

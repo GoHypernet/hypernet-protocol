@@ -37,4 +37,9 @@ export const useStyles = makeStyles({
     cursor: "pointer",
     top: 38,
   },
+  bottomText: {
+    alignSelf: "flex-end",
+    color: colors.GRAY700,
+    marginTop: 24,
+  },
 });

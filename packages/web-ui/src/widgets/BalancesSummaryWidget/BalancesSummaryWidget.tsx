@@ -28,7 +28,7 @@ const BalancesSummaryWidget: React.FC<IBalancesSummaryWidget> = ({
     return (
       <GovernanceCard>
         <GovernanceEmptyState
-          title="Ups..!"
+          title="Oops..!"
           description="You don't have any Hypernet account yet, you need to authorize a gateway first."
         />
       </GovernanceCard>

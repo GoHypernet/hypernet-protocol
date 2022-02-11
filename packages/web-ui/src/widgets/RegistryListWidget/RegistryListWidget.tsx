@@ -6,7 +6,7 @@ import {
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryListWidgetParams } from "@web-ui/interfaces";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   GovernanceRegistryListItem,
@@ -23,6 +23,7 @@ const REGISTIRES_PER_PAGE = 3;
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryEntryListNavigate,
   onRegistryDetailNavigate,
+  onLazyMintRequestsNavigate,
 }: IRegistryListWidgetParams) => {
   const { coreProxy } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
@@ -37,19 +38,10 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   );
   const [createRegistryModalOpen, setCreateRegistryModalOpen] =
     useState<boolean>(false);
+  const mounted = useRef(false);
 
   useEffect(() => {
-    setLoading(true);
-    coreProxy
-      .getNumberOfRegistries()
-      .map((numberOfRegistries) => {
-        setRegistriesCount(numberOfRegistries);
-        if (!numberOfRegistries) {
-          setHasEmptyState(true);
-        }
-        setLoading(false);
-      })
-      .mapErr(handleCoreError);
+    getNumberOfRegistries();
   }, []);
 
   useEffect(() => {
@@ -59,25 +51,42 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   }, []);
 
   useEffect(() => {
-    getRegistries(page);
+    getRegistries();
   }, [page, registriesCount]);
 
   useEffect(() => {
-    getRegistries(1);
+    if (mounted.current) {
+      handleRegistryListRefresh();
+    } else {
+      mounted.current = true;
+    }
   }, [reversedSortingEnabled]);
 
-  const getRegistries = (pageNumber: number) => {
+  const getNumberOfRegistries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
+      .getNumberOfRegistries()
+      .map((numberOfRegistries) => {
+        setRegistriesCount(numberOfRegistries);
+        if (!numberOfRegistries) {
+          setHasEmptyState(true);
+        }
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
+  const getRegistries = () => {
+    setLoading(true);
+    coreProxy.registries
       .getRegistries(
-        pageNumber,
+        page,
         REGISTIRES_PER_PAGE,
         reversedSortingEnabled
           ? ERegistrySortOrder.REVERSED_ORDER
           : ERegistrySortOrder.DEFAULT,
       )
       .map((registries) => {
-        setPage(pageNumber);
         if (!registries.length) {
           setRegistries([]);
           setHasEmptyState(true);
@@ -88,6 +97,20 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
         setLoading(false);
       })
       .mapErr(handleCoreError);
+  };
+
+  const handleRegistryListRefresh = () => {
+    if (page === 1) {
+      getRegistries();
+    } else {
+      setPage(1);
+    }
+  };
+
+  const handleCreateRegistryWidgetClose = () => {
+    getNumberOfRegistries();
+    handleRegistryListRefresh();
+    setCreateRegistryModalOpen(false);
   };
 
   const getRegistryNotAllowedChipItems = (registry: Registry) => {
@@ -105,6 +128,13 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
       <GovernanceWidgetHeader
         label="Registries"
         headerActions={[
+          {
+            label: "Lazy Minting Requests",
+            onClick: () =>
+              onLazyMintRequestsNavigate && onLazyMintRequestsNavigate(),
+            variant: "outlined",
+            color: "primary",
+          },
           {
             label: "Create New Registry",
             onClick: () => setCreateRegistryModalOpen(true),
@@ -153,8 +183,8 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.numberOfEntries.toString(),
             },
             {
-              fieldTitle: "First Registrar Addresses",
-              fieldValue: registry.registrarAddresses.join("-"),
+              fieldTitle: "Registration Fee",
+              fieldValue: registry.registrationFee,
             },
           ]}
           actionButtonList={
@@ -192,11 +222,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
       {createRegistryModalOpen && (
         <CreateRegistryWidget
-          onCloseCallback={() => {
-            setReversedSortingEnabled(true);
-            getRegistries(1);
-            setCreateRegistryModalOpen(false);
-          }}
+          onCloseCallback={handleCreateRegistryWidgetClose}
           currentAccountAddress={accountAddress}
         />
       )}

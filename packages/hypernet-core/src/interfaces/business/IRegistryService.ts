@@ -14,6 +14,12 @@ import {
   GovernanceSignerUnavailableError,
   RegistryModule,
   BatchModuleContractError,
+  LazyMintModuleContractError,
+  PersistenceError,
+  VectorError,
+  LazyMintingSignature,
+  InvalidParametersError,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -27,9 +33,9 @@ export interface IRegistryService {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   getRegistryByName(
-    registryNames: string[],
+    registryNames: RegistryName[],
   ): ResultAsync<
-    Map<string, Registry>,
+    Map<RegistryName, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   getRegistryByAddress(
@@ -39,7 +45,7 @@ export interface IRegistryService {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   getRegistryEntries(
-    registryName: string,
+    registryName: RegistryName,
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
@@ -48,14 +54,14 @@ export interface IRegistryService {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   getRegistryEntryDetailByTokenId(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   updateRegistryEntryTokenURI(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
@@ -67,7 +73,7 @@ export interface IRegistryService {
     | GovernanceSignerUnavailableError
   >;
   updateRegistryEntryLabel(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
@@ -79,9 +85,9 @@ export interface IRegistryService {
     | GovernanceSignerUnavailableError
   >;
   getRegistryEntriesTotalCount(
-    registryNames: string[],
+    registryNames: RegistryName[],
   ): ResultAsync<
-    Map<string, number>,
+    Map<RegistryName, number>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
   getNumberOfRegistries(): ResultAsync<
@@ -99,7 +105,7 @@ export interface IRegistryService {
     | GovernanceSignerUnavailableError
   >;
   createRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
@@ -111,7 +117,7 @@ export interface IRegistryService {
     | GovernanceSignerUnavailableError
   >;
   transferRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
@@ -123,7 +129,7 @@ export interface IRegistryService {
     | GovernanceSignerUnavailableError
   >;
   burnRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
@@ -138,9 +144,14 @@ export interface IRegistryService {
     symbol: string,
     registrarAddress: EthereumAccountAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError>;
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | ERC20ContractError
+    | BlockchainUnavailableError
+  >;
   grantRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -151,7 +162,7 @@ export interface IRegistryService {
     | GovernanceSignerUnavailableError
   >;
   revokeRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -162,7 +173,7 @@ export interface IRegistryService {
     | GovernanceSignerUnavailableError
   >;
   renounceRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -173,7 +184,7 @@ export interface IRegistryService {
     | GovernanceSignerUnavailableError
   >;
   getRegistryEntryByOwnerAddress(
-    registryName: string,
+    registryName: RegistryName,
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
@@ -182,10 +193,10 @@ export interface IRegistryService {
   >;
   getRegistryModules(): ResultAsync<
     RegistryModule[],
-    RegistryFactoryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   >;
   createBatchRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     newRegistryEntries: RegistryEntry[],
   ): ResultAsync<
     void,
@@ -194,17 +205,62 @@ export interface IRegistryService {
     | NonFungibleRegistryContractError
   >;
   getRegistryEntryListByOwnerAddress(
-    registryName: string,
+    registryName: RegistryName,
     ownerAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
+  submitLazyMintSignature(
+    registryName: RegistryName,
+    tokenId: RegistryTokenId,
+    ownerAddress: EthereumAccountAddress,
+    registrationData: string,
+  ): ResultAsync<
+    void,
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+    | PersistenceError
+    | VectorError
+  >;
   getRegistryEntryListByUsername(
-    registryName: string,
+    registryName: RegistryName,
     username: string,
   ): ResultAsync<
     RegistryEntry[],
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
+  retrieveLazyMintingSignatures(): ResultAsync<
+    LazyMintingSignature[],
+    PersistenceError | BlockchainUnavailableError | VectorError
+  >;
+  executeLazyMint(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    | InvalidParametersError
+    | PersistenceError
+    | VectorError
+    | BlockchainUnavailableError
+    | LazyMintModuleContractError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+  >;
+  revokeLazyMintSignature(
+    lazyMintingSignature: LazyMintingSignature,
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
+  initializeReadOnly(): ResultAsync<void, never>;
+  initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 }
+
+export const IRegistryServiceType = Symbol.for("IRegistryService");

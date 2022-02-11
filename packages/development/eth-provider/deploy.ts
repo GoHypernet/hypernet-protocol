@@ -18,7 +18,7 @@ import { registerTransfer } from "../src.ts/utils";
 
 // important address
 const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
-const hyperKYCAddress = "0x821aEa9a577a9b44299B9c15c88cf3087F3b5544";
+const hypernetIDAddress = "0x821aEa9a577a9b44299B9c15c88cf3087F3b5544";
 const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
 const hypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 const enumerableRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
@@ -55,6 +55,9 @@ const func: DeployFunction = async () => {
       `Account ${deployer} has zero balance on chain ${chainId}, aborting migration`,
     );
   }
+
+  // We can simulate a chain with hypertoken on it or not
+  const includeHypertoken = process.env.INCLUDE_HYPERTOKEN == "1";
 
   ////////////////////////////////////////
   // Run the migration
@@ -119,21 +122,29 @@ const func: DeployFunction = async () => {
       "UpgradeableRegistryFactory",
       [
         timelockContractAddress,
-        ["Hypernet Profiles", "Gateways", "Liquidity Providers", "HyperID", "Tokens", "Chains"],
         [
-            "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
-            "Payment gateway signatures for the Hypernet Protocol payment network.", 
-            "Liquidity provider metadata for the Hypernet Protocol payment network.", 
-            "Hypernet.ID token registry.", 
-            "Officially supported payment tokens for the Hypernet Protocol payment network.", 
-            "Officially supported layer 1 chains for the Hypernet Protocol payment network."],
+          "Hypernet Profiles",
+          "Gateways",
+          "Liquidity Providers",
+          "Payment Tokens",
+          "Registry Modules",
+          "Hypernet.ID",
+        ],
+        [
+          "Customizable Web3 user profile tokens for the Hypernet Protocol.",
+          "Payment gateway signatures for the Hypernet Protocol payment network.",
+          "Liquidity provider metadata for the Hypernet Protocol payment network.",
+          "Officially supported payment tokens for the Hypernet Protocol payment network.",
+          "Official modules for extending Hypernet registry functionality.",
+          "Pseudo-anonymous identity verification for the web3 metaverse.",
+        ],
         [
           registryAccountAddress,
           registryAccountAddress,
           registryAccountAddress,
-          hyperKYCAddress,
           registryAccountAddress,
           registryAccountAddress,
+          hypernetIDAddress,
         ],
         enumerableRegistryAddress,
         nonenumerableRegistryAddress,
@@ -145,6 +156,9 @@ const func: DeployFunction = async () => {
       "TimelockController",
       [1, [governanceContractAddress], [governanceContractAddress]],
     ],
+    ["BatchModule", ["Batch Minting"]],
+    ["LazyMintModule", ["Lazy Minting"]],
+    ["MerkleModule", ["Merkle Drop"]],
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -269,6 +283,21 @@ const func: DeployFunction = async () => {
   await hyperpayTestTx.wait();
   await hyperpayHyperTx.wait();
   await hyperpayEthTx.wait();
+
+  // Hypernet.ID Wallet //////////////////////////////////
+  // Hypernet.ID address is a default address with all the eth in the world
+  const hypernetIDTestTx = await testTokenContract.transfer(
+    hypernetIDAddress,
+    amount,
+  );
+  const hypernetIDHyperTx = await hyperTokenContract.transfer(
+    hypernetIDAddress,
+    amount,
+  );
+
+  await hypernetIDTestTx.wait();
+  await hypernetIDHyperTx.wait();
+
   log.info("Rich uncle is now in the poor house");
 
   ////////////////////////////////////////
@@ -282,22 +311,29 @@ const func: DeployFunction = async () => {
   const liquidityRegistryAddress = await registryFactoryContract.nameToAddress(
     "Liquidity Providers",
   );
-  const hyperidRegistryAddress = await registryFactoryContract.nameToAddress(
-    "HyperID",
+  const regModulesRegistryAddress = await registryFactoryContract.nameToAddress(
+    "Registry Modules",
   );
   const tokenRegistryAddress = await registryFactoryContract.nameToAddress(
-    "Tokens",
+    "Payment Tokens",
   );
-  const chainRegistryAddress = await registryFactoryContract.nameToAddress(
-    "Chains",
+  const hyperidRegistryAddress = await registryFactoryContract.nameToAddress(
+    "Hypernet.ID",
   );
+
+  const batchMintAddress = "0x0d8cc4b8d15D4c3eF1d70af0071376fb26B5669b";
+  const lazyMintAddress = "0xEcFcaB0A285d3380E488A39B4BB21e777f8A4EaC";
+  const merkleMintAddress = "0x38cF23C52Bb4B13F051Aec09580a2dE845a7FA35";
 
   log.info(`Profiles Registry Address: ${profilesRegistryAddress}`);
   log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
   log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
   log.info(`HyperID Registry Address: ${hyperidRegistryAddress}`);
   log.info(`Token Registry Address: ${tokenRegistryAddress}`);
-  log.info(`Chain Registry Address: ${chainRegistryAddress}`);
+  log.info(`Registry Modules Registry Address: ${regModulesRegistryAddress}`);
+  log.info(`Batch Mint Module Address: ${batchMintAddress}`);
+  log.info(`Lazy Mint Module Address: ${lazyMintAddress}`);
+  log.info(`Merkle Drop Module Address: ${merkleMintAddress}`);
 
   const routerPublicIdentifier =
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
@@ -306,12 +342,43 @@ const func: DeployFunction = async () => {
     "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
 
   // make needed profile accounts
-  log.info("Creating account profiles")
+  log.info("Creating account profiles");
   const profileRegistryContract = new ethers.Contract(
     profilesRegistryAddress,
     NFRAbi,
     registrySigner,
   );
+
+  if (!includeHypertoken) {
+    log.info("Granting registrar role to Hypernet.ID Account");
+    // Get the registrar role on the Profile registry
+    const registrarRole = await profileRegistryContract.REGISTRAR_ROLE();
+
+    // Grant the Hypernet.ID account that role.
+    // This account will now be able to call register() rather than registerByToken().
+    // This is not exactly the same as if Hypertoken was missing on the chain
+    // but it will work for our purposes.
+    const grantHypernetIdTx = await profileRegistryContract.grantRole(
+      registrarRole,
+      hypernetIDAddress,
+    );
+  }
+
+  const abiCoder = ethers.utils.defaultAbiCoder;
+
+  log.info("Setting Hypertoken as registration token for Hypernet Profiles");
+  // construct call data via ABI encoding
+  const params = abiCoder.encode(
+    [
+      "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], string[])",
+    ],
+    [[[], [], [], [], [hypertokenContractAddress], [], [], [], []]],
+  );
+
+  const regTokenTx = await profileRegistryContract.setRegistryParameters(
+    params,
+  );
+  await regTokenTx.wait(3);
 
   // Mint a profile for the router
   const liquidityProfileTx = await profileRegistryContract.register(
@@ -556,103 +623,31 @@ const func: DeployFunction = async () => {
 
   ////////////////////////////////////////
   log.info("Deploying Chain Registry entries");
-  const chainRegistryContract = new ethers.Contract(
-    chainRegistryAddress,
+  const regModulesRegistryContract = new ethers.Contract(
+    regModulesRegistryAddress,
     NFRAbi,
     registrySigner,
   );
 
   // Mint tokens for some different tokens
   const chainTxs = [
-    await chainRegistryContract.register(
+    await regModulesRegistryContract.register(
       registryAccountAddress,
-      "1337",
-      JSON.stringify({
-        name: "Local Development Chain",
-        chainId: 1337,
-        channelFactoryAddress: "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
-        transferRegistryAddress: "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
-        hypertokenAddress: hypertokenContractAddress,
-        messageTransferAddress: "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6",
-        insuranceTransferAddress: "0x30753E4A8aad7F8597332E813735Def5dD395028",
-        parameterizedTransferAddress:
-          "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4",
-        hypernetGovernorAddress: governanceContractAddress,
-        registryFactoryAddress: registryFactoryContractAddress,
-        gatewayRegistryAddress: gatewayRegistryAddress,
-        liquidityRegistryAddress: liquidityRegistryAddress,
-        tokenRegistryAddress: tokenRegistryAddress,
-        chainRegistryAddress: chainRegistryAddress,
-        providerUrls: ["http://blockchain:8545"],
-      }),
+      "Batch Minting",
+      batchMintAddress,
       1,
     ),
-    await chainRegistryContract.register(
+    await regModulesRegistryContract.register(
       registryAccountAddress,
-      "1369",
-      JSON.stringify({
-        name: "Dev Environment Chain",
-        chainId: 1369,
-        channelFactoryAddress: "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
-        transferRegistryAddress: "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
-        hypertokenAddress: hypertokenContractAddress,
-        messageTransferAddress: "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6",
-        insuranceTransferAddress: "0x30753E4A8aad7F8597332E813735Def5dD395028",
-        parameterizedTransferAddress:
-          "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4",
-        hypernetGovernorAddress: governanceContractAddress,
-        registryFactoryAddress: registryFactoryContractAddress,
-        gatewayRegistryAddress: gatewayRegistryAddress,
-        liquidityRegistryAddress: liquidityRegistryAddress,
-        tokenRegistryAddress: tokenRegistryAddress,
-        chainRegistryAddress: chainRegistryAddress,
-        providerUrls: ["https://eth-provider-dev.hypernetlabs.io"],
-      }),
+      "Lazy Minting",
+      lazyMintAddress,
       2,
     ),
-    await chainRegistryContract.register(
+    await regModulesRegistryContract.register(
       registryAccountAddress,
-      "4",
-      JSON.stringify({
-        name: "Rinkeby",
-        chainId: 4,
-        channelFactoryAddress: "TODO",
-        transferRegistryAddress: "TODO",
-        hypertokenAddress: "TODO",
-        messageTransferAddress: "TODO",
-        insuranceTransferAddress: "TODO",
-        parameterizedTransferAddress: "TODO",
-        hypernetGovernorAddress: "TODO",
-        registryFactoryAddress: "TODO",
-        gatewayRegistryAddress: "TODO",
-        liquidityRegistryAddress: "TODO",
-        tokenRegistryAddress: "TODO",
-        chainRegistryAddress: "TODO",
-        providerUrls: ["TODO"],
-      }),
+      "Merkle Drop",
+      merkleMintAddress,
       3,
-    ),
-    await chainRegistryContract.register(
-      registryAccountAddress,
-      "1",
-      JSON.stringify({
-        name: "MainNet",
-        chainId: 1,
-        channelFactoryAddress: "TODO",
-        transferRegistryAddress: "TODO",
-        hypertokenAddress: "TODO",
-        messageTransferAddress: "TODO",
-        insuranceTransferAddress: "TODO",
-        parameterizedTransferAddress: "TODO",
-        hypernetGovernorAddress: "TODO",
-        registryFactoryAddress: "TODO",
-        gatewayRegistryAddress: "TODO",
-        liquidityRegistryAddress: "TODO",
-        tokenRegistryAddress: "TODO",
-        chainRegistryAddress: "TODO",
-        providerUrls: ["TODO"],
-      }),
-      4,
     ),
   ];
 

@@ -5,11 +5,13 @@ import {
   Balances,
   PublicIdentifier,
   GatewayUrl,
-  Signature,
   ActiveStateChannel,
   ChainId,
   EthereumAccountAddress,
   InitializeStatus,
+  chainConfig,
+  GovernanceChainInformation,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -66,13 +68,29 @@ export class ContextProvider implements IContextProvider {
     onAccountChanged: Subject<EthereumAccountAddress>,
     onGovernanceChainChanged: Subject<ChainId>,
     onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
+    onGovernanceSignerUnavailable: Subject<GovernanceSignerUnavailableError>,
+    defaultGovernanceChainId?: ChainId,
   ) {
+    const governanceChainInfo = chainConfig.get(
+      defaultGovernanceChainId || ChainId(1),
+    );
+    if (governanceChainInfo == null) {
+      throw new Error("Main net chain information does not exist!");
+    }
+
+    if (!(governanceChainInfo instanceof GovernanceChainInformation)) {
+      throw new Error(
+        `Invalid configuration! Governance chain ${governanceChainInfo} is not a GovernanceChainInformation`,
+      );
+    }
+
     this.context = new HypernetContext(
       null,
       null,
       null,
       false,
-      new InitializeStatus(false, false, false, false),
+      new InitializeStatus(new Map(), new Map(), new Map(), new Map()),
+      governanceChainInfo,
       onControlClaimed,
       onControlYielded,
       onPushPaymentSent,
@@ -108,6 +126,7 @@ export class ContextProvider implements IContextProvider {
       onAccountChanged,
       onGovernanceChainChanged,
       onGovernanceAccountChanged,
+      onGovernanceSignerUnavailable,
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {
@@ -144,6 +163,7 @@ export class ContextProvider implements IContextProvider {
           this.context.activeStateChannels || [],
           this.context.inControl,
           this.context.initializeStatus,
+          this.context.governanceChainInformation,
           this.context.onControlClaimed,
           this.context.onControlYielded,
           this.context.onPushPaymentSent,
@@ -179,6 +199,7 @@ export class ContextProvider implements IContextProvider {
           this.context.onAccountChanged,
           this.context.onGovernanceChainChanged,
           this.context.onGovernanceAccountChanged,
+          this.context.onGovernanceSignerUnavailable,
         ),
       );
     }

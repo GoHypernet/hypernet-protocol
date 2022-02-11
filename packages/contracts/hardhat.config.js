@@ -38,7 +38,6 @@ module.exports = {
     hardhat: {
       accounts: {
         accountsBalance: "10000000000000000000000",
-        mnemonic,
       },
       mining: {
         auto: true,
@@ -52,7 +51,7 @@ module.exports = {
         mnemonic,
       },
       chainId: 31337,
-      url: 'http://127.0.0.1:8545'
+      url: "http://127.0.0.1:8569",
     },
     DevNet: {
       accounts: {
@@ -60,10 +59,32 @@ module.exports = {
       },
       url: "https://eth-provider-dev.hypernetlabs.io",
     },
-    rinkeby: {
+    rinkeby: { // ethereum tesnet
       accounts: { mnemonic },
       chainId: 4,
-      url: urlOverride || "http://localhost:8545",
+      url: urlOverride || "https://station-hundred-assure-neighborhood.trycloudflare.com/http/",
+    },
+    mumbai: { // polygon testnet
+        accounts: { mnemonic },
+        chainId: 80001,
+        url: urlOverride || "https://rpc-mumbai.maticvigil.com",
+        gas: 6000000,
+        gasPrice: 8000000000
+    },
+    polygon: { // polygon mainnet
+        accounts: { mnemonic },
+        chainId: 137,
+        url: urlOverride || "https://rpc-mainnet.maticvigil.com",
+    },
+    fuji: { // avalanche testnet
+        accounts: { mnemonic },
+        chainId: 43113,
+        url: urlOverride || "https://f0fa7eba-0c1b-4f3f-bc37-67ba6ae2b60a.hypernetlabs.io/http/ext/bc/C/rpc",
+    },
+    avalanche: { // avalanche mainnet
+        accounts: { mnemonic },
+        chainId: 43114,
+        url: urlOverride || "https://053e1c5c-66fd-49c3-b267-42ab5f9202c6.hypernetlabs.io/http/ext/bc/C/rpc",
     },
   },
   gasReporter: {

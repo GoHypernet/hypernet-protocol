@@ -16,7 +16,7 @@ const PublicIdentifierWidget: React.FC<IPublicIdentifierWidget> = () => {
   const [publicIdentifer, setPublicIdentifer] = useState<PublicIdentifier>();
 
   useEffect(() => {
-    coreProxy.getPublicIdentifier().map((publicIdentifer) => {
+    coreProxy.payments.getPublicIdentifier().map((publicIdentifer) => {
       setPublicIdentifer(publicIdentifer);
     });
   }, []);

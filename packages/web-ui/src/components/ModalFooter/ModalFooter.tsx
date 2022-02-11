@@ -15,6 +15,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
   return (
     <Box className={classes.container}>
       <GovernanceButton
+        className={classes.linkButton}
         variant="text"
         color="primary"
         fullWidth

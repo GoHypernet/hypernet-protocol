@@ -4,6 +4,7 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
+const { gasSettings }  = require("../tasks/constants.js");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -19,7 +20,7 @@ async function main() {
 
   // deploy hypertoken contract
   const Hypertoken = await ethers.getContractFactory("Hypertoken");
-  const hypertoken = await Hypertoken.deploy();
+  const hypertoken = await Hypertoken.deploy(await gasSettings());
   const hypertoken_reciept = await hypertoken.deployTransaction.wait();
   const totalSupply = await hypertoken.totalSupply();
   const recipientBalance = await hypertoken.balanceOf(owner.address);
@@ -37,7 +38,7 @@ async function main() {
 
   // deploy timelock contract
   const Timelock = await ethers.getContractFactory("TimelockController");
-  const timelock = await Timelock.deploy(1, [], []);
+  const timelock = await Timelock.deploy(1, [], [], await gasSettings());
   const timelock_reciept = await timelock.deployTransaction.wait();
   console.log("Timelock Address:", timelock.address);
   console.log("Timelock Gas Fee:", timelock_reciept.gasUsed.toString());
@@ -47,6 +48,7 @@ async function main() {
   const hypernetgovernor = await HypernetGovernor.deploy(
     hypertoken.address,
     timelock.address,
+    await gasSettings()
   );
   const hypernetgovernor_reciept =
     await hypernetgovernor.deployTransaction.wait();
@@ -57,43 +59,52 @@ async function main() {
   const tx1 = await timelock.grantRole(
     timelock.PROPOSER_ROLE(),
     hypernetgovernor.address,
+    await gasSettings()
   );
   const tx1_reciept = await tx1.wait();
 
-  console.log("DAO has proposer role")
+  console.log("DAO has proposer role");
+  console.log("Gas Used:", tx1_reciept.gasUsed.toString())
+
 
   // give the governor contract the Executor role in the timelock contract
   const tx2 = await timelock.grantRole(
     timelock.EXECUTOR_ROLE(),
     hypernetgovernor.address,
+    await gasSettings()
   );
   const tx2_reciept = await tx2.wait();
 
   console.log("DAO has executor role");
+  console.log("Gas Used:", tx2_reciept.gasUsed.toString());
 
   // give the governor contract the admin role of the timelock contract
   const tx3 = await timelock.grantRole(
     timelock.TIMELOCK_ADMIN_ROLE(),
     hypernetgovernor.address,
+    await gasSettings()
   );
   const tx3_reciept = await tx3.wait();
 
   console.log("DAO is timelock admin");
+  console.log("Gas Used:", tx3_reciept.gasUsed.toString());
 
   // deployer address should now renounce admin role for security
   const tx4 = await timelock.renounceRole(
     timelock.TIMELOCK_ADMIN_ROLE(),
     owner.address,
+    await gasSettings()
   );
   const tx4_reciept = await tx4.wait();
 
   console.log("Deploy wallet renounced role.");
+  console.log("Gas Used:", tx4_reciept.gasUsed.toString())
 
   // deploy enumerable registry contract
   const EnumerableRegistry = await ethers.getContractFactory(
     "NonFungibleRegistryEnumerableUpgradeable",
   );
-  const enumerableregistry = await EnumerableRegistry.deploy();
+  const enumerableregistry = await EnumerableRegistry.deploy(await gasSettings());
   const enumerable_registry_reciept =
     await enumerableregistry.deployTransaction.wait();
   console.log(
@@ -109,7 +120,7 @@ async function main() {
   const Registry = await ethers.getContractFactory(
     "NonFungibleRegistryUpgradeable",
   );
-  const registry = await Registry.deploy();
+  const registry = await Registry.deploy(await gasSettings());
   const registry_reciept = await registry.deployTransaction.wait();
   console.log("Registry Beacon Address:", registry.address);
   console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString());
@@ -124,23 +135,27 @@ async function main() {
         "Hypernet Profiles", 
         "Gateways", 
         "Liquidity Providers", 
-        "Payment Tokens"
+        "Payment Tokens",
+        "Registry Modules"
     ],
     [
         "Customizable Web3 user profile tokens for the Hypernet Protocol.", 
         "Payment gateway signatures for the Hypernet Protocol payment network.", 
         "Liquidity provider metadata for the Hypernet Protocol payment network.", 
-        "Officially supported payment tokens for the Hypernet Protocol payment network."
+        "Officially supported payment tokens for the Hypernet Protocol payment network.",
+        "Official modules for extending Hypernet registry functionality."
     ],
     [
         timelock.address, 
         timelock.address, 
         timelock.address, 
+        timelock.address,
         timelock.address
     ],
     enumerableregistry.address,
     registry.address,
     hypertoken.address,
+    await gasSettings(),
   );
   const factory_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);
@@ -148,24 +163,31 @@ async function main() {
 
   // deploy the batch minting module
   const BatchModule = await ethers.getContractFactory("BatchModule");
-  batchmodule = await BatchModule.deploy("Batch Minting");
+  batchmodule = await BatchModule.deploy("Batch Minting", await gasSettings());
   const batchmodule_reciept = await batchmodule.deployTransaction.wait();
   console.log("Batch Module Address:", batchmodule.address);
   console.log("Batch Module Gas Fee:", batchmodule_reciept.gasUsed.toString());
 
   // deploy the lazy minting module
   const LazyMintModule = await ethers.getContractFactory("LazyMintModule");
-  const lazymintmodule = await LazyMintModule.deploy("Lazy Minting");
+  const lazymintmodule = await LazyMintModule.deploy("Lazy Minting", await gasSettings());
   const lazymintmodule_reciept = await lazymintmodule.deployTransaction.wait();
   console.log("Lazy Mint Module Address:", lazymintmodule.address);
   console.log("Lazy Mint Module Gas Fee:", lazymintmodule_reciept.gasUsed.toString());
 
   // deploy the Merkle Drop module
   const MerkleModule = await ethers.getContractFactory("MerkleModule");
-  const merklemodule = await MerkleModule.deploy("Merkle Drop");
+  const merklemodule = await MerkleModule.deploy("Merkle Drop", await gasSettings());
   const merklemodule_reciept = await merklemodule.deployTransaction.wait();
   console.log("Merkle Module Address:", merklemodule.address);
   console.log("Merkle Module Gas Fee:", merklemodule_reciept.gasUsed.toString());
+
+  // deploy the Buy NFI module
+  const BuyModule = await ethers.getContractFactory("BuyModule");
+  const buymodule = await BuyModule.deploy("Buy NFI", await gasSettings());
+  const buymodule_reciept = await buymodule.deployTransaction.wait();
+  console.log("Buy NFI Module Address:", buymodule.address);
+  console.log("Buy NFI Module Gas Fee:", buymodule_reciept.gasUsed.toString());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

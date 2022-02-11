@@ -35,7 +35,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
       {balancesByChannelAddress.length === 0 && !loading ? (
         <Box display="flex" justifyContent="center">
           <GovernanceEmptyState
-            title="Ups..!"
+            title="Oops..!"
             description={
               <Typography variant="body2">
                 You don't have any balances yet, you can Fund your account from

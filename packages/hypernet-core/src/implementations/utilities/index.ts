@@ -15,3 +15,5 @@ export * from "@implementations/utilities/PaymentUtils";
 export * from "@implementations/utilities/VectorUtils";
 export * from "@implementations/utilities/WrappedBrowserNode";
 export * from "@implementations/utilities/BlockchainTimeUtils";
+export * from "@implementations/utilities/DIDDataStoreProvider";
+export * from "@implementations/utilities/IPFSUtils";

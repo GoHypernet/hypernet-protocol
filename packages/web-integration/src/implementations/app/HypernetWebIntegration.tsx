@@ -3,6 +3,8 @@ import {
   GatewayUrl,
   IUIData,
   ActiveStateChannel,
+  ChainId,
+  Theme,
 } from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -13,7 +15,7 @@ import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypern
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected iframeURL = "http://localhost:5020";
-  protected governanceChainId = 1337;
+  protected defaultGovernanceChainId = 1337;
   protected debug = false;
   protected currentGatewayUrl: GatewayUrl | undefined | null;
   protected selectedStateChannel: ActiveStateChannel = {} as ActiveStateChannel;
@@ -28,17 +30,18 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   constructor(
     iframeURL: string | null,
-    governanceChainId: number | null,
+    defaultGovernanceChainId: number | null,
     governanceRequired: boolean | null,
     paymentsRequired: boolean | null,
+    theme: Theme | null,
     debug: boolean | null,
   ) {
     let iframeURLWithSearchParams = new URL(iframeURL || this.iframeURL);
 
-    if (governanceChainId != null) {
+    if (defaultGovernanceChainId != null) {
       iframeURLWithSearchParams.searchParams.append(
-        "governanceChainId",
-        governanceChainId.toString(),
+        "defaultGovernanceChainId",
+        defaultGovernanceChainId.toString(),
       );
     }
 
@@ -61,7 +64,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     this.iframeURL = iframeURLWithSearchParams.toString();
     this.debug = debug || this.debug;
-    this.governanceChainId = governanceChainId || this.governanceChainId;
+    this.defaultGovernanceChainId =
+      defaultGovernanceChainId || this.defaultGovernanceChainId;
 
     // Create a proxy connection to the iframe
     this.core = new HypernetIFrameProxy(
@@ -87,7 +91,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         this.core,
         this.UIData,
         this.iframeURL,
-        this.governanceChainId,
+        this.defaultGovernanceChainId,
+        theme,
         this.debug,
       );
     }
@@ -135,7 +140,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     return this.core
       .activate()
-      .andThen(() => this.core.initializeRegistries())
+      .andThen(() => this.core.registries.initializeRegistries())
       .map(() => {
         this.getRegistriesReadyResolved = true;
         window.hypernetCoreInstance = this.core;
@@ -157,7 +162,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     return this.core
       .activate()
-      .andThen(() => this.core.initializeGovernance())
+      .andThen(() => this.core.governance.initializeGovernance())
       .map(() => {
         this.getGovernanceReadyResolved = true;
         window.hypernetCoreInstance = this.core;
@@ -179,7 +184,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     return this.core
       .activate()
-      .andThen(() => this.core.initializePayments())
+      .andThen(() => this.core.payments.initializePayments())
       .map(() => {
         this.getPaymentsReadyResolved = false;
         window.hypernetCoreInstance = this.core;
@@ -196,11 +201,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public displayGatewayIFrame(gatewayUrl: GatewayUrl): void {
-    this.core.displayGatewayIFrame(gatewayUrl);
+    this.core.payments.displayGatewayIFrame(gatewayUrl);
   }
 
   public closeGatewayIFrame(gatewayUrl: GatewayUrl): void {
-    this.core.closeGatewayIFrame(gatewayUrl);
+    this.core.payments.closeGatewayIFrame(gatewayUrl);
   }
 
   private _prepareIFrameContainer(): HTMLElement {
@@ -270,7 +275,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "click",
       (e) => {
         if (this.currentGatewayUrl != null) {
-          this.core.closeGatewayIFrame(this.currentGatewayUrl);
+          this.core.payments.closeGatewayIFrame(this.currentGatewayUrl);
           this.currentGatewayUrl = null;
         }
         iframeContainer.style.display = "none";

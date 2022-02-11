@@ -15,11 +15,16 @@ import DelegateVotesWidget from "@web-ui/widgets/DelegateVotesWidget";
 
 const PROPOSALS_PER_PAGE = 10;
 
+// This check is used for some existing proposals in rinkeby.
+export const hasProposalDescriptionHash = (proposalDescription: string) => {
+  return proposalDescription.includes(":Qm");
+};
+
 const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalCreationNavigate,
   onProposalDetailsNavigate,
 }: IProposalsWidgetParams) => {
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading, handleCoreError } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
@@ -30,8 +35,27 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
   useEffect(() => {
+    getProposals();
+  }, [page]);
+
+  useEffect(() => {
+    getProposalsCount();
+  }, []);
+
+  const getProposals = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.governance
+      .getProposals(page, PROPOSALS_PER_PAGE)
+      .map((proposals) => {
+        setProposals(proposals);
+        setLoading(false);
+      })
+      .mapErr(handleCoreError);
+  };
+
+  const getProposalsCount = () => {
+    setLoading(true);
+    coreProxy.governance
       .getProposalsCount()
       .map((proposalCount) => {
         setProposalCount(proposalCount);
@@ -41,18 +65,15 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
         setLoading(false);
       })
       .mapErr(handleCoreError);
-  }, []);
+  };
 
-  useEffect(() => {
-    setLoading(true);
-    coreProxy
-      .getProposals(page, PROPOSALS_PER_PAGE)
-      .map((proposals) => {
-        setProposals(proposals);
-        setLoading(false);
-      })
-      .mapErr(handleCoreError);
-  }, [page]);
+  const handleProposalsRefresh = () => {
+    if (page === 1) {
+      getProposals();
+    } else {
+      setPage(1);
+    }
+  };
 
   return (
     <Box>
@@ -93,21 +114,27 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
         />
       )}
 
-      {proposals.map((proposal) => (
-        <GovernanceProposalListItem
-          onClick={() =>
-            onProposalDetailsNavigate && onProposalDetailsNavigate(proposal.id)
-          }
-          key={proposal.id}
-          number={
-            proposal.proposalNumber != null
-              ? (proposal.proposalNumber + 1).toString()
-              : "-"
-          }
-          title={proposal.description}
-          status={proposal.state}
-        />
-      ))}
+      {proposals.map((proposal) => {
+        const proposalName = hasProposalDescriptionHash(proposal.description)
+          ? viewUtils.getProposalName(proposal.description)
+          : proposal.description;
+        return (
+          <GovernanceProposalListItem
+            onClick={() =>
+              onProposalDetailsNavigate &&
+              onProposalDetailsNavigate(proposal.id)
+            }
+            key={proposal.id}
+            number={
+              proposal.proposalNumber != null
+                ? (proposal.proposalNumber + 1).toString()
+                : "-"
+            }
+            title={proposalName}
+            status={proposal.state}
+          />
+        );
+      })}
       {!!proposalCount && (
         <GovernancePagination
           customPageOptions={{

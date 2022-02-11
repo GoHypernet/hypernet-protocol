@@ -2,6 +2,7 @@ import {
   EthereumAccountAddress,
   RegistryEntry,
   RegistryTokenId,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -20,6 +21,7 @@ interface ICreateIdentityWidget {
   onCloseCallback: () => void;
   registryName: string;
   currentAccountAddress: EthereumAccountAddress;
+  lazyMintModeEnabled?: boolean;
 }
 
 interface ICreateIdentityFormValues {
@@ -33,6 +35,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   onCloseCallback,
   registryName,
   currentAccountAddress,
+  lazyMintModeEnabled,
 }: ICreateIdentityWidget) => {
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
@@ -48,16 +51,37 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   }: ICreateIdentityFormValues) => {
     setLoading(true);
 
-    coreProxy
+    coreProxy.registries
       .createRegistryEntry(
-        registryName,
+        RegistryName(registryName),
         new RegistryEntry(
           label,
-          RegistryTokenId(Number(tokenId)),
+          RegistryTokenId(BigInt(tokenId)),
           EthereumAccountAddress(recipientAddress),
           tokenUri,
           null,
         ),
+      )
+      .map(() => {
+        setLoading(false);
+        onCloseCallback();
+      })
+      .mapErr(handleCoreError);
+  };
+
+  const handlLazyMintIdentity = ({
+    recipientAddress,
+    tokenUri,
+    tokenId,
+  }: ICreateIdentityFormValues) => {
+    setLoading(true);
+
+    coreProxy.registries
+      .submitLazyMintSignature(
+        RegistryName(registryName),
+        RegistryTokenId(BigInt(tokenId)),
+        EthereumAccountAddress(recipientAddress),
+        tokenUri,
       )
       .map(() => {
         setLoading(false);
@@ -87,7 +111,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
 
   return (
     <GovernanceDialog
-      title="Create a New Identity"
+      title={lazyMintModeEnabled ? "" : "Create a New Identity"}
       isOpen={true}
       onClose={onCloseCallback}
       content={
@@ -99,7 +123,11 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
               tokenUri: "",
               tokenId: Math.floor(Math.random() * 10000000000).toString(),
             }}
-            onSubmit={handleCreateIdentity}
+            onSubmit={(values) =>
+              lazyMintModeEnabled
+                ? handlLazyMintIdentity(values)
+                : handleCreateIdentity(values)
+            }
           >
             {({ handleSubmit, values, setFieldValue }) => {
               return (
@@ -120,23 +148,24 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                     name="tokenId"
                     type="input"
                     placeholder="Enter a number for your token"
+                    required
                   />
-                  <GovernanceField
-                    title="Label"
-                    name="label"
-                    type="input"
-                    placeholder="Enter a label"
-                  />
+                  {!lazyMintModeEnabled && (
+                    <GovernanceField
+                      title="Label"
+                      name="label"
+                      type="input"
+                      placeholder="Enter a label"
+                    />
+                  )}
                   <GovernanceField
                     title="Recipient Address"
-                    required
                     name="recipientAddress"
                     type="input"
                     placeholder="Enter the recipient address"
                   />
                   <GovernanceField
                     title="Token URI"
-                    required
                     name="tokenUri"
                     type="input"
                     placeholder="Enter the token URI"
@@ -154,7 +183,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                       variant="contained"
                       color="primary"
                       onClick={handleSubmit}
-                      disabled={!values.recipientAddress || !values.tokenUri}
+                      disabled={!values.tokenId}
                     >
                       Submit
                     </GovernanceButton>
