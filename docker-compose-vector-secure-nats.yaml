@@ -272,6 +272,7 @@ services:
       - core-iframe
       - gateway-iframe
       - test-gateway
+      - ipfs
 
   test-gateway:
     image: hypernetlabs/hypernet-protocol-test-gateway:local
@@ -287,3 +288,18 @@ services:
     volumes:
       - ./ethereum-node-data:/root/.ethereum:rw
     command: --datadir=/root/.ethereum/devchain --syncmode light --http.vhosts '*' --cache 2048 --http --http.api eth,net,web3
+
+  ipfs:
+    image: ipfs/go-ipfs:release
+    ports:
+      - "4021:4001" # Swarm
+      - "5021:5001" # Api
+      - "8088:8080" # Gateway
+    volumes:
+      - ./.ipfs/ipfs0:/data/ipfs
+      - ./.ipfs/export:/export
+      - ./packages/development/ipfs-provider/start_ipfs:/start_ipfs
+    entrypoint: ["/sbin/tini", "--", "/start_ipfs"]
+    command: ["daemon", "--migrate=true", "--agent-version-suffix=docker"]
+    environment:
+      ACCESS_CONTROL_ALLOW_ORIGIN: "[\"*\"]"
