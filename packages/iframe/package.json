@@ -8,8 +8,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "yarn clean && yarn compile && yarn postCompile",
-    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-core-iframe:local -f Dockerfile --progress=plain ../..",
-    "dockerize-dev": "docker build --build-arg NATS_URL=wss://dev-nats.hypernet.foundation:4221 -t hypernetlabs/hypernet-protocol-core-iframe:local -f Dockerfile --progress=plain ../..",
+    "dockerize": "docker build --build-arg NATS_URL=wss://dev-nats.hypernet.foundation:4221 -t hypernetlabs/hypernet-protocol-core-iframe:local -f Dockerfile --progress=plain ../..",
     "docker-push": "docker push hypernetlabs/hypernet-protocol-core-iframe:local",
     "dev": "webpack watch --config webpack.config.js --mode development",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
