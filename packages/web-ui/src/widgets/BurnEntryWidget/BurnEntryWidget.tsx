@@ -1,4 +1,4 @@
-import { RegistryTokenId } from "@hypernetlabs/objects";
+import { RegistryTokenId, RegistryName } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import React from "react";
@@ -9,7 +9,7 @@ import { useStyles } from "@web-ui/widgets/BurnEntryWidget/BurnEntryWidget.style
 interface IBurnEntryWidget {
   onCloseCallback: () => void;
   onSuccessCallback: () => void;
-  registryName: string;
+  registryName: RegistryName;
   tokenId: RegistryTokenId;
 }
 

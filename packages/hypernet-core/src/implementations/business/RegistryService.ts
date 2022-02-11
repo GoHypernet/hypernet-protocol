@@ -19,6 +19,7 @@ import {
   VectorError,
   LazyMintingSignature,
   InvalidParametersError,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { IRegistryService } from "@interfaces/business";
 import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
@@ -47,9 +48,9 @@ export class RegistryService implements IRegistryService {
   }
 
   public getRegistryByName(
-    registryNames: string[],
+    registryNames: RegistryName[],
   ): ResultAsync<
-    Map<string, Registry>,
+    Map<RegistryName, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryRepository.getRegistryByName(registryNames);
@@ -65,16 +66,16 @@ export class RegistryService implements IRegistryService {
   }
 
   public getRegistryEntriesTotalCount(
-    registryNames: string[],
+    registryNames: RegistryName[],
   ): ResultAsync<
-    Map<string, number>,
+    Map<RegistryName, number>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryRepository.getRegistryEntriesTotalCount(registryNames);
   }
 
   public getRegistryEntries(
-    registryName: string,
+    registryName: RegistryName,
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
@@ -91,7 +92,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public getRegistryEntryDetailByTokenId(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
@@ -104,7 +105,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public updateRegistryEntryTokenURI(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
@@ -123,7 +124,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public updateRegistryEntryLabel(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
@@ -162,7 +163,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public createRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
@@ -180,7 +181,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public transferRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
@@ -199,7 +200,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public burnRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
@@ -232,7 +233,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public grantRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -246,7 +247,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public revokeRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -260,7 +261,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public renounceRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -274,7 +275,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public getRegistryEntryByOwnerAddress(
-    registryName: string,
+    registryName: RegistryName,
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
@@ -290,13 +291,13 @@ export class RegistryService implements IRegistryService {
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   > {
     return this.registryRepository.getRegistryModules();
   }
 
   public createBatchRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     newRegistryEntries: RegistryEntry[],
   ): ResultAsync<
     void,
@@ -311,7 +312,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public getRegistryEntryListByOwnerAddress(
-    registryName: string,
+    registryName: RegistryName,
     ownerAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry[],
@@ -324,7 +325,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public submitLazyMintSignature(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
@@ -346,7 +347,7 @@ export class RegistryService implements IRegistryService {
   }
 
   public getRegistryEntryListByUsername(
-    registryName: string,
+    registryName: RegistryName,
     username: string,
   ): ResultAsync<
     RegistryEntry[],
@@ -376,6 +377,7 @@ export class RegistryService implements IRegistryService {
     | LazyMintModuleContractError
     | NonFungibleRegistryContractError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     return this.registryRepository.executeLazyMint(lazyMintingSignature);
   }

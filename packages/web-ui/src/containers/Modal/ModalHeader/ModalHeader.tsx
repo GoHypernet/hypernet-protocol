@@ -1,14 +1,21 @@
 import { Box } from "@material-ui/core";
 import React from "react";
 
-import { useStyles } from "./ModalHeader.style";
+import { GovernanceTypography } from "@web-ui/components";
+
+import { useLayoutContext } from "@web-ui/contexts";
+import { useStyles } from "@web-ui/containers/Modal/ModalHeader/ModalHeader.style";
 
 import { HYPERNET_PROTOCOL_LOGO_DARK_URL } from "@web-ui/constants";
 
 export const ModalHeader: React.FC = () => {
+  const { modalHeader } = useLayoutContext();
+
   const classes = useStyles();
 
-  return (
+  return modalHeader ? (
+    <GovernanceTypography variant="h4">{modalHeader}</GovernanceTypography>
+  ) : (
     <Box className={classes.container}>
       <Box className={classes.imageContainer}>
         <img height={32} src={HYPERNET_PROTOCOL_LOGO_DARK_URL} />

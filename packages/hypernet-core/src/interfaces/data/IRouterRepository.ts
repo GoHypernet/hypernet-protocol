@@ -2,6 +2,7 @@ import {
   NonFungibleRegistryContractError,
   PublicIdentifier,
   RouterDetails,
+  RegistryFactoryContractError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -10,7 +11,7 @@ export interface IRouterRepository {
     publicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
     Map<PublicIdentifier, RouterDetails>,
-    NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   >;
 }
 

@@ -42,12 +42,14 @@ class TestGatewayConnector implements IGatewayConnector {
   protected routerPublicIdentifier = PublicIdentifier(
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR",
   );
-  protected paymentToken = EthereumContractAddress(
-    "0xAa588d3737B611baFD7bD713445b314BD453a5C8",
-  ); // HyperToken
+
   // protected paymentToken = EthereumContractAddress(
-  // "0x0000000000000000000000000000000000000000",
-  //   ); // Ethereum
+  //   "0xAa588d3737B611baFD7bD713445b314BD453a5C8",
+  // ); // HyperToken
+
+  protected paymentToken = EthereumContractAddress(
+      "0x0000000000000000000000000000000000000000",
+    ); // Ethereum
 
   protected privateKey =
     "0x0123456789012345678901234567890123456789012345678901234567890123";

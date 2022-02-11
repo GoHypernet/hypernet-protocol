@@ -26,6 +26,7 @@ import { ERegistrySortOrder } from "@objects/typing";
 import { RegistryModule } from "@objects/RegistryModule";
 import { InitializeStatus } from "@objects/InitializeStatus";
 import { LazyMintingSignature } from "@objects/LazyMintingSignature";
+import { RegistryName } from "@objects/RegistryName";
 
 export interface IHypernetRegistries {
   registriesInitialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
@@ -40,6 +41,7 @@ export interface IHypernetRegistries {
     | BlockchainUnavailableError
     | InvalidParametersError
     | IPFSUnavailableError
+    | RegistryFactoryContractError
     | ProxyError
   >;
 
@@ -53,9 +55,9 @@ export interface IHypernetRegistries {
   >;
 
   getRegistryByName(
-    registryNames: string[],
+    registryNames: RegistryName[],
   ): ResultAsync<
-    Map<string, Registry>,
+    Map<RegistryName, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
@@ -67,7 +69,7 @@ export interface IHypernetRegistries {
   >;
 
   getRegistryEntries(
-    registryName: string,
+    registryName: RegistryName,
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
@@ -77,7 +79,7 @@ export interface IHypernetRegistries {
   >;
 
   getRegistryEntryDetailByTokenId(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
@@ -85,7 +87,7 @@ export interface IHypernetRegistries {
   >;
 
   updateRegistryEntryTokenURI(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
@@ -99,7 +101,7 @@ export interface IHypernetRegistries {
   >;
 
   updateRegistryEntryLabel(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
@@ -113,9 +115,9 @@ export interface IHypernetRegistries {
   >;
 
   getRegistryEntriesTotalCount(
-    registryNames: string[],
+    registryNames: RegistryName[],
   ): ResultAsync<
-    Map<string, number>,
+    Map<RegistryName, number>,
     RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   >;
 
@@ -137,7 +139,7 @@ export interface IHypernetRegistries {
   >;
 
   createRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
@@ -151,7 +153,7 @@ export interface IHypernetRegistries {
   >;
 
   transferRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
@@ -165,7 +167,7 @@ export interface IHypernetRegistries {
   >;
 
   burnRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
@@ -191,7 +193,7 @@ export interface IHypernetRegistries {
   >;
 
   grantRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -204,7 +206,7 @@ export interface IHypernetRegistries {
   >;
 
   revokeRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -217,7 +219,7 @@ export interface IHypernetRegistries {
   >;
 
   renounceRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -230,7 +232,7 @@ export interface IHypernetRegistries {
   >;
 
   getRegistryEntryByOwnerAddress(
-    registryName: string,
+    registryName: RegistryName,
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
@@ -240,11 +242,11 @@ export interface IHypernetRegistries {
 
   getRegistryModules(): ResultAsync<
     RegistryModule[],
-    NonFungibleRegistryContractError | ProxyError
+    NonFungibleRegistryContractError | RegistryFactoryContractError | ProxyError
   >;
 
   createBatchRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     newRegistryEntries: RegistryEntry[],
   ): ResultAsync<
     void,
@@ -255,7 +257,7 @@ export interface IHypernetRegistries {
   >;
 
   getRegistryEntryListByOwnerAddress(
-    registryName: string,
+    registryName: RegistryName,
     ownerAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry[],
@@ -263,7 +265,7 @@ export interface IHypernetRegistries {
   >;
 
   submitLazyMintSignature(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
@@ -279,7 +281,7 @@ export interface IHypernetRegistries {
   >;
 
   getRegistryEntryListByUsername(
-    registryName: string,
+    registryName: RegistryName,
     username: string,
   ): ResultAsync<
     RegistryEntry[],
@@ -301,6 +303,7 @@ export interface IHypernetRegistries {
     | BlockchainUnavailableError
     | LazyMintModuleContractError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
     | ProxyError
   >;
 

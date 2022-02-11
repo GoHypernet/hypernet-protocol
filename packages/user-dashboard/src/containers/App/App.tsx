@@ -31,6 +31,7 @@ const integration: IHypernetWebIntegration = new HypernetWebIntegration(
   true,
   false,
   null,
+  null,
 );
 
 const App: React.FC = () => {

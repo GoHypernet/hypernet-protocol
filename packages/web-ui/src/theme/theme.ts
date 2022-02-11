@@ -1,5 +1,7 @@
+import { Palette } from "@hypernetlabs/objects";
 import {
   createTheme,
+  Theme,
   ThemeProvider as MuiThemeProvider,
 } from "@material-ui/core";
 
@@ -37,6 +39,7 @@ export const colors = {
 
   BLUE100: "#DEEBFF",
   BLUE200: "#B3D4FF",
+  BLUE300: "#4C9AFF",
   BLUE400: "#0052CC",
   BLUE700: "#0747A6",
 
@@ -315,5 +318,20 @@ export const darkTheme = createTheme({
     MuiButtonBase,
   },
 });
+
+export const injectCustomPaletteToTheme = (
+  theme: Theme,
+  customPalette: Palette,
+) => {
+  const { palette } = theme;
+  
+  const injectedPalette = {
+    primary: { ...palette.primary, ...customPalette?.primary },
+    text: { ...palette.text, ...customPalette?.text },
+    divider: customPalette?.divider || palette.divider,
+  };
+
+  return createTheme({ ...theme, palette: injectedPalette });
+};
 
 export const ThemeProvider = MuiThemeProvider;

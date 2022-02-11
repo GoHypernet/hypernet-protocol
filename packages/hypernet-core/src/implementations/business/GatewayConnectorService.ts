@@ -25,6 +25,7 @@ import {
   VectorError,
   NonFungibleRegistryContractError,
   InactiveGatewayError,
+  RegistryFactoryContractError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGatewayConnectorService } from "@interfaces/business";
@@ -76,6 +77,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       | VectorError
       | PersistenceError
       | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
     >
   >;
   protected domain: TypedDataDomain;
@@ -91,6 +93,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       | GatewayActivationError
       | VectorError
       | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
     >
   >();
 
@@ -202,6 +205,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
             | GatewayValidationError
             | NonFungibleRegistryContractError
             | InactiveGatewayError
+            | RegistryFactoryContractError
           >
         >();
         return this.gatewayConnectorRepository
@@ -231,6 +235,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayActivationError
     | VectorError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     const inProgress = this.authorizationsInProgress.get(gatewayUrl);
 
@@ -373,6 +378,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | VectorError
     | BlockchainUnavailableError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     if (routerPublicIdentifiers.length < 1) {
       return errAsync(
@@ -461,6 +467,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayValidationError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   > {
     const retMap = new Map<GatewayUrl, GatewayTokenInfo[]>();
     return ResultUtils.combine(
@@ -499,6 +506,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | VectorError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
@@ -676,6 +684,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayValidationError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   > {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.closeGatewayIFrame();
@@ -697,6 +706,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayValidationError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   > {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.displayGatewayIFrame();
@@ -717,6 +727,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayValidationError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   > {
     // The goal of this method is to return an activated gateway proxy,
     // and not resolve unless all hope is lost.
@@ -818,6 +829,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
           | GatewayValidationError
           | NonFungibleRegistryContractError
           | InactiveGatewayError
+          | RegistryFactoryContractError
         >(e);
       });
   }
@@ -849,6 +861,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | VectorError
     | PersistenceError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     // Do some initial cleanup, so that this can be called repeatedly.
     const existingProxyResult = this.authorizedGatewayProxies.get(
@@ -1040,7 +1053,9 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     routerPublicIdentifier: PublicIdentifier,
   ): ResultAsync<
     void,
-    NonFungibleRegistryContractError | RouterUnauthorizedError
+    | NonFungibleRegistryContractError
+    | RouterUnauthorizedError
+    | RegistryFactoryContractError
   > {
     return this.routerRepository
       .getRouterDetails([routerPublicIdentifier])

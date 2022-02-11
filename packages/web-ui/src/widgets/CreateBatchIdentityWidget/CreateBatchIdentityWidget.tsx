@@ -2,6 +2,7 @@ import {
   EthereumAccountAddress,
   RegistryEntry,
   RegistryTokenId,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
@@ -19,7 +20,7 @@ import { useStyles } from "@web-ui/widgets/CreateBatchIdentityWidget/CreateBatch
 
 interface CreateBatchIdentityWidget {
   onCloseCallback: () => void;
-  registryName: string;
+  registryName: RegistryName;
   currentAccountAddress: EthereumAccountAddress;
 }
 

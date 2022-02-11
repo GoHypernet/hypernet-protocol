@@ -28,6 +28,8 @@ import {
   TransferId,
   UnixTimestamp,
   RegistryModulesNames,
+  RegistryNames,
+  RegistryName,
 } from "@hypernetlabs/objects";
 
 export const account = EthereumAccountAddress("account-address-1");
@@ -126,26 +128,6 @@ export const insuranceTransferAddress = EthereumContractAddress(
 export const parameterizedTransferAddress = EthereumContractAddress(
   "parameterizedTransferAddress",
 );
-export const gatewayRegistryAddress = EthereumContractAddress(
-  "gatewayRegistryAddress",
-);
-export const liquidityRegistryAddress = EthereumContractAddress(
-  "liquidityRegistryAddress",
-);
-export const tokenRegistryAddress = EthereumContractAddress(
-  "tokenRegistryAddress",
-);
-export const chainRegistryAddress = EthereumContractAddress(
-  "chainRegistryAddress",
-);
-
-export const hypernetProfileRegistryAddress = EthereumContractAddress(
-  "hypernetProfileRegistryAddress",
-);
-
-export const modulesRegistryAddress = EthereumContractAddress(
-  "modulesRegistryAddress",
-);
 export const hypernetGovernorAddress = EthereumContractAddress(
   "hypernetGovernorAddress",
 );
@@ -158,6 +140,15 @@ const registryModulesNames = new RegistryModulesNames(
   "Batch Minting",
   "Lazy Minting",
   "Merkle Drop",
+);
+
+const registryNames = new RegistryNames(
+  RegistryName("Hypernet Profiles"),
+  RegistryName("Gateways"),
+  RegistryName("Liquidity Providers"),
+  RegistryName("Payment Tokens"),
+  RegistryName("Registry Modules"),
+  RegistryName("Hypernet.ID"),
 );
 
 export const defaultGovernanceChainInformation = new GovernanceChainInformation(
@@ -173,12 +164,7 @@ export const defaultGovernanceChainInformation = new GovernanceChainInformation(
   parameterizedTransferAddress,
   hypernetGovernorAddress,
   registryFactoryAddress,
-  gatewayRegistryAddress,
-  liquidityRegistryAddress,
-  tokenRegistryAddress,
-  chainRegistryAddress,
-  hypernetProfileRegistryAddress,
-  modulesRegistryAddress,
+  registryNames,
   registryModulesNames,
   [ProviderUrl("http://localhost:8545")],
 );

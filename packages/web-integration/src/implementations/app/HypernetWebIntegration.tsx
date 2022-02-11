@@ -4,6 +4,7 @@ import {
   IUIData,
   ActiveStateChannel,
   ChainId,
+  Theme,
 } from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -32,6 +33,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     defaultGovernanceChainId: number | null,
     governanceRequired: boolean | null,
     paymentsRequired: boolean | null,
+    theme: Theme | null,
     debug: boolean | null,
   ) {
     let iframeURLWithSearchParams = new URL(iframeURL || this.iframeURL);
@@ -90,6 +92,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         this.UIData,
         this.iframeURL,
         this.defaultGovernanceChainId,
+        theme,
         this.debug,
       );
     }

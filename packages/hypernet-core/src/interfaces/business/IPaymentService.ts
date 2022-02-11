@@ -26,6 +26,7 @@ import {
   EPaymentType,
   NonFungibleRegistryContractError,
   PersistenceError,
+  RegistryFactoryContractError,
 } from "@hypernetlabs/objects";
 import { PaymentInitiationResponse } from "@interfaces/objects";
 import { ResultAsync } from "neverthrow";
@@ -92,6 +93,7 @@ export interface IPaymentService {
     | PersistenceError
     | ProxyError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   >;
 
   /**
@@ -167,6 +169,7 @@ export interface IPaymentService {
     | InvalidParametersError
     | NonFungibleRegistryContractError
     | TransferCreationError
+    | RegistryFactoryContractError
   >;
 
   /**
@@ -190,6 +193,7 @@ export interface IPaymentService {
     | InvalidPaymentIdError
     | PaymentCreationError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   >;
 
   /**

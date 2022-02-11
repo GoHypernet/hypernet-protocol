@@ -1,11 +1,9 @@
-import { ResultAsync, Result } from "neverthrow";
-import { Subject } from "rxjs";
+import { ResultAsync } from "neverthrow";
 
 import { ActiveStateChannel } from "@objects/ActiveStateChannel";
 import { Balances } from "@objects/Balances";
 import { BigNumberString } from "@objects/BigNumberString";
 import { ChainId } from "@objects/ChainId";
-import { ControlClaim } from "@objects/ControlClaim";
 import {
   AcceptPaymentError,
   BalancesUnavailableError,
@@ -18,26 +16,16 @@ import {
   InvalidParametersError,
   ProxyError,
   GatewayAuthorizationDeniedError,
-  MessagingError,
-  RouterChannelUnknownError,
-  RegistryPermissionError,
   RegistryFactoryContractError,
   NonFungibleRegistryContractError,
-  HypernetGovernorContractError,
-  ERC20ContractError,
   InvalidPaymentError,
   GatewayActivationError,
   InvalidPaymentIdError,
-  GovernanceSignerUnavailableError,
   TransferResolutionError,
   TransferCreationError,
   PaymentStakeError,
-  PaymentFinalizeError,
   PaymentCreationError,
   InactiveGatewayError,
-  BatchModuleContractError,
-  LazyMintModuleContractError,
-  IPFSUnavailableError,
   CoreInitializationErrors,
 } from "@objects/errors";
 import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
@@ -49,24 +37,10 @@ import { GatewayUrl } from "@objects/GatewayUrl";
 import { HypernetLink } from "@objects/HypernetLink";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
-import { Proposal, ProposalVoteReceipt } from "@objects/Proposal";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { PullPayment } from "@objects/PullPayment";
-import { PushPayment } from "@objects/PushPayment";
-import { Registry } from "@objects/Registry";
-import { RegistryEntry } from "@objects/RegistryEntry";
-import { RegistryParams } from "@objects/RegistryParams";
-import { RegistryTokenId } from "@objects/RegistryTokenId";
 import { Signature } from "@objects/Signature";
-import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
-import { ProviderId } from "@objects/ProviderId";
 import { TokenInformation } from "@objects/TokenInformation";
-import { RegistryModule } from "@objects/RegistryModule";
-import { IpfsCID } from "@objects/IpfsCID";
 import { InitializeStatus } from "@objects/InitializeStatus";
-import { LazyMintingSignature } from "@objects/LazyMintingSignature";
-import { ChainInformation } from "@objects/ChainInformation";
-
 export interface IHypernetPayments {
   paymentsInitialized(chainId?: ChainId): ResultAsync<boolean, ProxyError>;
 
@@ -186,6 +160,7 @@ export interface IHypernetPayments {
     | InvalidPaymentIdError
     | PaymentCreationError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   >;
 
   /**
@@ -251,6 +226,7 @@ export interface IHypernetPayments {
     | ProxyError
     | GatewayValidationError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   >;
 
   deauthorizeGateway(
@@ -267,6 +243,7 @@ export interface IHypernetPayments {
     | GatewayValidationError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   >;
 
   getAuthorizedGateways(): ResultAsync<
@@ -298,6 +275,7 @@ export interface IHypernetPayments {
     | GatewayValidationError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   >;
 
   /**
@@ -317,7 +295,7 @@ export interface IHypernetPayments {
    */
   getGatewayEntryList(): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    NonFungibleRegistryContractError | ProxyError
+    NonFungibleRegistryContractError | RegistryFactoryContractError | ProxyError
   >;
 
   getTokenInformation(): ResultAsync<TokenInformation[], ProxyError>;
@@ -346,6 +324,7 @@ export interface IHypernetPayments {
     | ProxyError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   >;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
@@ -363,5 +342,6 @@ export interface IHypernetPayments {
     | ProxyError
     | NonFungibleRegistryContractError
     | InactiveGatewayError
+    | RegistryFactoryContractError
   >;
 }

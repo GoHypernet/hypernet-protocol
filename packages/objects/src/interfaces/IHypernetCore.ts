@@ -66,6 +66,8 @@ export interface IHypernetCore {
     providerId: ProviderId,
   ): ResultAsync<void, InvalidParametersError | ProxyError>;
 
+  rejectProviderIdRequest(): ResultAsync<void, ProxyError>;
+
   getBlockNumber(): ResultAsync<
     number,
     BlockchainUnavailableError | ProxyError

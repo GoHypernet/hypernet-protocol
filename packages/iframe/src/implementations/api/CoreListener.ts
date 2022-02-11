@@ -22,6 +22,7 @@ import {
   RegistryEntry,
   LazyMintingSignature,
   IpfsCID,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import {
   IIFrameCallData,
@@ -340,7 +341,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
-      getRegistryByName: (data: IIFrameCallData<string[]>) => {
+      getRegistryByName: (data: IIFrameCallData<RegistryName[]>) => {
         this.returnForModel(() => {
           return this.core.registries.getRegistryByName(data.data);
         }, data.callId);
@@ -352,14 +353,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.registries.getRegistryByAddress(data.data);
         }, data.callId);
       },
-      getRegistryEntriesTotalCount: (data: IIFrameCallData<string[]>) => {
+      getRegistryEntriesTotalCount: (data: IIFrameCallData<RegistryName[]>) => {
         this.returnForModel(() => {
           return this.core.registries.getRegistryEntriesTotalCount(data.data);
         }, data.callId);
       },
       getRegistryEntries: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           pageNumber: number;
           pageSize: number;
           sortOrder: ERegistrySortOrder;
@@ -376,7 +377,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getRegistryEntryDetailByTokenId: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
         }>,
       ) => {
@@ -404,7 +405,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       updateRegistryEntryTokenURI: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
           registrationData: string;
         }>,
@@ -419,7 +420,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       updateRegistryEntryLabel: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
           label: string;
         }>,
@@ -464,7 +465,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       createRegistryEntry: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           newRegistryEntry: RegistryEntry;
         }>,
       ) => {
@@ -477,7 +478,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       transferRegistryEntry: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
           transferToAddress: EthereumAccountAddress;
         }>,
@@ -492,7 +493,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       burnRegistryEntry: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
         }>,
       ) => {
@@ -522,7 +523,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       grantRegistrarRole: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           address: EthereumAccountAddress | EthereumContractAddress;
         }>,
       ) => {
@@ -535,7 +536,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       revokeRegistrarRole: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           address: EthereumAccountAddress;
         }>,
       ) => {
@@ -548,7 +549,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       renounceRegistrarRole: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           address: EthereumAccountAddress;
         }>,
       ) => {
@@ -562,6 +563,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       provideProviderId: (data: IIFrameCallData<ProviderId>) => {
         this.returnForModel(() => {
           return this.core.provideProviderId(data.data);
+        }, data.callId);
+      },
+      rejectProviderIdRequest: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.rejectProviderIdRequest();
         }, data.callId);
       },
       getTokenInformation: (data: IIFrameCallData<void>) => {
@@ -583,7 +589,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getRegistryEntryByOwnerAddress: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           ownerAddress: EthereumAccountAddress;
           index: number;
         }>,
@@ -603,7 +609,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       createBatchRegistryEntry: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           newRegistryEntries: RegistryEntry[];
         }>,
       ) => {
@@ -616,7 +622,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getRegistryEntryListByOwnerAddress: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           ownerAddress: EthereumAccountAddress;
         }>,
       ) => {
@@ -634,7 +640,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getRegistryEntryListByUsername: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           username: string;
         }>,
       ) => {
@@ -647,7 +653,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       submitLazyMintSignature: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
           ownerAddress: EthereumAccountAddress;
           registrationData: string;

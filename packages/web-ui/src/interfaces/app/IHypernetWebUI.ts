@@ -5,6 +5,7 @@ import {
   EthereumAddress,
   RenderError,
   RegistryTokenId,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
 import React from "react";
@@ -12,6 +13,7 @@ import React from "react";
 export interface IRenderParams {
   selector?: string;
   showInModal?: boolean;
+  noHeader?: boolean;
   noLabel?: boolean;
   excludeCardWrapper?: boolean;
   bodyStyle?: React.CSSProperties;
@@ -25,12 +27,18 @@ export interface IConnectorAuthorizationFlowParams extends IRenderParams {
   connectorLogoUrl?: string;
 }
 
+export interface IOnboardingSuccessButtonProps {
+  label: string;
+  action: () => void;
+}
+
 export interface IOnboardingFlowParams extends IRenderParams {
   gatewayUrl: GatewayUrl;
   gatewayName?: string;
   gatewayLogoUrl?: string;
-  finalSuccessContent?: string;
+  renderGatewayApprovalContent?: () => React.ReactNode;
   launchpadUrl?: string;
+  successButtonProps?: IOnboardingSuccessButtonProps;
 }
 
 export interface IRenderPaymentWidgetParams extends IRenderParams {
@@ -59,29 +67,29 @@ export interface IProposalCreateWidgetParams extends IRenderParams {
 }
 
 export interface IRegistryListWidgetParams extends IRenderParams {
-  onRegistryEntryListNavigate?: (registryName: string) => void;
-  onRegistryDetailNavigate?: (registryName: string) => void;
+  onRegistryEntryListNavigate?: (registryName: RegistryName) => void;
+  onRegistryDetailNavigate?: (registryName: RegistryName) => void;
   onLazyMintRequestsNavigate?: () => void;
 }
 
 export interface IRegistryEntryListWidgetParams extends IRenderParams {
   onRegistryEntryDetailsNavigate?: (
-    registryName: string,
+    registryName: RegistryName,
     entryTokenId: RegistryTokenId,
   ) => void;
   onRegistryListNavigate?: () => void;
-  registryName: string;
+  registryName: RegistryName;
 }
 
 export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
-  onRegistryEntryListNavigate?: (registryName: string) => void;
-  registryName: string;
+  onRegistryEntryListNavigate?: (registryName: RegistryName) => void;
+  registryName: RegistryName;
   entryTokenId: RegistryTokenId;
 }
 
 export interface IRegistryDetailWidgetParams extends IRenderParams {
   onRegistryListNavigate?: () => void;
-  registryName: string;
+  registryName: RegistryName;
 }
 
 export interface IHypernetWebUI {

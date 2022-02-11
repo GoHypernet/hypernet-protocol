@@ -35,6 +35,7 @@ import {
   PersistenceError,
   VectorError,
   LazyMintingSignature,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IRegistryRepository } from "@interfaces/data";
@@ -43,6 +44,7 @@ import { BigNumber, ethers } from "ethers";
 import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
+import { IRegistryUtils, IRegistryUtilsType } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
@@ -70,6 +72,7 @@ export class RegistryRepository implements IRegistryRepository {
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(IRegistryUtilsType) protected registryUtils: IRegistryUtils,
     @inject(IDIDDataStoreProviderType)
     protected didDataStoreProvider: IDIDDataStoreProvider,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
@@ -117,9 +120,9 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public getRegistryByName(
-    registryNames: string[],
+    registryNames: RegistryName[],
   ): ResultAsync<
-    Map<string, Registry>,
+    Map<RegistryName, Registry>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return ResultUtils.combine([
@@ -127,7 +130,7 @@ export class RegistryRepository implements IRegistryRepository {
       this.getRegistryModules(),
     ]).andThen((vals) => {
       const [context, registryModules] = vals;
-      const registriesMap: Map<string, Registry> = new Map();
+      const registriesMap: Map<RegistryName, Registry> = new Map();
       return ResultUtils.combine(
         registryNames.map((registryName) => {
           return this.registryFactoryContract
@@ -192,12 +195,14 @@ export class RegistryRepository implements IRegistryRepository {
                   baseURI,
                 ] = vals;
 
+                console.log("registryModules", registryModules);
                 const batchModule = registryModules.find(
                   (registryModule) =>
                     registryModule.name ===
                     context.governanceChainInformation.registryModulesNames
                       .batchMintingModule,
                 );
+                console.log("batchModule", batchModule);
 
                 const lazyMintModule = registryModules.find(
                   (registryModule) =>
@@ -205,6 +210,8 @@ export class RegistryRepository implements IRegistryRepository {
                     context.governanceChainInformation.registryModulesNames
                       .lazyMintingModule,
                 );
+                console.log("lazyMintModule", lazyMintModule);
+                console.log("registrarAddresses", registrarAddresses);
 
                 const modulesCapability = new RegistryModuleCapability(
                   registryAddress,
@@ -219,6 +226,7 @@ export class RegistryRepository implements IRegistryRepository {
                       lazyMintModule?.address,
                   ),
                 );
+                console.log("modulesCapability", modulesCapability);
 
                 registriesMap.set(
                   registryName,
@@ -351,7 +359,7 @@ export class RegistryRepository implements IRegistryRepository {
                 registrarAddresses,
                 registrarAdminAddresses,
                 registryAddress,
-                registryName,
+                RegistryName(registryName),
                 registrySymbol,
                 registryNumberOfEntries,
                 allowStorageUpdate,
@@ -376,12 +384,12 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public getRegistryEntriesTotalCount(
-    registryNames: string[],
+    registryNames: RegistryName[],
   ): ResultAsync<
-    Map<string, number>,
+    Map<RegistryName, number>,
     RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
-    const totalCountsMap: Map<string, number> = new Map();
+    const totalCountsMap: Map<RegistryName, number> = new Map();
 
     return ResultUtils.combine(
       registryNames.map((registryName) => {
@@ -414,7 +422,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public getRegistryEntries(
-    registryName: string,
+    registryName: RegistryName,
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
@@ -497,7 +505,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public getRegistryEntryByOwnerAddress(
-    registryName: string,
+    registryName: RegistryName,
     ownerAddress: EthereumAccountAddress,
     index: number,
   ): ResultAsync<
@@ -527,7 +535,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public getRegistryEntryDetailByTokenId(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
   ): ResultAsync<
     RegistryEntry,
@@ -555,7 +563,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public updateRegistryEntryTokenURI(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     registrationData: string,
   ): ResultAsync<
@@ -619,7 +627,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public updateRegistryEntryLabel(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     label: string,
   ): ResultAsync<
@@ -683,7 +691,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public transferRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     transferToAddress: EthereumAccountAddress,
   ): ResultAsync<
@@ -756,7 +764,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public burnRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
   ): ResultAsync<
     void,
@@ -911,7 +919,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public createRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     newRegistryEntry: RegistryEntry,
   ): ResultAsync<
     void,
@@ -1051,7 +1059,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public grantRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -1112,7 +1120,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public revokeRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -1173,7 +1181,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public renounceRegistrarRole(
-    registryName: string,
+    registryName: RegistryName,
     address: EthereumAccountAddress | EthereumContractAddress,
   ): ResultAsync<
     void,
@@ -1241,71 +1249,75 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryModules(): ResultAsync<
     RegistryModule[],
-    NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   > {
     return this.contextProvider.getContext().andThen((context) => {
-      if (this.provider == null) {
-        throw new Error("No provider available!");
-      }
+      const registryModulesName =
+        context.governanceChainInformation.registryNames.registryModules;
 
-      if (context.governanceChainInformation.modulesRegistryAddress == null) {
+      if (registryModulesName == null) {
         return errAsync(
-          new NonFungibleRegistryContractError(
-            "modulesRegistryAddress is not defined!",
+          new RegistryFactoryContractError(
+            "registryModules name is not defined!",
           ),
         );
       }
 
-      const registryAddress =
-        context.governanceChainInformation.modulesRegistryAddress;
-
-      // Call the NFI contract of modules registry
-      this.nonFungibleRegistryContract =
-        new NonFungibleRegistryEnumerableUpgradeableContract(
-          this.provider,
-          registryAddress,
-        );
-
-      return this.nonFungibleRegistryContract
-        .totalSupply(registryAddress)
-        .andThen((totalCount) => {
-          const registryEntryListResult: ResultAsync<
-            RegistryEntry,
-            NonFungibleRegistryContractError
-          >[] = [];
-
-          for (let i = 0; i < totalCount; i++) {
-            registryEntryListResult.push(
-              this.nonFungibleRegistryContract
-                .tokenByIndex(i, registryAddress)
-                .andThen((tokenId) => {
-                  return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
-                    tokenId,
-                    registryAddress,
-                  );
-                }),
-            );
+      return this.registryUtils
+        .getRegistryNameAddress(registryModulesName)
+        .andThen((registryModulesAddress) => {
+          if (this.provider == null) {
+            throw new Error("No provider available!");
           }
 
-          return ResultUtils.combine(registryEntryListResult).map(
-            (registryEntries) => {
-              return registryEntries.reduce((acc, registryEntry) => {
-                acc.push({
-                  name: registryEntry.label,
-                  address: EthereumContractAddress(
-                    registryEntry.tokenURI as string,
-                  ),
-                });
-                return acc;
-              }, [] as RegistryModule[]);
-            },
-          );
+          // Call the NFI contract of modules registry
+          this.nonFungibleRegistryContract =
+            new NonFungibleRegistryEnumerableUpgradeableContract(
+              this.provider,
+              registryModulesAddress,
+            );
+
+          return this.nonFungibleRegistryContract
+            .totalSupply(registryModulesAddress)
+            .andThen((totalCount) => {
+              const registryEntryListResult: ResultAsync<
+                RegistryEntry,
+                NonFungibleRegistryContractError
+              >[] = [];
+
+              for (let i = 0; i < totalCount; i++) {
+                registryEntryListResult.push(
+                  this.nonFungibleRegistryContract
+                    .tokenByIndex(i, registryModulesAddress)
+                    .andThen((tokenId) => {
+                      return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
+                        tokenId,
+                        registryModulesAddress,
+                      );
+                    }),
+                );
+              }
+
+              return ResultUtils.combine(registryEntryListResult).map(
+                (registryEntries) => {
+                  return registryEntries.reduce((acc, registryEntry) => {
+                    acc.push({
+                      name: registryEntry.label,
+                      address: EthereumContractAddress(
+                        registryEntry.tokenURI as string,
+                      ),
+                    });
+                    return acc;
+                  }, [] as RegistryModule[]);
+                },
+              );
+            });
         });
     });
   }
 
   public createBatchRegistryEntry(
-    registryName: string,
+    registryName: RegistryName,
     newRegistryEntries: RegistryEntry[],
   ): ResultAsync<
     void,
@@ -1376,7 +1388,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public submitLazyMintSignature(
-    registryName: string,
+    registryName: RegistryName,
     tokenId: RegistryTokenId,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
@@ -1462,6 +1474,7 @@ export class RegistryRepository implements IRegistryRepository {
     | BlockchainUnavailableError
     | LazyMintModuleContractError
     | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
   > {
     if (lazyMintingSignature.tokenClaimed === true) {
       return errAsync(new InvalidParametersError("Token already claimed!"));
@@ -1633,7 +1646,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public getRegistryEntryListByOwnerAddress(
-    registryName: string,
+    registryName: RegistryName,
     ownerAddress: EthereumAccountAddress,
   ): ResultAsync<
     RegistryEntry[],
@@ -1677,7 +1690,7 @@ export class RegistryRepository implements IRegistryRepository {
   }
 
   public getRegistryEntryListByUsername(
-    registryName: string,
+    registryName: RegistryName,
     username: string,
   ): ResultAsync<
     RegistryEntry[],
@@ -1687,24 +1700,34 @@ export class RegistryRepository implements IRegistryRepository {
       this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
     ]).andThen(([context, provider]) => {
-      this.provider = provider;
+      const hypernetProfilesName =
+        context.governanceChainInformation.registryNames.hypernetProfiles;
 
-      const registryAddress =
-        context.governanceChainInformation.hypernetProfileRegistryAddress;
-
-      const hypernetProfileRegistryContract =
-        new NonFungibleRegistryEnumerableUpgradeableContract(
-          provider,
-          registryAddress,
+      if (hypernetProfilesName == null) {
+        return errAsync(
+          new RegistryFactoryContractError(
+            "hypernetProfiles name is not defined!",
+          ),
         );
+      }
 
-      return hypernetProfileRegistryContract
-        .getRegistryEntryByLabel(username, registryAddress)
-        .andThen((registryEntry) => {
-          return this.getRegistryEntryListByOwnerAddress(
-            registryName,
-            registryEntry.owner,
-          );
+      return this.registryUtils
+        .getRegistryNameAddress(hypernetProfilesName)
+        .andThen((hypernetProfilesRegistryAddress) => {
+          const hypernetProfileRegistryContract =
+            new NonFungibleRegistryEnumerableUpgradeableContract(
+              provider,
+              hypernetProfilesRegistryAddress,
+            );
+
+          return hypernetProfileRegistryContract
+            .getRegistryEntryByLabel(username, hypernetProfilesRegistryAddress)
+            .andThen((registryEntry) => {
+              return this.getRegistryEntryListByOwnerAddress(
+                registryName,
+                registryEntry.owner,
+              );
+            });
         });
     });
   }
@@ -1793,7 +1816,7 @@ export class RegistryRepository implements IRegistryRepository {
               [],
               [],
               registryAddress,
-              registryName,
+              RegistryName(registryName),
               registrySymbol,
               registryNumberOfEntries,
               allowStorageUpdate,

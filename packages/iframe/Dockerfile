@@ -35,7 +35,7 @@ ARG IFRAME_SOURCE=http://localhost:5000
 ENV __IFRAME_SOURCE__ $IFRAME_SOURCE
 RUN echo $__IFRAME_SOURCE__
 
-ARG NATS_URL=ws://localhost:4221
+ARG NATS_URL=wss://dev-nats.hypernet.foundation:4221
 ENV __NATS_URL__ $NATS_URL
 
 RUN echo $__NATS_URL__
