@@ -23,6 +23,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected getRegistriesReadyResolved = false;
   protected getGovernanceReadyResolved = false;
   protected getPaymentsReadyResolved = false;
+  protected paymentsInitializing = false;
 
   public webUIClient: IHypernetWebUI;
   public core: HypernetIFrameProxy;
@@ -31,8 +32,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   constructor(
     iframeURL: string | null,
     defaultGovernanceChainId: number | null,
-    governanceRequired: boolean | null,
-    paymentsRequired: boolean | null,
     theme: Theme | null,
     debug: boolean | null,
   ) {
@@ -42,20 +41,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       iframeURLWithSearchParams.searchParams.append(
         "defaultGovernanceChainId",
         defaultGovernanceChainId.toString(),
-      );
-    }
-
-    if (governanceRequired != null) {
-      iframeURLWithSearchParams.searchParams.append(
-        "governanceRequired",
-        governanceRequired.toString(),
-      );
-    }
-
-    if (paymentsRequired != null) {
-      iframeURLWithSearchParams.searchParams.append(
-        "paymentsRequired",
-        paymentsRequired.toString(),
       );
     }
 
@@ -77,11 +62,21 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.UIData = {
       onSelectedStateChannelChanged: new Subject<ActiveStateChannel>(),
       onVotesDelegated: new Subject<void>(),
+      onProviderIdProvided: new Subject<void>(),
       getSelectedStateChannel: () => this.selectedStateChannel,
     };
 
     this.UIData.onSelectedStateChannelChanged.subscribe((stateChannel) => {
       this.selectedStateChannel = stateChannel;
+    });
+
+    this.UIData.onProviderIdProvided.subscribe(() => {
+      // Render payments instuction only if getPaymentsReady is being called
+      if (this.paymentsInitializing === true) {
+        this.webUIClient.payments.renderPaymentsMetamaskInstructionsWidget({
+          showInModal: true,
+        });
+      }
     });
 
     if (window.hypernetWebUIInstance) {
@@ -179,7 +174,9 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public getPaymentsReady(): ResultAsync<IHypernetCore, Error> {
+    this.paymentsInitializing = true;
     if (this.getPaymentsReadyResolved === true) {
+      this.paymentsInitializing = false;
       return okAsync(this.core);
     }
     return this.core
@@ -187,6 +184,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       .andThen(() => this.core.payments.initializePayments())
       .map(() => {
         this.getPaymentsReadyResolved = false;
+        this.paymentsInitializing = false;
         window.hypernetCoreInstance = this.core;
         return this.core;
       })
@@ -196,6 +194,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
             err?.message ? `: ${err?.message}` : "."
           }`,
         );
+        this.paymentsInitializing = false;
         return new Error("Something went wrong!");
       });
   }

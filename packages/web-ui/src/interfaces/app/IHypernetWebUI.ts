@@ -131,6 +131,9 @@ export interface IHypernetPaymentsWebUI {
     params: IConnectorAuthorizationFlowParams,
   ): Result<void, RenderError>;
   startOnboardingFlow(params: IOnboardingFlowParams): Result<void, RenderError>;
+  renderPaymentsMetamaskInstructionsWidget(
+    config: IRenderParams,
+  ): Result<void, RenderError>;
 }
 
 export interface IHypernetGovernanceWebUI {

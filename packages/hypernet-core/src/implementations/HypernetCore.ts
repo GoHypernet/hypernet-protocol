@@ -724,66 +724,43 @@ export class HypernetCore implements IHypernetCore {
    * Returns the initialized status of this instance of Hypernet Core.
    */
   public initialized(chainId?: ChainId): ResultAsync<boolean, never> {
-    return ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getContext(),
-    ]).andThen((vals) => {
-      const [config, context] = vals;
+    return this.contextProvider.getContext().andThen((context) => {
       const governanceChainId =
         chainId || context.governanceChainInformation.chainId;
 
-      if (
-        config.governanceRequired == true &&
-        config.paymentsRequired == true
-      ) {
-        return ok(
-          this._governanceInitialized.get(governanceChainId) === true &&
-            this._paymentsInitialized.get(governanceChainId) === true,
-        );
-      } else {
-        return ok(
-          this._governanceInitialized.get(governanceChainId) === true ||
-            this._paymentsInitialized.get(governanceChainId) === true,
-        );
-      }
+      return ok(
+        this._registriesInitialized.get(governanceChainId) === true ||
+          this._paymentsInitialized.get(governanceChainId) === true ||
+          this._governanceInitialized.get(governanceChainId) === true,
+      );
     });
   }
 
   public waitInitialized(chainId?: ChainId): ResultAsync<void, never> {
-    return ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getContext(),
-    ]).andThen((vals) => {
-      const [config, context] = vals;
+    return this.contextProvider.getContext().andThen((context) => {
       const governanceChainId =
         chainId || context.governanceChainInformation.chainId;
 
+      const registriesInitializePromise =
+        this._registriesInitializePromise.get(governanceChainId);
       const governanceInitializePromise =
         this._governanceInitializePromise.get(governanceChainId);
       const paymentsInitializePromise =
         this._paymentsInitializePromise.get(governanceChainId);
 
       if (
+        registriesInitializePromise == null ||
         governanceInitializePromise == null ||
         paymentsInitializePromise == null
       ) {
         throw new Error("Chain Id is not supported in chain config!");
       }
 
-      if (
-        config.governanceRequired == true &&
-        config.paymentsRequired == true
-      ) {
-        return ResultUtils.combine([
-          ResultAsync.fromSafePromise<void, never>(governanceInitializePromise),
-          ResultAsync.fromSafePromise<void, never>(paymentsInitializePromise),
-        ]).map(() => {});
-      } else {
-        return ResultUtils.race([
-          ResultAsync.fromSafePromise<void, never>(governanceInitializePromise),
-          ResultAsync.fromSafePromise<void, never>(paymentsInitializePromise),
-        ]).map(() => {});
-      }
+      return ResultUtils.race([
+        ResultAsync.fromSafePromise<void, never>(registriesInitializePromise),
+        ResultAsync.fromSafePromise<void, never>(governanceInitializePromise),
+        ResultAsync.fromSafePromise<void, never>(paymentsInitializePromise),
+      ]).map(() => {});
     });
   }
 
@@ -794,30 +771,15 @@ export class HypernetCore implements IHypernetCore {
     chainId?: ChainId,
   ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
     return ResultUtils.combine([
-      this.configProvider.getConfig(),
       this.contextProvider.getContext(),
       this.registries.initializeRegistries(chainId),
     ]).andThen((vals) => {
-      const [config, context] = vals;
+      const [context] = vals;
       this.logUtils.debug(`Initializing Hypernet Protocol Core`);
 
       return ResultUtils.combine([
-        this.governance.initializeGovernance(chainId).orElse((e) => {
-          this.logUtils.error(e);
-          if (config.governanceRequired === true) {
-            return errAsync(e);
-          } else {
-            return okAsync(context.initializeStatus);
-          }
-        }),
-        this.payments.initializePayments(chainId).orElse((e) => {
-          this.logUtils.error(e);
-          if (config.paymentsRequired === true) {
-            return errAsync(e);
-          } else {
-            return okAsync(context.initializeStatus);
-          }
-        }),
+        this.governance.initializeGovernance(chainId),
+        this.payments.initializePayments(chainId),
       ]).andThen(() => {
         return okAsync(context.initializeStatus);
       });
