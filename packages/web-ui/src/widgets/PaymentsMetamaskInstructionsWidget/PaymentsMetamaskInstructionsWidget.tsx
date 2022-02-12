@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Box } from "@material-ui/core";
 
-import { useStyles } from "@web-integration/widgets/PaymentsMetamaskInstructionsWidget/PaymentsMetamaskInstructionsWidget.style";
+import { useStyles } from "@web-ui/widgets/PaymentsMetamaskInstructionsWidget/PaymentsMetamaskInstructionsWidget.style";
 import { GovernanceTypography } from "@web-ui/components";
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import {

@@ -1,1 +1,1 @@
-export { default } from "@web-integration/widgets/PaymentsMetamaskInstructionsWidget/PaymentsMetamaskInstructionsWidget";
+export { default } from "@web-ui/widgets/PaymentsMetamaskInstructionsWidget/PaymentsMetamaskInstructionsWidget";
