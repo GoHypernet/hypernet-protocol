@@ -17,7 +17,6 @@ import {
 import { useStyles } from "@web-ui/widgets/WalletConnectWidget/WalletConnectWidget.style";
 
 import OptionCard from "./OptionCard";
-import MetamaskInstructions from "@web-ui/components/MetamaskInstructions";
 export interface IProvider {
   id: string;
   name: string;
@@ -48,12 +47,10 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
   props: IWalletConnectWidget,
 ) => {
   const classes = useStyles();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, UIData } = useStoreContext();
   const { closeModal, setModalHeader } = useLayoutContext();
 
   const [showMetamaskWarning, setShowMetamaskWarning] =
-    useState<boolean>(false);
-  const [showMetamaskInstructions, setShowMetamaskInstructions] =
     useState<boolean>(false);
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -62,25 +59,14 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
     useState<IProvider>(METAMASK);
 
   useEffect(() => {
-    if (!showMetamaskInstructions && !showMetamaskWarning) {
+    if (!showMetamaskWarning) {
       setModalHeader("Wallet Option");
     }
 
     return () => {
       setModalHeader("");
     };
-  }, [showMetamaskInstructions, showMetamaskWarning]);
-
-  useEffect(() => {
-    coreProxy
-      .waitInitialized()
-      .map(() => {
-        closeModal();
-      })
-      .mapErr(() => {
-        closeModal();
-      });
-  }, []);
+  }, [showMetamaskWarning]);
 
   const connectWallet = () => {
     const { id } = selectedWalletOption;
@@ -91,15 +77,13 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
         setShowMetamaskWarning(true);
         return;
       }
-      setShowMetamaskInstructions(true);
     }
 
     coreProxy.provideProviderId(ProviderId(id)).match(
       () => {
         // do not close for metamask for instructions
-        if (id === WALLETCONNECT.id) {
-          closeModal();
-        }
+        closeModal();
+        UIData.onProviderIdProvided.next();
       },
       (err) => {
         console.error(err.message || "Err while providePrivateCredentials.");
@@ -110,7 +94,6 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
 
   const retry = () => {
     setShowMetamaskWarning(false);
-    setShowMetamaskInstructions(true);
     connectWallet();
   };
 
@@ -120,10 +103,6 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
     }
     return WALLET_PROVIDERS;
   };
-
-  if (showMetamaskInstructions) {
-    return <MetamaskInstructions />;
-  }
 
   if (showMetamaskWarning) {
     return <MetamaskWarning retry={retry} />;
@@ -136,16 +115,6 @@ const WalletConnectWidget: React.FC<IWalletConnectWidget> = (
           Please select a wallet to connect.
         </GovernanceTypography>
       </Box>
-      {/* <Box className={classes.titleWrapper}>
-        <GovernanceTypography variant="h4">
-          Wallet options!
-        </GovernanceTypography>
-      </Box>
-      <Box className={classes.subtitleWrapper}>
-        <GovernanceTypography variant="subtitle1">
-          Please select a wallet to connect.
-        </GovernanceTypography>
-      </Box> */}
       {getFilteredProviders().map((provider: IProvider) => (
         <OptionCard
           key={provider.id}

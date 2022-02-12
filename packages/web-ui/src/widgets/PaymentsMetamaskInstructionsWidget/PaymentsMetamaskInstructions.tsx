@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Box } from "@material-ui/core";
 
-import { useStyles } from "@web-ui/components/MetamaskInstructions/MetamaskInstructions.style";
 import { GovernanceTypography } from "@web-ui/components";
 import { useLayoutContext } from "@web-ui/contexts";
 import {
@@ -9,8 +8,9 @@ import {
   USER_LIGHT_ICON_URL,
   WALLET_LIGHT_ICON_URL,
 } from "@web-ui/constants";
+import { useStyles } from "@web-ui/widgets/PaymentsMetamaskInstructionsWidget/PaymentsMetamaskInstructionsWidget.style";
 
-const MetamaskInstructions: React.FC = () => {
+const PaymentsMetamaskInstructions: React.FC = () => {
   const classes = useStyles();
   const { setModalHeader, setHideModalWatermark } = useLayoutContext();
 
@@ -62,4 +62,4 @@ const MetamaskInstructions: React.FC = () => {
   );
 };
 
-export default MetamaskInstructions;
+export default PaymentsMetamaskInstructions;

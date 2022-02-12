@@ -19,8 +19,6 @@ const theme = new Theme(
 const client: IHypernetWebIntegration = new HypernetWebIntegration(
   "http://localhost:5020",
   ChainId(1337),
-  true,
-  true,
   theme,
   null,
 );

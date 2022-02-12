@@ -11,7 +11,7 @@ import {
   ILocalStorageUtils,
 } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
-import { okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import {
   IBrowserNode,

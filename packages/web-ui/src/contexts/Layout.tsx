@@ -47,7 +47,10 @@ export function LayoutProvider({ children }: ILayoutProps) {
     setLoading(false);
 
     let errorMessage = "";
-    if (err?.message != null && err?.message.includes("Nonce too high")) {
+    if (
+      err?.message != null &&
+      err?.message?.toLowerCase()?.includes("nonce too high")
+    ) {
       errorMessage =
         "Nonce too high error, try to restart your metamask from the advanced option";
     } else if (err?.message != null) {

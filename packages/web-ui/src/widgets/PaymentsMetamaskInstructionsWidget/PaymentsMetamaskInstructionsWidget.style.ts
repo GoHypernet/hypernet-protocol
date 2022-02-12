@@ -19,13 +19,11 @@ export const useStyles = makeStyles({
   },
   step: {
     fontWeight: EFontWeight.SEMI_BOLD,
-    // TODO: Update Color Schema
     color: "#AEAEAE",
   },
   description: {
     fontWeight: EFontWeight.MEDIUM,
     marginBottom: 24,
-    // TODO: Update Color Schema
     color: "#6D6D6D",
   },
 });

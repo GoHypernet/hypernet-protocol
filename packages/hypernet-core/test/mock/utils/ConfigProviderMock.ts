@@ -51,8 +51,6 @@ export class ConfigProviderMock implements IConfigProvider {
         5 * 1000, // gatewayDeauthorizationTimeout
         "HypernetProtocolControlClaims", // controlClaimSubject
         false, // requireOnline
-        true,
-        true,
         "ipfsApiUrl",
         "ipfsGatewayUrl",
         false, // debug is off for testing

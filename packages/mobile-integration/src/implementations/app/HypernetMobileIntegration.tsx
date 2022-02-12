@@ -25,10 +25,8 @@ export default class HypernetMobileIntegration {
     this.webIntegrationInstance = new HypernetWebIntegration(
       null,
       null,
-      true,
-      false,
       null,
-      false
+      false,
     );
     this.webIntegrationInstance.getReady().map((coreProxy) => {
       this.coreProxy = coreProxy;
