@@ -28,7 +28,7 @@ const RegistryLazyMintingRequestsWidget: React.FC<IRegistryLazyMintingRequestsWi
 
     const getLazyMintSignatures = () => {
       setLoading(true);
-      coreProxy
+      coreProxy.registries
         .retrieveLazyMintingSignatures()
         .map((lazyMintingSignatureList) => {
           setLazyMintingSignatures(lazyMintingSignatureList || []);
@@ -45,7 +45,7 @@ const RegistryLazyMintingRequestsWidget: React.FC<IRegistryLazyMintingRequestsWi
 
     const revokeSignature = (lazyMintingSignature: LazyMintingSignature) => {
       setLoading(true);
-      coreProxy
+      coreProxy.registries
         .revokeLazyMintSignature(lazyMintingSignature)
         .map(() => {
           getLazyMintSignatures();
@@ -56,7 +56,7 @@ const RegistryLazyMintingRequestsWidget: React.FC<IRegistryLazyMintingRequestsWi
 
     const submitSignature = (lazyMintingSignature: LazyMintingSignature) => {
       setLoading(true);
-      coreProxy
+      coreProxy.registries
         .executeLazyMint(lazyMintingSignature)
         .map(() => {
           getLazyMintSignatures();
@@ -78,7 +78,7 @@ const RegistryLazyMintingRequestsWidget: React.FC<IRegistryLazyMintingRequestsWi
 
         {lazyMintingSignatures?.map((lazyMintingSignature, index) => (
           <GovernanceRegistryListItem
-            key={lazyMintingSignature.tokenId}
+            key={Number(lazyMintingSignature.tokenId)}
             number={(index + 1).toString()}
             title={lazyMintingSignature.tokenId.toString()}
             fieldWithValueList={[

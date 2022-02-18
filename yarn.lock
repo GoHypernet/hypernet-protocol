@@ -3010,13 +3010,13 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@hypernetlabs/common-repositories@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@hypernetlabs/common-repositories/-/common-repositories-0.0.3.tgz#3e841534d1e85c69cf845a2d4d902d359722febf"
-  integrity sha512-P43FweoP5JuhTc/oI2U7oyJoB+6yYjZotm/mK/EJb67lGnc0p0Kl2wZXnxQQShAP6L0Cc02cWeV4bHPgjUEDbA==
+"@hypernetlabs/common-repositories@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/common-repositories/-/common-repositories-0.0.4.tgz#6d9da6a590a8d81edca9ebd740f31d37f61f319b"
+  integrity sha512-RKsD6IFdrUC6ERFI82yTMSMqjqFBZJA7jE6k59i9OEvBo5JWZt1qumwmFb3lTt5PfA0Ksrf+LQ0jelz9+lydWA==
   dependencies:
-    "@hypernetlabs/governance-sdk" "^0.0.3"
-    "@hypernetlabs/objects" "^0.3.15"
+    "@hypernetlabs/governance-sdk" "^0.0.5"
+    "@hypernetlabs/objects" "^0.3.17"
     ethers "^5.4.7"
     inversify "^5.1.1"
     neverthrow "^4.2.2"
@@ -3028,6 +3028,17 @@
   dependencies:
     "@hypernetlabs/objects" "^0.3.10"
     ethers "^5.4.7"
+
+"@hypernetlabs/governance-sdk@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/governance-sdk/-/governance-sdk-0.0.4.tgz#d3de8ce18c8735b3b2fc3bd96df14deb73a1656c"
+  integrity sha512-gmxnERHeQ+/cBsdS8GBDziCwAWBNTQzVloq7W6JSs0Cf2vH1bLgnnFtJuMO8+tNjUqsbipCy6sEMBQWj6AWeKw==
+  dependencies:
+    "@hypernetlabs/gateway-connector" "^0.0.12"
+    "@hypernetlabs/objects" "^0.3.15"
+    "@hypernetlabs/utils" "^0.5.2"
+    ethers "^5.4.7"
+    neverthrow "^4.2.2"
 
 "@icons/material@^0.2.4":
   version "0.2.4"

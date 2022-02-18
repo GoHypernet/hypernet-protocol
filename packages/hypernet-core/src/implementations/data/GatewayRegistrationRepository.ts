@@ -1,4 +1,7 @@
-import { NonFungibleRegistryEnumerableUpgradeableContract } from "@hypernetlabs/governance-sdk";
+import {
+  NonFungibleRegistryEnumerableUpgradeableContract,
+  RegistryFactoryContract,
+} from "@hypernetlabs/governance-sdk";
 import {
   GatewayUrl,
   PersistenceError,
@@ -8,6 +11,8 @@ import {
   EthereumAccountAddress,
   NonFungibleRegistryContractError,
   RegistryEntry,
+  RegistryFactoryContractError,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -18,9 +23,14 @@ import {
 } from "@hypernetlabs/utils";
 import { IGatewayRegistrationRepository } from "@interfaces/data";
 import { injectable, inject } from "inversify";
-import { okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
-import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
+import {
+  IRegistryUtils,
+  IRegistryUtilsType,
+  IStorageUtils,
+  IStorageUtilsType,
+} from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
@@ -53,6 +63,7 @@ export class GatewayRegistrationRepository
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
+    @inject(IRegistryUtilsType) protected registryUtils: IRegistryUtils,
     @inject(IGatewayConnectorProxyFactoryType)
     protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
@@ -64,21 +75,21 @@ export class GatewayRegistrationRepository
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   > {
-    return ResultUtils.combine([
-      this.contextProvider.getContext(),
-      this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([context, provider]) => {
-      const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
-      const newGatewayResults = new Array<
-        ResultAsync<void, NonFungibleRegistryContractError>
-      >();
+    const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
+    const newGatewayResults = new Array<
+      ResultAsync<void, NonFungibleRegistryContractError>
+    >();
 
+    return ResultUtils.combine([
+      this.blockchainProvider.getGovernanceProvider(),
+      this.getGatewayRegistryAddress(),
+    ]).andThen(([provider, gatewayRegistryAddress]) => {
       const gatewayRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          context.governanceChainInformation.gatewayRegistryAddress,
+          gatewayRegistryAddress,
         );
 
       // Check for entries that are already cached.
@@ -130,16 +141,16 @@ export class GatewayRegistrationRepository
 
   public getGatewayEntryList(): ResultAsync<
     Map<GatewayUrl, GatewayRegistrationInfo>,
-    NonFungibleRegistryContractError
+    NonFungibleRegistryContractError | RegistryFactoryContractError
   > {
     return ResultUtils.combine([
-      this.contextProvider.getContext(),
       this.blockchainProvider.getGovernanceProvider(),
-    ]).andThen(([context, provider]) => {
+      this.getGatewayRegistryAddress(),
+    ]).andThen(([provider, gatewayRegistryAddress]) => {
       const gatewayRegistryContract =
         new NonFungibleRegistryEnumerableUpgradeableContract(
           provider,
-          context.governanceChainInformation.gatewayRegistryAddress,
+          gatewayRegistryAddress,
         );
 
       return gatewayRegistryContract.totalSupply().andThen((totalCount) => {
@@ -214,6 +225,21 @@ export class GatewayRegistrationRepository
     filter?: GatewayRegistrationFilter,
   ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> {
     throw new Error("Method not implemented.");
+  }
+
+  private getGatewayRegistryAddress(): ResultAsync<
+    EthereumContractAddress,
+    RegistryFactoryContractError
+  > {
+    return this.contextProvider.getContext().andThen((context) => {
+      const gatewaysRegistryName =
+        context.governanceChainInformation.registryNames.gateways;
+      if (gatewaysRegistryName == null) {
+        throw new Error("Gateways registry name not found!");
+      }
+
+      return this.registryUtils.getRegistryNameAddress(gatewaysRegistryName);
+    });
   }
 }
 

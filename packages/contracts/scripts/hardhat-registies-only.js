@@ -19,7 +19,7 @@ async function main() {
   console.log("Deployment Wallet Address:", owner.address);
   console.log("RPC URL:", hre.network.config.url);
 
-  const hypernetidaddress = "0xC1B2875d2dde88fd4889Be7499176e61C8a5aF6c";
+  const hypernetidaddress = "0x37633f89253F7106ef01ec84927fc3e7168eb59D";
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   // deploy enumerable registry contract
@@ -98,6 +98,13 @@ async function main() {
   console.log("Merkle Module Address:", merklemodule.address);
   console.log("Merkle Module Gas Fee:", merklemodule_reciept.gasUsed.toString());
 
+  // deploy the Buy NFI module
+  const BuyModule = await ethers.getContractFactory("BuyModule");
+  const buymodule = await BuyModule.deploy("Buy NFI", await gasSettings());
+  const buymodule_reciept = await buymodule.deployTransaction.wait();
+  console.log("Buy NFI Module Address:", buymodule.address);
+  console.log("Buy NFI Module Gas Fee:", buymodule_reciept.gasUsed.toString());
+
   // register the deployer wallet so it can recieve NFIs
   const profilesAddress = await factoryregistry.nameToAddress("Hypernet Profiles");
   const profilesHandle = new hre.ethers.Contract(
@@ -145,6 +152,10 @@ async function main() {
   const merkleDropRegTx = await registryModulesHandle.register(owner.address, "Merkle Drop", `${merklemodule.address}`, 3, await gasSettings());
   const merkleDropRegRcpt = await merkleDropRegTx.wait(3);
   console.log("Merkle Drop Module Register Gas Fee:", merkleDropRegRcpt.gasUsed.toString());
+
+  const buyNFIRegTx = await registryModulesHandle.register(owner.address, "Buy NFI", `${buymodule.address}`, 4, await gasSettings());
+  const buyNFIRegRcpt = await buyNFIRegTx.wait(3);
+  console.log("Buy NFI Module Register Gas Fee:", buyNFIRegRcpt.gasUsed.toString());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

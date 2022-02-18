@@ -1,4 +1,4 @@
-import { RegistryTokenId } from "@hypernetlabs/objects";
+import { RegistryTokenId, RegistryName } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import React, { useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -11,17 +11,17 @@ const RegistryEntryDetail: React.FC = () => {
   const { handleError } = useLayoutContext();
   const { hypernetWebIntegration } = useStoreContext();
   const { registryName, entryTokenId } =
-    useParams<{ registryName: string; entryTokenId: string }>();
+    useParams<{ registryName: RegistryName; entryTokenId: string }>();
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
+    hypernetWebIntegration.webUIClient.registries
       .renderRegistryEntryDetailWidget({
         selector: "registry-entry-detail-page-wrapper",
-        onRegistryEntryListNavigate: (registryName: string) => {
+        onRegistryEntryListNavigate: (registryName: RegistryName) => {
           history.push(`/registries/${registryName}/entries`);
         },
         registryName,
-        entryTokenId: RegistryTokenId(parseInt(entryTokenId)),
+        entryTokenId: RegistryTokenId(BigInt(entryTokenId)),
       })
       .mapErr(handleError);
   }, []);

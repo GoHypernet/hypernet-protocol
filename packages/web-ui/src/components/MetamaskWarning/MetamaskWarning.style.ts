@@ -18,4 +18,7 @@ export const useStyles = makeStyles({
   metamaskImg: {
     maxWidth: 200,
   },
+  continueButton: {
+    marginBottom: 16,
+  },
 });

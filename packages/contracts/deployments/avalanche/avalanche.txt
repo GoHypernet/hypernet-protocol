@@ -1,0 +1,24 @@
+Deployment Wallet Address: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+RPC URL: https://053e1c5c-66fd-49c3-b267-42ab5f9202c6.hypernetlabs.io/http/ext/bc/C/rpc
+Enumerable Registry Beacon Address: 0x6D4eE7f794103672490830e15308A99eB7a89024
+Factory Gas Fee: 4150356
+Registry Beacon Address: 0x3B2774F359AC2AD606179a56Af969432563FF22F
+Registry Gas Fee: 3894692
+Factory Address: 0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a
+Factory Gas Fee: 5354311
+Batch Module Address: 0x3353da0f24fCACd83832b09e9371a937195D2640
+Batch Module Gas Fee: 607047
+Lazy Mint Module Address: 0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899
+Lazy Mint Module Gas Fee: 699397
+Merkle Module Address: 0x5dbAe4cB356905bdC202B943e1D6386606BAF50d
+Merkle Module Gas Fee: 456881
+Buy NFI Module Address: 0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf
+Buy NFI Module Gas Fee: 542298
+Deployer Account Register Gas Fee: 207534
+Hypernet.ID Account Register Gas Fee: 210370
+Hypernet.ID address has registrar role
+Access Control Gas Fee: 111456
+Batch Module Register Gas Fee: 281577
+Lazy Mint Module Register Gas Fee: 287165
+Merkle Drop Module Register Gas Fee: 287153
+Buy NFI Module Register Gas Fee: 287105

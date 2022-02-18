@@ -1,15 +1,25 @@
-import { GatewayUrl, ChainId } from "@hypernetlabs/objects";
+import { GatewayUrl, ChainId, Theme } from "@hypernetlabs/objects";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
 
 import Spinner from "./assets/loading-spinner";
 
+const theme = new Theme(
+  {
+    primary: {
+      main: "#00C3A9",
+      light: "#00C3A9",
+      dark: "#00C3A9",
+    },
+  },
+  null,
+);
+
 const client: IHypernetWebIntegration = new HypernetWebIntegration(
   "http://localhost:5020",
   ChainId(1337),
-  true,
-  false,
+  theme,
   null,
 );
 
@@ -32,25 +42,37 @@ Spinner();
 
 const gatewayUrl = GatewayUrl("http://localhost:3000/users/v0");
 
-client
-  .getReady()
-  .map((coreProxy) => {
-    Spinner.hide();
-    client.webUIClient
-      .startOnboardingFlow({
-        gatewayUrl: gatewayUrl,
-        finalSuccessContent:
-          'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',
-        showInModal: true,
-        excludeCardWrapper: true,
-      })
-      .map(() => {
-        Spinner.hide();
-      })
-      .mapErr((err) => {
-        console.log("startOnboardingFlow errerrerr", err);
-      });
-  })
-  .mapErr((err) => {
-    console.log("getReady errerrerr", err);
-  });
+const getReady = () => {
+  client
+    .getReady()
+    .map((coreProxy) => {
+      Spinner.hide();
+      client.webUIClient.payments
+        .startOnboardingFlow({
+          gatewayUrl: gatewayUrl,
+          showInModal: true,
+          renderGatewayApprovalContent: () =>
+            "You are good to go now and purchase credits.",
+          successButtonProps: {
+            label: "Success",
+            action: () => {
+              console.log("Success action.");
+            },
+          },
+        })
+        .map(() => {
+          Spinner.hide();
+        })
+        .mapErr((err) => {
+          console.log("startOnboardingFlow error", err);
+        });
+    })
+    .mapErr((err) => {
+      console.log("getReady error", err);
+    });
+};
+
+const button = document.createElement("button");
+button.innerHTML = "init";
+button.onclick = getReady;
+document.body.appendChild(button);

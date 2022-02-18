@@ -46,7 +46,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
 
   useEffect(() => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .getGatewayTokenInfo([gatewayUrl])
       .map((gatewayTokenInfoMap) => {
         const gatewayTokenInfoVal = gatewayTokenInfoMap.get(gatewayUrl);
@@ -62,8 +62,8 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
     _gatewayTokenInfo: GatewayTokenInfo[] = gatewayTokenInfo,
   ) => {
     setLoading(true);
-    coreProxy.getBalances().map((balances) => {
-      coreProxy
+    coreProxy.payments.getBalances().map((balances) => {
+      coreProxy.payments
         .getActiveStateChannels()
         .map((activeStateChannels) => {
           const activeRouters = activeStateChannels.map(
@@ -108,7 +108,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
 
   const addToken = (gatewayToken: GatewayTokenInfo) => {
     setLoading(true);
-    coreProxy
+    coreProxy.payments
       .createStateChannel(
         gatewayToken.routerPublicIdentifiers,
         gatewayToken.chainId,

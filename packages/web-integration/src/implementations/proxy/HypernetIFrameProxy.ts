@@ -59,6 +59,10 @@ import {
   LazyMintingSignature,
   ChainInformation,
   chainConfig,
+  IHypernetPayments,
+  IHypernetGovernance,
+  IHypernetRegistries,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -213,13 +217,13 @@ export default class HypernetIFrameProxy
       });
 
       child.on("onCeramicAuthenticationStarted", () => {
-        this._displayCoreIFrame();
+        //this._displayCoreIFrame();
 
         this.onCeramicAuthenticationStarted.next();
       });
 
       child.on("onCeramicAuthenticationSucceeded", () => {
-        this._closeCoreIFrame();
+        //this._closeCoreIFrame();
 
         this.onCeramicAuthenticationSucceeded.next();
       });
@@ -387,54 +391,6 @@ export default class HypernetIFrameProxy
     }
   }
 
-  public registriesInitialized(
-    chainId?: ChainId,
-  ): ResultAsync<boolean, ProxyError> {
-    return this._createCall("registriesInitialized", chainId);
-  }
-
-  public waitRegistriesInitialized(
-    chainId?: ChainId,
-  ): ResultAsync<void, ProxyError> {
-    if (this.coreRegistriesInitialized === true) {
-      return this._createCall("waitRegistriesInitialized", chainId);
-    } else {
-      return ResultAsync.fromSafePromise(this.waitRegistriesInitializedPromise);
-    }
-  }
-
-  public governanceInitialized(
-    chainId?: ChainId,
-  ): ResultAsync<boolean, ProxyError> {
-    return this._createCall("governanceInitialized", chainId);
-  }
-
-  public waitGovernanceInitialized(
-    chainId?: ChainId,
-  ): ResultAsync<void, ProxyError> {
-    if (this.coreGovernanceInitialized === true) {
-      return this._createCall("waitGovernanceInitialized", chainId);
-    } else {
-      return ResultAsync.fromSafePromise(this.waitGovernanceInitializedPromise);
-    }
-  }
-
-  public paymentsInitialized(
-    chainId?: ChainId,
-  ): ResultAsync<boolean, ProxyError> {
-    return this._createCall("paymentsInitialized", chainId);
-  }
-
-  public waitPaymentsInitialized(
-    chainId?: ChainId,
-  ): ResultAsync<void, ProxyError> {
-    if (this.corePaymentsInitialized === true) {
-      return this._createCall("waitPaymentsInitialized", chainId);
-    } else {
-      return ResultAsync.fromSafePromise(this.waitPaymentsInitializedPromise);
-    }
-  }
-
   public inControl(): Result<boolean, never> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
@@ -458,252 +414,8 @@ export default class HypernetIFrameProxy
     return this._createCall("initialize", chainId);
   }
 
-  public initializeRegistries(
-    chainId?: ChainId,
-  ): ResultAsync<
-    InitializeStatus,
-    | GovernanceSignerUnavailableError
-    | BlockchainUnavailableError
-    | InvalidParametersError
-    | ProxyError
-  > {
-    return this._createCall("initializeRegistries", chainId);
-  }
-
   public getInitializationStatus(): ResultAsync<InitializeStatus, ProxyError> {
     return this._createCall("getInitializationStatus", null);
-  }
-
-  public initializeGovernance(
-    chainId?: ChainId,
-  ): ResultAsync<
-    InitializeStatus,
-    | GovernanceSignerUnavailableError
-    | BlockchainUnavailableError
-    | InvalidParametersError
-    | ProxyError
-  > {
-    return this._createCall("initializeGovernance", chainId);
-  }
-
-  public initializePayments(
-    chainId?: ChainId,
-  ): ResultAsync<InitializeStatus, CoreInitializationErrors> {
-    return this._createCall("initializePayments", chainId);
-  }
-
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, ProxyError> {
-    return this._createCall("getPublicIdentifier", null);
-  }
-
-  public getActiveStateChannels(): ResultAsync<
-    ActiveStateChannel[],
-    VectorError | BlockchainUnavailableError | PersistenceError | ProxyError
-  > {
-    return this._createCall("getActiveStateChannels", null);
-  }
-
-  public createStateChannel(
-    routerPublicIdentifiers: PublicIdentifier[],
-    chainId: ChainId,
-  ): ResultAsync<
-    ActiveStateChannel,
-    VectorError | BlockchainUnavailableError | PersistenceError | ProxyError
-  > {
-    return this._createCall("createStateChannel", {
-      routerPublicIdentifiers,
-      chainId,
-    });
-  }
-
-  public depositFunds(
-    channelAddress: EthereumContractAddress,
-    assetAddress: EthereumContractAddress,
-    amount: BigNumberString,
-  ): ResultAsync<
-    Balances,
-    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
-  > {
-    return this._createCall("depositFunds", {
-      channelAddress,
-      assetAddress,
-      amount: amount,
-    });
-  }
-
-  public withdrawFunds(
-    channelAddress: EthereumContractAddress,
-    assetAddress: EthereumContractAddress,
-    amount: BigNumberString,
-    destinationAddress: EthereumAccountAddress,
-  ): ResultAsync<
-    Balances,
-    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
-  > {
-    return this._createCall("withdrawFunds", {
-      channelAddress,
-      assetAddress,
-      amount: amount,
-      destinationAddress,
-    });
-  }
-
-  public getBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | ProxyError
-  > {
-    return this._createCall("getBalances", null);
-  }
-
-  public getLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
-    return this._createCall("getLinks", null);
-  }
-
-  public getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
-    return this._createCall("getActiveLinks", null);
-  }
-
-  public acceptOffer(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | TransferCreationError
-    | VectorError
-    | BalancesUnavailableError
-    | BlockchainUnavailableError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | PaymentStakeError
-    | TransferResolutionError
-    | AcceptPaymentError
-    | InsufficientBalanceError
-    | ProxyError
-  > {
-    return this._createCall("acceptFunds", paymentId);
-  }
-
-  public pullFunds(
-    paymentId: PaymentId,
-    amount: BigNumberString,
-  ): ResultAsync<Payment, VectorError | Error> {
-    return this._createCall("pullFunds", {
-      paymentId,
-      amount: amount,
-    });
-  }
-
-  public repairPayments(
-    paymentIds: PaymentId[],
-  ): ResultAsync<
-    void,
-    | VectorError
-    | BlockchainUnavailableError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-    | InvalidPaymentIdError
-    | ProxyError
-  > {
-    return this._createCall("repairPayments", paymentIds);
-  }
-
-  public mintTestToken(
-    amount: BigNumberString,
-  ): ResultAsync<void, BlockchainUnavailableError | ProxyError> {
-    return this._createCall("mintTestToken", amount);
-  }
-
-  public authorizeGateway(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    GatewayValidationError | PersistenceError | VectorError | ProxyError
-  > {
-    return this._createCall("authorizeGateway", gatewayUrl);
-  }
-
-  public deauthorizeGateway(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
-  > {
-    return this._createCall("deauthorizeGateway", gatewayUrl);
-  }
-
-  public getAuthorizedGateways(): ResultAsync<
-    Map<GatewayUrl, Signature>,
-    PersistenceError | VectorError | ProxyError
-  > {
-    return this._createCall("getAuthorizedGateways", null);
-  }
-
-  public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
-    Map<GatewayUrl, boolean>,
-    PersistenceError | VectorError | ProxyError
-  > {
-    return this._createCall("getAuthorizedGatewaysConnectorsStatus", null);
-  }
-
-  public getGatewayTokenInfo(
-    gatewayUrls: GatewayUrl[],
-  ): ResultAsync<
-    Map<GatewayUrl, GatewayTokenInfo[]>,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
-  > {
-    return this._createCall("getGatewayTokenInfo", gatewayUrls);
-  }
-
-  public getGatewayRegistrationInfo(
-    filter?: GatewayRegistrationFilter,
-  ): ResultAsync<
-    GatewayRegistrationInfo[],
-    PersistenceError | VectorError | ProxyError
-  > {
-    return this._createCall("getGatewayRegistrationInfo", filter);
-  }
-
-  public getGatewayEntryList(): ResultAsync<
-    Map<GatewayUrl, GatewayRegistrationInfo>,
-    NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getGatewayEntryList", null);
-  }
-
-  public displayGatewayIFrame(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    GatewayConnectorError | PersistenceError | VectorError | ProxyError
-  > {
-    return this.getAuthorizedGatewaysConnectorsStatus().andThen(
-      (gatewaysMap) => {
-        if (gatewaysMap.get(gatewayUrl) == true) {
-          this._displayCoreIFrame();
-
-          return this._createCall<GatewayUrl, GatewayConnectorError, void>(
-            "displayGatewayIFrame",
-            gatewayUrl,
-          );
-        } else {
-          alert(
-            `Gateway ${gatewayUrl} is not activated at the moment, try again later`,
-          );
-          return okAsync(undefined);
-        }
-      },
-    );
-  }
-
-  public closeGatewayIFrame(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    GatewayConnectorError | PersistenceError | VectorError | ProxyError
-  > {
-    this._closeCoreIFrame();
-
-    return this._createCall("closeGatewayIFrame", gatewayUrl);
   }
 
   public providePrivateCredentials(
@@ -716,384 +428,11 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public getProposals(
-    pageNumber: number,
-    pageSize: number,
-  ): ResultAsync<Proposal[], HypernetGovernorContractError | ProxyError> {
-    return this._createCall("getProposals", {
-      pageNumber,
-      pageSize,
-    });
-  }
-
-  public createProposal(
-    name: string,
-    symbol: string,
-    owner: EthereumAccountAddress,
-    enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
-    return this._createCall("createProposal", {
-      name,
-      symbol,
-      owner,
-      enumerable,
-    });
-  }
-
-  public delegateVote(
-    delegateAddress: EthereumAccountAddress,
-    amount: number | null,
-  ): ResultAsync<void, ERC20ContractError | ProxyError> {
-    return this._createCall("delegateVote", {
-      delegateAddress,
-      amount,
-    });
-  }
-
-  public getProposalDetails(
-    proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
-    return this._createCall("getProposalDetails", proposalId);
-  }
-
-  public getProposalDescription(
-    descriptionHash: string,
-  ): ResultAsync<
-    string,
-    IPFSUnavailableError | HypernetGovernorContractError | ProxyError
-  > {
-    return this._createCall("getProposalDescription", descriptionHash);
-  }
-
-  public castVote(
-    proposalId: string,
-    support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
-    return this._createCall("castVote", {
-      proposalId,
-      support,
-    });
-  }
-
-  public getProposalVotesReceipt(
-    proposalId: string,
-    voterAddress: EthereumAccountAddress,
-  ): ResultAsync<
-    ProposalVoteReceipt,
-    HypernetGovernorContractError | ProxyError
-  > {
-    return this._createCall("getProposalVotesReceipt", {
-      proposalId,
-      voterAddress,
-    });
-  }
-
-  public getRegistries(
-    pageNumber: number,
-    pageSize: number,
-    sortOrder: ERegistrySortOrder,
-  ): ResultAsync<
-    Registry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistries", {
-      pageNumber,
-      pageSize,
-      sortOrder,
-    });
-  }
-
-  public getRegistryByName(
-    registryNames: string[],
-  ): ResultAsync<
-    Map<string, Registry>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryByName", registryNames);
-  }
-
-  public getRegistryByAddress(
-    registryAddresses: EthereumContractAddress[],
-  ): ResultAsync<
-    Map<EthereumContractAddress, Registry>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryByAddress", registryAddresses);
-  }
-
-  public getRegistryEntriesTotalCount(
-    registryNames: string[],
-  ): ResultAsync<
-    Map<string, number>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryEntriesTotalCount", registryNames);
-  }
-
-  public getRegistryEntries(
-    registryName: string,
-    pageNumber: number,
-    pageSize: number,
-    sortOrder: ERegistrySortOrder,
-  ): ResultAsync<
-    RegistryEntry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryEntries", {
-      registryName,
-      pageNumber,
-      pageSize,
-      sortOrder,
-    });
-  }
-
-  public getRegistryEntryDetailByTokenId(
-    registryName: string,
-    tokenId: number,
-  ): ResultAsync<
-    RegistryEntry,
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryEntryDetailByTokenId", {
-      registryName,
-      tokenId,
-    });
-  }
-
-  public updateRegistryEntryTokenURI(
-    registryName: string,
-    tokenId: number,
-    registrationData: string,
-  ): ResultAsync<
-    RegistryEntry,
-    | BlockchainUnavailableError
-    | RegistryFactoryContractError
-    | NonFungibleRegistryContractError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("updateRegistryEntryTokenURI", {
-      registryName,
-      tokenId,
-      registrationData,
-    });
-  }
-
-  public updateRegistryEntryLabel(
-    registryName: string,
-    tokenId: number,
-    label: string,
-  ): ResultAsync<
-    RegistryEntry,
-    | BlockchainUnavailableError
-    | RegistryFactoryContractError
-    | NonFungibleRegistryContractError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("updateRegistryEntryLabel", {
-      registryName,
-      tokenId,
-      label,
-    });
-  }
-
-  public queueProposal(
-    proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
-    return this._createCall("queueProposal", proposalId);
-  }
-
-  public cancelProposal(
-    proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
-    return this._createCall("cancelProposal", proposalId);
-  }
-
-  public executeProposal(
-    proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
-    return this._createCall("executeProposal", proposalId);
-  }
-
   public getBlockNumber(): ResultAsync<
     number,
     BlockchainUnavailableError | ProxyError
   > {
     return this._createCall("getBlockNumber", null);
-  }
-
-  public getProposalsCount(): ResultAsync<
-    number,
-    HypernetGovernorContractError | ProxyError
-  > {
-    return this._createCall("getProposalsCount", null);
-  }
-
-  public getProposalThreshold(): ResultAsync<
-    number,
-    HypernetGovernorContractError | ProxyError
-  > {
-    return this._createCall("getProposalThreshold", null);
-  }
-
-  public getVotingPower(
-    account: EthereumAccountAddress,
-  ): ResultAsync<
-    number,
-    HypernetGovernorContractError | ERC20ContractError | ProxyError
-  > {
-    return this._createCall("getVotingPower", account);
-  }
-
-  public getHyperTokenBalance(
-    account: EthereumAccountAddress,
-  ): ResultAsync<number, ERC20ContractError | ProxyError> {
-    return this._createCall("getHyperTokenBalance", account);
-  }
-
-  public getNumberOfRegistries(): ResultAsync<
-    number,
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getNumberOfRegistries", null);
-  }
-
-  public updateRegistryParams(
-    registryParams: RegistryParams,
-  ): ResultAsync<
-    Registry,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("updateRegistryParams", registryParams);
-  }
-
-  public createRegistryEntry(
-    registryName: string,
-    newRegistryEntry: RegistryEntry,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("createRegistryEntry", {
-      registryName,
-      newRegistryEntry,
-    });
-  }
-
-  public transferRegistryEntry(
-    registryName: string,
-    tokenId: number,
-    transferToAddress: EthereumAccountAddress,
-  ): ResultAsync<
-    RegistryEntry,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("transferRegistryEntry", {
-      registryName,
-      tokenId,
-      transferToAddress,
-    });
-  }
-
-  public burnRegistryEntry(
-    registryName: string,
-    tokenId: number,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("burnRegistryEntry", {
-      registryName,
-      tokenId,
-    });
-  }
-
-  public createRegistryByToken(
-    name: string,
-    symbol: string,
-    registrarAddress: EthereumAccountAddress,
-    enumerable: boolean,
-  ): ResultAsync<
-    void,
-    | RegistryFactoryContractError
-    | ERC20ContractError
-    | BlockchainUnavailableError
-    | ProxyError
-  > {
-    return this._createCall("createRegistryByToken", {
-      name,
-      symbol,
-      registrarAddress,
-      enumerable,
-    });
-  }
-
-  public grantRegistrarRole(
-    registryName: string,
-    address: EthereumAccountAddress | EthereumContractAddress,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("grantRegistrarRole", {
-      registryName,
-      address,
-    });
-  }
-
-  public revokeRegistrarRole(
-    registryName: string,
-    address: EthereumAccountAddress,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("revokeRegistrarRole", {
-      registryName,
-      address,
-    });
-  }
-
-  public renounceRegistrarRole(
-    registryName: string,
-    address: EthereumAccountAddress,
-  ): ResultAsync<
-    void,
-    | NonFungibleRegistryContractError
-    | RegistryFactoryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | ProxyError
-  > {
-    return this._createCall("renounceRegistrarRole", {
-      registryName,
-      address,
-    });
   }
 
   public provideProviderId(
@@ -1102,138 +441,8 @@ export default class HypernetIFrameProxy
     return this._createCall("provideProviderId", providerId);
   }
 
-  public getTokenInformation(): ResultAsync<TokenInformation[], ProxyError> {
-    return this._createCall("getTokenInformation", null);
-  }
-
-  public getTokenInformationForChain(
-    chainId: ChainId,
-  ): ResultAsync<TokenInformation[], ProxyError> {
-    return this._createCall("getTokenInformationForChain", chainId);
-  }
-
-  public getTokenInformationByAddress(
-    tokenAddress: EthereumContractAddress,
-  ): ResultAsync<TokenInformation | null, ProxyError> {
-    return this._createCall("getTokenInformationByAddress", tokenAddress);
-  }
-
-  public getRegistryEntryByOwnerAddress(
-    registryName: string,
-    ownerAddress: EthereumAccountAddress,
-    index: number,
-  ): ResultAsync<
-    RegistryEntry | null,
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryEntryByOwnerAddress", {
-      registryName,
-      ownerAddress,
-      index,
-    });
-  }
-
-  public getRegistryModules(): ResultAsync<
-    RegistryModule[],
-    NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryModules", null);
-  }
-
-  public createBatchRegistryEntry(
-    registryName: string,
-    newRegistryEntries: RegistryEntry[],
-  ): ResultAsync<
-    void,
-    | BatchModuleContractError
-    | RegistryFactoryContractError
-    | NonFungibleRegistryContractError
-    | ProxyError
-  > {
-    return this._createCall("createBatchRegistryEntry", {
-      registryName,
-      newRegistryEntries,
-    });
-  }
-
-  public getRegistryEntryListByOwnerAddress(
-    registryName: string,
-    ownerAddress: EthereumAccountAddress,
-  ): ResultAsync<
-    RegistryEntry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryEntryListByOwnerAddress", {
-      registryName,
-      ownerAddress,
-    });
-  }
-
-  public getRegistryEntryListByUsername(
-    registryName: string,
-    username: string,
-  ): ResultAsync<
-    RegistryEntry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
-  > {
-    return this._createCall("getRegistryEntryListByUsername", {
-      registryName,
-      username,
-    });
-  }
-
-  public submitLazyMintSignature(
-    registryName: string,
-    tokenId: RegistryTokenId,
-    ownerAddress: EthereumAccountAddress,
-    registrationData: string,
-  ): ResultAsync<
-    void,
-    | RegistryFactoryContractError
-    | NonFungibleRegistryContractError
-    | BlockchainUnavailableError
-    | RegistryPermissionError
-    | PersistenceError
-    | VectorError
-    | ProxyError
-  > {
-    return this._createCall("submitLazyMintSignature", {
-      registryName,
-      tokenId,
-      ownerAddress,
-      registrationData,
-    });
-  }
-
-  public retrieveLazyMintingSignatures(): ResultAsync<
-    LazyMintingSignature[],
-    PersistenceError | BlockchainUnavailableError | VectorError | ProxyError
-  > {
-    return this._createCall("retrieveLazyMintingSignatures", null);
-  }
-
-  public executeLazyMint(
-    lazyMintingSignature: LazyMintingSignature,
-  ): ResultAsync<
-    void,
-    | InvalidParametersError
-    | PersistenceError
-    | VectorError
-    | BlockchainUnavailableError
-    | LazyMintModuleContractError
-    | NonFungibleRegistryContractError
-    | ProxyError
-  > {
-    return this._createCall("executeLazyMint", lazyMintingSignature);
-  }
-
-  public revokeLazyMintSignature(
-    lazyMintingSignature: LazyMintingSignature,
-  ): ResultAsync<
-    void,
-    PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
-  > {
-    return this._createCall("revokeLazyMintSignature", lazyMintingSignature);
+  public rejectProviderIdRequest(): ResultAsync<void, ProxyError> {
+    return this._createCall("rejectProviderIdRequest", null);
   }
 
   public retrieveChainInformationList(): ResultAsync<
@@ -1268,6 +477,857 @@ export default class HypernetIFrameProxy
   > {
     return this._createCall("getMainProviderChainId", null);
   }
+
+  public payments: IHypernetPayments = {
+    paymentsInitialized: (
+      chainId?: ChainId,
+    ): ResultAsync<boolean, ProxyError> => {
+      return this._createCall("paymentsInitialized", chainId);
+    },
+
+    waitPaymentsInitialized: (
+      chainId?: ChainId,
+    ): ResultAsync<void, ProxyError> => {
+      if (this.corePaymentsInitialized === true) {
+        return this._createCall("waitPaymentsInitialized", chainId);
+      } else {
+        return ResultAsync.fromSafePromise(this.waitPaymentsInitializedPromise);
+      }
+    },
+
+    initializePayments: (
+      chainId?: ChainId,
+    ): ResultAsync<InitializeStatus, CoreInitializationErrors> => {
+      return this._createCall("initializePayments", chainId);
+    },
+
+    getPublicIdentifier: (): ResultAsync<PublicIdentifier, ProxyError> => {
+      return this._createCall("getPublicIdentifier", null);
+    },
+
+    getActiveStateChannels: (): ResultAsync<
+      ActiveStateChannel[],
+      VectorError | BlockchainUnavailableError | PersistenceError | ProxyError
+    > => {
+      return this._createCall("getActiveStateChannels", null);
+    },
+
+    createStateChannel: (
+      routerPublicIdentifiers: PublicIdentifier[],
+      chainId: ChainId,
+    ): ResultAsync<
+      ActiveStateChannel,
+      VectorError | BlockchainUnavailableError | PersistenceError | ProxyError
+    > => {
+      return this._createCall("createStateChannel", {
+        routerPublicIdentifiers,
+        chainId,
+      });
+    },
+
+    depositFunds: (
+      channelAddress: EthereumContractAddress,
+      assetAddress: EthereumContractAddress,
+      amount: BigNumberString,
+    ): ResultAsync<
+      Balances,
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | VectorError
+      | Error
+    > => {
+      return this._createCall("depositFunds", {
+        channelAddress,
+        assetAddress,
+        amount: amount,
+      });
+    },
+
+    withdrawFunds: (
+      channelAddress: EthereumContractAddress,
+      assetAddress: EthereumContractAddress,
+      amount: BigNumberString,
+      destinationAddress: EthereumAccountAddress,
+    ): ResultAsync<
+      Balances,
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | VectorError
+      | Error
+    > => {
+      return this._createCall("withdrawFunds", {
+        channelAddress,
+        assetAddress,
+        amount: amount,
+        destinationAddress,
+      });
+    },
+
+    getBalances: (): ResultAsync<
+      Balances,
+      BalancesUnavailableError | VectorError | ProxyError
+    > => {
+      return this._createCall("getBalances", null);
+    },
+
+    getLinks: (): ResultAsync<HypernetLink[], VectorError | Error> => {
+      return this._createCall("getLinks", null);
+    },
+
+    getActiveLinks: (): ResultAsync<HypernetLink[], VectorError | Error> => {
+      return this._createCall("getActiveLinks", null);
+    },
+
+    acceptOffer: (
+      paymentId: PaymentId,
+    ): ResultAsync<
+      Payment,
+      | TransferCreationError
+      | VectorError
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | InvalidPaymentError
+      | InvalidParametersError
+      | PaymentStakeError
+      | TransferResolutionError
+      | AcceptPaymentError
+      | InsufficientBalanceError
+      | ProxyError
+    > => {
+      return this._createCall("acceptFunds", paymentId);
+    },
+
+    pullFunds: (
+      paymentId: PaymentId,
+      amount: BigNumberString,
+    ): ResultAsync<Payment, VectorError | Error> => {
+      return this._createCall("pullFunds", {
+        paymentId,
+        amount: amount,
+      });
+    },
+
+    finalizePullPayment: (
+      _paymentId: PaymentId,
+      _finalAmount: BigNumberString,
+    ): Promise<HypernetLink> => {
+      throw new Error("Method not implemented.");
+    },
+
+    repairPayments: (
+      paymentIds: PaymentId[],
+    ): ResultAsync<
+      void,
+      | VectorError
+      | BlockchainUnavailableError
+      | InvalidPaymentError
+      | InvalidParametersError
+      | TransferResolutionError
+      | InvalidPaymentIdError
+      | ProxyError
+    > => {
+      return this._createCall("repairPayments", paymentIds);
+    },
+
+    mintTestToken: (
+      amount: BigNumberString,
+    ): ResultAsync<void, BlockchainUnavailableError | ProxyError> => {
+      return this._createCall("mintTestToken", amount);
+    },
+
+    authorizeGateway: (
+      gatewayUrl: GatewayUrl,
+    ): ResultAsync<
+      void,
+      GatewayValidationError | PersistenceError | VectorError | ProxyError
+    > => {
+      return this._createCall("authorizeGateway", gatewayUrl);
+    },
+
+    deauthorizeGateway: (
+      gatewayUrl: GatewayUrl,
+    ): ResultAsync<
+      void,
+      PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    > => {
+      return this._createCall("deauthorizeGateway", gatewayUrl);
+    },
+
+    getAuthorizedGateways: (): ResultAsync<
+      Map<GatewayUrl, Signature>,
+      PersistenceError | VectorError | ProxyError
+    > => {
+      return this._createCall("getAuthorizedGateways", null);
+    },
+
+    getAuthorizedGatewaysConnectorsStatus: (): ResultAsync<
+      Map<GatewayUrl, boolean>,
+      PersistenceError | VectorError | ProxyError
+    > => {
+      return this._createCall("getAuthorizedGatewaysConnectorsStatus", null);
+    },
+
+    getGatewayTokenInfo: (
+      gatewayUrls: GatewayUrl[],
+    ): ResultAsync<
+      Map<GatewayUrl, GatewayTokenInfo[]>,
+      PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    > => {
+      return this._createCall("getGatewayTokenInfo", gatewayUrls);
+    },
+
+    getGatewayRegistrationInfo: (
+      filter?: GatewayRegistrationFilter,
+    ): ResultAsync<
+      GatewayRegistrationInfo[],
+      PersistenceError | VectorError | ProxyError
+    > => {
+      return this._createCall("getGatewayRegistrationInfo", filter);
+    },
+
+    getGatewayEntryList: (): ResultAsync<
+      Map<GatewayUrl, GatewayRegistrationInfo>,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getGatewayEntryList", null);
+    },
+
+    getTokenInformation: (): ResultAsync<TokenInformation[], ProxyError> => {
+      return this._createCall("getTokenInformation", null);
+    },
+
+    getTokenInformationForChain: (
+      chainId: ChainId,
+    ): ResultAsync<TokenInformation[], ProxyError> => {
+      return this._createCall("getTokenInformationForChain", chainId);
+    },
+
+    getTokenInformationByAddress: (
+      tokenAddress: EthereumContractAddress,
+    ): ResultAsync<TokenInformation | null, ProxyError> => {
+      return this._createCall("getTokenInformationByAddress", tokenAddress);
+    },
+
+    displayGatewayIFrame: (
+      gatewayUrl: GatewayUrl,
+    ): ResultAsync<
+      void,
+      | GatewayConnectorError
+      | PersistenceError
+      | VectorError
+      | BlockchainUnavailableError
+      | ProxyError
+    > => {
+      return this.payments
+        .getAuthorizedGatewaysConnectorsStatus()
+        .andThen((gatewaysMap) => {
+          if (gatewaysMap.get(gatewayUrl) == true) {
+            this._displayCoreIFrame();
+
+            return this._createCall<GatewayUrl, GatewayConnectorError, void>(
+              "displayGatewayIFrame",
+              gatewayUrl,
+            );
+          } else {
+            alert(
+              `Gateway ${gatewayUrl} is not activated at the moment, try again later`,
+            );
+            return okAsync(undefined);
+          }
+        });
+    },
+
+    closeGatewayIFrame: (
+      gatewayUrl: GatewayUrl,
+    ): ResultAsync<
+      void,
+      GatewayConnectorError | PersistenceError | VectorError | ProxyError
+    > => {
+      this._closeCoreIFrame();
+
+      return this._createCall("closeGatewayIFrame", gatewayUrl);
+    },
+  };
+
+  public governance: IHypernetGovernance = {
+    governanceInitialized: (
+      chainId?: ChainId,
+    ): ResultAsync<boolean, ProxyError> => {
+      return this._createCall("governanceInitialized", chainId);
+    },
+
+    waitGovernanceInitialized: (
+      chainId?: ChainId,
+    ): ResultAsync<void, ProxyError> => {
+      if (this.coreGovernanceInitialized === true) {
+        return this._createCall("waitGovernanceInitialized", chainId);
+      } else {
+        return ResultAsync.fromSafePromise(
+          this.waitGovernanceInitializedPromise,
+        );
+      }
+    },
+
+    initializeGovernance: (
+      chainId?: ChainId,
+    ): ResultAsync<
+      InitializeStatus,
+      | GovernanceSignerUnavailableError
+      | BlockchainUnavailableError
+      | InvalidParametersError
+      | ProxyError
+    > => {
+      return this._createCall("initializeGovernance", chainId);
+    },
+
+    getProposals: (
+      pageNumber: number,
+      pageSize: number,
+    ): ResultAsync<Proposal[], HypernetGovernorContractError | ProxyError> => {
+      return this._createCall("getProposals", {
+        pageNumber,
+        pageSize,
+      });
+    },
+
+    createProposal: (
+      name: string,
+      symbol: string,
+      owner: EthereumAccountAddress,
+      enumerable: boolean,
+    ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> => {
+      return this._createCall("createProposal", {
+        name,
+        symbol,
+        owner,
+        enumerable,
+      });
+    },
+
+    delegateVote: (
+      delegateAddress: EthereumAccountAddress,
+      amount: number | null,
+    ): ResultAsync<void, ERC20ContractError | ProxyError> => {
+      return this._createCall("delegateVote", {
+        delegateAddress,
+        amount,
+      });
+    },
+
+    getProposalDetails: (
+      proposalId: string,
+    ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> => {
+      return this._createCall("getProposalDetails", proposalId);
+    },
+
+    getProposalDescription: (
+      descriptionHash: string,
+    ): ResultAsync<
+      string,
+      IPFSUnavailableError | HypernetGovernorContractError | ProxyError
+    > => {
+      return this._createCall("getProposalDescription", descriptionHash);
+    },
+
+    castVote: (
+      proposalId: string,
+      support: EProposalVoteSupport,
+    ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> => {
+      return this._createCall("castVote", {
+        proposalId,
+        support,
+      });
+    },
+
+    getProposalVotesReceipt: (
+      proposalId: string,
+      voterAddress: EthereumAccountAddress,
+    ): ResultAsync<
+      ProposalVoteReceipt,
+      HypernetGovernorContractError | ProxyError
+    > => {
+      return this._createCall("getProposalVotesReceipt", {
+        proposalId,
+        voterAddress,
+      });
+    },
+
+    getProposalsCount: (): ResultAsync<
+      number,
+      HypernetGovernorContractError | ProxyError
+    > => {
+      return this._createCall("getProposalsCount", null);
+    },
+
+    getProposalThreshold: (): ResultAsync<
+      number,
+      HypernetGovernorContractError | ProxyError
+    > => {
+      return this._createCall("getProposalThreshold", null);
+    },
+
+    getVotingPower: (
+      account: EthereumAccountAddress,
+    ): ResultAsync<
+      number,
+      HypernetGovernorContractError | ERC20ContractError | ProxyError
+    > => {
+      return this._createCall("getVotingPower", account);
+    },
+
+    getHyperTokenBalance: (
+      account: EthereumAccountAddress,
+    ): ResultAsync<number, ERC20ContractError | ProxyError> => {
+      return this._createCall("getHyperTokenBalance", account);
+    },
+
+    queueProposal: (
+      proposalId: string,
+    ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> => {
+      return this._createCall("queueProposal", proposalId);
+    },
+
+    cancelProposal: (
+      proposalId: string,
+    ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> => {
+      return this._createCall("cancelProposal", proposalId);
+    },
+
+    executeProposal: (
+      proposalId: string,
+    ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> => {
+      return this._createCall("executeProposal", proposalId);
+    },
+  };
+
+  public registries: IHypernetRegistries = {
+    registriesInitialized: (
+      chainId?: ChainId,
+    ): ResultAsync<boolean, ProxyError> => {
+      return this._createCall("registriesInitialized", chainId);
+    },
+
+    waitRegistriesInitialized: (
+      chainId?: ChainId,
+    ): ResultAsync<void, ProxyError> => {
+      if (this.coreRegistriesInitialized === true) {
+        return this._createCall("waitRegistriesInitialized", chainId);
+      } else {
+        return ResultAsync.fromSafePromise(
+          this.waitRegistriesInitializedPromise,
+        );
+      }
+    },
+
+    initializeRegistries: (
+      chainId?: ChainId,
+    ): ResultAsync<
+      InitializeStatus,
+      | GovernanceSignerUnavailableError
+      | BlockchainUnavailableError
+      | InvalidParametersError
+      | ProxyError
+    > => {
+      return this._createCall("initializeRegistries", chainId);
+    },
+
+    getRegistries: (
+      pageNumber: number,
+      pageSize: number,
+      sortOrder: ERegistrySortOrder,
+    ): ResultAsync<
+      Registry[],
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistries", {
+        pageNumber,
+        pageSize,
+        sortOrder,
+      });
+    },
+
+    getRegistryByName: (
+      registryNames: RegistryName[],
+    ): ResultAsync<
+      Map<RegistryName, Registry>,
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryByName", registryNames);
+    },
+
+    getRegistryByAddress: (
+      registryAddresses: EthereumContractAddress[],
+    ): ResultAsync<
+      Map<EthereumContractAddress, Registry>,
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryByAddress", registryAddresses);
+    },
+
+    getRegistryEntriesTotalCount: (
+      registryNames: RegistryName[],
+    ): ResultAsync<
+      Map<RegistryName, number>,
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryEntriesTotalCount", registryNames);
+    },
+
+    getRegistryEntries: (
+      registryName: RegistryName,
+      pageNumber: number,
+      pageSize: number,
+      sortOrder: ERegistrySortOrder,
+    ): ResultAsync<
+      RegistryEntry[],
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryEntries", {
+        registryName,
+        pageNumber,
+        pageSize,
+        sortOrder,
+      });
+    },
+
+    getRegistryEntryDetailByTokenId: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+    ): ResultAsync<
+      RegistryEntry,
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryEntryDetailByTokenId", {
+        registryName,
+        tokenId,
+      });
+    },
+
+    updateRegistryEntryTokenURI: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+      registrationData: string,
+    ): ResultAsync<
+      RegistryEntry,
+      | BlockchainUnavailableError
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("updateRegistryEntryTokenURI", {
+        registryName,
+        tokenId,
+        registrationData,
+      });
+    },
+
+    updateRegistryEntryLabel: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+      label: string,
+    ): ResultAsync<
+      RegistryEntry,
+      | BlockchainUnavailableError
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("updateRegistryEntryLabel", {
+        registryName,
+        tokenId,
+        label,
+      });
+    },
+
+    getNumberOfRegistries: (): ResultAsync<
+      number,
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getNumberOfRegistries", null);
+    },
+
+    updateRegistryParams: (
+      registryParams: RegistryParams,
+    ): ResultAsync<
+      Registry,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("updateRegistryParams", registryParams);
+    },
+
+    createRegistryEntry: (
+      registryName: RegistryName,
+      newRegistryEntry: RegistryEntry,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("createRegistryEntry", {
+        registryName,
+        newRegistryEntry,
+      });
+    },
+
+    transferRegistryEntry: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+      transferToAddress: EthereumAccountAddress,
+    ): ResultAsync<
+      RegistryEntry,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("transferRegistryEntry", {
+        registryName,
+        tokenId,
+        transferToAddress,
+      });
+    },
+
+    burnRegistryEntry: (
+      registryName: RegistryName,
+      tokenId: RegistryTokenId,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("burnRegistryEntry", {
+        registryName,
+        tokenId,
+      });
+    },
+
+    createRegistryByToken: (
+      name: string,
+      symbol: string,
+      registrarAddress: EthereumAccountAddress,
+      enumerable: boolean,
+    ): ResultAsync<
+      void,
+      | RegistryFactoryContractError
+      | ERC20ContractError
+      | BlockchainUnavailableError
+      | ProxyError
+    > => {
+      return this._createCall("createRegistryByToken", {
+        name,
+        symbol,
+        registrarAddress,
+        enumerable,
+      });
+    },
+
+    grantRegistrarRole: (
+      registryName: RegistryName,
+      address: EthereumAccountAddress | EthereumContractAddress,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("grantRegistrarRole", {
+        registryName,
+        address,
+      });
+    },
+
+    revokeRegistrarRole: (
+      registryName: RegistryName,
+      address: EthereumAccountAddress,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("revokeRegistrarRole", {
+        registryName,
+        address,
+      });
+    },
+
+    renounceRegistrarRole: (
+      registryName: RegistryName,
+      address: EthereumAccountAddress,
+    ): ResultAsync<
+      void,
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | ProxyError
+    > => {
+      return this._createCall("renounceRegistrarRole", {
+        registryName,
+        address,
+      });
+    },
+
+    getRegistryEntryByOwnerAddress: (
+      registryName: RegistryName,
+      ownerAddress: EthereumAccountAddress,
+      index: number,
+    ): ResultAsync<
+      RegistryEntry | null,
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryEntryByOwnerAddress", {
+        registryName,
+        ownerAddress,
+        index,
+      });
+    },
+
+    getRegistryModules: (): ResultAsync<
+      RegistryModule[],
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryModules", null);
+    },
+
+    createBatchRegistryEntry: (
+      registryName: RegistryName,
+      newRegistryEntries: RegistryEntry[],
+    ): ResultAsync<
+      void,
+      | BatchModuleContractError
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("createBatchRegistryEntry", {
+        registryName,
+        newRegistryEntries,
+      });
+    },
+
+    getRegistryEntryListByOwnerAddress: (
+      registryName: string,
+      ownerAddress: EthereumAccountAddress,
+    ): ResultAsync<
+      RegistryEntry[],
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryEntryListByOwnerAddress", {
+        registryName,
+        ownerAddress,
+      });
+    },
+
+    getRegistryEntryListByUsername: (
+      registryName: string,
+      username: string,
+    ): ResultAsync<
+      RegistryEntry[],
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | ProxyError
+    > => {
+      return this._createCall("getRegistryEntryListByUsername", {
+        registryName,
+        username,
+      });
+    },
+
+    submitLazyMintSignature: (
+      registryName: string,
+      tokenId: RegistryTokenId,
+      ownerAddress: EthereumAccountAddress,
+      registrationData: string,
+    ): ResultAsync<
+      void,
+      | RegistryFactoryContractError
+      | NonFungibleRegistryContractError
+      | BlockchainUnavailableError
+      | RegistryPermissionError
+      | PersistenceError
+      | VectorError
+      | ProxyError
+    > => {
+      return this._createCall("submitLazyMintSignature", {
+        registryName,
+        tokenId,
+        ownerAddress,
+        registrationData,
+      });
+    },
+
+    retrieveLazyMintingSignatures: (): ResultAsync<
+      LazyMintingSignature[],
+      PersistenceError | BlockchainUnavailableError | VectorError | ProxyError
+    > => {
+      return this._createCall("retrieveLazyMintingSignatures", null);
+    },
+
+    executeLazyMint: (
+      lazyMintingSignature: LazyMintingSignature,
+    ): ResultAsync<
+      void,
+      | InvalidParametersError
+      | PersistenceError
+      | VectorError
+      | BlockchainUnavailableError
+      | LazyMintModuleContractError
+      | NonFungibleRegistryContractError
+      | RegistryFactoryContractError
+      | ProxyError
+    > => {
+      return this._createCall("executeLazyMint", lazyMintingSignature);
+    },
+
+    revokeLazyMintSignature: (
+      lazyMintingSignature: LazyMintingSignature,
+    ): ResultAsync<
+      void,
+      PersistenceError | VectorError | BlockchainUnavailableError | ProxyError
+    > => {
+      return this._createCall("revokeLazyMintSignature", lazyMintingSignature);
+    },
+  };
 
   private _displayCoreIFrame(): void {
     // Show core iframe

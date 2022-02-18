@@ -76,8 +76,6 @@ export class ConfigProvider implements IConfigProvider {
       config?.gatewayDeauthorizationTimeout || 5 * 1000, // gatewayDeauthorizationTimeout
       config?.controlClaimSubject || "HypernetProtocolControlClaims",
       config?.requireOnline == null ? true : config?.requireOnline, // requireOnline
-      config?.governanceRequired == null ? true : config?.governanceRequired, // governanceRequired
-      config?.paymentsRequired == null ? true : config?.paymentsRequired, // paymentsRequired
       config?.ipfsApiUrl || __IPFS_API_URL__,
       config?.ipfsGatewayUrl || __IPFS_GATEWAY_URL__,
       config?.debug == null ? __DEBUG__ : config?.debug, // debug

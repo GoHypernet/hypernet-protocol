@@ -58,7 +58,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
 
   const getRegistryEntryByLabel = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntryDetailByTokenId(registryName, entryTokenId)
       .map((registryEntry: RegistryEntry) => {
         setRegistryEntry(registryEntry);
@@ -69,7 +69,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
 
   const getRegistryByName = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryByName([registryName])
       .map((registryMap) => {
         setRegistry(registryMap.get(registryName));
@@ -80,7 +80,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
 
   const updateLabel = (val: string) => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .updateRegistryEntryLabel(
         registryName,
         registryEntry?.tokenId as RegistryTokenId,
@@ -95,7 +95,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
 
   const updateTokenURI = (val: string) => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .updateRegistryEntryTokenURI(
         registryName,
         registryEntry?.tokenId as RegistryTokenId,
@@ -135,7 +135,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       return isRegistrar || isOwner;
     }, [isRegistrar, isOwner]);
 
-    let headerActions: IHeaderAction[] = [];
+    const headerActions: IHeaderAction[] = [];
 
     if (canBurn) {
       headerActions.push({

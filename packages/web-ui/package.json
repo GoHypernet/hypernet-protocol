@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/web-ui",
-  "version": "5.0.20",
+  "version": "5.0.22",
   "description": "Web ui react components for hypernet protocol",
   "license": "ISC",
   "repository": {
@@ -39,7 +39,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.3.15",
+    "@hypernetlabs/objects": "^0.3.17",
     "ethers": "5.4.7",
     "react-alert": "^7.0.2",
     "react-alert-template-basic": "^1.0.0",

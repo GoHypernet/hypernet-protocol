@@ -1,5 +1,7 @@
 import { ILogUtils } from "@hypernetlabs/utils";
 import td from "testdouble";
+import { DIDDataStore } from "@glazed/did-datastore";
+import { okAsync } from "neverthrow";
 
 import { CeramicUtils } from "@implementations/utilities/CeramicUtils";
 import { ICeramicUtils } from "@interfaces/utilities/ICeramicUtils";
@@ -20,9 +22,9 @@ class CeramicUtilsMocks {
   public logUtils = td.object<ILogUtils>();
 
   constructor() {
-    /* td.when(this.gatewayConnectorProxy.activateProxy()).thenReturn(
-      okAsync(undefined),
-    ); */
+    td.when(
+      this.didDataStoreProvider.initializeDIDDataStoreProvider(),
+    ).thenReturn(okAsync({} as DIDDataStore));
   }
 
   public factoryRepository(): ICeramicUtils {

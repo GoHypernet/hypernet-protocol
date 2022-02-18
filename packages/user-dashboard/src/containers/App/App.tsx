@@ -28,8 +28,7 @@ declare const __GOVERNANCE_CHAIN_ID__: string;
 const integration: IHypernetWebIntegration = new HypernetWebIntegration(
   __CORE_IFRAME_SOURCE__,
   ChainId(parseInt(__GOVERNANCE_CHAIN_ID__)),
-  true,
-  false,
+  null,
   null,
 );
 

@@ -29,27 +29,36 @@ RUN yarn install
 # for the environment.
 ARG BUILD_ENV=development
 ENV __BUILD_ENV__ $BUILD_ENV
+RUN echo $__BUILD_ENV__
 
 ARG IFRAME_SOURCE=http://localhost:5000
 ENV __IFRAME_SOURCE__ $IFRAME_SOURCE
+RUN echo $__IFRAME_SOURCE__
 
-ARG NATS_URL=ws://localhost:4221
+ARG NATS_URL=wss://dev-nats.hypernet.foundation:4221
 ENV __NATS_URL__ $NATS_URL
+
+RUN echo $__NATS_URL__
 
 ARG AUTH_URL=http://localhost:5040
 ENV __AUTH_URL__ $AUTH_URL
+RUN echo $__AUTH_URL__
 
 ARG VALIDATOR_IFRAME_URL=http://localhost:5005
 ENV __VALIDATOR_IFRAME_URL__ $VALIDATOR_IFRAME_URL
+RUN echo $__VALIDATOR_IFRAME_URL__
 
 ARG CERAMIC_NODE_URL=https://clay.ceramic.hypernet.foundation
 ENV __CERAMIC_NODE_URL__ $CERAMIC_NODE_URL
+RUN echo $__CERAMIC_NODE_URL__
 
 ARG IPFS_API_URL=http://localhost:5021
 ENV __IPFS_API_URL__ $IPFS_API_URL
+RUN echo $__IPFS_API_URL__
 
 ARG IPFS_GATEWAY_URL=http://localhost:8088
 ENV __IPFS_GATEWAY_URL__ $IPFS_GATEWAY_URL
+RUN echo $__IPFS_GATEWAY_URL__
 
 ARG DEBUG=true
 ENV __DEBUG__ $DEBUG

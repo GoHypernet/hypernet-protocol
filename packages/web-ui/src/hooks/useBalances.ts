@@ -118,8 +118,8 @@ export function useBalances() {
       if (cancelRequest) return;
       dispatch({ type: EActionTypes.FETCHING });
       setLoading(true);
-      coreProxy
-        ?.getBalances()
+      coreProxy?.payments
+        .getBalances()
         .map((_balances) => {
           setLoading(false);
           dispatch({
@@ -133,15 +133,17 @@ export function useBalances() {
             selectedStateChannel == null ||
             selectedStateChannel.channelAddress == null
           ) {
-            coreProxy.getActiveStateChannels().map((activeStateChannels) => {
-              dispatch({
-                type: EActionTypes.STATE_CHANNEL_CHANGED,
-                payload: {
-                  balances: _balances,
-                  activeStateChannel: activeStateChannels[0],
-                },
+            coreProxy.payments
+              .getActiveStateChannels()
+              .map((activeStateChannels) => {
+                dispatch({
+                  type: EActionTypes.STATE_CHANNEL_CHANGED,
+                  payload: {
+                    balances: _balances,
+                    activeStateChannel: activeStateChannels[0],
+                  },
+                });
               });
-            });
           } else {
             dispatch({
               type: EActionTypes.STATE_CHANNEL_CHANGED,
@@ -186,7 +188,7 @@ export function useBalances() {
     UIData.onSelectedStateChannelChanged.subscribe({
       next: (activeStateChannel) => {
         if (cancelRequest) return;
-        coreProxy?.getBalances().map((balances) => {
+        coreProxy?.payments.getBalances().map((balances) => {
           setLoading(false);
           dispatch({
             type: EActionTypes.FETCHED,

@@ -25,9 +25,8 @@ export default class HypernetMobileIntegration {
     this.webIntegrationInstance = new HypernetWebIntegration(
       null,
       null,
-      true,
-      false,
       null,
+      false,
     );
     this.webIntegrationInstance.getReady().map((coreProxy) => {
       this.coreProxy = coreProxy;
@@ -87,25 +86,25 @@ export default class HypernetMobileIntegration {
   }
 
   private postBalances() {
-    this.coreProxy.getBalances().map((balances) => {
+    this.coreProxy.payments.getBalances().map((balances) => {
       this.postDataToRN(ECoreViewDataKeys.balances, balances);
     });
   }
 
   private postLinks() {
-    this.coreProxy.getLinks().map((links) => {
+    this.coreProxy.payments.getLinks().map((links) => {
       this.postDataToRN(ECoreViewDataKeys.links, links);
     });
   }
 
   private postActiveLinks() {
-    this.coreProxy.getActiveLinks().map((links) => {
+    this.coreProxy.payments.getActiveLinks().map((links) => {
       this.postDataToRN(ECoreViewDataKeys.activeLinks, links);
     });
   }
 
   private postAuthorizedGateways() {
-    this.coreProxy.getAuthorizedGateways().map((gateways) => {
+    this.coreProxy.payments.getAuthorizedGateways().map((gateways) => {
       //const gatewayList = [...gateways].map(([name, value]) => ({ name, value }));
       this.postDataToRN(ECoreViewDataKeys.authorizedGateways, gateways);
     });

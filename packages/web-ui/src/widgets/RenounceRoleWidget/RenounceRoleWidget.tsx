@@ -1,4 +1,4 @@
-import { EthereumAccountAddress } from "@hypernetlabs/objects";
+import { EthereumAccountAddress, RegistryName } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
@@ -16,12 +16,12 @@ interface IValues {
 }
 interface IRenounceRoleWidget {
   onCloseCallback: () => void;
-  registrarName: string;
+  registryName: RegistryName;
 }
 
 const RenounceRoleWidget: React.FC<IRenounceRoleWidget> = ({
   onCloseCallback,
-  registrarName,
+  registryName,
 }: IRenounceRoleWidget) => {
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
@@ -32,8 +32,8 @@ const RenounceRoleWidget: React.FC<IRenounceRoleWidget> = ({
 
   const handleFormSubmit = (values: IValues) => {
     setLoading(true);
-    coreProxy
-      .renounceRegistrarRole(registrarName, values.accountAddress)
+    coreProxy.registries
+      .renounceRegistrarRole(registryName, values.accountAddress)
       .map(() => {
         setLoading(false);
         onCloseCallback();

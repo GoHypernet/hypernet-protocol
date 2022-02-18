@@ -8,7 +8,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "yarn clean && yarn compile && yarn postCompile",
-    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-core-iframe:local -f Dockerfile --progress=plain ../..",
+    "dockerize": "docker build --build-arg NATS_URL=wss://dev-nats.hypernet.foundation:4221 -t hypernetlabs/hypernet-protocol-core-iframe:local -f Dockerfile --progress=plain ../..",
     "docker-push": "docker push hypernetlabs/hypernet-protocol-core-iframe:local",
     "dev": "webpack watch --config webpack.config.js --mode development",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
@@ -21,9 +21,9 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@hypernetlabs/hypernet-core": "^0.0.1",
-    "@hypernetlabs/objects": "^0.3.15",
+    "@hypernetlabs/objects": "^0.3.17",
     "@hypernetlabs/utils": "^0.5.2",
-    "@hypernetlabs/web-ui": "^5.0.19",
+    "@hypernetlabs/web-ui": "^5.0.22",
     "neverthrow": "^4.2.2",
     "postmate": "^1.5.2"
   }

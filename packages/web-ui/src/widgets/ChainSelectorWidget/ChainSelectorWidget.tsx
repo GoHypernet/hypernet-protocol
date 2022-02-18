@@ -39,7 +39,12 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
 
   const chainOptions = useMemo(() => {
     return chainInformationList
-      .filter(({ isDev }) => isDev === false)
+      .filter(({ isDev }) => {
+        if (window.location.host.includes("localhost") === true) {
+          return true;
+        }
+        return isDev === false;
+      })
       .map(({ chainId, name }) => ({
         name: `${name} - ${chainId}`,
         value: chainId,
@@ -47,17 +52,17 @@ const ChainSelectorWidget: React.FC<ChainSelectorWidgetParams> = () => {
   }, [JSON.stringify(chainInformationList)]);
 
   useEffect(() => {
-    coreProxy
+    coreProxy.payments
       .waitPaymentsInitialized()
       .map(initializeData)
       .mapErr(handleCoreError);
 
-    coreProxy
+    coreProxy.registries
       .waitRegistriesInitialized()
       .map(initializeData)
       .mapErr(handleCoreError);
 
-    coreProxy
+    coreProxy.governance
       .waitGovernanceInitialized()
       .map(initializeData)
       .mapErr(handleCoreError);

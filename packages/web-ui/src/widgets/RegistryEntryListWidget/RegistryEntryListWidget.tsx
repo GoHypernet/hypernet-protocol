@@ -1,14 +1,15 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import { Form, Formik } from "formik";
 import {
   ERegistrySortOrder,
   EthereumAccountAddress,
   Registry,
   RegistryEntry,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Box, Typography } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
+import { Form, Formik } from "formik";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 
 import {
   GovernanceRegistryListItem,
@@ -20,8 +21,8 @@ import {
   GovernanceSearchFilter,
   GovernanceDialogSelectField,
 } from "@web-ui/components";
-import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import CreateBatchIdentityWidget from "@web-ui/widgets/CreateBatchIdentityWidget";
+import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 import { useStyles } from "@web-ui/widgets/RegistryEntryListWidget/RegistryEntryListWidget.style";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
@@ -92,10 +93,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const getRegistry = () => {
     setLoading(true);
-    coreProxy
-      .getRegistryByName([registryName])
+    coreProxy.registries
+      .getRegistryByName([RegistryName(registryName)])
       .map((registryMap) => {
-        const registry = registryMap.get(registryName);
+        const registry = registryMap.get(RegistryName(registryName));
         setRegistryFetched(true);
         setRegistry(registry);
         setHasEmptyState(!registry?.numberOfEntries);
@@ -106,9 +107,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const getRegistryEntries = () => {
     setLoading(true);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntries(
-        registryName,
+        RegistryName(registryName),
         page,
         REGISTRY_ENTRIES_PER_PAGE,
         reversedSortingEnabled
@@ -144,7 +145,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     const cansubmitLazyMintSignature =
       isRegistrar && registry?.modulesCapability.lazyMintEnabled;
 
-    let headerActions: IHeaderAction[] = [];
+    const headerActions: IHeaderAction[] = [];
 
     if (cansubmitLazyMintSignature) {
       headerActions.push({
@@ -185,9 +186,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByOwnerAddressClick = (value) => {
     setLoading(true);
     setSearchTerm(value);
-    coreProxy
+    coreProxy.registries
       .getRegistryEntryListByOwnerAddress(
-        registryName,
+        RegistryName(registryName),
         EthereumAccountAddress(value),
       )
       .map((registryEntries) => {
@@ -201,8 +202,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const onSearchByUsernameClick = (value) => {
     setLoading(true);
     setSearchTerm(value);
-    coreProxy
-      .getRegistryEntryListByUsername(registryName, value)
+    coreProxy.registries
+      .getRegistryEntryListByUsername(RegistryName(registryName), value)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
         setPage(1);
@@ -352,7 +353,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
                 onClick: () =>
                   onRegistryEntryDetailsNavigate &&
                   onRegistryEntryDetailsNavigate(
-                    registryName,
+                    RegistryName(registryName),
                     registryEntry.tokenId,
                   ),
               },

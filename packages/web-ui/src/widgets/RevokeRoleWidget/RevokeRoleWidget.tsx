@@ -1,4 +1,4 @@
-import { EthereumAccountAddress } from "@hypernetlabs/objects";
+import { EthereumAccountAddress, RegistryName } from "@hypernetlabs/objects";
 import { Box } from "@material-ui/core";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Form, Formik } from "formik";
@@ -16,12 +16,12 @@ interface IValues {
 }
 interface IRevokeRoleWidget {
   onCloseCallback: () => void;
-  registrarName: string;
+  registryName: RegistryName;
 }
 
 const RevokeRoleWidget: React.FC<IRevokeRoleWidget> = ({
   onCloseCallback,
-  registrarName,
+  registryName,
 }: IRevokeRoleWidget) => {
   const classes = useStyles();
   const { coreProxy } = useStoreContext();
@@ -32,8 +32,8 @@ const RevokeRoleWidget: React.FC<IRevokeRoleWidget> = ({
 
   const handleFormSubmit = (values: IValues) => {
     setLoading(true);
-    coreProxy
-      .revokeRegistrarRole(registrarName, values.accountAddress)
+    coreProxy.registries
+      .revokeRegistrarRole(registryName, values.accountAddress)
       .map(() => {
         setLoading(false);
         onCloseCallback();

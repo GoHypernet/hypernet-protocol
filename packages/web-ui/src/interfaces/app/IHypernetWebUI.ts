@@ -5,6 +5,7 @@ import {
   EthereumAddress,
   RenderError,
   RegistryTokenId,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
 import React from "react";
@@ -12,6 +13,7 @@ import React from "react";
 export interface IRenderParams {
   selector?: string;
   showInModal?: boolean;
+  noHeader?: boolean;
   noLabel?: boolean;
   excludeCardWrapper?: boolean;
   bodyStyle?: React.CSSProperties;
@@ -25,12 +27,18 @@ export interface IConnectorAuthorizationFlowParams extends IRenderParams {
   connectorLogoUrl?: string;
 }
 
+export interface IOnboardingSuccessButtonProps {
+  label: string;
+  action: () => void;
+}
+
 export interface IOnboardingFlowParams extends IRenderParams {
   gatewayUrl: GatewayUrl;
   gatewayName?: string;
   gatewayLogoUrl?: string;
-  finalSuccessContent?: string;
+  renderGatewayApprovalContent?: () => React.ReactNode;
   launchpadUrl?: string;
+  successButtonProps?: IOnboardingSuccessButtonProps;
 }
 
 export interface IRenderPaymentWidgetParams extends IRenderParams {
@@ -59,32 +67,51 @@ export interface IProposalCreateWidgetParams extends IRenderParams {
 }
 
 export interface IRegistryListWidgetParams extends IRenderParams {
-  onRegistryEntryListNavigate?: (registryName: string) => void;
-  onRegistryDetailNavigate?: (registryName: string) => void;
+  onRegistryEntryListNavigate?: (registryName: RegistryName) => void;
+  onRegistryDetailNavigate?: (registryName: RegistryName) => void;
   onLazyMintRequestsNavigate?: () => void;
 }
 
 export interface IRegistryEntryListWidgetParams extends IRenderParams {
   onRegistryEntryDetailsNavigate?: (
-    registryName: string,
-    entryTokenId: number,
+    registryName: RegistryName,
+    entryTokenId: RegistryTokenId,
   ) => void;
   onRegistryListNavigate?: () => void;
-  registryName: string;
+  registryName: RegistryName;
 }
 
 export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
-  onRegistryEntryListNavigate?: (registryName: string) => void;
-  registryName: string;
+  onRegistryEntryListNavigate?: (registryName: RegistryName) => void;
+  registryName: RegistryName;
   entryTokenId: RegistryTokenId;
 }
 
 export interface IRegistryDetailWidgetParams extends IRenderParams {
   onRegistryListNavigate?: () => void;
-  registryName: string;
+  registryName: RegistryName;
 }
 
 export interface IHypernetWebUI {
+  renderPrivateKeysModal(): Result<void, RenderError>;
+  renderWarningAlertModal(errorMessage?: string): Result<void, RenderError>;
+  renderMetamaskWarningModal(): Result<void, RenderError>;
+
+  renderConnectedAccountWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
+  renderWalletConnectWidget(config: IRenderParams): Result<void, RenderError>;
+
+  renderChainSelectorWidget(params?: IRenderParams): Result<void, RenderError>;
+
+  payments: IHypernetPaymentsWebUI;
+
+  governance: IHypernetGovernanceWebUI;
+
+  registries: IHypernetRegistriesWebUI;
+}
+
+export interface IHypernetPaymentsWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
   renderGatewaysWidget(params?: IRenderParams): Result<void, RenderError>;
   renderFundWidget(params?: IRenderParams): Result<void, RenderError>;
@@ -104,9 +131,12 @@ export interface IHypernetWebUI {
     params: IConnectorAuthorizationFlowParams,
   ): Result<void, RenderError>;
   startOnboardingFlow(params: IOnboardingFlowParams): Result<void, RenderError>;
-  renderPrivateKeysModal(): Result<void, RenderError>;
-  renderWarningAlertModal(errorMessage?: string): Result<void, RenderError>;
-  renderMetamaskWarningModal(): Result<void, RenderError>;
+  renderPaymentsMetamaskInstructionsWidget(
+    config: IRenderParams,
+  ): Result<void, RenderError>;
+}
+
+export interface IHypernetGovernanceWebUI {
   renderProposalsWidget(
     config?: IProposalsWidgetParams,
   ): Result<void, RenderError>;
@@ -116,6 +146,13 @@ export interface IHypernetWebUI {
   renderProposalCreateWidget(
     config?: IProposalCreateWidgetParams,
   ): Result<void, RenderError>;
+  renderHypertokenBalanceWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
+  renderVotingPowerWidget(params?: IRenderParams): Result<void, RenderError>;
+}
+
+export interface IHypernetRegistriesWebUI {
   renderRegistryListWidget(
     config?: IRegistryListWidgetParams,
   ): Result<void, RenderError>;
@@ -128,16 +165,7 @@ export interface IHypernetWebUI {
   renderRegistryEntryDetailWidget(
     config?: IRegistryEntryDetailWidgetParams,
   ): Result<void, RenderError>;
-  renderHypertokenBalanceWidget(
-    params?: IRenderParams,
-  ): Result<void, RenderError>;
-  renderVotingPowerWidget(params?: IRenderParams): Result<void, RenderError>;
-  renderConnectedAccountWidget(
-    params?: IRenderParams,
-  ): Result<void, RenderError>;
-  renderWalletConnectWidget(config: IRenderParams): Result<void, RenderError>;
   renderRegistryLazyMintingRequestsWidget(
     config?: IRenderParams,
   ): Result<void, RenderError>;
-  renderChainSelectorWidget(params?: IRenderParams): Result<void, RenderError>;
 }

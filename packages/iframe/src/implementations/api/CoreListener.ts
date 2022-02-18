@@ -22,6 +22,7 @@ import {
   RegistryEntry,
   LazyMintingSignature,
   IpfsCID,
+  RegistryName,
 } from "@hypernetlabs/objects";
 import {
   IIFrameCallData,
@@ -53,17 +54,17 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       initializeRegistries: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.initializeRegistries(data.data);
+          return this.core.registries.initializeRegistries(data.data);
         }, data.callId);
       },
       initializeGovernance: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.initializeGovernance(data.data);
+          return this.core.governance.initializeGovernance(data.data);
         }, data.callId);
       },
       initializePayments: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.initializePayments(data.data);
+          return this.core.payments.initializePayments(data.data);
         }, data.callId);
       },
       getInitializationStatus: (data: IIFrameCallData<void>) => {
@@ -78,17 +79,17 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       waitRegistriesInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitRegistriesInitialized(data.data);
+          return this.core.registries.waitRegistriesInitialized(data.data);
         }, data.callId);
       },
       waitGovernanceInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitGovernanceInitialized(data.data);
+          return this.core.governance.waitGovernanceInitialized(data.data);
         }, data.callId);
       },
       waitPaymentsInitialized: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.waitPaymentsInitialized(data.data);
+          return this.core.payments.waitPaymentsInitialized(data.data);
         }, data.callId);
       },
       getEthereumAccounts: (data: IIFrameCallData<void>) => {
@@ -98,12 +99,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getPublicIdentifier: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getPublicIdentifier();
+          return this.core.payments.getPublicIdentifier();
         }, data.callId);
       },
       getActiveStateChannels: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getActiveStateChannels();
+          return this.core.payments.getActiveStateChannels();
         }, data.callId);
       },
       createStateChannel: (
@@ -113,7 +114,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.createStateChannel(
+          return this.core.payments.createStateChannel(
             data.data.routerPublicIdentifiers,
             data.data.chainId,
           );
@@ -127,7 +128,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.depositFunds(
+          return this.core.payments.depositFunds(
             data.data.channelAddress,
             data.data.assetAddress,
             data.data.amount,
@@ -144,7 +145,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.withdrawFunds(
+          return this.core.payments.withdrawFunds(
             data.data.channelAddress,
             data.data.assetAddress,
             data.data.amount,
@@ -155,44 +156,44 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
       getBalances: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getBalances();
+          return this.core.payments.getBalances();
         }, data.callId);
       },
       getLinks: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getLinks();
+          return this.core.payments.getLinks();
         }, data.callId);
       },
       getActiveLinks: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getActiveLinks();
+          return this.core.payments.getActiveLinks();
         }, data.callId);
       },
       acceptFunds: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
-          return this.core.acceptOffer(data.data);
+          return this.core.payments.acceptOffer(data.data);
         }, data.callId);
       },
       repairPayments: (data: IIFrameCallData<PaymentId[]>) => {
         this.returnForModel(() => {
-          return this.core.repairPayments(data.data);
+          return this.core.payments.repairPayments(data.data);
         }, data.callId);
       },
       authorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
-          return this.core.authorizeGateway(data.data);
+          return this.core.payments.authorizeGateway(data.data);
         }, data.callId);
       },
       deauthorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
-          return this.core.deauthorizeGateway(data.data);
+          return this.core.payments.deauthorizeGateway(data.data);
         }, data.callId);
       },
       closeGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
-        this.core.closeGatewayIFrame(data.data);
+        this.core.payments.closeGatewayIFrame(data.data);
       },
       displayGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
-        this.core.displayGatewayIFrame(data.data);
+        this.core.payments.displayGatewayIFrame(data.data);
       },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
@@ -203,34 +204,34 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
       mintTestToken: (data: IIFrameCallData<BigNumberString>) => {
         this.returnForModel(() => {
-          return this.core.mintTestToken(data.data);
+          return this.core.payments.mintTestToken(data.data);
         }, data.callId);
       },
       getAuthorizedGateways: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getAuthorizedGateways();
+          return this.core.payments.getAuthorizedGateways();
         }, data.callId);
       },
       getAuthorizedGatewaysConnectorsStatus: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getAuthorizedGatewaysConnectorsStatus();
+          return this.core.payments.getAuthorizedGatewaysConnectorsStatus();
         }, data.callId);
       },
       getGatewayTokenInfo: (data: IIFrameCallData<GatewayUrl[]>) => {
         this.returnForModel(() => {
-          return this.core.getGatewayTokenInfo(data.data);
+          return this.core.payments.getGatewayTokenInfo(data.data);
         }, data.callId);
       },
       getGatewayRegistrationInfo: (
         data: IIFrameCallData<GatewayRegistrationFilter>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getGatewayRegistrationInfo(data.data);
+          return this.core.payments.getGatewayRegistrationInfo(data.data);
         }, data.callId);
       },
       getGatewayEntryList: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getGatewayEntryList();
+          return this.core.payments.getGatewayEntryList();
         }, data.callId);
       },
       providePrivateCredentials: (
@@ -253,7 +254,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getProposals(
+          return this.core.governance.getProposals(
             data.data.pageNumber,
             data.data.pageSize,
           );
@@ -268,7 +269,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.createProposal(
+          return this.core.governance.createProposal(
             data.data.name,
             data.data.symbol,
             data.data.owner,
@@ -283,7 +284,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.delegateVote(
+          return this.core.governance.delegateVote(
             data.data.delegateAddress,
             data.data.amount,
           );
@@ -291,12 +292,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getProposalDetails: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
-          return this.core.getProposalDetails(data.data);
+          return this.core.governance.getProposalDetails(data.data);
         }, data.callId);
       },
       getProposalDescription: (data: IIFrameCallData<IpfsCID>) => {
         this.returnForModel(() => {
-          return this.core.getProposalDescription(data.data);
+          return this.core.governance.getProposalDescription(data.data);
         }, data.callId);
       },
       castVote: (
@@ -306,7 +307,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.castVote(data.data.proposalId, data.data.support);
+          return this.core.governance.castVote(
+            data.data.proposalId,
+            data.data.support,
+          );
         }, data.callId);
       },
       getProposalVotesReceipt: (
@@ -316,7 +320,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getProposalVotesReceipt(
+          return this.core.governance.getProposalVotesReceipt(
             data.data.proposalId,
             data.data.voterAddress,
           );
@@ -330,40 +334,40 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getRegistries(
+          return this.core.registries.getRegistries(
             data.data.pageNumber,
             data.data.pageSize,
             data.data.sortOrder,
           );
         }, data.callId);
       },
-      getRegistryByName: (data: IIFrameCallData<string[]>) => {
+      getRegistryByName: (data: IIFrameCallData<RegistryName[]>) => {
         this.returnForModel(() => {
-          return this.core.getRegistryByName(data.data);
+          return this.core.registries.getRegistryByName(data.data);
         }, data.callId);
       },
       getRegistryByAddress: (
         data: IIFrameCallData<EthereumContractAddress[]>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getRegistryByAddress(data.data);
+          return this.core.registries.getRegistryByAddress(data.data);
         }, data.callId);
       },
-      getRegistryEntriesTotalCount: (data: IIFrameCallData<string[]>) => {
+      getRegistryEntriesTotalCount: (data: IIFrameCallData<RegistryName[]>) => {
         this.returnForModel(() => {
-          return this.core.getRegistryEntriesTotalCount(data.data);
+          return this.core.registries.getRegistryEntriesTotalCount(data.data);
         }, data.callId);
       },
       getRegistryEntries: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           pageNumber: number;
           pageSize: number;
           sortOrder: ERegistrySortOrder;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getRegistryEntries(
+          return this.core.registries.getRegistryEntries(
             data.data.registryName,
             data.data.pageNumber,
             data.data.pageSize,
@@ -373,12 +377,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getRegistryEntryDetailByTokenId: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getRegistryEntryDetailByTokenId(
+          return this.core.registries.getRegistryEntryDetailByTokenId(
             data.data.registryName,
             data.data.tokenId,
           );
@@ -386,28 +390,28 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       queueProposal: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
-          return this.core.queueProposal(data.data);
+          return this.core.governance.queueProposal(data.data);
         }, data.callId);
       },
       cancelProposal: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
-          return this.core.cancelProposal(data.data);
+          return this.core.governance.cancelProposal(data.data);
         }, data.callId);
       },
       executeProposal: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
-          return this.core.executeProposal(data.data);
+          return this.core.governance.executeProposal(data.data);
         }, data.callId);
       },
       updateRegistryEntryTokenURI: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
           registrationData: string;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.updateRegistryEntryTokenURI(
+          return this.core.registries.updateRegistryEntryTokenURI(
             data.data.registryName,
             data.data.tokenId,
             data.data.registrationData,
@@ -416,13 +420,13 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       updateRegistryEntryLabel: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
           label: string;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.updateRegistryEntryLabel(
+          return this.core.registries.updateRegistryEntryLabel(
             data.data.registryName,
             data.data.tokenId,
             data.data.label,
@@ -431,42 +435,42 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getProposalsCount: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getProposalsCount();
+          return this.core.governance.getProposalsCount();
         }, data.callId);
       },
       getProposalThreshold: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getProposalThreshold();
+          return this.core.governance.getProposalThreshold();
         }, data.callId);
       },
       getVotingPower: (data: IIFrameCallData<EthereumAccountAddress>) => {
         this.returnForModel(() => {
-          return this.core.getVotingPower(data.data);
+          return this.core.governance.getVotingPower(data.data);
         }, data.callId);
       },
       getHyperTokenBalance: (data: IIFrameCallData<EthereumAccountAddress>) => {
         this.returnForModel(() => {
-          return this.core.getHyperTokenBalance(data.data);
+          return this.core.governance.getHyperTokenBalance(data.data);
         }, data.callId);
       },
       getNumberOfRegistries: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getNumberOfRegistries();
+          return this.core.registries.getNumberOfRegistries();
         }, data.callId);
       },
       updateRegistryParams: (data: IIFrameCallData<RegistryParams>) => {
         this.returnForModel(() => {
-          return this.core.updateRegistryParams(data.data);
+          return this.core.registries.updateRegistryParams(data.data);
         }, data.callId);
       },
       createRegistryEntry: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           newRegistryEntry: RegistryEntry;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.createRegistryEntry(
+          return this.core.registries.createRegistryEntry(
             data.data.registryName,
             data.data.newRegistryEntry,
           );
@@ -474,13 +478,13 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       transferRegistryEntry: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
           transferToAddress: EthereumAccountAddress;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.transferRegistryEntry(
+          return this.core.registries.transferRegistryEntry(
             data.data.registryName,
             data.data.tokenId,
             data.data.transferToAddress,
@@ -489,12 +493,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       burnRegistryEntry: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.burnRegistryEntry(
+          return this.core.registries.burnRegistryEntry(
             data.data.registryName,
             data.data.tokenId,
           );
@@ -509,7 +513,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.createRegistryByToken(
+          return this.core.registries.createRegistryByToken(
             data.data.name,
             data.data.symbol,
             data.data.registrarAddress,
@@ -519,12 +523,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       grantRegistrarRole: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           address: EthereumAccountAddress | EthereumContractAddress;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.grantRegistrarRole(
+          return this.core.registries.grantRegistrarRole(
             data.data.registryName,
             data.data.address,
           );
@@ -532,12 +536,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       revokeRegistrarRole: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           address: EthereumAccountAddress;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.revokeRegistrarRole(
+          return this.core.registries.revokeRegistrarRole(
             data.data.registryName,
             data.data.address,
           );
@@ -545,12 +549,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       renounceRegistrarRole: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           address: EthereumAccountAddress;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.renounceRegistrarRole(
+          return this.core.registries.renounceRegistrarRole(
             data.data.registryName,
             data.data.address,
           );
@@ -561,32 +565,37 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.provideProviderId(data.data);
         }, data.callId);
       },
+      rejectProviderIdRequest: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.rejectProviderIdRequest();
+        }, data.callId);
+      },
       getTokenInformation: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getTokenInformation();
+          return this.core.payments.getTokenInformation();
         }, data.callId);
       },
       getTokenInformationForChain: (data: IIFrameCallData<ChainId>) => {
         this.returnForModel(() => {
-          return this.core.getTokenInformationForChain(data.data);
+          return this.core.payments.getTokenInformationForChain(data.data);
         }, data.callId);
       },
       getTokenInformationByAddress: (
         data: IIFrameCallData<EthereumContractAddress>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getTokenInformationByAddress(data.data);
+          return this.core.payments.getTokenInformationByAddress(data.data);
         }, data.callId);
       },
       getRegistryEntryByOwnerAddress: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           ownerAddress: EthereumAccountAddress;
           index: number;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getRegistryEntryByOwnerAddress(
+          return this.core.registries.getRegistryEntryByOwnerAddress(
             data.data.registryName,
             data.data.ownerAddress,
             data.data.index,
@@ -595,17 +604,17 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getRegistryModules: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getRegistryModules();
+          return this.core.registries.getRegistryModules();
         }, data.callId);
       },
       createBatchRegistryEntry: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           newRegistryEntries: RegistryEntry[];
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.createBatchRegistryEntry(
+          return this.core.registries.createBatchRegistryEntry(
             data.data.registryName,
             data.data.newRegistryEntries,
           );
@@ -613,12 +622,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getRegistryEntryListByOwnerAddress: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           ownerAddress: EthereumAccountAddress;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getRegistryEntryListByOwnerAddress(
+          return this.core.registries.getRegistryEntryListByOwnerAddress(
             data.data.registryName,
             data.data.ownerAddress,
           );
@@ -631,12 +640,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       getRegistryEntryListByUsername: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           username: string;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.getRegistryEntryListByUsername(
+          return this.core.registries.getRegistryEntryListByUsername(
             data.data.registryName,
             data.data.username,
           );
@@ -644,14 +653,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       submitLazyMintSignature: (
         data: IIFrameCallData<{
-          registryName: string;
+          registryName: RegistryName;
           tokenId: RegistryTokenId;
           ownerAddress: EthereumAccountAddress;
           registrationData: string;
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.submitLazyMintSignature(
+          return this.core.registries.submitLazyMintSignature(
             data.data.registryName,
             data.data.tokenId,
             data.data.ownerAddress,
@@ -661,19 +670,19 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       },
       retrieveLazyMintingSignatures: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.retrieveLazyMintingSignatures();
+          return this.core.registries.retrieveLazyMintingSignatures();
         }, data.callId);
       },
       executeLazyMint: (data: IIFrameCallData<LazyMintingSignature>) => {
         this.returnForModel(() => {
-          return this.core.executeLazyMint(data.data);
+          return this.core.registries.executeLazyMint(data.data);
         }, data.callId);
       },
       revokeLazyMintSignature: (
         data: IIFrameCallData<LazyMintingSignature>,
       ) => {
         this.returnForModel(() => {
-          return this.core.revokeLazyMintSignature(data.data);
+          return this.core.registries.revokeLazyMintSignature(data.data);
         }, data.callId);
       },
       retrieveChainInformationList: (data: IIFrameCallData<void>) => {
@@ -711,21 +720,23 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("initialized", this.defaultGovernanceChainId);
     });
 
-    this.core
+    this.core.registries
       .waitRegistriesInitialized(this.defaultGovernanceChainId)
       .map(() => {
         parent.emit("registriesInitialized", this.defaultGovernanceChainId);
       });
 
-    this.core
+    this.core.governance
       .waitGovernanceInitialized(this.defaultGovernanceChainId)
       .map(() => {
         parent.emit("governanceInitialized", this.defaultGovernanceChainId);
       });
 
-    this.core.waitPaymentsInitialized(this.defaultGovernanceChainId).map(() => {
-      parent.emit("paymentsInitialized", this.defaultGovernanceChainId);
-    });
+    this.core.payments
+      .waitPaymentsInitialized(this.defaultGovernanceChainId)
+      .map(() => {
+        parent.emit("paymentsInitialized", this.defaultGovernanceChainId);
+      });
 
     // We are going to relay the RXJS events
     this.core.onControlClaimed.subscribe((val) => {
