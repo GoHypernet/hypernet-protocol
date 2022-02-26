@@ -3029,17 +3029,6 @@
     "@hypernetlabs/objects" "^0.3.10"
     ethers "^5.4.7"
 
-"@hypernetlabs/governance-sdk@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@hypernetlabs/governance-sdk/-/governance-sdk-0.0.4.tgz#d3de8ce18c8735b3b2fc3bd96df14deb73a1656c"
-  integrity sha512-gmxnERHeQ+/cBsdS8GBDziCwAWBNTQzVloq7W6JSs0Cf2vH1bLgnnFtJuMO8+tNjUqsbipCy6sEMBQWj6AWeKw==
-  dependencies:
-    "@hypernetlabs/gateway-connector" "^0.0.12"
-    "@hypernetlabs/objects" "^0.3.15"
-    "@hypernetlabs/utils" "^0.5.2"
-    ethers "^5.4.7"
-    neverthrow "^4.2.2"
-
 "@icons/material@^0.2.4":
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/@icons/material/-/material-0.2.4.tgz#e90c9f71768b3736e76d7dd6783fc6c2afa88bc8"

@@ -117,8 +117,11 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
+    transactionCallback?:
+      | ((transactionHash: string, gasFee: ContractOverrides) => void)
+      | null,
+    overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
-    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   grantRole(
     address: EthereumAccountAddress | EthereumContractAddress,

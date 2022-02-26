@@ -730,8 +730,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
+    transactionCallback?:
+      | ((transactionHash: string, gasFee: ContractOverrides) => void)
+      | null,
+    overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
-    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     this.reinitializeContract(registryAddress);
 
@@ -743,7 +746,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         return ResultAsync.fromPromise(
           this.contract?.register(recipientAddress, label, data, tokenId, {
             ...gasFee,
-            ...overrides,
+            ...(overrides != null ? overrides : {}),
           }) as Promise<ethers.providers.TransactionResponse>,
           (e) => {
             return new NonFungibleRegistryContractError(
@@ -751,7 +754,16 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
               e,
             );
           },
-        );
+        ).map((tx) => {
+          if (transactionCallback != null) {
+            GasUtils.getGasFeeInfo(this.providerOrSigner, tx).map(
+              (gasFeeInfo) => {
+                transactionCallback(tx.hash, gasFeeInfo);
+              },
+            );
+          }
+          return tx;
+        });
       })
       .andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait(), (e) => {

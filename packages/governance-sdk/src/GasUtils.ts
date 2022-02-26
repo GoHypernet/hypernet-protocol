@@ -17,4 +17,24 @@ export class GasUtils {
       return new ContractOverrides(feeData.maxFeePerGas);
     });
   }
+
+  static getGasFeeInfo(
+    providerOrSigner:
+      | ethers.providers.Provider
+      | ethers.providers.JsonRpcSigner
+      | ethers.Wallet,
+    transaction: ethers.providers.TransactionResponse,
+  ): ResultAsync<ContractOverrides, GasPriceError> {
+    return ResultAsync.fromPromise(providerOrSigner.getFeeData(), (e) => {
+      return new GasPriceError("Error retrieving getFeeData", e);
+    }).map((feeData) => {
+      return new ContractOverrides(
+        feeData.maxFeePerGas,
+        feeData.gasPrice,
+        feeData.maxPriorityFeePerGas,
+        transaction.value,
+        transaction.nonce,
+      );
+    });
+  }
 }
