@@ -50,7 +50,7 @@
     "@hypernetlabs/common-repositories": "^0.0.4",
     "@hypernetlabs/gateway-connector": "^0.0.12",
     "@hypernetlabs/governance-sdk": "^0.0.4",
-    "@hypernetlabs/objects": "^0.3.17",
+    "@hypernetlabs/objects": "^0.3.19",
     "@hypernetlabs/utils": "^0.5.2",
     "@walletconnect/web3-provider": "^1.5.2",
     "class-transformer": "^0.3.2",

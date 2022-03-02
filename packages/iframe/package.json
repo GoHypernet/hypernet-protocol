@@ -21,7 +21,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@hypernetlabs/hypernet-core": "^0.0.1",
-    "@hypernetlabs/objects": "^0.3.17",
+    "@hypernetlabs/objects": "^0.3.19",
     "@hypernetlabs/utils": "^0.5.2",
     "@hypernetlabs/web-ui": "^5.0.22",
     "neverthrow": "^4.2.2",

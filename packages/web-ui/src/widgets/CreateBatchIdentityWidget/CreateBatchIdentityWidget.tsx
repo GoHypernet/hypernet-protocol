@@ -55,7 +55,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
       registryEntries.push(
         new RegistryEntry(
           label,
-          RegistryTokenId(BigInt(tokenId)),
+          RegistryTokenId(tokenId),
           EthereumAccountAddress(recipientAddress),
           tokenUri,
           null,
@@ -111,7 +111,7 @@ const CreateBatchIdentityWidget: React.FC<CreateBatchIdentityWidget> = ({
         ...prevState,
         new RegistryEntry(
           values.label,
-          RegistryTokenId(BigInt(values.tokenId)),
+          RegistryTokenId(values.tokenId),
           EthereumAccountAddress(values.recipientAddress),
           values.tokenUri,
           null,
