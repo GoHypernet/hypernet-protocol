@@ -109,8 +109,11 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
+    transactionCallback?:
+      | ((transaction: ethers.providers.TransactionResponse) => void)
+      | null,
+    overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
-    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   register(
     recipientAddress: EthereumAccountAddress,

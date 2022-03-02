@@ -3010,12 +3010,12 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@hypernetlabs/common-repositories@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@hypernetlabs/common-repositories/-/common-repositories-0.0.4.tgz#6d9da6a590a8d81edca9ebd740f31d37f61f319b"
-  integrity sha512-RKsD6IFdrUC6ERFI82yTMSMqjqFBZJA7jE6k59i9OEvBo5JWZt1qumwmFb3lTt5PfA0Ksrf+LQ0jelz9+lydWA==
+"@hypernetlabs/common-repositories@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/common-repositories/-/common-repositories-0.0.5.tgz#239202bfe0eb957a2c7c002fdea9835042f60547"
+  integrity sha512-SELE0MsOUPzithoy7Lx/edLvMseHWeZg3SPHQMD6ij6p1JbrOAbhk95X+3fIiI8wBjGkwduBxOEOX7HmRoyFxg==
   dependencies:
-    "@hypernetlabs/governance-sdk" "^0.0.5"
+    "@hypernetlabs/governance-sdk" "^0.0.9"
     "@hypernetlabs/objects" "^0.3.17"
     ethers "^5.4.7"
     inversify "^5.1.1"
@@ -3028,28 +3028,6 @@
   dependencies:
     "@hypernetlabs/objects" "^0.3.10"
     ethers "^5.4.7"
-
-"@hypernetlabs/governance-sdk@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@hypernetlabs/governance-sdk/-/governance-sdk-0.0.5.tgz#aea6ba5530c4754eeabe7d51f2e9bc254b9ffc88"
-  integrity sha512-1b7yH0FGM/wi08J5XBPG24ueiFNBy4tOJ0MgcL+ysdWn5yVsirinJt5Q/RV9kjgvOXN9x8VI8MI9Kjj127v+Ug==
-  dependencies:
-    "@hypernetlabs/gateway-connector" "^0.0.12"
-    "@hypernetlabs/objects" "^0.3.17"
-    "@hypernetlabs/utils" "^0.5.2"
-    ethers "^5.4.7"
-    neverthrow "^4.2.2"
-
-"@hypernetlabs/governance-sdk@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@hypernetlabs/governance-sdk/-/governance-sdk-0.0.6.tgz#16a2c5ca7ed60a017df2fa58c6d9525291f5d797"
-  integrity sha512-Zao8V33ALcrgjm2gsENAWK2bQqPpssgqeBJGIaOtAky3lB+BGfKbjGxRmmwB9t3nZ4KdfLP/2B8VVK/fZx/AsA==
-  dependencies:
-    "@hypernetlabs/gateway-connector" "^0.0.12"
-    "@hypernetlabs/objects" "^0.3.17"
-    "@hypernetlabs/utils" "^0.5.2"
-    ethers "^5.4.7"
-    neverthrow "^4.2.2"
 
 "@icons/material@^0.2.4":
   version "0.2.4"

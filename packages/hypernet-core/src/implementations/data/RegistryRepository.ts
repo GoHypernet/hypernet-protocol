@@ -984,6 +984,8 @@ export class RegistryRepository implements IRegistryRepository {
                   newRegistryEntry.label,
                   newRegistryEntry.tokenURI,
                   newRegistryEntry.tokenId,
+                  null,
+                  null,
                   registry.address,
                 );
               });

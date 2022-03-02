@@ -688,8 +688,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
-    registryAddress?: EthereumContractAddress,
+    transactionCallback?:
+      | ((transaction: ethers.providers.TransactionResponse) => void)
+      | null,
     overrides: ContractOverrides | null = null,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     this.reinitializeContract(registryAddress);
 
@@ -715,6 +718,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         );
       })
       .andThen((tx) => {
+        if (transactionCallback != null) {
+          transactionCallback(tx);
+        }
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
@@ -754,14 +760,12 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
               e,
             );
           },
-        ).map((tx) => {
-          if (transactionCallback != null) {
-            transactionCallback(tx);
-          }
-          return tx;
-        });
+        );
       })
       .andThen((tx) => {
+        if (transactionCallback != null) {
+          transactionCallback(tx);
+        }
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
