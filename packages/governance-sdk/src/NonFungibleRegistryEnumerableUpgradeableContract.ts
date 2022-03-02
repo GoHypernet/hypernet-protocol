@@ -731,7 +731,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     data: string | null,
     tokenId: RegistryTokenId,
     transactionCallback?:
-      | ((transactionHash: string, gasFee: ContractOverrides) => void)
+      | ((transaction: ethers.providers.TransactionResponse) => void)
       | null,
     overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
@@ -756,11 +756,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           },
         ).map((tx) => {
           if (transactionCallback != null) {
-            GasUtils.getGasFeeInfo(this.providerOrSigner, tx).map(
-              (gasFeeInfo) => {
-                transactionCallback(tx.hash, gasFeeInfo);
-              },
-            );
+            transactionCallback(tx);
           }
           return tx;
         });

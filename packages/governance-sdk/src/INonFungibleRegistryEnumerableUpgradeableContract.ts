@@ -6,7 +6,7 @@ import {
   RegistryTokenId,
   RegistryEntry,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 import { ContractOverrides } from "@governance-sdk/ContractOverrides";
@@ -118,7 +118,7 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     data: string | null,
     tokenId: RegistryTokenId,
     transactionCallback?:
-      | ((transactionHash: string, gasFee: ContractOverrides) => void)
+      | ((transaction: ethers.providers.TransactionResponse) => void)
       | null,
     overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
