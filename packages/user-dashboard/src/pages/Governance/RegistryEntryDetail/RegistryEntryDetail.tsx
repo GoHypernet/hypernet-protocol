@@ -21,7 +21,7 @@ const RegistryEntryDetail: React.FC = () => {
           history.push(`/registries/${registryName}/entries`);
         },
         registryName,
-        entryTokenId: RegistryTokenId(BigInt(entryTokenId)),
+        entryTokenId: RegistryTokenId(entryTokenId),
       })
       .mapErr(handleError);
   }, []);

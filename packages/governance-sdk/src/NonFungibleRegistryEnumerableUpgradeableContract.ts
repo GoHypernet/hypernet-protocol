@@ -406,7 +406,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           e,
         );
       },
-    ).map((tokenId) => RegistryTokenId(tokenId.toBigInt()));
+    ).map((tokenId) => RegistryTokenId(tokenId.toString()));
   }
 
   public tokenOfOwnerByIndex(
@@ -427,7 +427,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           e,
         );
       },
-    ).map((tokenId) => RegistryTokenId(tokenId.toBigInt()));
+    ).map((tokenId) => RegistryTokenId(tokenId.toString()));
   }
 
   public registryMap(
@@ -967,7 +967,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           },
         ).andThen((tokenId) => {
           return this.getRegistryEntryByTokenId(
-            RegistryTokenId(tokenId.toBigInt()),
+            RegistryTokenId(tokenId.toString()),
             registryAddress,
           );
         });
