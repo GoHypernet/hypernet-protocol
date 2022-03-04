@@ -38,6 +38,11 @@ const errorCodes = {
   LazyMintModuleContractError: "37",
   IPFSUnavailableError: "38",
   GasPriceError: "39",
+  TransactionNotImplementedError: "40",
+  TransactionServerError: "41",
+  TransactionTimeoutError: "42",
+  TransactionUnknownError: "43",
+  TransactionUnsupportedOperationError: "44",
 };
 
 export default errorCodes;
