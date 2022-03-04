@@ -6,6 +6,12 @@ import {
   NonFungibleRegistryContractError,
   RegistryEntry,
   RegistryTokenId,
+  ETransactionErrorCode,
+  TransactionNotImplementedError,
+  TransactionServerError,
+  TransactionTimeoutError,
+  TransactionUnknownError,
+  TransactionUnsupportedOperationError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
@@ -776,6 +782,79 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       .map(() => {});
   }
 
+  public registerAsync(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError
+  > {
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.register(recipientAddress, label, data, tokenId, {
+            ...gasFee,
+            ...(overrides != null ? overrides : {}),
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return this.handleTransactionError(
+              e,
+              "Error while calling contract.register()",
+            );
+          },
+        );
+      });
+  }
+
+  public registerByTokenAsync(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError
+  > {
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.registerByToken(
+            recipientAddress,
+            label,
+            data,
+            tokenId,
+            { ...gasFee, ...(overrides != null ? overrides : {}) },
+          ) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return this.handleTransactionError(
+              e,
+              "Error while calling contract.registerByToken()",
+            );
+          },
+        );
+      });
+  }
+
   public grantRole(
     address: EthereumAccountAddress | EthereumContractAddress,
     registryAddress?: EthereumContractAddress,
@@ -992,5 +1071,37 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
       this.providerOrSigner,
     );
+  }
+
+  private handleTransactionError(
+    e: any,
+    defaultErrorMessage: string,
+  ):
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError {
+    const errorCode = e?.code;
+    const errorMessage = e?.body?.error?.message || defaultErrorMessage;
+
+    if (errorCode == ETransactionErrorCode.NOT_IMPLEMENTED) {
+      return new TransactionNotImplementedError(errorMessage, e);
+    }
+    if (errorCode == ETransactionErrorCode.SERVER_ERROR) {
+      return new TransactionServerError(errorMessage, e);
+    }
+    if (errorCode == ETransactionErrorCode.TIMEOUT) {
+      return new TransactionTimeoutError(errorMessage, e);
+    }
+    if (errorCode == ETransactionErrorCode.UNKNOWN_ERROR) {
+      return new TransactionUnknownError(errorMessage, e);
+    }
+    if (errorCode == ETransactionErrorCode.UNSUPPORTED_OPERATION) {
+      return new TransactionUnsupportedOperationError(errorMessage, e);
+    }
+
+    return new NonFungibleRegistryContractError(errorMessage, e);
   }
 }

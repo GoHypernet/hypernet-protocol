@@ -5,6 +5,11 @@ import {
   BigNumberString,
   RegistryTokenId,
   RegistryEntry,
+  TransactionNotImplementedError,
+  TransactionServerError,
+  TransactionTimeoutError,
+  TransactionUnknownError,
+  TransactionUnsupportedOperationError,
 } from "@hypernetlabs/objects";
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -126,6 +131,36 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
+  registerAsync(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError
+  >;
+  registerByTokenAsync(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError
+  >;
   grantRole(
     address: EthereumAccountAddress | EthereumContractAddress,
     registryAddress?: EthereumContractAddress,
