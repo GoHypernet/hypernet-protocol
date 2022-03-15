@@ -941,7 +941,7 @@ export class RegistryRepository implements IRegistryRepository {
       }
 
       if (
-        newRegistryEntry.tokenId === BigInt(0) ||
+        BigNumber.from(newRegistryEntry.tokenId).eq(0) ||
         isNaN(Number(newRegistryEntry.tokenId))
       ) {
         return errAsync(
@@ -984,6 +984,8 @@ export class RegistryRepository implements IRegistryRepository {
                   newRegistryEntry.label,
                   newRegistryEntry.tokenURI,
                   newRegistryEntry.tokenId,
+                  null,
+                  null,
                   registry.address,
                 );
               });
@@ -994,6 +996,8 @@ export class RegistryRepository implements IRegistryRepository {
           newRegistryEntry.label,
           newRegistryEntry.tokenURI,
           newRegistryEntry.tokenId,
+          null,
+          null,
           registry.address,
         );
       }
