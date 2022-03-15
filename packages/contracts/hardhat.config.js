@@ -74,7 +74,7 @@ module.exports = {
     polygon: { // polygon mainnet
         accounts: { mnemonic },
         chainId: 137,
-        url: urlOverride || "https://rpc-mainnet.maticvigil.com",
+        url: urlOverride || "https://rpc-mainnet.matic.network",
     },
     fuji: { // avalanche testnet
         accounts: { mnemonic },
