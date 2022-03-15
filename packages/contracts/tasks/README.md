@@ -1,6 +1,6 @@
 ## Hardhat tasks
 
-This directory contains network constants and tasks definitions for use via the Hardhat CLI. In order to see all available 
+This directory contains network constants and tasks definitions for use via the Hardhat CLI. To see all available 
 tasks available through the Hardhat CLI run:
 
 ```shell

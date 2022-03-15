@@ -42,11 +42,11 @@ All roles are set up through the NFR constructor/initializer which is called by 
 `allowStorageUpdate` is set to `false` (which it is by default and can be updated by the `REGISTRAR_ROLE`). The same applies for the 
 token `label` through the `allowLabelChange` flag (which is false by default). In some cases, it can be useful to dissallow the transfer 
 of ownership of NFIs. This can be done if `REGISTRAR_ROLE` sets `allowTransfers` to `false`. In this case, the `REGISTRAR_ROLE` can still 
-transfer an NFI on the owners behalf if the NFI owner gives approval to the `REGISTRAR_ROLE` through the `approve` function.
+transfer an NFI on the owner's behalf if the NFI owner gives approval to the `REGISTRAR_ROLE` through the `approve` function.
 
 ### Extending registry functionality 
 
-Each NFR can augment its registration logic (as well as add novel functionality) through the use of external 
+Each NFR can augment its registration logic (as well as add novel functionality) via external logic
 [*modules*](/packages/contracts/contracts/modules/README.md). A module is a stateless external contract which can be given the `REGISTRAR_ROLE` 
 and thus extend an NFR's capability in an algorithmic fashion. For example, the a 
 [LazyMintModule.sol](/packages/contracts/contracts/modules/LazyMintModule.sol) contract offers a means to add lazy minting functionality 
@@ -58,8 +58,8 @@ can add and remove these modules from their NFR as needed.
 
 Lastly, the Hypernet NFR implements a native mechanism for registration by sending an EIP20-compatible token to the registry. By default, this feature is 
 disabled, but the `REGISTRAR_ROLE` can set `registrationToken` to an address of an EIP20-compatible token which will enable the feature. The 
-default registration fee is `1e18` (1 token assuming 18 decimal places) which can also be updated by the `REGISTRAR_ROLE`. In order to use this 
-feature, a participant must `approve` the NFR to spend `registrationFee` amount of `registrationToken` from their account. The NFR will 
+default registration fee is `1e18` (1 token assuming 18 decimal places) which can also be updated by the `REGISTRAR_ROLE`. Utilization of this 
+feature requires that a participant must `approve` the NFR to spend `registrationFee` amount of `registrationToken` from their account. The NFR will 
 record the registration token address used and fee amount and associate this staking fee with the NFI `tokenId`. Upon burning of the NFI, 
 any non-zero registration fee associated with the burned `tokenId` will be transfered to the account who burned the token, *not* the owner
 of the token at the time of burning. 
@@ -72,8 +72,8 @@ functionality. All NFRs in this list are managed by the Hypernet Protocol [DAO](
 
 ### [Hypernet Profiles](https://rinkeby.launchpad.hypernet.foundation/registries/Hypernet%20Profiles/entries)
 
-The Hypernet Profile NFR is the primary registry of the Hypernet Protocol ecosystem. In order for an account to receive a NFI in any other NFR, that 
-address must first create an NFI profile token in this registry. This is done by locking Hypertoken in the registry itself by approving the registry to 
+The Hypernet Profile NFR is the primary registry of the Hypernet Protocol ecosystem. For an account to receive a NFI in any other NFR, that 
+account must first create an NFI profile token in this registry. This is done by locking Hypertoken in the registry itself by approving the registry to 
 pull `registrationFee` amound of Hypertoken from the transaction initiator's account and then calling the `registryByToken` function. The `label` that 
 is claimed in this action becomes the unique username of the entity within the Hypernet Protocol ecosystem (this username can be traded with other 
 users or burned to reclaim some of the Hypertoken that was staked in its creation).

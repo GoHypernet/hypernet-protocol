@@ -13,4 +13,4 @@ externally owned account (EOA).
 
 The [`Test.sol`](/packages/contracts/contracts/utils/Test.sol) contract under the `utils` subdirectory is used to help test this library. 
 See [`test/NFTAccessControl-test.js`](/packages/contracts/test/NFTAccessControl-test.js) for an example of how to interact with a contract
-inhereting from `NFTAccessControlUpgradeable.sol`. 
+inheriting from `NFTAccessControlUpgradeable.sol`. 

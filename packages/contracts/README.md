@@ -66,7 +66,7 @@ npx hardhat compile
 
 ## Environment Variables
 
-The following environment variables can be set in order to customize the hardhat environment for testing
+The following environment variables can be set to customize the hardhat environment for testing
 or deployment purposes. 
 
 `ETH_PROVIDER_URL`: URL that hardhat will use for its RPC provider, if blank then `localhost` is assumed. 
