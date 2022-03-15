@@ -16,6 +16,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
  *
  * The bulk of the logic was produced by the OpenZeppelin contract wizard including the TimelockController extension:
  * https://docs.openzeppelin.com/contracts/4.x/wizard
+ * 
+ * For more information on the Governor library see:
+ * https://docs.openzeppelin.com/contracts/4.x/governance
  *
  * Modifications from OZ reference implementation:
  * First, the parameters _votingDelay, _votingPeriod, _proposalThreshold have setter functions that are only callable 

@@ -17,6 +17,9 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * voting power to an address other than the holder of the Hypertoken balance, this vesting
  * contract allows the beneficiary to claim their voting rights while the vesting contract 
  * is in custody of their token through a call to `delegate`. 
+ * 
+ * For more info on ERC-20 voting extension see:
+ * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Votes.sol
  */
 contract Vester {
     using SafeMath for uint;
@@ -70,7 +73,7 @@ contract Vester {
         recipient = recipient_;
     }
 
-    /// @notice delegate delegates votes associated with tokens help by this contract to the beneficiary
+    /// @notice delegate delegates votes associated with tokens held by this contract to an address specified by the beneficiary
     /// @dev The function allows for beneficiaries to have voting rights before they take possession of 
     /// their tokens
     /// @param recipient_ address to recieve the voting rights, does not necessarly have to be the beneficiary
@@ -92,6 +95,7 @@ contract Vester {
     }
 }
 
+/// minimal interface for ERC-20 token with external delegate function call
 interface IHypertoken {
     function balanceOf(address account) external view returns (uint);
     function transfer(address dst, uint rawAmount) external returns (bool);
