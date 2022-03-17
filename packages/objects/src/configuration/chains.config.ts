@@ -121,7 +121,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
   [
     ChainId(1),
     new GovernanceChainInformation(
-      "MainNet",
+      "Ethereum MainNet",
       ChainId(1),
       true,
       false,
@@ -132,7 +132,7 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       EthereumContractAddress("TODO"), // insuranceTransfer
       EthereumContractAddress("TODO"), // parameterizedTransfer
       EthereumContractAddress("TODO"), // hypernetGovernor
-      EthereumContractAddress("TODO"), // registryFactory
+      EthereumContractAddress("0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899"), // registryFactory
       new RegistryNames(
         RegistryName("Hypernet Profiles"),
         RegistryName("Gateways"),
@@ -142,7 +142,11 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
         RegistryName("Hypernet.ID"),
       ),
       new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
-      [ProviderUrl("https://mainnet.hypernet.foundation")],
+      [
+        ProviderUrl(
+          "https://f8334b5b-ad76-4d4a-8443-88d05097eb8b.hypernetlabs.io/http/",
+        ),
+      ],
     ),
   ],
   [
