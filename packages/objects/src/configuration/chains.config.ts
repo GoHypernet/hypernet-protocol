@@ -269,4 +269,35 @@ export const chainConfig = new Map<ChainId, ChainInformation>([
       ],
     ),
   ],
+  [
+    ChainId(250),
+    new GovernanceChainInformation(
+      "Fantom Mainnet",
+      ChainId(250),
+      true,
+      false,
+      EthereumContractAddress("TODO"), // channelFactory
+      EthereumContractAddress("TODO"), // transferRegistry
+      EthereumContractAddress("TODO"), // hypertoken
+      EthereumContractAddress("TODO"), // messageTransfer
+      EthereumContractAddress("TODO"), // insuranceTransfer
+      EthereumContractAddress("TODO"), // parameterizedTransfer
+      EthereumContractAddress("TODO"), // hypernetGovernor
+      EthereumContractAddress("0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"), // registryFactory
+      new RegistryNames(
+        RegistryName("Hypernet Profiles"),
+        RegistryName("Gateways"),
+        RegistryName("Liquidity Providers"),
+        RegistryName("Payment Tokens"),
+        RegistryName("Registry Modules"),
+        RegistryName("Hypernet.ID"),
+      ),
+      new RegistryModulesNames("Batch Minting", "Lazy Minting", "Merkle Drop"),
+      [
+        ProviderUrl(
+          "https://lyrics-prepared-here-powerpoint.trycloudflare.com/rpc/",
+        ),
+      ],
+    ),
+  ],
 ]);
