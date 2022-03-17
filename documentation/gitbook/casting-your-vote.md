@@ -7,7 +7,7 @@ as follows:
 
 1. Transfer Hypertoken into the account you wish to vote from.
 2. Ensure you have enough Ethereum token to pay for network fees associated with transactions from this account. 
-3. Delegate the voting power of the Hypertoken you hold to your account (you only ever have to do this once).
+3. Delegate the voting power of the Hypertoken you hold to your account (you must only do this once).
 4. Select a proposal you wish to vote on that has an *active* status.
 5. Cast your support for one of the three options (for, against, abstain).
 

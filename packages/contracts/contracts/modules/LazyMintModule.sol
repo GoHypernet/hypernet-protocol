@@ -47,7 +47,9 @@ contract LazyMintModule is Context {
         bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData, tokenId)));
         
         // check that the signature is from REGISTRAR_ROLE
-        return INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), ECDSA.recover(hash, signature));
+        address signer = ECDSA.recover(hash, signature);
+        require(signer != address(0), "LazyMintModule: Signer cannot be 0 address.");
+        return INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), signer);
     }
 }
 

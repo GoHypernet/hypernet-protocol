@@ -9,6 +9,29 @@ import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFractio
 import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+/**
+ * @dev Implementation of the Hypernet Protocol DAO
+ *
+ * This implementation is based on OpenZeppelin's Governor library with a few minor modifications
+ *
+ * The bulk of the logic was produced by the OpenZeppelin contract wizard including the TimelockController extension:
+ * https://docs.openzeppelin.com/contracts/4.x/wizard
+ * 
+ * For more information on the Governor library see:
+ * https://docs.openzeppelin.com/contracts/4.x/governance
+ *
+ * Modifications from OZ reference implementation:
+ * First, the parameters _votingDelay, _votingPeriod, _proposalThreshold have setter functions that are only callable 
+ * by the Timelock controller contract.
+ *
+ * Second, proposalIDs are stored in a mapping for easier lookups by dApps without the need for indexing services for 
+ * displaying historical proposal data. This does increase the gas cost for each new proposal, however, proposals are 
+ * not meant to be frequent and increasing the gas cost for a few percent is considered a non-issue for this application.
+ * 
+ * Third, a new internal function called _preRegistered was introduced to gate certain function calls to only users who
+ * hold a Hypernet Profile Non-Fungible Identity. Specifically, this gating function is applied to the propose and 
+ * execute functions. 
+ */
 contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl {
     constructor(ERC20Votes _token, TimelockController _timelock)
         Governor("HypernetGovernor")
@@ -34,6 +57,7 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
     uint256 private _proposalThreshold = 1_000_000e18; // number of votes required to in order to submit a successful proposal
 
     // address of registry that serves os the Hypernet User Profile registry
+    // If this address is set to the zero address, then _preRegistered is bypassed
     address public hypernetProfileRegistry = address(0);
 
     function votingDelay() public view override returns (uint256) {
@@ -149,7 +173,7 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
     }
 
     function _preRegistered(address owner) internal view virtual returns (bool) {
-        // check if there if a profile is required and if so 
+        // check if there if a Hypernet Profile is required and if so 
         // does the recipient have a non-zero balance. 
         return ((hypernetProfileRegistry == address(0)) || (IERC721(hypernetProfileRegistry).balanceOf(owner) > 0));
     }

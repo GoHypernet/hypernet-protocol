@@ -5,8 +5,13 @@ import {
   BigNumberString,
   RegistryTokenId,
   RegistryEntry,
+  TransactionNotImplementedError,
+  TransactionServerError,
+  TransactionTimeoutError,
+  TransactionUnknownError,
+  TransactionUnsupportedOperationError,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 import { ContractOverrides } from "@governance-sdk/ContractOverrides";
@@ -109,17 +114,53 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
+    transactionCallback?:
+      | ((transaction: ethers.providers.TransactionResponse) => void)
+      | null,
+    overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
-    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   register(
     recipientAddress: EthereumAccountAddress,
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
+    transactionCallback?:
+      | ((transaction: ethers.providers.TransactionResponse) => void)
+      | null,
+    overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
-    overrides?: ContractOverrides,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
+  registerAsync(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError
+  >;
+  registerByTokenAsync(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError
+  >;
   grantRole(
     address: EthereumAccountAddress | EthereumContractAddress,
     registryAddress?: EthereumContractAddress,

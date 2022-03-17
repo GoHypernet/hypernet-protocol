@@ -56,7 +56,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
         RegistryName(registryName),
         new RegistryEntry(
           label,
-          RegistryTokenId(BigInt(tokenId)),
+          RegistryTokenId(tokenId),
           EthereumAccountAddress(recipientAddress),
           tokenUri,
           null,
@@ -79,7 +79,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
     coreProxy.registries
       .submitLazyMintSignature(
         RegistryName(registryName),
-        RegistryTokenId(BigInt(tokenId)),
+        RegistryTokenId(tokenId),
         EthereumAccountAddress(recipientAddress),
         tokenUri,
       )

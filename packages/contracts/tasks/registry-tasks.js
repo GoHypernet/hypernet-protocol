@@ -131,7 +131,7 @@ task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
         primaryregistry,
         await gasSettings()
     );
-    await tx.wait(2);
+    await tx.wait();
     console.log("Primary Registry Set");
   });
 
@@ -395,9 +395,11 @@ task("listRegistryEntries", "Prints all NFI entries for the specified registry."
  task("batchRegister", "Mints NFIs specified in the given csv file.")
  .addParam("name", "Target NonFungible Registry Name.")
  .addParam("nfis","Path to csv file with NFI data.")
+ .addParam("dryrun", "boolean flag (true or false), if true then no transaction is submitted")
  .setAction(async (taskArgs) => {
    const name = taskArgs.name;
    const nfis = taskArgs.nfis;
+   const dryrun = taskArgs.dryrun;
 
    const accounts = await hre.ethers.getSigners();
 
@@ -428,15 +430,17 @@ task("listRegistryEntries", "Prints all NFI entries for the specified registry."
    const uriArr = jsonObj.map((row) => row.URI);
    const recipArr = jsonObj.map((row) => row.OWNER);
    const labelArr = jsonObj.map((row) => row.LABEL);
-   if ((indexArr.length === idArr.length) && (uriArr.length === recipArr.length) && (indexArr.length === recipArr.length)) {
+   if ((indexArr.length === idArr.length) && (uriArr.length === recipArr.length) && (indexArr.length === recipArr.length) && (dryrun == 'false')) {
        let tx = await batchModuleHandle.batchRegister(recipArr, labelArr, uriArr, idArr, targetRegistryAddress, await gasSettings());
+       const tx_rcpt = await tx.wait();
+       console.log("Batch Gas Cost:", tx_rcpt.gasUsed.toString());
    } else {
-       console.log("Arrays are different lengths.")
-       console.log(indexArr.length)
-       console.log(idArr.length)
-       console.log(uriArr.length)
-       console.log(recipArr.length)
-       console.log(labelArr.length)
+       console.log("Transaction skipped.");
+       console.log(indexArr.length);
+       console.log(idArr.length);
+       console.log(uriArr.length);
+       console.log(recipArr.length);
+       console.log(labelArr.length);
    }
    console.log("Batch Module token ID:", batchModuleTokenId.toString());
    console.log("Batch Module Address:", batchModuleAddress);
@@ -637,6 +641,7 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
   .addParam("data", "Data to be written to NFI entry.")
   .addParam("recipient", "Recipient address of the NFI.")
   .addParam("tokenid", "Desired token ID for NFI to be created.")
+  .addParam("accountnumber", "which account to use in HD wallet.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
@@ -645,18 +650,19 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
     const NFIData = taskArgs.data;
     const NFIRecipient = taskArgs.recipient;
     const tokenid = taskArgs.tokenid;
+    const accountnumber = taskArgs.accountnumber;
 
     const factoryHandle = new hre.ethers.Contract(
       factoryAddress(),
       RF.abi,
-      accounts[0],
+      accounts[accountnumber],
     );
 
     const registryAddress = await factoryHandle.nameToAddress(registryName);
     const registryHandle = new hre.ethers.Contract(
       registryAddress,
       NFR.abi,
-      accounts[0],
+      accounts[accountnumber],
     );
 
     // call registerByToken on the NFR
@@ -668,7 +674,7 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
       await gasSettings()
     );
     console.log(tx);
-    const txrcpt = await tx.wait(3);
+    const txrcpt = await tx.wait();
 
     console.log("Gas Used:", txrcpt.gasUsed.toString());
   });

@@ -6,6 +6,12 @@ import {
   NonFungibleRegistryContractError,
   RegistryEntry,
   RegistryTokenId,
+  ETransactionErrorCode,
+  TransactionNotImplementedError,
+  TransactionServerError,
+  TransactionTimeoutError,
+  TransactionUnknownError,
+  TransactionUnsupportedOperationError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
@@ -406,7 +412,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           e,
         );
       },
-    ).map((tokenId) => RegistryTokenId(tokenId.toBigInt()));
+    ).map((tokenId) => RegistryTokenId(tokenId.toString()));
   }
 
   public tokenOfOwnerByIndex(
@@ -427,7 +433,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           e,
         );
       },
-    ).map((tokenId) => RegistryTokenId(tokenId.toBigInt()));
+    ).map((tokenId) => RegistryTokenId(tokenId.toString()));
   }
 
   public registryMap(
@@ -688,8 +694,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
-    registryAddress?: EthereumContractAddress,
+    transactionCallback?:
+      | ((transaction: ethers.providers.TransactionResponse) => void)
+      | null,
     overrides: ContractOverrides | null = null,
+    registryAddress?: EthereumContractAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     this.reinitializeContract(registryAddress);
 
@@ -715,6 +724,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         );
       })
       .andThen((tx) => {
+        if (transactionCallback != null) {
+          transactionCallback(tx);
+        }
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
@@ -730,8 +742,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     label: string,
     data: string | null,
     tokenId: RegistryTokenId,
+    transactionCallback?:
+      | ((transaction: ethers.providers.TransactionResponse) => void)
+      | null,
+    overrides?: ContractOverrides | null,
     registryAddress?: EthereumContractAddress,
-    overrides: ContractOverrides | null = null,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     this.reinitializeContract(registryAddress);
 
@@ -743,7 +758,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         return ResultAsync.fromPromise(
           this.contract?.register(recipientAddress, label, data, tokenId, {
             ...gasFee,
-            ...overrides,
+            ...(overrides != null ? overrides : {}),
           }) as Promise<ethers.providers.TransactionResponse>,
           (e) => {
             return new NonFungibleRegistryContractError(
@@ -754,6 +769,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         );
       })
       .andThen((tx) => {
+        if (transactionCallback != null) {
+          transactionCallback(tx);
+        }
         return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
@@ -762,6 +780,79 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         });
       })
       .map(() => {});
+  }
+
+  public registerAsync(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError
+  > {
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.register(recipientAddress, label, data, tokenId, {
+            ...gasFee,
+            ...(overrides != null ? overrides : {}),
+          }) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return this.handleTransactionError(
+              e,
+              "Error while calling contract.register()",
+            );
+          },
+        );
+      });
+  }
+
+  public registerByTokenAsync(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError
+  > {
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract?.registerByToken(
+            recipientAddress,
+            label,
+            data,
+            tokenId,
+            { ...gasFee, ...(overrides != null ? overrides : {}) },
+          ) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            return this.handleTransactionError(
+              e,
+              "Error while calling contract.registerByToken()",
+            );
+          },
+        );
+      });
   }
 
   public grantRole(
@@ -955,7 +1046,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           },
         ).andThen((tokenId) => {
           return this.getRegistryEntryByTokenId(
-            RegistryTokenId(tokenId.toBigInt()),
+            RegistryTokenId(tokenId.toString()),
             registryAddress,
           );
         });
@@ -980,5 +1071,37 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
       this.providerOrSigner,
     );
+  }
+
+  private handleTransactionError(
+    e: any,
+    defaultErrorMessage: string,
+  ):
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | NonFungibleRegistryContractError {
+    const errorCode = e?.code;
+    const errorMessage = e?.body?.error?.message || defaultErrorMessage;
+
+    if (errorCode == ETransactionErrorCode.NOT_IMPLEMENTED) {
+      return new TransactionNotImplementedError(errorMessage, e);
+    }
+    if (errorCode == ETransactionErrorCode.SERVER_ERROR) {
+      return new TransactionServerError(errorMessage, e);
+    }
+    if (errorCode == ETransactionErrorCode.TIMEOUT) {
+      return new TransactionTimeoutError(errorMessage, e);
+    }
+    if (errorCode == ETransactionErrorCode.UNKNOWN_ERROR) {
+      return new TransactionUnknownError(errorMessage, e);
+    }
+    if (errorCode == ETransactionErrorCode.UNSUPPORTED_OPERATION) {
+      return new TransactionUnsupportedOperationError(errorMessage, e);
+    }
+
+    return new NonFungibleRegistryContractError(errorMessage, e);
   }
 }

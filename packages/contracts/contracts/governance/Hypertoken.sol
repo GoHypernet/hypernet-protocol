@@ -5,6 +5,16 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
+
+/**
+ * @dev Implementation of the Hypertoken ERC-20 token.
+ *
+ * This implementation is based on OpenZeppelin's ERC-20 library with no additional modifications
+ *
+ * It was produced by the OpenZeppelin contract wizard including the `votes` and `permit` extensions:
+ * https://docs.openzeppelin.com/contracts/4.x/wizard
+ *
+ */
 contract Hypertoken is ERC20, ERC20Permit, ERC20Votes {
     constructor() ERC20("Hypertoken", "H") ERC20Permit("Hypertoken") {
         _mint(msg.sender, 100000000 * 10 ** decimals());

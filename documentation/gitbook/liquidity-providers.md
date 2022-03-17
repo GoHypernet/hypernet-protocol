@@ -11,7 +11,7 @@ capital intensive since the operator must maintain sufficient liquid assets in t
 to offset their operational costs by imposing a transaction fee for each transaction they fascilitate. 
 
 Since liquidity providers are running off-chain infrastructure, Hypernet Protocol allows for a decentralized discovery mechanism via the 
-[Liquidity Providers](/packages/contracts/contracts/identity/README.md#liquidity-providers) NFR. In oder to obtain an registration token from the Liquidity Provider
+[Liquidity Providers](/packages/contracts/contracts/identity/README.md#liquidity-providers) NFR. In oder to obtain a registration token from the Liquidity Provider
 registry, the owning account must first create a [Hypernet Profile](/packages/contracts/contracts/identity/README.md#hypernet-profiles) and choose a username. 
 Hypernet Core (and Gateways build on top of Hypernet Core) will not instantiate payment transfers from liquidity providers that have not registered in the Liquidity 
 Providers NFR. As with the Gateways Registry, the Liquidity Providers registry is also governed by the Hypernet DAO and therefor individual entries can be removed 

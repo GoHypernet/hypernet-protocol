@@ -8,7 +8,7 @@ payments on behalf of end-users and merchants while never having custody of fund
 
 It is necessary for a gateway service provider to register their gateway connector code signature in the Hypernet Protocol 
 [Gateway registry](/packages/contracts/contracts/identity/README.md#gateways) (which itself is an instance of an 
-[NFR](/documentation/gitbook/definitions-and-key-terms.md#non-fungible-registry-nfr) owned by the DAO) in order for the Hypernet Core infrastructure to allow their service to process payments. 
+[NFR](/documentation/gitbook/definitions-and-key-terms.md#non-fungible-registry-nfr) owned by the DAO) for the Hypernet Core infrastructure to allow their service to process payments. 
 Registration requires locking a significant amount of Hypertoken into the Gateways Registry contract. This deposit will be forfeited in the scenario that the Hypernet DAO votes 
 to remove them from participating in the payment network. The service provider can choose to recover their deposit by burning their registration and exiting the payment 
 network.

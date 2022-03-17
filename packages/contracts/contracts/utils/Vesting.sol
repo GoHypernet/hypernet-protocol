@@ -3,6 +3,24 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+/**
+ * @dev Minimalist implementation of a ERC-20 token vesting contract 
+ *
+ * The base implementation was taken from Uniswap's governance repository:
+ * https://github.com/Uniswap/governance/blob/master/contracts/TreasuryVester.sol
+ *
+ * This vesting contract allows the deployer to set a recipient, a vesting amount,
+ * a cliff, and vesting end date. Tokens linearly vest from the cliff date to the end 
+ * date. 
+ *
+ * Since Hypertoken is a voting token, and thus has an extension function for delegating
+ * voting power to an address other than the holder of the Hypertoken balance, this vesting
+ * contract allows the beneficiary to claim their voting rights while the vesting contract 
+ * is in custody of their token through a call to `delegate`. 
+ * 
+ * For more info on ERC-20 voting extension see:
+ * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Votes.sol
+ */
 contract Vester {
     using SafeMath for uint;
 
@@ -16,6 +34,13 @@ contract Vester {
 
     uint public lastUpdate;
 
+    /// @dev Constructor definition
+    /// @param h_ address of the ERC-20 token implementing Hypernetoken
+    /// @param recipient_ address of the beneficiary account
+    /// @param vestingAmount_ total amount of h_ due to recipient_
+    /// @param vestingBegin_ timestamp to use for the starting point of vesting period
+    /// @param vestingCliff_ timestamp when recipient can redeem first allocation of token
+    /// @param vestingEnd_ timestamp when all tokens are available to the beneficiary
     constructor(
         address h_,
         address recipient_,
@@ -48,6 +73,10 @@ contract Vester {
         recipient = recipient_;
     }
 
+    /// @notice delegate delegates votes associated with tokens held by this contract to an address specified by the beneficiary
+    /// @dev The function allows for beneficiaries to have voting rights before they take possession of 
+    /// their tokens
+    /// @param recipient_ address to recieve the voting rights, does not necessarly have to be the beneficiary
     function delegate(address recipient_) public {
         require(msg.sender == recipient, 'TreasuryVester::setRecipient: unauthorized');
         IHypertoken(h).delegate(recipient_);        
@@ -66,8 +95,9 @@ contract Vester {
     }
 }
 
+/// minimal interface for ERC-20 token with external delegate function call
 interface IHypertoken {
     function balanceOf(address account) external view returns (uint);
     function transfer(address dst, uint rawAmount) external returns (bool);
-    function delegate(address delegatee) external virtual; 
+    function delegate(address delegatee) external; 
 }
