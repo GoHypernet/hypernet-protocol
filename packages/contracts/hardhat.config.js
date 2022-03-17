@@ -59,6 +59,11 @@ module.exports = {
       },
       url: "https://eth-provider-dev.hypernetlabs.io",
     },
+    mainnet: { // ethereum mainnet
+        accounts: { mnemonic },
+        chainId: 1,
+        url: urlOverride || "https://f8334b5b-ad76-4d4a-8443-88d05097eb8b.hypernetlabs.io/http/",
+    },
     rinkeby: { // ethereum tesnet
       accounts: { mnemonic },
       chainId: 4,
@@ -86,7 +91,7 @@ module.exports = {
         chainId: 43114,
         url: urlOverride || "https://053e1c5c-66fd-49c3-b267-42ab5f9202c6.hypernetlabs.io/http/ext/bc/C/rpc",
     },
-    fantom: { // avalanche mainnet
+    fantom: { // fantom mainnet
         accounts: { mnemonic },
         chainId: 250,
         url: urlOverride || "https://lyrics-prepared-here-powerpoint.trycloudflare.com/rpc/",

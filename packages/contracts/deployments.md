@@ -1,5 +1,22 @@
 # Hypernet Contract Addresses
 
+## Ethereum Mainnet
+
+Ethereum mainnet network that is based on Proof-of-Work. Maintained by the Geth developer team. 
+
+- Hypertoken: [`TBD`](https://etherscan.io/address/)
+- Timelock: [`TBD`](https://etherscan.io/address/)
+- DAO: [`TBD`](https://etherscan.io/address/)
+- Registry Factory: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://etherscan.io/address/0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899)
+- Hypernet Profiles: [`0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17`](https://etherscan.io/address/0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17)
+- Gateways: [`TBD`](https://etherscan.io/address/)
+- Liquidity Providers: [`TBD`](https://etherscan.io/address/)
+- Payment Tokens: [`TBD`](https://etherscan.io/address/)
+- Registry Modules: [`0x9a35a007F08809DED1452C78338CCddbEaa1CEE3`](https://etherscan.io/address/0x9a35a007F08809DED1452C78338CCddbEaa1CEE3)
+- Batch Module: [`0x5dbAe4cB356905bdC202B943e1D6386606BAF50d`](https://etherscan.io/address/0x5dbAe4cB356905bdC202B943e1D6386606BAF50d)
+- Lazy Mint Module: [`0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf`](https://etherscan.io/address/0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf)
+- Merkle Module: [`0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3`](https://etherscan.io/address/0xC7aA6dD27B383B7c899FD48FBC07d1197283b8d3)
+
 ## Rinkeby
 
 Ethereum test network that is based on Proof-of-Authority. Maintained by the Geth developer team. 
