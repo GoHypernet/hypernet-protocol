@@ -65,3 +65,16 @@ Avalanche test network that replicates the functionality of the Avalanche mainne
 - Batch Module: [`0x3353da0f24fCACd83832b09e9371a937195D2640`](https://testnet.avascan.info/blockchain/c/address/0x3353da0f24fCACd83832b09e9371a937195D2640)
 - Lazy Mint Module: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://testnet.avascan.info/blockchain/c/address/0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899)
 - Merkle Module: [`0x5dbAe4cB356905bdC202B943e1D6386606BAF50d`](https://testnet.avascan.info/blockchain/c/address/0x5dbAe4cB356905bdC202B943e1D6386606BAF50d)
+
+## Fantom Mainnet
+
+Fantom is a fast, scalable, and secure layer-1 platform built on an aBFT consensus protocol. Metamask settings can be found
+[here](https://docs.fantom.foundation/tutorials/set-up-metamask).
+
+- Registry Factory: [`0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a`](https://ftmscan.com/address/0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a)
+- Hypernet Profiles: [`0xf51499e303E6Af9895147a170C6b2Cd9e407a868`](https://ftmscan.com/address/0xf51499e303E6Af9895147a170C6b2Cd9e407a868)
+- Registry Modules: [`0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468`](https://ftmscan.com/address/0xBe6442D06a9Dc6B66cAB3B05703aA64FFE1Bf468)
+- Batch Module: [`0x3353da0f24fCACd83832b09e9371a937195D2640`](https://ftmscan.com/address/0x3353da0f24fCACd83832b09e9371a937195D2640)
+- Lazy Mint Module: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://ftmscan.com/address/0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899)
+- Merkle Module: [`0x5dbAe4cB356905bdC202B943e1D6386606BAF50d`](https://ftmscan.com/address/0x5dbAe4cB356905bdC202B943e1D6386606BAF50d)
+- Buy Module: [`0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf`](https://ftmscan.com/address/0xF7f338FFE54083Ec64FE54a4FeA773816797ffBf)
