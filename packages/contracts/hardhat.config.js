@@ -74,7 +74,7 @@ module.exports = {
     polygon: { // polygon mainnet
         accounts: { mnemonic },
         chainId: 137,
-        url: urlOverride || "https://rpc-mainnet.matic.network",
+        url: urlOverride || "https://polygon-mainnet.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931",
     },
     fuji: { // avalanche testnet
         accounts: { mnemonic },
@@ -85,6 +85,11 @@ module.exports = {
         accounts: { mnemonic },
         chainId: 43114,
         url: urlOverride || "https://053e1c5c-66fd-49c3-b267-42ab5f9202c6.hypernetlabs.io/http/ext/bc/C/rpc",
+    },
+    fantom: { // avalanche mainnet
+        accounts: { mnemonic },
+        chainId: 250,
+        url: urlOverride || "https://lyrics-prepared-here-powerpoint.trycloudflare.com/rpc/",
     },
   },
   gasReporter: {

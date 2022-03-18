@@ -160,7 +160,13 @@ task("gasSettings", "Prints the EIP1159 standard gas settings", async (taskArgs,
     const [account] = await hre.ethers.getSigners();
 
     const feeData = await account.getFeeData();
-    console.log("maxFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"), "GWei");
-    console.log("maxPriorityFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxPriorityFeePerGas, "gwei"), "GWei");
-    console.log("gasPrice:",hre.ethers.utils.formatUnits(feeData.gasPrice, "gwei"), "GWei");
+    if (feeData.maxFeePerGas) {
+        console.log("maxFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"), "GWei");
+    }
+    if (feeData.maxPriorityFeePerGas) {
+        console.log("maxPriorityFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxPriorityFeePerGas, "gwei"), "GWei");
+    }
+    if (feeData.gasPrice) {
+        console.log("gasPrice:",hre.ethers.utils.formatUnits(feeData.gasPrice, "gwei"), "GWei");
+    }
 });
