@@ -34,6 +34,8 @@ const hAddress = function () {
     return ""
   } else if (hre.hardhatArguments.network == "fantom") {
     return ""
+  } else if (hre.hardhatArguments.network == "mainnet") {
+    return ""
   } else {
     return "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
   }
@@ -56,6 +58,8 @@ const govAddress = function () {
   } else if (hre.hardhatArguments.network == "avalanche") {
     return ""
   } else if (hre.hardhatArguments.network == "fantom") {
+    return ""
+  } else if (hre.hardhatArguments.network == "mainnet") {
     return ""
   } else {
     return "0xdDA6327139485221633A1FcD65f4aC932E60A2e1";
@@ -80,6 +84,8 @@ const timelockAddress = function () {
     return ""
   } else if (hre.hardhatArguments.network == "fantom") {
     return ""
+  } else if (hre.hardhatArguments.network == "mainnet") {
+    return ""
   } else {
     return "0xeec918d74c746167564401103096D45BbD494B74";
   }
@@ -103,6 +109,8 @@ const factoryAddress = function () {
     return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
   } else if (hre.hardhatArguments.network == "fantom") {
     return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
+  } else if (hre.hardhatArguments.network == "mainnet") {
+    return "0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899"
   } else {
     return "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
   }

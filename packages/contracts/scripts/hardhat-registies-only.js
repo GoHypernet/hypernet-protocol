@@ -19,7 +19,7 @@ async function main() {
   console.log("Deployment Wallet Address:", owner.address);
   console.log("RPC URL:", hre.network.config.url);
 
-  const hypernetidaddress = "0xf70C7dF5D45a1a4553c70998cb34294f63DCF73c";
+  const hypernetidaddress = "0xeEce4ABb281d5BE24d42B4403884cDAf47600945";
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   // deploy enumerable registry contract
