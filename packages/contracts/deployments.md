@@ -7,7 +7,7 @@ Ethereum mainnet network that is based on Proof-of-Work. Maintained by the Geth 
 - Hypertoken: [`TBD`](https://etherscan.io/address/)
 - Timelock: [`TBD`](https://etherscan.io/address/)
 - DAO: [`TBD`](https://etherscan.io/address/)
-- Registry Factory: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://etherscan.io/address/0x60eFCb4dDA1bef87aA244006273e3DdDb0E4abCB)
+- Registry Factory: [`0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899`](https://etherscan.io/address/0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899)
 - Hypernet Profiles: [`0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17`](https://etherscan.io/address/0xa6C15b6950dfd9aB3FA3ba7fAb9F420e52B22f17)
 - Gateways: [`TBD`](https://etherscan.io/address/)
 - Liquidity Providers: [`TBD`](https://etherscan.io/address/)
