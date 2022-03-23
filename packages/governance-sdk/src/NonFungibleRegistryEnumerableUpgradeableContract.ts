@@ -802,12 +802,22 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         return new NonFungibleRegistryContractError("Error getting gas fee", e);
       })
       .andThen((gasFee) => {
+        const overrideObject = {
+          maxFeePerGas: gasFee.maxFeePerGas,
+          ...(overrides != null ? overrides : {}),
+        };
+        console.log("overrideObject: ", overrideObject);
+
         return ResultAsync.fromPromise(
-          this.contract?.register(recipientAddress, label, data, tokenId, {
-            ...gasFee,
-            ...(overrides != null ? overrides : {}),
-          }) as Promise<ethers.providers.TransactionResponse>,
+          this.contract?.register(
+            recipientAddress,
+            label,
+            data,
+            tokenId,
+            overrideObject,
+          ) as Promise<ethers.providers.TransactionResponse>,
           (e) => {
+            console.log("error from register(): ", e);
             return this.handleTransactionError(
               e,
               "Error while calling contract.register()",
@@ -837,15 +847,23 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         return new NonFungibleRegistryContractError("Error getting gas fee", e);
       })
       .andThen((gasFee) => {
+        const overrideObject = {
+          maxFeePerGas: gasFee.maxFeePerGas,
+          ...(overrides != null ? overrides : {}),
+        };
+        console.log("overrideObject: ", overrideObject);
+
         return ResultAsync.fromPromise(
           this.contract?.registerByToken(
             recipientAddress,
             label,
             data,
             tokenId,
-            { ...gasFee, ...(overrides != null ? overrides : {}) },
+            overrideObject,
           ) as Promise<ethers.providers.TransactionResponse>,
           (e) => {
+            console.log("error from registerByToken(): ", e);
+
             return this.handleTransactionError(
               e,
               "Error while calling contract.registerByToken()",
@@ -1085,20 +1103,19 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     | NonFungibleRegistryContractError {
     const errorCode = e?.code;
     const errorMessage = e?.body?.error?.message || defaultErrorMessage;
-
-    if (errorCode == ETransactionErrorCode.NOT_IMPLEMENTED) {
+    if (errorCode == "NOT_IMPLEMENTED") {
       return new TransactionNotImplementedError(errorMessage, e);
     }
-    if (errorCode == ETransactionErrorCode.SERVER_ERROR) {
+    if (errorCode == "SERVER_ERROR") {
       return new TransactionServerError(errorMessage, e);
     }
-    if (errorCode == ETransactionErrorCode.TIMEOUT) {
+    if (errorCode == "TIMEOUT") {
       return new TransactionTimeoutError(errorMessage, e);
     }
-    if (errorCode == ETransactionErrorCode.UNKNOWN_ERROR) {
+    if (errorCode == "UNKNOWN_ERROR") {
       return new TransactionUnknownError(errorMessage, e);
     }
-    if (errorCode == ETransactionErrorCode.UNSUPPORTED_OPERATION) {
+    if (errorCode == "UNSUPPORTED_OPERATION") {
       return new TransactionUnsupportedOperationError(errorMessage, e);
     }
 
