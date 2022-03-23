@@ -4,6 +4,9 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /**
+ * @title A vesting contract for ERC-20 tokens with a voting extension
+ * @author Todd Chapman
+ * @notice Use this contract with OpenZepplin ERC-20 contracts that are used for voting
  * @dev Minimalist implementation of a ERC-20 token vesting contract 
  *
  * The base implementation was taken from Uniswap's governance repository:
@@ -20,18 +23,28 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * 
  * For more info on ERC-20 voting extension see:
  * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Votes.sol
+ * 
+ * See unit tests for example usage:
+ * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/vesting-test.js
  */
 contract Vester {
     using SafeMath for uint;
 
+    /// @dev address of token to be vested
     address public h;
+    /// @dev address of the beneficiary of the vesting contract
     address public recipient;
 
+    /// @dev amount of h to be vested
     uint public vestingAmount;
+    /// @dev timestamp when vesting begins; use timeNow to help set an appropriate time
     uint public vestingBegin;
+    /// @dev timestamp when first token becomes available to the beneficiary; use timeNow to help set an appropriate time
     uint public vestingCliff;
+    /// @dev timestamp when entirety pf vestomgAmount is available to the beneficiary; use timeNow to help set an appropriate time
     uint public vestingEnd;
 
+    /// @dev last timestamp that claim was successfully called
     uint public lastUpdate;
 
     /// @dev Constructor definition
@@ -64,24 +77,31 @@ contract Vester {
         lastUpdate = vestingBegin;
     }
 
+    /// @notice helper function that returns the current timestamp 
+    /// @dev This function can help get your timestamp format right in testing
+    /// @return timenow returns the current block timestamp
     function timeNow() public view returns (uint timenow) {
         timenow = block.timestamp;
     }
 
+    /// @notice allows the beneficiary to change the beneficiary address to a new address 
+    /// @dev This function can only be called by the account set in the recipient variable
+    /// @param recipient_ address to set as the new beneficiary
     function setRecipient(address recipient_) public {
         require(msg.sender == recipient, 'TreasuryVester::setRecipient: unauthorized');
         recipient = recipient_;
     }
 
     /// @notice delegate delegates votes associated with tokens held by this contract to an address specified by the beneficiary
-    /// @dev The function allows for beneficiaries to have voting rights before they take possession of 
-    /// their tokens
+    /// @dev The function allows for beneficiaries to have voting rights before they take possession of their tokens
     /// @param recipient_ address to recieve the voting rights, does not necessarly have to be the beneficiary
     function delegate(address recipient_) public {
         require(msg.sender == recipient, 'TreasuryVester::setRecipient: unauthorized');
         IHypertoken(h).delegate(recipient_);        
     }
 
+    /// @notice Call this function to disperse holdings to the beneficiary account
+    /// @dev This function can be called by any account to save gas for the recipient, but vested token is only sent to the address stored in recipient
     function claim() public {
         require(block.timestamp >= vestingCliff, 'Vester::claim: not time yet');
         uint amount;
@@ -95,7 +115,7 @@ contract Vester {
     }
 }
 
-/// minimal interface for ERC-20 token with external delegate function call
+/// @dev a minimal interface for ERC-20 token with external delegate function call
 interface IHypertoken {
     function balanceOf(address account) external view returns (uint);
     function transfer(address dst, uint rawAmount) external returns (bool);

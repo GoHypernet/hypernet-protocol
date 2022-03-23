@@ -635,7 +635,7 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
     console.log("Balance after: ", balanceAfter);
   });
 
-  task("register", "Register an NFI as the REGISTRAR_ROLE.")
+task("register", "Register an NFI as the REGISTRAR_ROLE.")
   .addParam("registry", "Name of target Registry where NFI is to be entered.")
   .addParam("label", "NFI label.")
   .addParam("data", "Data to be written to NFI entry.")
@@ -651,6 +651,7 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
     const NFIRecipient = taskArgs.recipient;
     const tokenid = taskArgs.tokenid;
     const accountnumber = taskArgs.accountnumber;
+    const txCount = await accounts[accountnumber].getTransactionCount();
 
     const factoryHandle = new hre.ethers.Contract(
       factoryAddress(),
@@ -665,19 +666,21 @@ task("burnRegistryEntry", "Prints NonFungible Identity Data.")
       accounts[accountnumber],
     );
 
+    const gassettings = await gasSettings(txCount);
     // call registerByToken on the NFR
     tx = await registryHandle.register(
       NFIRecipient,
       NFILabel,
       NFIData,
       tokenid,
-      await gasSettings()
+      gassettings
     );
     console.log(tx);
+    console.log(gassettings);
     const txrcpt = await tx.wait();
 
     console.log("Gas Used:", txrcpt.gasUsed.toString());
-  });
+});
 
 task("registerWithToken", "Register an NFI with ERC20 token.")
   .addParam("registry", "Name of target Registry where NFI is to be entered.")

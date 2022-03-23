@@ -5,10 +5,23 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+/**
+ * @title Hypernet Protocol Buy Module for NFRs
+ * @author Todd Chapman
+ * @dev Implementation of a simple purchasing extension for NFRs
+ *
+ * See the documentation for more details:
+ * https://docs.hypernet.foundation/hypernet-protocol/identity/modules#buy-nfi
+ *
+ * See the unit tests for example usage:
+ * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/upgradeable-registry-enumerable-test.js#L493
+ */
 contract BuyModule is Context {
 
     using SafeERC20 for IERC20;
 
+    /// @dev the name to be listed in the Hypernet Protocol Registry Modules NFR
+    /// @dev see https://docs.hypernet.foundation/hypernet-protocol/identity#registry-modules
     string public name;
 
     constructor(string memory _name) 
@@ -41,7 +54,7 @@ contract BuyModule is Context {
         }
 }
 
-// minimal interface for the NonFungibleRegistry register function
+/// @dev a minimal interface for interacting with Hypernet Protocol NFRs
 interface INfr {
     function ownerOf(uint256 tokenId) external view returns (address);
     function hasRole(bytes32 role, address account) external view returns (bool);

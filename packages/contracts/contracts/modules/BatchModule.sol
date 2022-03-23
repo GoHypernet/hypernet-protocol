@@ -4,8 +4,21 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 
+/**
+ * @title Hypernet Protocol Batch Minting Module for NFRs
+ * @author Todd Chapman
+ * @dev Implementation of a batch minting extension for NFRs
+ *
+ * See the documentation for more details:
+ * https://docs.hypernet.foundation/hypernet-protocol/identity/modules#batch-minting
+ * 
+ * See the unit tests for example usage:
+ * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/upgradeable-registry-enumerable-test.js#L438
+ */
 contract BatchModule is Context {
 
+    /// @dev the name to be listed in the Hypernet Protocol Registry Modules NFR
+    /// @dev see https://docs.hypernet.foundation/hypernet-protocol/identity#registry-modules
     string public name;
 
     constructor(string memory _name) 
@@ -40,7 +53,7 @@ contract BatchModule is Context {
         }
 }
 
-// minimal interface for the NonFungibleRegistry register function
+/// @dev a minimal interface for interacting with Hypernet Protocol NFRs
 interface INfr {
     function register(address to, string calldata label, string calldata registrationData, uint256 tokenId) external;
     function hasRole(bytes32 role, address account) external view returns (bool);

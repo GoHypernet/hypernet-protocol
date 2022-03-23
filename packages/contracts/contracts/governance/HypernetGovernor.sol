@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.so
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 /**
+ * @title Hypernet Protocol DAO
+ * @author Todd Chapman
  * @dev Implementation of the Hypernet Protocol DAO
  *
  * This implementation is based on OpenZeppelin's Governor library with a few minor modifications
@@ -31,6 +33,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
  * Third, a new internal function called _preRegistered was introduced to gate certain function calls to only users who
  * hold a Hypernet Profile Non-Fungible Identity. Specifically, this gating function is applied to the propose and 
  * execute functions. 
+ *
+ * See unit tests for example usage with Hypertoken:
+ * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/governance-test.js
  */
 contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl {
     constructor(ERC20Votes _token, TimelockController _timelock)
@@ -42,36 +47,55 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
 
     using Counters for Counters.Counter;
 
-    mapping(uint256 => uint256) public _proposalMap; // mapping from a counter to a proposalID
+    /// @notice This mapping helps UI's fetch proposal ID's from the chain, its less gas efficient, but more self-contained
+    /// @dev This public variable maps a 0-based index to a proposalID so that UI's don't have to rely on an indexing service
+    mapping(uint256 => uint256) public _proposalMap;
 
+    /// @notice This is a monotonically increasing counter that keeps track of the total number of proposals
+    /// @dev This counter is incremented by one every time a proposal is created
     Counters.Counter public _proposalIdTracker; // track number of proposals in governance
 
-    // description for each proposal so we don't have to rely on off-chain indexing
+    /// @notice This variable maps a proposalID to a description. 
+    /// @dev It is recommended that descriptions be IPFS hashes instead of raw text descriptions to save costs
     mapping(uint256 => string) public proposalDescriptions; 
 
-    // be sure to set these to reasonable values for Mainnet
-    uint256 private _votingDelay = 1; // blocks (1 block is about 13 seconds)
+    /// @notice This returns the number of blocks that must be mined after a proposal is created before it becomes active
+    /// @dev The token holder community should set this to an appropriate value after token launch: 1 block = approx 13 sec
+    uint256 private _votingDelay = 1; 
 
+    /// @notice This returns the number of blocks that a proposal remains active for
+    /// @dev The token holder community should set this to an appropriate value after token launch: 1 block = approx 13 sec
     uint256 private _votingPeriod = 20; // blocks
 
+    /// @notice The proposal threshold is the number of tokens required to create a proposal
+    /// @dev The token holder community should set this to an appropriate value after token launch: there are 18 decimals in H
     uint256 private _proposalThreshold = 1_000_000e18; // number of votes required to in order to submit a successful proposal
 
-    // address of registry that serves os the Hypernet User Profile registry
-    // If this address is set to the zero address, then _preRegistered is bypassed
+    /// @notice This address points to the Hypernet Profiles registy. A user must obtain a Hypernet Profile to participate in the DAO
+    /// @dev If this variable is set to the zero address, then the propose and execute functions do not require caller to own a Hypernet Profile
     address public hypernetProfileRegistry = address(0);
 
+    /// @notice A getter function for the _votingDelay variable
+    /// @dev This is a dedicated funcion for returning _votingDelay
     function votingDelay() public view override returns (uint256) {
         return _votingDelay; 
     }
 
+    /// @notice A getter function for the _votingPeriod variable
+    /// @dev This is a dedicated funcion for returning _votingPeriod
     function votingPeriod() public view override returns (uint256) {
         return _votingPeriod; 
     }
 
+    /// @notice A getter function for the _proposalThreshold variable
+    /// @dev This is a dedicated funcion for returning _proposalThreshold
     function proposalThreshold() public view override returns (uint256) {
         return _proposalThreshold; 
     }
 
+    /// @notice This function updates the DAO's _votingDelay parameter
+    /// @dev Only the DAO timelock contract can call this function
+    /// @param newVotingDelay The number of blocks to wait before new proposal are active
     function setVotingDelay(uint256 newVotingDelay) 
         public 
         onlyGovernance()
@@ -79,6 +103,9 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
       _votingDelay = newVotingDelay;
     }
 
+    /// @notice This function updates the DAO's _votingPeriod parameter
+    /// @dev Only the DAO timelock contract can call this function
+    /// @param newVotingPeriod The number of blocks that a proposal remains active
     function setVotingPeriod(uint256 newVotingPeriod) 
         public 
         onlyGovernance()
@@ -86,6 +113,9 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
       _votingPeriod = newVotingPeriod;
     }
 
+    /// @notice This function updates the DAO's _proposalThreshold parameter
+    /// @dev Only the DAO timelock contract can call this function
+    /// @param newProposalThreshold The number of Hypertoken required to create a proposal, remember there are 18 decimal places
     function setProposalThreshold(uint256 newProposalThreshold) 
         public 
         onlyGovernance()
@@ -93,6 +123,9 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
       _proposalThreshold = newProposalThreshold;
     }
 
+    /// @notice This function sets the address of the NFR to use for gating the propose and execute functions
+    /// @dev Only the DAO timelock contract can call this function
+    /// @param _hypernetProfileRegistry The new address to use for the gating NFR. If set to the 0 address, then gating is deactivated.
     function setProfileRegistry(address _hypernetProfileRegistry) 
         public 
         onlyGovernance()

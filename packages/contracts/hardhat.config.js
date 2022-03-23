@@ -8,6 +8,7 @@ require("@openzeppelin/hardhat-upgrades");
 require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 require("hardhat-tracer");
+require("ethers");
 
 require("./tasks/general-tasks.js");
 require("./tasks/governance-tasks.js");
@@ -79,7 +80,7 @@ module.exports = {
     polygon: { // polygon mainnet
         accounts: { mnemonic },
         chainId: 137,
-        url: urlOverride || "https://polygon-mainnet.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931",
+        url: urlOverride || "https://rpc-mainnet.matic.quiknode.pro",
     },
     fuji: { // avalanche testnet
         accounts: { mnemonic },

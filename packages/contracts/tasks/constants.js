@@ -5,13 +5,21 @@ const NFR = require("../deployments/rinkeby-update-1-21-2022/identity/NonFungibl
 const BM = require("../deployments/rinkeby-update-1-21-2022/modules/BatchModule.sol/BatchModule.json");
 const IBEACON = require("./UpgradeableBeacon.json");
 
-const gasSettings = async function () { 
+const gasSettings = async function (txCount) { 
     const hre = require("hardhat");
     const [account] = await hre.ethers.getSigners();
     const feeData = await account.getFeeData();
-    const gs = { 
-        maxFeePerGas:  feeData.maxFeePerGas
-    };
+    let gs;
+    if (txCount) {
+        gs = { 
+            nonce: txCount,
+            maxFeePerGas:  feeData.maxFeePerGas
+        };
+    } else {
+        gs = { 
+            maxFeePerGas:  feeData.maxFeePerGas
+        };
+    }
     return gs
   };
 
