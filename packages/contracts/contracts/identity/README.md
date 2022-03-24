@@ -29,13 +29,16 @@ which the registry is used for identity or authenticity verification in which th
 
 ### Authenticity
 
-The identity component of the Hypernet Protocol allows for simple yet effective method for verifying the authenticity of NFRs. The address of the the 
-resulting NFR proxy contract created via the Hypernet Protocol NFR factory is stored in either the `registries` or `enumerableRegistries` public array 
-variable (depending on if the NFR is deployed with or without the enumeration property). Additionally, a mapping from the human-readable name of the 
-NFR (retrieved by calling the `name()` function on any Hypernet NFR) to its proxy contract address is stored in `nameToAddress` mapping variable. This 
-has the additional effect of enforcing that every NFR within the Hypernet Protocol has a unique name. Thus, any external user wishing to ensure that they 
-are interacting with an authentic Hypernet Protocol NFR need only query the contract factory with the name of the target NFR in order to obtain the address 
-of the true registry. 
+The identity component of the Hypernet Protocol allows for a simple yet effective method for verifying the authenticity of NFRs. The address of the 
+resulting NFR proxy contract created via the Hypernet Protocol NFR factory is stored in either the 
+[`registries`](https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/contracts/identity/UpgradeableRegistryFactory.sol#L33) or 
+[`enumerableRegistries`](https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/contracts/identity/UpgradeableRegistryFactory.sol#L36) 
+public array variable (depending on if the NFR is deployed with or without the enumeration property). Additionally, a mapping from the human-readable name 
+of the NFR (retrieved by calling the `name()` function on any Hypernet NFR) to its proxy contract address is stored in the public 
+[`nameToAddress`](https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/contracts/identity/UpgradeableRegistryFactory.sol#L43) mapping 
+variable. This has the additional effect of enforcing that every NFR within the Hypernet Protocol has a unique name. Thus, any external user wishing to 
+ensure that they are interacting with an authentic Hypernet Protocol NFR need only query the contract factory with the name of the target NFR in order to 
+obtain the address of the true registry. 
 
 ## Roles and Minting
 
