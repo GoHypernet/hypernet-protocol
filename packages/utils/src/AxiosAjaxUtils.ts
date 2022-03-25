@@ -2,7 +2,7 @@ import { AjaxError, JsonWebToken } from "@hypernetlabs/objects";
 import axios, { AxiosResponse } from "axios";
 import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
-import stream from 'stream';
+import { Readable } from "stream";
 
 import { IAjaxUtils, IRequestConfig } from "@utils/IAjaxUtils";
 
@@ -24,7 +24,7 @@ export class AxiosAjaxUtils implements IAjaxUtils {
       | Record<string, unknown>
       | ArrayBuffer
       | ArrayBufferView
-      | stream.Readable 
+      | Readable
       | URLSearchParams,
     config?: IRequestConfig,
   ): ResultAsync<T, AjaxError> {
@@ -43,7 +43,7 @@ export class AxiosAjaxUtils implements IAjaxUtils {
       | Record<string, unknown>
       | ArrayBuffer
       | ArrayBufferView
-      | stream.Readable 
+      | Readable
       | URLSearchParams,
     config?: IRequestConfig,
   ): ResultAsync<T, AjaxError> {
