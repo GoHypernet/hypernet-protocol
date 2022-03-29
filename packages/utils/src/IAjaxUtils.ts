@@ -1,6 +1,7 @@
 import { AjaxError, JsonWebToken } from "@hypernetlabs/objects";
 import { AxiosRequestConfig } from "axios";
 import { ResultAsync } from "neverthrow";
+import { Readable } from "stream";
 
 /**
  * AjaxUtils are just a wrapper around Axios for purposes of testing.
@@ -14,6 +15,7 @@ export interface IAjaxUtils {
       | Record<string, unknown>
       | ArrayBuffer
       | ArrayBufferView
+      | Readable
       | URLSearchParams,
     config?: IRequestConfig,
   ): ResultAsync<T, AjaxError>;
@@ -24,6 +26,7 @@ export interface IAjaxUtils {
       | Record<string, unknown>
       | ArrayBuffer
       | ArrayBufferView
+      | Readable
       | URLSearchParams,
     config?: IRequestConfig,
   ): ResultAsync<T, AjaxError>;
