@@ -106,7 +106,7 @@ export class BatchModuleContract implements IBatchModuleContract {
           ) as Promise<ethers.BigNumber>,
           (e) => {
             return new BatchModuleContractError(
-              "Unable to call BatchModuleContract batchRegister()",
+              "Unable to call BatchModuleContract estimateGas.batchRegister()",
               e,
             );
           },
