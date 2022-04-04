@@ -3,6 +3,7 @@ import {
   GovernanceAbis,
   BatchModuleContractError,
   RegistryEntry,
+  GasUnits,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -77,7 +78,7 @@ export class BatchModuleContract implements IBatchModuleContract {
     registryAddress: EthereumContractAddress,
     registryEntries: RegistryEntry[],
     overrides: ContractOverrides | null = null,
-  ): ResultAsync<number, BatchModuleContractError> {
+  ): ResultAsync<GasUnits, BatchModuleContractError> {
     const recipients = registryEntries.map(
       (registryEntry) => registryEntry.owner,
     );
@@ -109,7 +110,7 @@ export class BatchModuleContract implements IBatchModuleContract {
               e,
             );
           },
-        ).map((estimatedGas) => estimatedGas.toNumber());
+        ).map((estimatedGas) => GasUnits(estimatedGas.toNumber()));
       });
   }
 }

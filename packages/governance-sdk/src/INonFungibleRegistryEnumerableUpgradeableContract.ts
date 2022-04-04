@@ -10,6 +10,7 @@ import {
   TransactionTimeoutError,
   TransactionUnknownError,
   TransactionUnsupportedOperationError,
+  GasUnits,
 } from "@hypernetlabs/objects";
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -152,7 +153,7 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     data: string | null,
     tokenId: RegistryTokenId,
     overrides?: ContractOverrides | null,
-  ): ResultAsync<number, NonFungibleRegistryContractError>;
+  ): ResultAsync<GasUnits, NonFungibleRegistryContractError>;
   registerByTokenAsync(
     recipientAddress: EthereumAccountAddress,
     label: string,

@@ -12,6 +12,7 @@ import {
   TransactionTimeoutError,
   TransactionUnknownError,
   TransactionUnsupportedOperationError,
+  GasUnits,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
@@ -833,7 +834,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     data: string | null,
     tokenId: RegistryTokenId,
     overrides?: ContractOverrides | null,
-  ): ResultAsync<number, NonFungibleRegistryContractError> {
+  ): ResultAsync<GasUnits, NonFungibleRegistryContractError> {
     return GasUtils.getGasFee(this.providerOrSigner)
       .mapErr((e) => {
         return new NonFungibleRegistryContractError("Error getting gas fee", e);
@@ -859,7 +860,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
               e,
             );
           },
-        ).map((estimatedGas) => estimatedGas.toNumber());
+        ).map((estimatedGas) => GasUnits(estimatedGas.toNumber()));
       });
   }
 
