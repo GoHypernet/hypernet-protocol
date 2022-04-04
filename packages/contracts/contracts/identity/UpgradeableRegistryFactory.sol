@@ -9,33 +9,49 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 
+/**
+ * @title Hypernet Protocol Non Fungible Registry Factory
+ * @author Todd Chapman
+ * @dev Upgradable beacon factor contract for efficiently deploying new
+ * Non Fungible Registries.
+ *
+ * See the Hypernet Protocol documentation for more information:
+ * https://docs.hypernet.foundation/hypernet-protocol/governance
+ * 
+ * See unit tests for example usage:
+ * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/upgradeable-factory-test.js
+ */
 contract UpgradeableRegistryFactory is AccessControlEnumerable {
 
-    // address of our upgradeble registry with enumeration proxy beacon
+    /// @dev address of our upgradeble registry with enumeration proxy beacon
     address public enumerableRegistryBeacon;
 
-    // address of our upgradable registry proxy beacon
+    /// @dev address of our upgradable registry proxy beacon
     address public registryBeacon;
 
-    // address of registry that serves os the Hypernet User Profile registry
+    /// @dev address of registry that serves os the Hypernet User Profile registry
     address public hypernetProfileRegistry = address(0);
 
-    // extra array storage fascilitates paginated UI
+    /// @dev extra array storage fascilitates paginated UI
     address[] public enumerableRegistries;
 
-    // extra array storage fascilitates paginated UI
+    /// @dev extra array storage fascilitates paginated UI
     address[] public registries;
 
-    // enable registry discovery by human-readable name
+    /// @notice Use this mapping to find the true deployment address of a project's NFR via the project name
+    /// @dev This mapping is updated everytime this is a new NFR created by the factory
     mapping (string => address) public nameToAddress;
 
-    // address of ERC20 token used for token-based regsitry creation
+    /// @notice Address indicating what ERC-20 token can be used with createRegistryByToken
+    /// @dev This address variable is used in conjunction with burnFee and burnAddress for the registerByToken function. Setting to the zero address disables the feature.
     address public registrationToken;
 
-    // amount of registration token required to create a registry
+    /// @notice The amount of registrationToken required to call createRegistryByToken
+    /// @dev Be sure you check the number of decimals associated with the ERC-20 contract at the registrationToken address
     uint256 public registrationFee = 50e18; // assume 18 decimal places
 
-    // address that token is sent to after registry creation
+    /// @notice This is the address where registrationToken is forwarded upon a call to createRegistryByToken
+    /// @dev The amount of registrationToken sent to this address is equal to {registrationFee * burnFee / 10000}
     address public burnAddress;
 
     /**

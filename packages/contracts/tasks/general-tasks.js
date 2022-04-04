@@ -21,11 +21,14 @@ task("getTransaction", "Get transaction details.")
     const hash = taskArgs.hash;
     const accounts = await hre.ethers.getSigners();
 
-    const tx = await accounts[0].provider.getTransaction(hash);
-    const txrcpt = await tx.wait();
-
-    console.log("Tx data:", tx);
-    console.log("Gas Used:", txrcpt.gasUsed.toString());
+    const tx = await accounts[4].provider.getTransaction(hash);
+    if(tx) {
+        const txrcpt = await tx.wait();
+        console.log("Tx data:", tx);
+        console.log("Gas Used:", txrcpt.gasUsed.toString());
+    } else {
+        console.log("Tx not found.");
+    }
 });
 
 task("currentBlockStats", "Get the current block gas limit.")
@@ -162,11 +165,13 @@ task("gasSettings", "Prints the EIP1159 standard gas settings", async (taskArgs,
     const feeData = await account.getFeeData();
     if (feeData.maxFeePerGas) {
         console.log("maxFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"), "GWei");
+        console.log(feeData.maxFeePerGas.toString())
     }
     if (feeData.maxPriorityFeePerGas) {
         console.log("maxPriorityFeePerGas:",hre.ethers.utils.formatUnits(feeData.maxPriorityFeePerGas, "gwei"), "GWei");
     }
     if (feeData.gasPrice) {
         console.log("gasPrice:",hre.ethers.utils.formatUnits(feeData.gasPrice, "gwei"), "GWei");
+        console.log(feeData.gasPrice.toString());
     }
 });

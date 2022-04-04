@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 
 /**
+ * @title Hypertoken
+ * @author Todd Chapman 
  * @dev Implementation of the Hypertoken ERC-20 token.
  *
  * This implementation is based on OpenZeppelin's ERC-20 library with no additional modifications
@@ -14,6 +16,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
  * It was produced by the OpenZeppelin contract wizard including the `votes` and `permit` extensions:
  * https://docs.openzeppelin.com/contracts/4.x/wizard
  *
+ * See unit tests for example usage with the Hypernet DAO implementation:
+ * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/governance-test.js
  */
 contract Hypertoken is ERC20, ERC20Permit, ERC20Votes {
     constructor() ERC20("Hypertoken", "H") ERC20Permit("Hypertoken") {

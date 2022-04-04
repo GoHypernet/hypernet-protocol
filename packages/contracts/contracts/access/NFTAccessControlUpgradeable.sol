@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
 /**
+ * @author Todd Chapman
  * @dev Contract module that allows children to implement role-based access
  * control mechanisms in which roles are denoted by ownership of an ERC721
  * compatible token. This is a lightweight version that doesn't allow enumerating role

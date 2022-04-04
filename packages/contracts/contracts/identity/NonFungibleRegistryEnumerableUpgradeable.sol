@@ -9,6 +9,19 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+/**
+ * @title Hypernet Protocol Enumerable Non Fungible Registry
+ * @author Todd Chapman
+ * @dev Implementation of the Hypernet Protocol Non Fungible Registry with Enumeration
+ *
+ * This implementation is based on OpenZeppelin's ERC-721 library with the enumeration extension
+ *
+ * See the Hypernet Protocol documentation for more information:
+ * https://docs.hypernet.foundation/hypernet-protocol/identity
+ *
+ * See unit tests for example usage:
+ * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/upgradeable-registry-enumerable-test.js
+ */
 contract NonFungibleRegistryEnumerableUpgradeable is
     Initializable,
     ContextUpgradeable,
@@ -38,68 +51,91 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         string[] _baseURI;
     }
 
-    // DFDL schema definition for metadata stored in tokenURI
+    /// @notice This is a reserved variable intended to be used by dynamic UI's
+    /// @dev This variable is intended to store DFDL specs for how to interpret the data stored in tokenURI
     string public schema;
 
-    // optional mapping a human-readable label to a tokenID
+    /// @notice optional mapping of a human-readable string label to a tokenID
+    /// @dev token labels stored in this variable must be unique for each token
     mapping(string => uint256) public registryMap;
 
-    // optional reverse mapping from tokenID to a human-readable label
+    /// @notice inverse datastructure to registryMap
+    /// @dev returns the label associated with a given token id
     mapping(uint256 => string) public reverseRegistryMap;
 
-    // registration fee belonging to each token which is refunded on burning
+    /// @notice A data structure that stores how much registrationToken is locked in a given tokenID 
+    /// @dev This data structure is used in conjunction with registerByToken
     mapping(uint256 => Fee) public identityStakes; 
 
-    // allow for tokenURI to be updated
+    /// @notice This boolean indicates if NFI's are allowed to update their tokenURI
+    /// @dev This boolean is utilized by the internal function _storageCanBeUpdated
     bool public allowStorageUpdate;
 
-    // allow for token label to be updated
+    /// @notice This boolean indicates if NFI's are allowed to update their labels in registryMap
+    /// @dev This boolean is utilized by internal function _labelCanBeChanged
     bool public allowLabelChange;
 
-    // disallow token transfers for all but DEFAULT_ADMIN_ROLE
+    /// @notice This boolean indicates if NFI's are allowed to be transfered
+    /// @dev This boolean is utilized by the internal function _transfersAllows. The REGISTRAR_ROLE may always initiate transfers. 
     bool public allowTransfers;
 
-    // address of ERC20 token used for token-based registration
+    /// @notice Address indicating what ERC-20 token can be used with registerByToken
+    /// @dev This address variable is used in conjunction with burnFee and burnAddress for the registerByToken function. Setting to the zero address disables the feature.
     address public registrationToken;
 
-    // amount of registration token required to call registerByToken
+    /// @notice The amount of registrationToken required to call registerByToken
+    /// @dev Be sure you check the number of decimals associated with the ERC-20 contract at the registrationToken address
     uint256 public registrationFee; 
 
-    // address that burned token is sent to
+    /// @notice This is the address where non-redeemable registration stake is sent after calling registerByToken
+    /// @dev The amount of registrationToken sent to this address is equal to {registrationFee * burnFee / 10000}
     address public burnAddress; 
 
-    // percentage (in basis points) of registration token burned by registerByToken
+    /// @notice The amount in basis points of registrationFee to send to the burnAddress account
+    /// @notice This variable must be less than or equal to 10000
     uint256 public burnFee;
 
-    // address of primary NFR registry required for participation
-    // if the primaryRegistry is address(0), then this variable is ignored
-    // if the primaryRegistry is an ERC721, then the recipient of an NFI must 
-    // have a non-zero balance in that ERC721 contract in order to recieve 
-    // an NFI
+  /** @dev address of primary NFR registry required for participation
+   * if the primaryRegistry is address(0), then this variable is ignored
+   * if the primaryRegistry is an ERC721, then the recipient of an NFI must 
+   * have a non-zero balance in that ERC721 contract in order to recieve 
+   * an NFI
+   */
     address public primaryRegistry;
 
-    // optional merkle proof that can be used with the external merkle drop module
+    /// @dev merkle root variable that can be used with the external merkle drop module
     bytes32 public merkleRoot; 
 
-    // flag used in conjunction with merkleRoot, if true then the merkleRoot can no 
-    // longer be updated by the REGISTRAR_ROLE
+    /// @notice flag used in conjunction with merkleRoot, if true then the merkleRoot can no longer be updated by the REGISTRAR_ROLE
+    /// @dev This variable is updated via the setMerkleRoot function
     bool public frozen;
 
-    // base URI for computing {tokenURI}. If set, the resulting URI for each
-    // token will be the concatenation of the `baseURI` and the `tokenId`. Empty
-    // by default, can be overriden in child contracts.
+   /** @notice base URI for computing {tokenURI}. If set, the resulting URI for each
+    *  token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+    *  by default, can be overriden in child contracts.
+    *  @dev baseURI is omitted if the user calls tokenURINoBase
+    */
     string public baseURI;
 
-    // create a REGISTRAR_ROLE to manage registry functionality
+    /// @dev The REGISTRAR_ROLE has rights to mint, transfer, and burn all NFI's. Grant access carefully
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
-    // create a REGISTRAR_ROLE to manage registry functionality
+    /// @dev The REGISTRAR_ROLE_ADMIN curates the address with REGISTRAR_ROLE permissions
     bytes32 public constant REGISTRAR_ROLE_ADMIN = keccak256("REGISTRAR_ROLE_ADMIN");
 
+    /**
+     * @dev Emitted when updateLabel is called successfully
+     */
     event LabelUpdated(uint256 tokenId, string label);
 
+    /**
+     * @dev Emitted when updateRegistration is called successfully
+     */
     event StorageUpdated(uint256 tokenId, bytes32 registrationData);
 
+    /**
+     * @dev Emitted when setMerkleRoot is called successfully
+     */
     event MerkleRootUpdated(bytes32 merkleRoot, bool frozen); 
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -143,10 +179,11 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         frozen = false;
     }
 
-    /// @notice setRegistryParameters enable or disable the lazy registration feature
-    /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
-    /// parameter if we don't want to chage it.
-    /// @param encodedParameters encoded calldata for registry parameters
+    /** @notice setRegistryParameters enable or disable the lazy registration feature
+     *  @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
+     *  parameter if we don't want to chage it.
+     *  @param encodedParameters encoded calldata for registry parameters, see {RegistryParams}
+     */
     function setRegistryParameters(bytes calldata encodedParameters)
         external 
         virtual {
