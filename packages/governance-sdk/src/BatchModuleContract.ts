@@ -72,4 +72,44 @@ export class BatchModuleContract implements IBatchModuleContract {
       })
       .map(() => {});
   }
+
+  public estimateGasbatchRegister(
+    registryAddress: EthereumContractAddress,
+    registryEntries: RegistryEntry[],
+    overrides: ContractOverrides | null = null,
+  ): ResultAsync<number, BatchModuleContractError> {
+    const recipients = registryEntries.map(
+      (registryEntry) => registryEntry.owner,
+    );
+    const labels = registryEntries.map((registryEntry) => registryEntry.label);
+    const datas = registryEntries.map(
+      (registryEntry) => registryEntry.tokenURI,
+    );
+    const tokenIds = registryEntries.map(
+      (registryEntry) => registryEntry.tokenId,
+    );
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new BatchModuleContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        return ResultAsync.fromPromise(
+          this.contract.estimateGas.batchRegister(
+            recipients,
+            labels,
+            datas,
+            tokenIds,
+            registryAddress,
+            { ...gasFee, ...overrides },
+          ) as Promise<ethers.BigNumber>,
+          (e) => {
+            return new BatchModuleContractError(
+              "Unable to call BatchModuleContract batchRegister()",
+              e,
+            );
+          },
+        ).map((estimatedGas) => estimatedGas.toNumber());
+      });
+  }
 }

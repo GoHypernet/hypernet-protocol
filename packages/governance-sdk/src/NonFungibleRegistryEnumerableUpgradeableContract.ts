@@ -827,6 +827,42 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       });
   }
 
+  public estimateGasRegister(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<number, NonFungibleRegistryContractError> {
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new NonFungibleRegistryContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        const overrideObject = {
+          maxFeePerGas: gasFee.maxFeePerGas,
+          ...(overrides != null ? overrides : {}),
+        };
+        console.log("overrideObject: ", overrideObject);
+
+        return ResultAsync.fromPromise(
+          this.contract?.estimateGas?.register(
+            recipientAddress,
+            label,
+            data,
+            tokenId,
+            overrideObject,
+          ) as Promise<BigNumber>,
+          (e) => {
+            return new NonFungibleRegistryContractError(
+              "Unable to call estimateGas.register()",
+              e,
+            );
+          },
+        ).map((estimatedGas) => estimatedGas.toNumber());
+      });
+  }
+
   public registerByTokenAsync(
     recipientAddress: EthereumAccountAddress,
     label: string,
