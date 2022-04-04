@@ -11,8 +11,14 @@ export interface IBatchModuleContract {
   batchRegister(
     registryAddress: EthereumContractAddress,
     registryEntries: RegistryEntry[],
-    overrides?: ContractOverrides,
+    overrides?: ContractOverrides | null,
   ): ResultAsync<void, BatchModuleContractError>;
+
+  estimateGasbatchRegister(
+    registryAddress: EthereumContractAddress,
+    registryEntries: RegistryEntry[],
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<number, BatchModuleContractError>;
 }
 
 export const IBatchModuleContractType = Symbol.for("IBatchModuleContract");

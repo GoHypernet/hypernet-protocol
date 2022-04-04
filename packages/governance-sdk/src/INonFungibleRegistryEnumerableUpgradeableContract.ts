@@ -146,6 +146,13 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     | TransactionUnsupportedOperationError
     | NonFungibleRegistryContractError
   >;
+  estimateGasRegister(
+    recipientAddress: EthereumAccountAddress,
+    label: string,
+    data: string | null,
+    tokenId: RegistryTokenId,
+    overrides?: ContractOverrides | null,
+  ): ResultAsync<number, NonFungibleRegistryContractError>;
   registerByTokenAsync(
     recipientAddress: EthereumAccountAddress,
     label: string,

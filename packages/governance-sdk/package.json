@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/governance-sdk",
-  "version": "0.0.13",
+  "version": "0.0.21",
   "description": "SDK for governance contracts wrappers",
   "main": "dist/index.js",
   "files": [
