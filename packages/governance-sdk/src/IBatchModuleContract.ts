@@ -2,6 +2,7 @@ import {
   BatchModuleContractError,
   RegistryEntry,
   EthereumContractAddress,
+  GasUnits,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -18,7 +19,7 @@ export interface IBatchModuleContract {
     registryAddress: EthereumContractAddress,
     registryEntries: RegistryEntry[],
     overrides?: ContractOverrides | null,
-  ): ResultAsync<number, BatchModuleContractError>;
+  ): ResultAsync<GasUnits, BatchModuleContractError>;
 }
 
 export const IBatchModuleContractType = Symbol.for("IBatchModuleContract");

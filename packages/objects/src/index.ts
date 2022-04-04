@@ -19,6 +19,7 @@ export * from "@objects/GatewayRegistrationFilter";
 export * from "@objects/GatewayRegistrationInfo";
 export * from "@objects/GatewayTokenInfo";
 export * from "@objects/GatewayUrl";
+export * from "@objects/GasUnits";
 export * from "@objects/HexString";
 export * from "@objects/HypernetLink";
 export * from "@objects/HypernetOfferDetails";
