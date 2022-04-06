@@ -468,6 +468,7 @@ export class RegistryRepository implements IRegistryRepository {
                   .andThen((tokenId) => {
                     return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
                       tokenId,
+                      false,
                       registryAddress,
                     );
                   });
@@ -529,6 +530,7 @@ export class RegistryRepository implements IRegistryRepository {
         return this.nonFungibleRegistryContract.getRegistryEntryByOwnerAddress(
           ownerAddress,
           index,
+          false,
           registryAddress,
         );
       });
@@ -557,6 +559,7 @@ export class RegistryRepository implements IRegistryRepository {
 
         return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
           tokenId,
+          false,
           registryAddress,
         );
       });
@@ -620,6 +623,7 @@ export class RegistryRepository implements IRegistryRepository {
         .andThen(() => {
           return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
             tokenId,
+            false,
             registry.address,
           );
         });
@@ -684,6 +688,7 @@ export class RegistryRepository implements IRegistryRepository {
         .andThen(() => {
           return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
             tokenId,
+            false,
             registry.address,
           );
         });
@@ -744,7 +749,7 @@ export class RegistryRepository implements IRegistryRepository {
         );
 
       return this.nonFungibleRegistryContract
-        .getRegistryEntryByTokenId(tokenId, registry.address)
+        .getRegistryEntryByTokenId(tokenId, false, registry.address)
         .andThen((registryEntry) => {
           return this.nonFungibleRegistryContract
             .transferFrom(
@@ -756,6 +761,7 @@ export class RegistryRepository implements IRegistryRepository {
             .andThen(() => {
               return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
                 tokenId,
+                false,
                 registry.address,
               );
             });
@@ -1296,6 +1302,7 @@ export class RegistryRepository implements IRegistryRepository {
                     .andThen((tokenId) => {
                       return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
                         tokenId,
+                        false,
                         registryModulesAddress,
                       );
                     }),
@@ -1682,6 +1689,7 @@ export class RegistryRepository implements IRegistryRepository {
                   .andThen((tokenId) => {
                     return this.nonFungibleRegistryContract.getRegistryEntryByTokenId(
                       tokenId,
+                      false,
                       registryAddress,
                     );
                   }),
@@ -1725,7 +1733,11 @@ export class RegistryRepository implements IRegistryRepository {
             );
 
           return hypernetProfileRegistryContract
-            .getRegistryEntryByLabel(username, hypernetProfilesRegistryAddress)
+            .getRegistryEntryByLabel(
+              username,
+              false,
+              hypernetProfilesRegistryAddress,
+            )
             .andThen((registryEntry) => {
               return this.getRegistryEntryListByOwnerAddress(
                 registryName,

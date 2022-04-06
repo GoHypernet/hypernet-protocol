@@ -505,6 +505,23 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
+  public tokenURINoBase(
+    tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<string, NonFungibleRegistryContractError> {
+    this.reinitializeContract(registryAddress);
+
+    return ResultAsync.fromPromise(
+      this.contract?.tokenURINoBase(tokenId) as Promise<string>,
+      (e) => {
+        return new NonFungibleRegistryContractError(
+          "Unable to call tokenURI()",
+          e,
+        );
+      },
+    );
+  }
+
   public updateRegistration(
     tokenId: RegistryTokenId,
     registrationData: string,
@@ -1030,12 +1047,15 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public getRegistryEntryByTokenId(
     tokenId: RegistryTokenId,
+    excludeBaseUri?: boolean,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
     return ResultUtils.combine([
       this.reverseRegistryMap(tokenId, registryAddress),
       this.ownerOf(tokenId, registryAddress),
-      this.tokenURI(tokenId, registryAddress),
+      excludeBaseUri === true
+        ? this.tokenURINoBase(tokenId, registryAddress)
+        : this.tokenURI(tokenId, registryAddress),
     ]).andThen((vals) => {
       const [label, owner, tokenURI] = vals;
       return okAsync(new RegistryEntry(label, tokenId, owner, tokenURI, null));
@@ -1061,12 +1081,15 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public getRegistryEntryByLabel(
     label: string,
+    excludeBaseUri?: boolean,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
     return this.registryMap(label).andThen((tokenId) => {
       return ResultUtils.combine([
         this.ownerOf(tokenId, registryAddress),
-        this.tokenURI(tokenId, registryAddress),
+        excludeBaseUri === true
+          ? this.tokenURINoBase(tokenId, registryAddress)
+          : this.tokenURI(tokenId, registryAddress),
       ]).andThen(([owner, tokenURI]) => {
         return okAsync(
           new RegistryEntry(label, tokenId, owner, tokenURI, null),
@@ -1078,6 +1101,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public getRegistryEntryByOwnerAddress(
     ownerAddress: EthereumAccountAddress,
     index: number,
+    excludeBaseUri?: boolean,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError> {
     return this.balanceOf(ownerAddress, registryAddress).andThen(
@@ -1102,6 +1126,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         ).andThen((tokenId) => {
           return this.getRegistryEntryByTokenId(
             RegistryTokenId(tokenId.toString()),
+            excludeBaseUri,
             registryAddress,
           );
         });
@@ -1111,11 +1136,13 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public getFirstRegistryEntryByOwnerAddress(
     ownerAddress: EthereumAccountAddress,
+    excludeBaseUri?: boolean,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError> {
     return this.getRegistryEntryByOwnerAddress(
       ownerAddress,
       0,
+      excludeBaseUri,
       registryAddress,
     );
   }
