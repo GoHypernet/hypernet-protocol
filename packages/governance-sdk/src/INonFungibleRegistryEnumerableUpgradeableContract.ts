@@ -81,6 +81,10 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     tokenId: RegistryTokenId,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<string, NonFungibleRegistryContractError>;
+  tokenURINoBase(
+    tokenId: RegistryTokenId,
+    registryAddress?: EthereumContractAddress,
+  ): ResultAsync<string, NonFungibleRegistryContractError>;
   updateRegistration(
     tokenId: RegistryTokenId,
     registrationData: string,
@@ -186,10 +190,12 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   ): ResultAsync<void, NonFungibleRegistryContractError>;
   getRegistryEntryByTokenId(
     tokenId: RegistryTokenId,
+    excludeBaseUri?: boolean,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError>;
   getRegistryEntryByLabel(
     label: string,
+    excludeBaseUri?: boolean,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError>;
   tokenOfOwnerByIndex(
@@ -200,6 +206,7 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   getRegistryEntryByOwnerAddress(
     ownerAddress: EthereumAccountAddress,
     index: number,
+    excludeBaseUri?: boolean,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError>;
   balanceOf(
@@ -208,6 +215,7 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   ): ResultAsync<number, NonFungibleRegistryContractError>;
   getFirstRegistryEntryByOwnerAddress(
     ownerAddress: EthereumAccountAddress,
+    excludeBaseUri?: boolean,
     registryAddress?: EthereumContractAddress,
   ): ResultAsync<RegistryEntry | null, NonFungibleRegistryContractError>;
   baseURI(
