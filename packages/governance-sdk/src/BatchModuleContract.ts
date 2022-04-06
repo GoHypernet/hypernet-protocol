@@ -4,6 +4,11 @@ import {
   BatchModuleContractError,
   RegistryEntry,
   GasUnits,
+  TransactionNotImplementedError,
+  TransactionServerError,
+  TransactionTimeoutError,
+  TransactionUnknownError,
+  TransactionUnsupportedOperationError,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -74,6 +79,61 @@ export class BatchModuleContract implements IBatchModuleContract {
       .map(() => {});
   }
 
+  public batchRegisterAsync(
+    registryAddress: EthereumContractAddress,
+    registryEntries: RegistryEntry[],
+    overrides: ContractOverrides | null = null,
+  ): ResultAsync<
+    ethers.providers.TransactionResponse,
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | BatchModuleContractError
+  > {
+    const recipients = registryEntries.map(
+      (registryEntry) => registryEntry.owner,
+    );
+    const labels = registryEntries.map((registryEntry) => registryEntry.label);
+    const datas = registryEntries.map(
+      (registryEntry) => registryEntry.tokenURI,
+    );
+    const tokenIds = registryEntries.map(
+      (registryEntry) => registryEntry.tokenId,
+    );
+
+    return GasUtils.getGasFee(this.providerOrSigner)
+      .mapErr((e) => {
+        return new BatchModuleContractError("Error getting gas fee", e);
+      })
+      .andThen((gasFee) => {
+        const overrideObject = {
+          maxFeePerGas: gasFee.maxFeePerGas,
+          ...(overrides != null ? overrides : {}),
+        };
+        console.log("overrideObject: ", overrideObject);
+
+        return ResultAsync.fromPromise(
+          this.contract.batchRegister(
+            recipients,
+            labels,
+            datas,
+            tokenIds,
+            registryAddress,
+            overrideObject,
+          ) as Promise<ethers.providers.TransactionResponse>,
+          (e) => {
+            console.log("error from register(): ", e);
+            return this.handleTransactionError(
+              e,
+              "Unable to call BatchModuleContract batchRegister()",
+            );
+          },
+        );
+      });
+  }
+
   public estimateGasbatchRegister(
     registryAddress: EthereumContractAddress,
     registryEntries: RegistryEntry[],
@@ -112,5 +172,36 @@ export class BatchModuleContract implements IBatchModuleContract {
           },
         ).map((estimatedGas) => GasUnits(estimatedGas.toNumber()));
       });
+  }
+
+  private handleTransactionError(
+    e: any,
+    defaultErrorMessage: string,
+  ):
+    | TransactionNotImplementedError
+    | TransactionServerError
+    | TransactionTimeoutError
+    | TransactionUnknownError
+    | TransactionUnsupportedOperationError
+    | BatchModuleContractError {
+    const errorCode = e?.code;
+    const errorMessage = e?.body?.error?.message || defaultErrorMessage;
+    if (errorCode == "NOT_IMPLEMENTED") {
+      return new TransactionNotImplementedError(errorMessage, e);
+    }
+    if (errorCode == "SERVER_ERROR") {
+      return new TransactionServerError(errorMessage, e);
+    }
+    if (errorCode == "TIMEOUT") {
+      return new TransactionTimeoutError(errorMessage, e);
+    }
+    if (errorCode == "UNKNOWN_ERROR") {
+      return new TransactionUnknownError(errorMessage, e);
+    }
+    if (errorCode == "UNSUPPORTED_OPERATION") {
+      return new TransactionUnsupportedOperationError(errorMessage, e);
+    }
+
+    return new BatchModuleContractError(errorMessage, e);
   }
 }
