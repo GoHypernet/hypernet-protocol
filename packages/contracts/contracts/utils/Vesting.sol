@@ -88,7 +88,7 @@ contract Vester {
     /// @dev This function can only be called by the account set in the recipient variable
     /// @param recipient_ address to set as the new beneficiary
     function setRecipient(address recipient_) public {
-        require(msg.sender == recipient, 'TreasuryVester::setRecipient: unauthorized');
+        require(msg.sender == recipient, 'Vester::setRecipient: unauthorized');
         recipient = recipient_;
     }
 
@@ -96,7 +96,7 @@ contract Vester {
     /// @dev The function allows for beneficiaries to have voting rights before they take possession of their tokens
     /// @param recipient_ address to recieve the voting rights, does not necessarly have to be the beneficiary
     function delegate(address recipient_) public {
-        require(msg.sender == recipient, 'TreasuryVester::setRecipient: unauthorized');
+        require(msg.sender == recipient, 'Vester::setRecipient: unauthorized');
         IHypertoken(h).delegate(recipient_);        
     }
 
