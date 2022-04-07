@@ -131,8 +131,9 @@ task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
         primaryregistry,
         await gasSettings()
     );
-    await tx.wait();
+    const tx_rcpt = await tx.wait();
     console.log("Primary Registry Set");
+    console.log("Gas Used:", tx_rcpt.gasUsed.toString());
   });
 
   task("createRegistry", "Creates a registry if you are the factory admin.")
@@ -164,10 +165,11 @@ task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
       await gasSettings()
     );
     console.log(tx);
-    await tx.wait(2);
+    const tx_rcpt = await tx.wait(2);
 
     const regAddress = await factoryHandle.nameToAddress(name);
     console.log("Registry Deployed to:", regAddress);
+    console.log("Gas Used:", tx_rcpt.gasUsed.toString());
   });
 
 task("createRegistryByToken", "Creates a registry by burning token.")
@@ -197,7 +199,8 @@ task("createRegistryByToken", "Creates a registry by burning token.")
 
     // approve the registry factory to pull hypertoken from the users wallet
     let tx = await hypertoken.approve(factoryHandle.address, regFee);
-    await tx.wait(3);
+    let tx_rcpt = await tx.wait(3);
+    console.log("Gas Used for Approval:", tx_rcpt.gasUsed.toString());
 
     tx = await factoryHandle.createRegistryByToken(
       name,
@@ -206,11 +209,12 @@ task("createRegistryByToken", "Creates a registry by burning token.")
       enumerable,
       await gasSettings(),
     );
-    await tx.wait(2);
+    tx_rcpt = await tx.wait(2);
 
     const regAddress = await factoryHandle.nameToAddress(name);
     console.log("Registry Deployed to:", regAddress);
-  });
+    console.log("Gas Used for Deployment:", tx_rcpt.gasUsed.toString());
+});
 
 task("registryParameters", "Prints NFR  parameters.")
   .addParam("name", "Name of the target registry.")
@@ -244,7 +248,12 @@ task("registryParameters", "Prints NFR  parameters.")
       0
     );
     const symbol = await registryHandle.symbol();
-    const numberOfEntries = await registryHandle.totalSupply();
+    let numberOfEntries;
+    try {
+        numberOfEntries = await registryHandle.totalSupply();
+    } catch (error) {
+        numberOfEntries = "Total Supply Unavailable (Non Enumerable Registry)";
+    }
     const registrationToken = await registryHandle.registrationToken();
     const allowLabelChange = await registryHandle.allowLabelChange();
     const allowStorageUpdate = await registryHandle.allowStorageUpdate();
@@ -327,7 +336,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
       );
 
     const tx = await registryHandle.setRegistryParameters(params, await gasSettings());
-    await tx.wait(3);
+    const tx_rcpt = await tx.wait(3);
 
     const REGISTRAR_ROLE = registryHandle.REGISTRAR_ROLE();
     const registrarAddress = await registryHandle.getRoleMember(
@@ -335,7 +344,12 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
       0,
     );
     const symbol = await registryHandle.symbol();
-    const numberOfEntries = await registryHandle.totalSupply();
+    let numberOfEntries;
+    try {
+        numberOfEntries = await registryHandle.totalSupply();
+    } catch (error) {
+        numberOfEntries = "Total Supply Not Available (Non Enumerable Registry)"
+    }
     const registrationToken = await registryHandle.registrationToken();
     const allowLabelChange = await registryHandle.allowLabelChange();
     const allowStorageUpdate = await registryHandle.allowStorageUpdate();
@@ -355,6 +369,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     console.log("Registration Token:", registrationToken);
     console.log("Registration Fee:", registrationFee.toString());
     console.log("Primary Registry:", primaryRegistry);
+    console.log("Gas Used:", tx_rcpt.gasUsed.toString());
   });
 
 task("listRegistryEntries", "Prints all NFI entries for the specified registry.")
@@ -675,8 +690,6 @@ task("register", "Register an NFI as the REGISTRAR_ROLE.")
       tokenid,
       gassettings
     );
-    console.log(tx);
-    console.log(gassettings);
     const txrcpt = await tx.wait();
 
     console.log("Gas Used:", txrcpt.gasUsed.toString());

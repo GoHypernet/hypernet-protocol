@@ -42,7 +42,7 @@ contract BulkTransferModule is Context {
         virtual 
         {
             require(recipients.length == tokenIds.length, "BulkTransferModule: recipients array must be same length as tokenIds array.");
-            require(INfr(registry).isApprovedForAll(owner, _msgSender()), "BulkTransferModule: msgSender is not approved.");
+            require(INfr(registry).isApprovedForAll(owner, _msgSender()), "BulkTransferModule: msgSender is not approved for all.");
 
             for (uint256 i = 0; i < recipients.length; ++i) {
                 INfr(registry).safeTransferFrom(owner, recipients[i], tokenIds[i]);

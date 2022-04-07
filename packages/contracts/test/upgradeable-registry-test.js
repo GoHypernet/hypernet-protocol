@@ -506,6 +506,83 @@ it("Test batch minting function.", async function () {
     tx.wait();
   });
 
+  it("Test bulk transfer function.", async function () {
+    // first deploy the bulk transfer function
+    const BulkTransfer = await ethers.getContractFactory("BulkTransferModule");
+    bulktransfer = await BulkTransfer.deploy("Bulk Transfer");
+    await bulktransfer.deployTransaction.wait();
+
+    // second, deploy batch minting for convenience 
+    const BatchModule = await ethers.getContractFactory("BatchModule");
+    batchmodule = await BatchModule.deploy("Batch Minting");
+    await batchmodule.deployTransaction.wait();
+
+    // minting many tokens in a single transaction can save gas:
+    const batchSize = 120;
+    const owners = [];
+    const recipients = [];
+    const labels = [];
+    const datas = [];
+    const tokenIds = [];
+    for (let i = 0; i < batchSize; i++) {
+      owners.push(owner.address);
+      recipients.push(addr1.address);
+      labels.push(`tokenLabel${i}`);
+      datas.push(`00000000000000030000000061672e7d`);
+      tokenIds.push(i + 1);
+    }
+
+    // add the bulk transfer module as a REGISTRAR
+    const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+    let tx = await registry.grantRole(REGISTRAR_ROLE, bulktransfer.address);
+    tx.wait();
+
+    // add the batch mint module as a REGISTRAR
+    tx = await registry.grantRole(REGISTRAR_ROLE, batchmodule.address);
+    tx.wait();
+
+    // create a series of NFIs to one account
+    tx = await batchmodule.batchRegister(
+      owners,
+      labels,
+      datas,
+      tokenIds,
+      registry.address,
+    );
+    tx.wait();
+
+    // if an account is not approved, bulk transfer will fail
+    await expectRevert(bulktransfer.connect(addr1).bulkTransfer(
+        owners[0],
+        recipients,
+        tokenIds,
+        registry.address,
+    ), "BulkTransferModule: msgSender is not approved for all.");
+
+    tx = await registry.setApprovalForAll(addr1.address, true);
+    tx.wait();
+
+    // bulk transfer them away after approved
+    tx = await bulktransfer.connect(addr1).bulkTransfer(
+        owners[0],
+        recipients,
+        tokenIds,
+        registry.address,
+    );
+    tx.wait();
+    expect(await registry.balanceOf(addr1.address)).to.equal(batchSize);
+
+    // registrars can transfer with implicit approval
+    tx = await bulktransfer.bulkTransfer(
+        recipients[0],
+        owners,
+        tokenIds,
+        registry.address,
+    );
+    tx.wait();
+    expect(await registry.balanceOf(owner.address)).to.equal(batchSize);
+  });
+
   it("Test Buy Module.", async function () {
     // first deploy the BuyModule
     const BuyModule = await ethers.getContractFactory("BuyModule");
