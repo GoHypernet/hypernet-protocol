@@ -560,7 +560,7 @@ task("registryEntryByTokenID", "Prints NonFungible Identity Data.")
 
   task("tokenOfOwnerByIndex", "Prints NonFungible Identity Data.")
   .addParam("registry", "Target NonFungle Registry Name.")
-  .addParam("address", "asdf")
+  .addParam("address", "account address to scan")
   .addParam("tokenindex", "NFI index")
   .setAction(async (taskArgs) => {
     const registry = taskArgs.registry;

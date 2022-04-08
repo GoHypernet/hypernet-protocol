@@ -32,7 +32,7 @@ gas limit of the layer 1 blockchain protocol. See the Hypernet Protocol unit tes
 [example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L438) of how to interact with a contract using the batch minting 
 feature. 
 
-### Bulk Transfers
+### Bulk Transfer
 
 This [module](/packages/contracts/contracts/modules/BulkTransferModule.sol) allows for accounts that have been given approval via 
 `setApprovalForAll` to transfer multiple NFIs from a single owner account to many recipient accounts decreasing the overall gas costs on a 
