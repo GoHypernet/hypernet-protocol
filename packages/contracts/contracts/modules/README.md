@@ -32,6 +32,14 @@ gas limit of the layer 1 blockchain protocol. See the Hypernet Protocol unit tes
 [example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L438) of how to interact with a contract using the batch minting 
 feature. 
 
+### Bulk Transfer
+
+This [module](/packages/contracts/contracts/modules/BulkTransferModule.sol) allows for accounts that have been given approval via 
+`setApprovalForAll` to transfer multiple NFIs from a single owner account to many recipient accounts decreasing the overall gas costs on a 
+per transfer basis. Accounts with the `REGISTRAR_ROLE` capability have implicit approval. The number of NFIs that can be transfered in a 
+single transaction is limited by the gas limit of the layer 1 blockchain protocol. See the Hypernet Protocol unit tests for an 
+[example](/packages/contracts/test/upgradeable-registry-enumerable-test.js#L493) of how to perform bulk transfers. 
+
 ### Buy NFI
 
 This [module](/packages/contracts/contracts/modules/BuyModule.sol) lets `REGISTRAR_ROLE_ADMIN`s bulk sell pre-minted NFIs from their NFR. 

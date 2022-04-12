@@ -31,6 +31,7 @@ contract BatchModule is Context {
     /// @param recipients address array of the recipients of the tokens
     /// @param labels an array of unique labels to attach to the tokens
     /// @param registrationDatas data to store in the tokenURI
+    /// @param tokenIds tokenIds to be given to NFIs produced by the batch registration
     /// @param registry address of the target registry to call
     function batchRegister(
         address[] memory recipients, 
