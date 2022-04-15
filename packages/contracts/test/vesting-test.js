@@ -51,6 +51,10 @@ describe("Vesting", function () {
     expect(await vester.vestingEnd()).to.equal(endTime);
     expect(await vester.recipient()).to.equal(addr1.address);
     expect(await hypertoken.balanceOf(vester.address)).to.equal(award);
+    await expectRevert(
+        vester.claim(),
+        "Vester::claim: not time yet",
+      );
   });
 
   it("Check for full recipient withdrawal.", async function () {
