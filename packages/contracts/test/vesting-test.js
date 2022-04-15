@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 describe("Vesting", function () {
   let hypertoken;
@@ -44,22 +45,15 @@ describe("Vesting", function () {
   });
 
   it("Check vesting parameters.", async function () {
-    let tx = await vester.connect(addr1).delegate(addr1.address);
-    tx.wait();
-
     expect(await vester.vestingAmount()).to.equal(award);
     expect(await vester.vestingBegin()).to.equal(startTime);
     expect(await vester.vestingCliff()).to.equal(cliffTime);
     expect(await vester.vestingEnd()).to.equal(endTime);
     expect(await vester.recipient()).to.equal(addr1.address);
     expect(await hypertoken.balanceOf(vester.address)).to.equal(award);
-    expect(await hypertoken.getVotes(addr1.address)).to.equal(award);
   });
 
-  it("Check for full withdrawal.", async function () {
-    let tx = await vester.connect(addr1).delegate(addr1.address);
-    tx.wait();
-
+  it("Check for full recipient withdrawal.", async function () {
     hre.timeAndMine.setTimeIncrease("1d");
     hre.timeAndMine.mine("100");
 
@@ -67,5 +61,35 @@ describe("Vesting", function () {
     tx.wait();
     expect(await hypertoken.balanceOf(addr1.address)).to.equal(award);
     expect(await hypertoken.balanceOf(vester.address)).to.equal(0);
+  });
+
+  it("Check for full proxy withdrawal.", async function () {
+    hre.timeAndMine.setTimeIncrease("1d");
+    hre.timeAndMine.mine("100");
+
+    tx = await vester.claim();
+    tx.wait();
+    expect(await hypertoken.balanceOf(addr1.address)).to.equal(award);
+    expect(await hypertoken.balanceOf(vester.address)).to.equal(0);
+  });
+
+  it("Check vote delegation permissions.", async function () {
+    let tx = await vester.connect(addr1).delegate(addr1.address);
+    tx.wait();
+    expect(await hypertoken.getVotes(addr1.address)).to.equal(award);
+    await expectRevert(
+        vester.delegate(owner.address),
+        "Vester::setRecipient: unauthorized",
+      );
+  });
+
+  it("Check setRecipient permissions.", async function () {
+    await expectRevert(
+        vester.setRecipient(owner.address),
+        "Vester::setRecipient: unauthorized",
+      );
+    let tx = await vester.connect(addr1).setRecipient(owner.address);
+    tx.wait();
+    expect(await vester.recipient()).to.equal(owner.address);
   });
 });

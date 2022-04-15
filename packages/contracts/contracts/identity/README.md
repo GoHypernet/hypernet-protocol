@@ -40,14 +40,14 @@ variable. This has the additional effect of enforcing that every NFR within the 
 ensure that they are interacting with an authentic Hypernet Protocol NFR need only query the contract factory with the name of the target NFR in order to 
 obtain the address of the true registry. 
 
-### Royalty Support
+### Royalty support
 
 Hypernet Protocol NFRs support the [EIP-2981](https://eips.ethereum.org/EIPS/eip-2981) interface for reporting royalty fees and recipients. The royalty 
 recipient address is denoted by the `burnAddress` (see the section of [Token-Based Registration](#token-based-registration)) and the the royalty fee is 
 calculated via the `burnFee` setting which has units of basis-points. Both variables are set by an account with the `REGISTRAR_ROLE` permission setting. 
 The `burnFee`, which acts as the royalty percentage, is applied equivalently to all NFIs in an NFR. 
 
-## Roles and Minting
+## Roles and minting
 
 ### Enumerable roles
 

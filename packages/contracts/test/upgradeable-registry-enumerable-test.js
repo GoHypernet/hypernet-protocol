@@ -1,4 +1,4 @@
-const { BN, expectRevert } = require("@openzeppelin/test-helpers");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
 const { MerkleTree } = require('merkletreejs');
