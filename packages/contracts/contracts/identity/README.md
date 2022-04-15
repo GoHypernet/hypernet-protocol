@@ -40,7 +40,7 @@ variable. This has the additional effect of enforcing that every NFR within the 
 ensure that they are interacting with an authentic Hypernet Protocol NFR need only query the contract factory with the name of the target NFR in order to 
 obtain the address of the true registry. 
 
-### Royalty supported
+### Royalty Support
 
 Hypernet Protocol NFRs support the [EIP-2981](https://eips.ethereum.org/EIPS/eip-2981) interface for reporting royalty fees and recipients. The royalty 
 recipient address is denoted by the `burnAddress` (see the section of [Token-Based Registration](#token-based-registration)) and the the royalty fee is 
