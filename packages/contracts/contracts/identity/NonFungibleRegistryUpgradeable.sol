@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
 /**
  * @title Hypernet Protocol Non Fungible Registry
@@ -25,7 +26,8 @@ contract NonFungibleRegistryUpgradeable is
     Initializable,
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
-    ERC721URIStorageUpgradeable
+    ERC721URIStorageUpgradeable,
+    IERC2981Upgradeable
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -438,6 +440,15 @@ contract NonFungibleRegistryUpgradeable is
         }
     }
 
+    function royaltyInfo(uint256 tokenId, uint256 salePrice)
+        external
+        view
+        override(IERC2981Upgradeable)
+    returns (address receiver, uint256 royaltyAmount) {
+        royaltyAmount = salePrice * burnFee / 10000;
+        receiver = burnAddress;
+    }
+
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
@@ -468,9 +479,9 @@ contract NonFungibleRegistryUpgradeable is
         public
         view
         virtual
-        override(AccessControlEnumerableUpgradeable, ERC721Upgradeable)
+        override(AccessControlEnumerableUpgradeable, ERC721Upgradeable, IERC165Upgradeable)
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
 }
