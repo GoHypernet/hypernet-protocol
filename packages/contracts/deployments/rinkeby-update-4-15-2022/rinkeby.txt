@@ -1,0 +1,15 @@
+Deployment Wallet Address: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+RPC URL: https://station-hundred-assure-neighborhood.trycloudflare.com/http/
+Enumerable Registry Beacon Address: 0x642f73D06e477246DeBB0D6CD6E5Df7afFbe6b95
+Gas Used: 4177570
+Registry Beacon Address: 0xD0469eE31809328c183E801d1F45fEb1FFACf6AF
+Gas Used: 3921028
+
+----------------------------------------------------------------------------------------
+Registry Beacon Address: 0xf44c129B3934E82de815ba25393c85A41E2a638C
+Registry Implementation Address: 0xA07F6402a94AF42d7C293B22f8f97AeC201b2b1d
+Registry Beacon Owner: 0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a
+Enumerable Registry Beacon Address: 0x006FB271c316A8f626319d7F8ae571a1eEB60459
+Enumerable Registry Implementation Address: 0x83EdB20E1DCd6bC551687E4b7a2AaE45e99AC2c4
+Enumerable Registry Beacon Owner: 0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a
+----------------------------------------------------------------------------------------

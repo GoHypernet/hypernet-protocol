@@ -73,7 +73,7 @@ module.exports = {
     mumbai: { // polygon testnet
         accounts: { mnemonic },
         chainId: 80001,
-        url: urlOverride || "https://rpc-mumbai.maticvigil.com",
+        url: urlOverride || "https://matic-mumbai.chainstacklabs.com",
         gas: 6000000,
         gasPrice: 8000000000
     },
