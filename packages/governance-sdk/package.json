@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/governance-sdk",
-  "version": "0.0.25",
+  "version": "0.0.27",
   "description": "SDK for governance contracts wrappers",
   "main": "dist/index.js",
   "files": [
@@ -24,9 +24,9 @@
     "test": "echo \"No tests specified yet\" && exit 0"
   },
   "dependencies": {
-    "@hypernetlabs/gateway-connector": "^0.0.12",
+    "@hypernetlabs/gateway-connector": "^0.0.13",
     "@hypernetlabs/objects": "^0.3.20",
-    "@hypernetlabs/utils": "^0.5.2",
+    "@hypernetlabs/utils": "^0.5.4",
     "ethers": "^5.4.7",
     "neverthrow": "^4.2.2"
   }

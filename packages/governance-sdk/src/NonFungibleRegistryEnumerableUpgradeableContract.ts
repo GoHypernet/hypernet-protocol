@@ -444,14 +444,14 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     this.reinitializeContract(registryAddress);
 
     return ResultAsync.fromPromise(
-      this.contract?.registryMap(label) as Promise<RegistryTokenId>,
+      this.contract?.registryMap(label) as Promise<BigNumber>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call registryMap()",
           e,
         );
       },
-    );
+    ).map((val) => RegistryTokenId(val.toString()));
   }
 
   public reverseRegistryMap(
@@ -515,7 +515,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       this.contract?.tokenURINoBase(tokenId) as Promise<string>,
       (e) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call tokenURI()",
+          "Unable to call tokenURINoBase()",
           e,
         );
       },
@@ -1095,6 +1095,15 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
           new RegistryEntry(label, tokenId, owner, tokenURI, null),
         );
       });
+    });
+  }
+
+  public checkRegistryExistenceByLabel(
+    label: string,
+  ): ResultAsync<boolean, NonFungibleRegistryContractError> {
+    return this.registryMap(label).andThen((tokenId) => {
+      console.log("tokenId: ", tokenId);
+      return okAsync(tokenId != null);
     });
   }
 
