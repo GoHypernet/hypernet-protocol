@@ -1098,15 +1098,6 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     });
   }
 
-  public checkRegistryExistenceByLabel(
-    label: string,
-  ): ResultAsync<boolean, NonFungibleRegistryContractError> {
-    return this.registryMap(label).andThen((tokenId) => {
-      console.log("tokenId: ", tokenId);
-      return okAsync(tokenId != null);
-    });
-  }
-
   public getRegistryEntryByOwnerAddress(
     ownerAddress: EthereumAccountAddress,
     index: number,
