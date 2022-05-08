@@ -23,9 +23,6 @@ import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
  */
 contract UpgradeableRegistryFactory is AccessControlEnumerable {
 
-    /// @dev the admin of the role "DEFAULT_ADMIN_ROLE"
-    bytes32 public SUDO_ROLE = keccak256("SUDO_ROLE");
-
     /// @dev address of our upgradeble registry with enumeration proxy beacon
     address public enumerableRegistryBeacon;
 
@@ -82,8 +79,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
 
         // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _setupRole(SUDO_ROLE, _admin);
-        _setRoleAdmin(DEFAULT_ADMIN_ROLE, SUDO_ROLE);
 
         // deploy upgradable beacon instance of enumerable registry contract
         UpgradeableBeacon _enumerableRegistryBeacon = new UpgradeableBeacon(_enumerableRegistry);
