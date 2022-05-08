@@ -1,0 +1,15 @@
+Deployment Wallet Address: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+RPC URL: https://lyrics-prepared-here-powerpoint.trycloudflare.com/rpc/
+Enumerable Registry Beacon Address: 0x2dE06FD57E76bAc559B8676Fd38B035F38Bb3EDd
+Gas Used: 4179770
+Registry Beacon Address: 0xC9581b9c8cb62dbE58c810D4a9ED755F2bde7B91
+Gas Used: 3923228
+
+----------------------------------------------------------------------------------------
+Registry Beacon Address: 0xd47068a28D240722165EaFD661aA9EeA665a1C92
+Registry Implementation Address: 0x3B2774F359AC2AD606179a56Af969432563FF22F
+Registry Beacon Owner: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+Enumerable Registry Beacon Address: 0xb6563b836b7e8E40a6e2a3bd6eB2a4F5AF44C067
+Enumerable Registry Implementation Address: 0x6D4eE7f794103672490830e15308A99eB7a89024
+Enumerable Registry Beacon Owner: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+----------------------------------------------------------------------------------------

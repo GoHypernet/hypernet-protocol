@@ -1,0 +1,15 @@
+Deployment Wallet Address: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+RPC URL: https://rpc-mainnet.matic.quiknode.pro
+Enumerable Registry Beacon Address: 0xb5B31c5864c6116515A47f04992C793BAAee11dB
+Gas Used: 4177570
+Registry Beacon Address: 0x19BC02AA2593162f534a3f0847EB3a610A939Ee0
+Gas Used: 3921028
+
+----------------------------------------------------------------------------------------
+Registry Beacon Address: 0x00054a40eFE192C9507918293689DDce749Ab251
+Registry Implementation Address: 0x59311469d5757D6F75920E1035273a121826967A
+Registry Beacon Owner: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+Enumerable Registry Beacon Address: 0x9Ca635376232Ed4FFAC8d2e3376BCC766Db98fC0
+Enumerable Registry Implementation Address: 0x1B6C3BB48D70f25263Fbf2510AE4DCF8B5ac2159
+Enumerable Registry Beacon Owner: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+----------------------------------------------------------------------------------------

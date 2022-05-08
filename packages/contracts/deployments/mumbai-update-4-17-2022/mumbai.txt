@@ -1,0 +1,15 @@
+Deployment Wallet Address: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+RPC URL: https://polygon-mumbai.infura.io/v3/d9f9f416d1e94778a11cabc1ddc5e931
+Enumerable Registry Beacon Address: 0x9F7Bb46A3aa363a47e21DecE8F61703fBA5A3c6D
+Gas Used: 4177570
+Registry Beacon Address: 0x17DdaA71B3978Ec4bAF7cDb4a0681B57C382FbB9
+Gas Used: 3921028
+
+----------------------------------------------------------------------------------------
+Registry Beacon Address: 0x960f4687f6f4Bd8Cf2ee68FdB8bE9231bdE00DD7
+Registry Implementation Address: 0x3353da0f24fCACd83832b09e9371a937195D2640
+Registry Beacon Owner: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+Enumerable Registry Beacon Address: 0x0928A94e59c981e56eF0c11F871905F9c549d992
+Enumerable Registry Implementation Address: 0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a
+Enumerable Registry Beacon Owner: 0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7
+----------------------------------------------------------------------------------------

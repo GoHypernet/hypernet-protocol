@@ -1,4 +1,4 @@
-const { BN, expectRevert } = require("@openzeppelin/test-helpers");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
 const { MerkleTree } = require('merkletreejs');
@@ -95,6 +95,18 @@ describe("Enumerated Registry", function () {
       registry.register(addr2.address, label, registrationData, 2),
       "NonFungibleRegistry: label is already registered.",
     );
+  });
+
+  it("Check for Royalties Interface (EIP-2981).", async function () {
+    const Test = await ethers.getContractFactory("Test");
+    test = await Test.deploy();
+    await test.deployTransaction.wait();
+
+    expect(await test.checkForEIP2981(registry.address)).to.equal(true);
+    const royaltyInfo = await registry.royaltyInfo(1, hre.ethers.utils.parseUnits("1.0", 18));
+    const royaltyReciever = await registry.burnAddress();
+    expect(royaltyInfo[0]).to.equal(royaltyReciever);
+    expect(royaltyInfo[1]).to.equal(hre.ethers.utils.parseUnits("0.05", 18));
   });
 
   it("Check token owner burn permissions", async function () {
