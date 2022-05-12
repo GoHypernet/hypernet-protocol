@@ -1,0 +1,2 @@
+Enumerable Registry Beacon Address: 0x7d0293aC3F35901b4c0D57b2F03A8f731aDF1987
+Registry Beacon Address: 0x621A97603b0cdE549D64e65886BDa70317a126E9

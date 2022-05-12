@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-web3");
 require("@nomiclabs/hardhat-solhint");
 require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-etherscan");
 require("@atixlabs/hardhat-time-n-mine");
 require("@openzeppelin/hardhat-upgrades");
 
@@ -14,10 +15,14 @@ require("./tasks/general-tasks.js");
 require("./tasks/governance-tasks.js");
 require("./tasks/registry-tasks.js");
 
+require('dotenv').config()
+
 const urlOverride = process.env.ETH_PROVIDER_URL;
 const mnemonic =
   process.env.MNEMONIC ||
   "test test test test test test test test test test test junk";
+const key = process.env.ETH_PRIVATE_KEY;
+const accounts = key ? [key] : { mnemonic }
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -47,53 +52,48 @@ module.exports = {
       chainId: 31337,
     },
     dev: {
-      accounts: {
-        accountsBalance: "10000000000000000000000",
-        mnemonic,
-      },
+      accounts: accounts,
       chainId: 31337,
       url: "http://127.0.0.1:8569",
     },
     DevNet: {
-      accounts: {
-        mnemonic,
-      },
+      accounts: accounts,
       url: "https://eth-provider-dev.hypernetlabs.io",
     },
     mainnet: { // ethereum mainnet
-        accounts: { mnemonic },
+        accounts: accounts,
         chainId: 1,
         url: urlOverride || "https://f8334b5b-ad76-4d4a-8443-88d05097eb8b.hypernetlabs.io/http/",
     },
     rinkeby: { // ethereum tesnet
-      accounts: { mnemonic },
+      accounts: accounts,
       chainId: 4,
       url: urlOverride || "https://station-hundred-assure-neighborhood.trycloudflare.com/http/",
     },
     mumbai: { // polygon testnet
-        accounts: { mnemonic },
+        accounts: accounts,
         chainId: 80001,
         url: urlOverride || "https://matic-mumbai.chainstacklabs.com",
         gas: 6000000,
         gasPrice: 8000000000
     },
     polygon: { // polygon mainnet
-        accounts: { mnemonic },
+        accounts: accounts,
         chainId: 137,
         url: urlOverride || "https://rpc-mainnet.matic.quiknode.pro",
     },
     fuji: { // avalanche testnet
-        accounts: { mnemonic },
+        accounts: accounts,
         chainId: 43113,
         url: urlOverride || "https://f0fa7eba-0c1b-4f3f-bc37-67ba6ae2b60a.hypernetlabs.io/http/ext/bc/C/rpc",
     },
     avalanche: { // avalanche mainnet
-        accounts: { mnemonic },
+        accounts: accounts,
         chainId: 43114,
         url: urlOverride || "https://053e1c5c-66fd-49c3-b267-42ab5f9202c6.hypernetlabs.io/http/ext/bc/C/rpc",
     },
     fantom: { // fantom mainnet
-        accounts: { mnemonic },
+        accounts: accounts,
         chainId: 250,
         url: urlOverride || "https://lyrics-prepared-here-powerpoint.trycloudflare.com/rpc/",
     },
@@ -106,4 +106,11 @@ module.exports = {
     runOnCompile: true,
     disambiguatePaths: false,
   },
+  etherscan: {
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_MAINNET_API_KEY,
+      rinkeby: process.env.ETHERSCAN_MAINNET_API_KEY,
+      polygon: process.env.ETHERSCAN_POLYGON_API_KEY
+    }
+  }
 };

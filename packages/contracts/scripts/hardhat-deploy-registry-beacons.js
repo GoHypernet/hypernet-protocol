@@ -42,6 +42,17 @@ async function main() {
   const registry_reciept = await registry.deployTransaction.wait(2);
   console.log("Registry Beacon Address:", registry.address);
   console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString());
+
+  // verify on etherscan if needed
+  await hre.run("verify:verify", {
+    address: enumerableregistry.address,
+    constructorArguments: []
+  });
+
+  await hre.run("verify:verify", {
+    address: registry.address,
+    constructorArguments: []
+  });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
