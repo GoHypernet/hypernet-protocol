@@ -54,6 +54,14 @@ module.exports = {
       chainId: 31337,
       url: "http://127.0.0.1:8569",
     },
+    dev_ganache: {
+      accounts: {
+        accountsBalance: "10000000000000000000000",
+        mnemonic,
+      },
+      chainId: 1337,
+      url: "http://127.0.0.1:7545"
+    },
     DevNet: {
       accounts: {
         mnemonic,
