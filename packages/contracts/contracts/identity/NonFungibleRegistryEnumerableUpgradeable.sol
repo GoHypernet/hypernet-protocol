@@ -94,8 +94,10 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     address public burnAddress; 
 
     /// @notice The amount in basis points of registrationFee to send to the burnAddress account
-    /// @notice This variable must be less than or equal to 10000
+    /// @notice This variable must be less than or equal to 10000 / burnDenom
     uint256 public burnFee;
+    uint constant burnDenom = 10000;
+
 
   /** @dev address of primary NFR registry required for participation
    * if the primaryRegistry is address(0), then this variable is ignored
@@ -273,7 +275,8 @@ contract NonFungibleRegistryEnumerableUpgradeable is
 
         _createLabeledToken(to, label, registrationData, tokenId);
 
-        uint256 burnAmount = registrationFee * burnFee / 10000;
+        uint256 burnAmount = calculateRoyalty(tokenId, registrationFee);
+        
         IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
         // the fee stays with the token, not the token owner
         identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
@@ -443,12 +446,16 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         }
     }
 
+    function calculateRoyalty(uint256 tokenId, uint256 salePrice) internal view returns(uint256 amount) {
+        amount = salePrice * burnFee / burnDenom;
+    }
+
     function royaltyInfo(uint256 tokenId, uint256 salePrice)
         external
         view
         override(IERC2981Upgradeable)
     returns (address receiver, uint256 royaltyAmount) {
-        royaltyAmount = salePrice * burnFee / 10000;
+        royaltyAmount = calculateRoyalty(tokenId, salePrice);
         receiver = burnAddress;
     }
 
