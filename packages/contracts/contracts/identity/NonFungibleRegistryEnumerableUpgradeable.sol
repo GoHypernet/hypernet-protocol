@@ -96,7 +96,6 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @notice The amount in basis points of registrationFee to send to the burnAddress account
     /// @notice This variable must be less than or equal to 10000 / burnDenom
     uint256 public burnFee;
-    uint constant burnDenom = 10000;
 
 
   /** @dev address of primary NFR registry required for participation
@@ -127,6 +126,10 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @dev The REGISTRAR_ROLE_ADMIN curates the address with REGISTRAR_ROLE permissions
     bytes32 public constant REGISTRAR_ROLE_ADMIN = keccak256("REGISTRAR_ROLE_ADMIN");
 
+    
+    /// @notice used to calculate burn % in calculating royaltyAmount
+    uint constant burnDenom = 10000;
+
     /**
      * @dev Emitted when updateLabel is called successfully
      */
@@ -145,7 +148,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    /// @notice initialize is called once on the creation of an upgradable proxy
+    /// @notice initialize is called once on the creation of an upgradable proxy. 
     /// @dev can only be called once due to the initializer modifier
     /// @param name_ name to be given to the Non Fungible Registry
     /// @param symbol_ shorthand symbol to be given to the Non Fungible Registry
@@ -275,8 +278,8 @@ contract NonFungibleRegistryEnumerableUpgradeable is
 
         _createLabeledToken(to, label, registrationData, tokenId);
 
-        uint256 burnAmount = calculateRoyalty(tokenId, registrationFee);
-        
+        uint256 burnAmount = calculateRoyalty(registrationFee);
+
         IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
         // the fee stays with the token, not the token owner
         identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
@@ -446,7 +449,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         }
     }
 
-    function calculateRoyalty(uint256 tokenId, uint256 salePrice) internal view returns(uint256 amount) {
+    function calculateRoyalty(uint256 salePrice) internal view returns(uint256 amount) {
         amount = salePrice * burnFee / burnDenom;
     }
 
@@ -455,7 +458,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         view
         override(IERC2981Upgradeable)
     returns (address receiver, uint256 royaltyAmount) {
-        royaltyAmount = calculateRoyalty(tokenId, salePrice);
+        royaltyAmount = calculateRoyalty(salePrice);
         receiver = burnAddress;
     }
 
