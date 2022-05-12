@@ -141,7 +141,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     event MerkleRootUpdated(bytes32 merkleRoot, bool frozen); 
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() initializer {}
+    // constructor() {}
 
     /// @notice initialize is called once on the creation of an upgradable proxy
     /// @dev can only be called once due to the initializer modifier
