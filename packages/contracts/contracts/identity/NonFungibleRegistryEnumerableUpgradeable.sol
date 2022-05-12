@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title Hypernet Protocol Enumerable Non Fungible Registry
@@ -29,7 +30,8 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     AccessControlEnumerableUpgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC2981Upgradeable
+    IERC2981Upgradeable,
+    OwnableUpgradeable
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -179,6 +181,16 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         burnFee = 500; // basis points, 500 bp = 5%
         primaryRegistry = _primaryRegistry;
         frozen = false;
+    }
+
+    /** @notice claims ownership of the collection if one is not set
+     *  @dev this can be used to claim ownership of un-owned collections
+     */
+    function claimOwner() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
+        require(owner() == address(0), "NonFungibleRegistry: owner already set.");
+
+        _transferOwnership(_msgSender());
     }
 
     /** @notice setRegistryParameters enable or disable the lazy registration feature

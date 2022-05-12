@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title Hypernet Protocol Non Fungible Registry
@@ -27,7 +28,8 @@ contract NonFungibleRegistryUpgradeable is
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC2981Upgradeable
+    IERC2981Upgradeable,
+    OwnableUpgradeable
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -203,6 +205,16 @@ contract NonFungibleRegistryUpgradeable is
             burnFee = params._burnFee[0]; 
         }
         if (params._baseURI.length > 0) { baseURI = params._baseURI[0]; }
+    }
+
+    /** @notice claims ownership of the collection if one is not set
+     *  @dev this can be used to claim ownership of un-owned collections
+     */
+    function claimOwner() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
+        require(owner() == address(0), "NonFungibleRegistry: owner already set.");
+
+        _transferOwnership(_msgSender());
     }
 
     /// @notice setMerkleRoot enable or disable requirement for pre-registration
