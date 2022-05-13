@@ -1,4 +1,4 @@
-const {  HT, hAddress, timelockAddress, gasSettings }  = require("./constants.js");
+const { RF, HT, hAddress, timelockAddress, gasSettings, factoryAddress }  = require("./constants.js");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -174,4 +174,18 @@ task("gasSettings", "Prints the EIP1159 standard gas settings", async (taskArgs,
         console.log("gasPrice:",hre.ethers.utils.formatUnits(feeData.gasPrice, "gwei"), "GWei");
         console.log(feeData.gasPrice.toString());
     }
+});
+
+task("grantAdminRole", "Grants the admin role to an account")
+  .addParam("address", "which address to grant the admin role to")
+  .setAction(async (taskArgs) => {
+    const newAdmin = taskArgs.address
+
+    console.log(`Granting admin role to ${newAdmin}`);
+
+    const factory = new hre.ethers.Contract(factoryAddress(), RF.abi, (await hre.ethers.getSigners())[0]);
+    const tx = await factory.grantRole("0x0000000000000000000000000000000000000000000000000000000000000000", newAdmin)
+    const receipt = await tx.wait();
+
+    console.log(`Result: ${receipt.status}`);  
 });
