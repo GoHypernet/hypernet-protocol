@@ -28,7 +28,7 @@ async function main() {
   );
   const enumerableregistry = await EnumerableRegistry.deploy(await gasSettings());  
   const enumerable_registry_reciept =
-    await enumerableregistry.deployTransaction.wait(3);
+    await enumerableregistry.deployTransaction.wait();
   console.log(
     "Enumerable Registry Beacon Address:",
     enumerableregistry.address,
@@ -43,7 +43,7 @@ async function main() {
     "NonFungibleRegistryUpgradeable",
   );
   const registry = await Registry.deploy(await gasSettings());
-  const registry_reciept = await registry.deployTransaction.wait(3);
+  const registry_reciept = await registry.deployTransaction.wait();
   console.log("Registry Beacon Address:", registry.address);
   console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString());
 
@@ -73,28 +73,28 @@ async function main() {
     zeroAddress,
     await gasSettings()
   );
-  const factory_reciept = await factoryregistry.deployTransaction.wait(6);
+  const factory_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);
   console.log("Factory Gas Fee:", factory_reciept.gasUsed.toString());
 
   // deploy the batch minting module
   const BatchModule = await ethers.getContractFactory("BatchModule");
   batchmodule = await BatchModule.deploy("Batch Minting", await gasSettings());
-  const batchmodule_reciept = await batchmodule.deployTransaction.wait(3);
+  const batchmodule_reciept = await batchmodule.deployTransaction.wait();
   console.log("Batch Module Address:", batchmodule.address);
   console.log("Batch Module Gas Fee:", batchmodule_reciept.gasUsed.toString());
 
   // deploy the lazy minting module
   const LazyMintModule = await ethers.getContractFactory("LazyMintModule");
   const lazymintmodule = await LazyMintModule.deploy("Lazy Minting", await gasSettings());
-  const lazymintmodule_reciept = await lazymintmodule.deployTransaction.wait(3);
+  const lazymintmodule_reciept = await lazymintmodule.deployTransaction.wait();
   console.log("Lazy Mint Module Address:", lazymintmodule.address);
   console.log("Lazy Mint Module Gas Fee:", lazymintmodule_reciept.gasUsed.toString());
 
   // deploy the Merkle Drop module
   const MerkleModule = await ethers.getContractFactory("MerkleModule");
   const merklemodule = await MerkleModule.deploy("Merkle Drop", await gasSettings());
-  const merklemodule_reciept = await merklemodule.deployTransaction.wait(3);
+  const merklemodule_reciept = await merklemodule.deployTransaction.wait();
   console.log("Merkle Module Address:", merklemodule.address);
   console.log("Merkle Module Gas Fee:", merklemodule_reciept.gasUsed.toString());
 
@@ -115,12 +115,12 @@ async function main() {
 
   // register the deployer account
   const registrationTx = await profilesHandle.register(owner.address, "Deployer Account", "", 9205545327, await gasSettings());
-  const registrationRcpt = await registrationTx.wait(3);
+  const registrationRcpt = await registrationTx.wait();
   console.log("Deployer Account Register Gas Fee:", registrationRcpt.gasUsed.toString());
 
   // register the Hypernet.ID account so it can also register and recieve NFIs
   const registrationHIDTx = await profilesHandle.register(hypernetidaddress, "Hypernet.ID Account", "", 6940495172, await gasSettings());
-  const registrationHIDRcpt = await registrationHIDTx.wait(3);
+  const registrationHIDRcpt = await registrationHIDTx.wait();
   console.log("Hypernet.ID Account Register Gas Fee:", registrationHIDRcpt.gasUsed.toString());
 
   // give the Hypernet.ID account the REGISTRAR role in Hypernet Profiles registry
@@ -129,7 +129,7 @@ async function main() {
       hypernetidaddress,
       await gasSettings()
     );
-  const hidAdminRcpt = await hidAdminTx.wait(3);
+  const hidAdminRcpt = await hidAdminTx.wait();
   console.log("Hypernet.ID address has registrar role");
   console.log("Access Control Gas Fee:", hidAdminRcpt.gasUsed.toString());
 
@@ -142,19 +142,19 @@ async function main() {
   );
 
   const batchRegTx = await registryModulesHandle.register(owner.address, "Batch Minting", `${batchmodule.address}`, 1, await gasSettings());
-  const batchRegRcpt = await batchRegTx.wait(3);
+  const batchRegRcpt = await batchRegTx.wait();
   console.log("Batch Module Register Gas Fee:", batchRegRcpt.gasUsed.toString());
 
   const lazyMintRegTx = await registryModulesHandle.register(owner.address, "Lazy Minting", `${lazymintmodule.address}`, 2, await gasSettings());
-  const lazyMintRegRcpt = await lazyMintRegTx.wait(3);
+  const lazyMintRegRcpt = await lazyMintRegTx.wait();
   console.log("Lazy Mint Module Register Gas Fee:", lazyMintRegRcpt.gasUsed.toString());
   
   const merkleDropRegTx = await registryModulesHandle.register(owner.address, "Merkle Drop", `${merklemodule.address}`, 3, await gasSettings());
-  const merkleDropRegRcpt = await merkleDropRegTx.wait(3);
+  const merkleDropRegRcpt = await merkleDropRegTx.wait();
   console.log("Merkle Drop Module Register Gas Fee:", merkleDropRegRcpt.gasUsed.toString());
 
   const buyNFIRegTx = await registryModulesHandle.register(owner.address, "Buy NFI", `${buymodule.address}`, 4, await gasSettings());
-  const buyNFIRegRcpt = await buyNFIRegTx.wait(3);
+  const buyNFIRegRcpt = await buyNFIRegTx.wait();
   console.log("Buy NFI Module Register Gas Fee:", buyNFIRegRcpt.gasUsed.toString());
 }
 

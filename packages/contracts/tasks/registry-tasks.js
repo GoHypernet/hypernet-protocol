@@ -203,7 +203,7 @@ task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
       await gasSettings()
     );
     console.log(tx);
-    const tx_rcpt = await tx.wait(2);
+    const tx_rcpt = await tx.wait();
 
     const regAddress = await factoryHandle.nameToAddress(name);
     console.log("Registry Deployed to:", regAddress);
@@ -236,7 +236,7 @@ task("createRegistryByToken", "Creates a registry by burning token.")
 
     // approve the registry factory to pull hypertoken from the users wallet
     let tx = await hypertoken.approve(factoryHandle.address, regFee);
-    let tx_rcpt = await tx.wait(3);
+    let tx_rcpt = await tx.wait();
 
     tx = await factoryHandle.createRegistryByToken(
       name,
@@ -245,7 +245,7 @@ task("createRegistryByToken", "Creates a registry by burning token.")
       enumerable,
       await gasSettings(),
     );
-    tx_rcpt = await tx.wait(2);
+    tx_rcpt = await tx.wait();
 
     const regAddress = await factoryHandle.nameToAddress(name);
     console.log("Registry Deployed to:", regAddress);
@@ -371,7 +371,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
       );
 
     const tx = await registryHandle.setRegistryParameters(params, await gasSettings());
-    const tx_rcpt = await tx.wait(3);
+    const tx_rcpt = await tx.wait();
 
     const REGISTRAR_ROLE = registryHandle.REGISTRAR_ROLE();
     const registrarAddress = await registryHandle.getRoleMember(
@@ -770,7 +770,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
       tokenid,
       await gasSettings()
     );
-    await tx.wait(3);
+    await tx.wait();
 
     const tokenId = await registryHandle.registryMap(NFILabel);
     console.log("Token ID:", tokenId.toString());

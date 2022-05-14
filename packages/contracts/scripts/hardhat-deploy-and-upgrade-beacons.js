@@ -5,7 +5,6 @@
 // Runtime Environment's members available in the global scope.
 const { ethers } = require("hardhat");
 const hre = require("hardhat");
-const { gasSettings } = require("../tasks/constants.js");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -22,7 +21,6 @@ async function main() {
   console.log(`------ Current Addresses ------`);
   await hre.run("getFactoryBeaconInfo");
   console.log(`-------------------------------\n`);
-
   console.log(`----- Deploying Beacons ------`);
 
   // deploy enumerable registry contract

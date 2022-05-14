@@ -23,6 +23,7 @@ const mnemonic =
   "test test test test test test test test test test test junk";
 const key = process.env.ETH_PRIVATE_KEY;
 const accounts = key ? [key] : { mnemonic }
+const forkRPCURL = process.env.FORK_RPC_URL;
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -42,12 +43,11 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      chainId: 137,
       mining: { 
         auto: true
       },
       forking: process.env.ENABLE_FORKING ? {
-        url: "https://polygon-mainnet.g.alchemy.com/v2/t0ds-JPi19zU61lT6r1n1UYw5KTTm1KW",
+        url: forkRPCURL,
         enabled: true
       } : undefined
     },
@@ -75,17 +75,12 @@ module.exports = {
         chainId: 80001,
         url: urlOverride || "https://matic-mumbai.chainstacklabs.com",
         gas: 6000000,
-        gasPrice: 8000000000,
-        forking: process.env.ENABLE_FORKING
+        gasPrice: 8000000000
     },
     polygon: { // polygon mainnet
         accounts: accounts,
         chainId: 137,
-        url: urlOverride || "https://rpc-mainnet.matic.quiknode.pro",
-        forking: process.env.ENABLE_FORKING ? {
-          url: urlOverride || "https://rpc-mainnet.matic.quiknode.pro",
-          enabled: true
-        } : undefined
+        url: urlOverride || "https://rpc-mainnet.matic.quiknode.pro"
     },
     fuji: { // avalanche testnet
         accounts: accounts,

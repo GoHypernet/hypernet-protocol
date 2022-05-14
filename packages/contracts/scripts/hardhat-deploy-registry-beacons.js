@@ -24,7 +24,7 @@ async function main() {
   );
   const enumerableregistry = await EnumerableRegistry.deploy(await gasSettings());
   const enumerable_registry_reciept =
-    await enumerableregistry.deployTransaction.wait(2);
+    await enumerableregistry.deployTransaction.wait();
   console.log(
     "Enumerable Registry Beacon Address:",
     enumerableregistry.address,
@@ -39,7 +39,7 @@ async function main() {
     "NonFungibleRegistryUpgradeable",
   );
   const registry = await Registry.deploy(await gasSettings());
-  const registry_reciept = await registry.deployTransaction.wait(2);
+  const registry_reciept = await registry.deployTransaction.wait();
   console.log("Registry Beacon Address:", registry.address);
   console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString());
 
