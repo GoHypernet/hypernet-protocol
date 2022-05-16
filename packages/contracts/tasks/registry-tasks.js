@@ -37,6 +37,19 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
     console.log("Enumerable Registry Beacon Address:", enumRegBeaconAddr);
     console.log("Enumerable Registry Implementation Address:", enumRegImplAddr);
     console.log("Enumerable Registry Beacon Owner:", enumRegBeaconOwner)
+
+    return {
+      registry: {
+        beacon: regBeaconAddr,
+        implementation: regImpleAddr,
+        owner: regBeaconOwner
+      },
+      enumerableRegistry: {
+        beacon: enumRegBeaconAddr,
+        implementation: enumRegImplAddr,
+        owner: enumRegBeaconOwner
+      }
+    }
   });
 
 task("setFactoryBeaconEnumerable", "Update the implementation address of the enumerable NFR beacon.")
@@ -89,7 +102,7 @@ task("setFactoryBeaconEnumerable", "Update the implementation address of the enu
 
     console.log("Enumerable Registry Implementation Address:", enumRegImplAddr);
     console.log("Enumerable Registry Beacon Owner:", enumRegBeaconOwner);
-    console.log("Gas Used:", txrcp.gasUsed.toString());
+    //console.log("Gas Used:", txrcp.gasUsed.toString());
   });
 
 task("setFactoryBeaconNonEnumerable", "Update the implementation address of the non-enumerable NFR beacon.")

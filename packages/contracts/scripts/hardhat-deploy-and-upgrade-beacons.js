@@ -3,8 +3,10 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
+const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const hre = require("hardhat");
+const { RF, factoryAddress, gasSettings } = require("../tasks/constants");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -40,6 +42,11 @@ async function main() {
     "NonFungibleRegistryUpgradeable",
   );
 
+  const klobtokenaddress = "0x04230665256b376a6829a7b5d77ed22ca4e668c3";
+  let klobtoken = await hre.ethers.getContractAt("NonFungibleRegistryEnumerableUpgradeable", klobtokenaddress);
+  //let theAdmin = await klobtoken.getRoleMember("0x0000000000000000000000000000000000000000000000000000000000000000", 0);
+  //console.log(theAdmin)
+
   const registry = await Registry.deploy();
   const registry_reciept = await registry.deployTransaction.wait();
   console.log("New Registry Beacon Address:", registry.address);
@@ -51,8 +58,80 @@ async function main() {
   console.log(`-------------------------------\n`);
 
   console.log(`------ Updated Addresses ------`);
-  await hre.run("getFactoryBeaconInfo");
+  const info = await hre.run("getFactoryBeaconInfo");
   console.log(`-------------------------------\n`);
+
+  const ivanAddress = "0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7";
+  await hre.network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [ivanAddress]
+  })
+
+  const ivanSigner = await hre.ethers.getSigner(ivanAddress);
+
+  klobtoken = klobtoken.connect(ivanSigner);
+
+  await hre.network.provider.send("hardhat_setBalance", [
+    ivanAddress,
+    ethers.utils.parseEther("100000000").toHexString()
+  ])
+
+  console.log(`----- Claiming Owner on KlobToken ------`)
+
+  let tx = await klobtoken.claimOwner();
+  await tx.wait();
+
+  klobtokenOwner = await klobtoken.owner();
+  console.log(`KlobToken Owner: ${klobtokenOwner}`);
+
+  console.log(`----------------------------------------\n`)
+
+  console.log(`----- Deploying New Test Registries ----`)
+  const name = "TEST"; const name2 = "Test2";
+  const symbol = "TST"; const symbol2 = "TST2";
+  const registrar = klobtokenOwner; const registrar2 = klobtokenOwner;
+  const enumerable = true; const enumerable2 = false;
+
+  const accounts = await hre.ethers.getSigners();
+  const factoryHandle = new hre.ethers.Contract(
+    factoryAddress(),
+    RF.abi,
+    ivanSigner
+  );
+
+  tx = await factoryHandle.createRegistry(
+    name,
+    symbol,
+    registrar,
+    enumerable,
+    await gasSettings()
+  );
+
+  tx2 = await factoryHandle.createRegistry(
+    name2,
+    symbol2,
+    registrar2,
+    enumerable2
+  )
+
+  //console.log(tx);
+  const tx_rcpt = await tx.wait();
+  const tx_rcpt2 = await tx2.wait();
+
+  const regAddress = await factoryHandle.nameToAddress(name);
+  console.log("Enumerable Registry Deployed to:", regAddress);
+  const newRegistry = await hre.ethers.getContractAt("NonFungibleRegistryEnumerableUpgradeable", regAddress);
+  const newRegistryOwner = await newRegistry.owner()
+  console.log(`New Enumerable Registry Owner: ${newRegistryOwner}`);
+
+  const regAddress2 = await factoryHandle.nameToAddress(name2);
+  console.log("Registry Deployed to:", regAddress2);
+  const newRegistry2 = await hre.ethers.getContractAt("NonFungibleRegistryEnumerableUpgradeable", regAddress2);
+  const newRegistryOwner2 = await newRegistry2.owner()
+  console.log(`New Registry Owner: ${newRegistryOwner2}`);
+
+  console.log(`----------------------------------------\n`)
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
