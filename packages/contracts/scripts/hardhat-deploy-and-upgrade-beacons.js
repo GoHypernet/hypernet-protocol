@@ -76,6 +76,8 @@ async function main() {
 
   console.log(`----- Claiming Owner on KlobToken ------`)
 
+  // @todo replace with claiming every existing registry
+
   let tx = await klobtoken.claimOwner();
   await tx.wait();
 
