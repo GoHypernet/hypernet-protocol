@@ -16,8 +16,31 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  const [owner] = await hre.ethers.getSigners();
-  console.log("Deployment Wallet Address:", owner.address);
+  const forking = hre.network.name == "hardhat"
+  const ivanAddress = "0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7";
+  let deployer = (await hre.ethers.getSigners())[0];
+
+  if (forking) {
+    console.log(`Running simulated deployment and upgrade test.`)
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [ivanAddress]
+    })
+
+    await hre.network.provider.send("hardhat_setBalance", [
+      ivanAddress,
+      ethers.utils.parseEther("100000000").toHexString()
+    ])
+  
+    deployer = await hre.ethers.getSigner(ivanAddress);
+  } else {
+    console.log(`Running real deployment and upgrade.`)
+    if (deployer.address != ivanAddress) {
+      throw new Error(`Deployer address expected to be ${ivanAddress} but was ${deployer.address}`)
+    }
+  }
+
+  console.log("Deployment Wallet Address:", deployer.address);
   console.log("RPC URL / Forking Config:", hre.network.config.forking);
 
   console.log(`------ Current Addresses ------`);
@@ -26,29 +49,19 @@ async function main() {
   console.log(`----- Deploying Beacons ------`);
 
   // deploy enumerable registry contract
-  const EnumerableRegistry = await ethers.getContractFactory(
-    "NonFungibleRegistryEnumerableUpgradeable",
-  );
+  const EnumerableRegistry = await ethers.getContractFactory("NonFungibleRegistryEnumerableUpgradeable");
+
   const enumerableregistry = await EnumerableRegistry.deploy();
-  const enumerable_registry_reciept =
-    await enumerableregistry.deployTransaction.wait();
-  console.log(
-    "New Enumerable Registry Beacon Address:",
-    enumerableregistry.address,
-  );
+  const enumerable_registry_reciept = await enumerableregistry.deployTransaction.wait();
+  console.log("New Enumerable Registry Beacon Address:", enumerableregistry.address);
 
   // deploy registry contract
-  const Registry = await ethers.getContractFactory(
-    "NonFungibleRegistryUpgradeable",
-  );
-
+  const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable",);
   const klobtokenaddress = "0x04230665256b376a6829a7b5d77ed22ca4e668c3";
-  let klobtoken = await hre.ethers.getContractAt("NonFungibleRegistryEnumerableUpgradeable", klobtokenaddress);
-  //let theAdmin = await klobtoken.getRoleMember("0x0000000000000000000000000000000000000000000000000000000000000000", 0);
-  //console.log(theAdmin)
-
+  let klobtoken = await hre.ethers.getContractAt("NonFungibleRegistryEnumerableUpgradeable", klobtokenaddress, deployer);
   const registry = await Registry.deploy();
   const registry_reciept = await registry.deployTransaction.wait();
+
   console.log("New Registry Beacon Address:", registry.address);
   console.log(`-------------------------------\n`);
 
@@ -60,21 +73,6 @@ async function main() {
   console.log(`------ Updated Addresses ------`);
   const info = await hre.run("getFactoryBeaconInfo");
   console.log(`-------------------------------\n`);
-
-  const ivanAddress = "0xD538fDEe65629C73cbe0d855d26E62d82ee8d1f7";
-  await hre.network.provider.request({
-    method: "hardhat_impersonateAccount",
-    params: [ivanAddress]
-  })
-
-  const ivanSigner = await hre.ethers.getSigner(ivanAddress);
-
-  klobtoken = klobtoken.connect(ivanSigner);
-
-  await hre.network.provider.send("hardhat_setBalance", [
-    ivanAddress,
-    ethers.utils.parseEther("100000000").toHexString()
-  ])
 
   console.log(`----- Claiming Owner on KlobToken ------`)
 
@@ -92,11 +90,10 @@ async function main() {
   const registrar = klobtokenOwner; const registrar2 = klobtokenOwner;
   const enumerable = true; const enumerable2 = false;
 
-  const accounts = await hre.ethers.getSigners();
   const factoryHandle = new hre.ethers.Contract(
     factoryAddress(),
     RF.abi,
-    ivanSigner
+    deployer
   );
 
   tx = await factoryHandle.createRegistry(
@@ -111,7 +108,8 @@ async function main() {
     name2,
     symbol2,
     registrar2,
-    enumerable2
+    enumerable2,
+    await gasSettings()
   )
 
   //console.log(tx);
@@ -129,9 +127,7 @@ async function main() {
   const newRegistry2 = await hre.ethers.getContractAt("NonFungibleRegistryEnumerableUpgradeable", regAddress2);
   const newRegistryOwner2 = await newRegistry2.owner()
   console.log(`New Registry Owner: ${newRegistryOwner2}`);
-
   console.log(`----------------------------------------\n`)
-
 }
 
 // We recommend this pattern to be able to use async/await everywhere
