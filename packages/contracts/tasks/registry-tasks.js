@@ -54,11 +54,11 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
 
 task("setFactoryBeaconEnumerable", "Update the implementation address of the enumerable NFR beacon.")
   .addParam("address", "Address of the new implemenation.")
-  .addOptionalParam("impersonate", "If we should impersonate the owner of the contract.")
+  //.addOptionalParam("impersonate", "If we should impersonate the owner of the contract.")
   .setAction(async (taskArgs) => {
     const [account] = await hre.ethers.getSigners();
-    const shouldImpersonate = taskArgs.impersonate;
-    if (shouldImpersonate) console.log(`Will impersonate the owner.`);
+    //const shouldImpersonate = taskArgs.impersonate;
+    //if (shouldImpersonate) console.log(`Will impersonate the owner.`);
 
     const newImpl = taskArgs.address;
     const factoryHandle = new hre.ethers.Contract(
@@ -75,6 +75,7 @@ task("setFactoryBeaconEnumerable", "Update the implementation address of the enu
         account,
     );
 
+    /*
     if (shouldImpersonate) {
       const owner = await enumRegBeaconHandle.owner();
 
@@ -91,10 +92,10 @@ task("setFactoryBeaconEnumerable", "Update the implementation address of the enu
       const ownerSigner = await hre.ethers.getSigner(owner);
 
       enumRegBeaconHandle = enumRegBeaconHandle.connect(ownerSigner)
-    }
+    }*/
 
     // set the new implementation address
-    let tx = await enumRegBeaconHandle.upgradeTo(newImpl, await gasSettings());
+    let tx = await enumRegBeaconHandle.upgradeTo(newImpl);
     let txrcp = await tx.wait();
 
     const enumRegImplAddr = await enumRegBeaconHandle.implementation();
@@ -107,11 +108,11 @@ task("setFactoryBeaconEnumerable", "Update the implementation address of the enu
 
 task("setFactoryBeaconNonEnumerable", "Update the implementation address of the non-enumerable NFR beacon.")
   .addParam("address", "Address of the new implemenation.")
-  .addOptionalParam("impersonate", "If we should impersonate the owner of the contract.")
+  //.addOptionalParam("impersonate", "If we should impersonate the owner of the contract.")
   .setAction(async (taskArgs) => {
     const [account] = await hre.ethers.getSigners();
-    const shouldImpersonate = taskArgs.impersonate;
-    if (shouldImpersonate) console.log(`Will impersonate the owner.`);
+    //const shouldImpersonate = taskArgs.impersonate;
+    //if (shouldImpersonate) console.log(`Will impersonate the owner.`);
 
     const newImpl = taskArgs.address;
     const factoryHandle = new hre.ethers.Contract(
@@ -128,7 +129,7 @@ task("setFactoryBeaconNonEnumerable", "Update the implementation address of the 
         account,
     );
 
-    if (shouldImpersonate) {
+    /*if (shouldImpersonate) {
       const owner = await regBeaconHandle.owner();
 
       await hre.network.provider.request({
@@ -144,10 +145,10 @@ task("setFactoryBeaconNonEnumerable", "Update the implementation address of the 
       const ownerSigner = await hre.ethers.getSigner(owner);
 
       regBeaconHandle = regBeaconHandle.connect(ownerSigner)
-    }
+    }*/
 
     // set the new implementation address
-    let tx = await regBeaconHandle.upgradeTo(newImpl, await gasSettings());
+    let tx = await regBeaconHandle.upgradeTo(newImpl);
     let txrcp = await tx.wait();
 
     const regImplAddr = await regBeaconHandle.implementation();

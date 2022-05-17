@@ -64,8 +64,8 @@ async function main() {
   console.log(`-------------------------------\n`);
 
   console.log(`------ Upgrading Beacons ------`)
-  await hre.run("setFactoryBeaconEnumerable", { address: enumerableregistry.address, impersonate: "false"});
-  await hre.run("setFactoryBeaconNonEnumerable", { address: registry.address, impersonate: "false" });
+  await hre.run("setFactoryBeaconEnumerable", { address: enumerableregistry.address});
+  await hre.run("setFactoryBeaconNonEnumerable", { address: registry.address});
   console.log(`-------------------------------\n`);
 
   console.log(`------ Updated Addresses ------`);
