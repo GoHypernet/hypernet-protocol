@@ -80,7 +80,7 @@ module.exports = {
     polygon: { // polygon mainnet
         accounts: accounts,
         chainId: 137,
-        url: urlOverride || "https://rpc-mainnet.matic.quiknode.pro"
+        url: urlOverride || "https://polygon-mainnet.g.alchemy.com/v2/6DS1vb9_i8ePkLPyPnk-sZsGyM5xnOwY"
     },
     fuji: { // avalanche testnet
         accounts: accounts,
