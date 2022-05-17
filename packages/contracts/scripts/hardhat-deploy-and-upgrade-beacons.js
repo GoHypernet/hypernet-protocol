@@ -57,8 +57,6 @@ async function main() {
 
   // deploy registry contract
   const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable",);
-  const klobtokenaddress = "0x04230665256b376a6829a7b5d77ed22ca4e668c3";
-  let klobtoken = await hre.ethers.getContractAt("NonFungibleRegistryEnumerableUpgradeable", klobtokenaddress, deployer);
   const registry = await Registry.deploy();
   const registry_reciept = await registry.deployTransaction.wait();
 
@@ -74,29 +72,45 @@ async function main() {
   const info = await hre.run("getFactoryBeaconInfo");
   console.log(`-------------------------------\n`);
 
-  console.log(`----- Claiming Owner on KlobToken ------`)
-
-  // @todo replace with claiming every existing registry
-
-  let tx = await klobtoken.claimOwner();
-  await tx.wait();
-
-  klobtokenOwner = await klobtoken.owner();
-  console.log(`KlobToken Owner: ${klobtokenOwner}`);
-
-  console.log(`----------------------------------------\n`)
-
-  console.log(`----- Deploying New Test Registries ----`)
-  const name = "TEST"; const name2 = "Test2";
-  const symbol = "TST"; const symbol2 = "TST2";
-  const registrar = klobtokenOwner; const registrar2 = klobtokenOwner;
-  const enumerable = true; const enumerable2 = false;
+  console.log(`----- Claiming Owner on Existing Registries ------`)
 
   const factoryHandle = new hre.ethers.Contract(
     factoryAddress(),
     RF.abi,
     deployer
   );
+
+  // @todo replace with claiming every existing registry
+  const numEnumerableRegistries = await factoryHandle.getNumberOfEnumerableRegistries()
+  const numRegistries = await factoryHandle.getNumberOfRegistries()
+
+  for (let i = 0; i < numEnumerableRegistries; i++) {
+    const enumerableRegistryAddress = await factoryHandle.enumerableRegistries(i)
+    console.log(`Claiming owner on Enumerable Registry: ${enumerableRegistryAddress}`)
+    let enumRegContract = await hre.ethers.getContractAt("NonFungibleRegistryEnumerableUpgradeable", enumerableRegistryAddress, deployer)
+    const tx = await enumRegContract.claimOwner()
+    await tx.wait()
+    const enumRegOwner = await enumRegContract.owner()
+    console.log(`Enumerable Registry ${enumerableRegistryAddress} owner: ${enumRegOwner}`)
+  }
+
+  for (let i = 0; i < numRegistries; i++) {
+    const registryAddress = await factoryHandle.registries(i)
+    console.log(`Claiming owner on Registry: ${registryAddress}`)
+    let regContract = await hre.ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, deployer)
+    const tx = await regContract.claimOwner()
+    await tx.wait()
+    const regOwner = await regContract.owner()
+    console.log(`Registry ${registryAddress} owner: ${regOwner}`)
+  }
+
+  console.log(`----------------------------------------\n`)
+
+  console.log(`----- Deploying New Test Registries ----`)
+  const name = "TEST"; const name2 = "Test2";
+  const symbol = "TST"; const symbol2 = "TST2";
+  const registrar = deployer.address; const registrar2 = deployer.address;
+  const enumerable = true; const enumerable2 = false;
 
   tx = await factoryHandle.createRegistry(
     name,
