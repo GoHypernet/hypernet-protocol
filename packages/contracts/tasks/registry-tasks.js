@@ -859,3 +859,36 @@ task("grantRegistrarRole", "Give the registrar role to a specified account.")
 
   console.log("REGISTRAR_ROLE updated");
 });
+
+task("transferOwnership", "Give the registrar role to a specified account.")
+.addParam("registry", "Name of target Registry where role is to be granted.")
+.addParam("owner", "Recipient of the OWNER_ROLE.")
+.setAction(async (taskArgs) => {
+  const accounts = await hre.ethers.getSigners();
+
+  const registryName = taskArgs.registry;
+  const registrar = taskArgs.registrar
+
+  const factoryHandle = new hre.ethers.Contract(
+    factoryAddress(),
+    RF.abi,
+    accounts[0],
+  );
+
+  const registryAddress = await factoryHandle.nameToAddress(registryName);
+  const registryHandle = new hre.ethers.Contract(
+    registryAddress,
+    NFR.abi,
+    accounts[0],
+  );
+
+  // call registerByToken on the NFR
+  tx = await registryHandle.grantRole(
+    registryHandle.REGISTRAR_ROLE(),
+    registrar,
+    await gasSettings()
+  );
+  await tx.wait();
+
+  console.log("REGISTRAR_ROLE updated");
+});

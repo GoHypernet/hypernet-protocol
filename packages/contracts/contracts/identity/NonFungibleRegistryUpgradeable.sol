@@ -183,6 +183,13 @@ contract NonFungibleRegistryUpgradeable is
         frozen = false;
     }
 
+    /** @notice transfer ownership of a collection to a new owner */
+    function transferOwnership(address newOwner) external {
+        require(hasRole(OWNER_ROLE, msg.sender));
+        _grantRole(OWNER_ROLE, newOwner);
+        _revokeRole(OWNER_ROLE, msg.sender);
+    }
+
     /** @notice claim ownership of the registry; must have DEFAULT_ADMIN_ROLE and owner must not already be set */
     function claimOwner() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
