@@ -27,30 +27,20 @@ async function main() {
     "NonFungibleRegistryEnumerableUpgradeable",
   );
   const enumerableregistry = await EnumerableRegistry.deploy(await gasSettings());  
-  const enumerable_registry_reciept =
-    await enumerableregistry.deployTransaction.wait();
-  console.log(
-    "Enumerable Registry Beacon Address:",
-    enumerableregistry.address,
-  );
-  console.log(
-    "Factory Gas Fee:",
-    enumerable_registry_reciept.gasUsed.toString(),
-  );
+  const enumerable_registry_reciept = await enumerableregistry.deployTransaction.wait();
+
+  console.log("Enumerable Registry Beacon Address:", enumerableregistry.address);
+  console.log("Factory Gas Fee:", enumerable_registry_reciept.gasUsed.toString());
 
   // deploy registry contract
-  const Registry = await ethers.getContractFactory(
-    "NonFungibleRegistryUpgradeable",
-  );
+  const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
   const registry = await Registry.deploy(await gasSettings());
   const registry_reciept = await registry.deployTransaction.wait();
   console.log("Registry Beacon Address:", registry.address);
   console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString());
 
   // deploy factory contract with the deployer wallet as the admin
-  const FactoryRegistry = await ethers.getContractFactory(
-    "UpgradeableRegistryFactory",
-  );
+  const FactoryRegistry = await ethers.getContractFactory("UpgradeableRegistryFactory");
   const factoryregistry = await FactoryRegistry.deploy(
     owner.address,
     [
@@ -73,6 +63,7 @@ async function main() {
     zeroAddress,
     await gasSettings()
   );
+
   const factory_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);
   console.log("Factory Gas Fee:", factory_reciept.gasUsed.toString());
@@ -129,17 +120,14 @@ async function main() {
       hypernetidaddress,
       await gasSettings()
     );
+
   const hidAdminRcpt = await hidAdminTx.wait();
   console.log("Hypernet.ID address has registrar role");
   console.log("Access Control Gas Fee:", hidAdminRcpt.gasUsed.toString());
 
   // update the Registry Modules registry
   const registryModulesAddress = await factoryregistry.nameToAddress("Registry Modules");
-  const registryModulesHandle = new hre.ethers.Contract(
-    registryModulesAddress,
-    NFR.abi,
-    owner,
-  );
+  const registryModulesHandle = new hre.ethers.Contract(registryModulesAddress,NFR.abi,owner);
 
   const batchRegTx = await registryModulesHandle.register(owner.address, "Batch Minting", `${batchmodule.address}`, 1, await gasSettings());
   const batchRegRcpt = await batchRegTx.wait();

@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "../external/RoyaltiesV2.sol";
 
 /**
  * @title Hypernet Protocol Enumerable Non Fungible Registry
@@ -29,7 +30,8 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     AccessControlEnumerableUpgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC2981Upgradeable
+    IERC2981Upgradeable,
+    RoyaltiesV2Impl
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -183,6 +185,15 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         burnFee = 500; // basis points, 500 bp = 5%
         primaryRegistry = _primaryRegistry;
         frozen = false;
+    }
+
+    /** @notice sets the royalties for the given token id, the recipient, with the given percentage */
+    function setRoyalties(uint _tokenId, address payable _royaltiesReceipientAddress, uint96 _percentageBasisPoints) public {
+        require(hasRole(OWNER_ROLE, _msgSender()), "Not owner.");
+        LibPart.Part[] memory _royalties = new LibPart.Part[](1);
+        _royalties[0].value = _percentageBasisPoints;
+        _royalties[0].account = _royaltiesReceipientAddress;
+        _saveRoyalties(_tokenId, _royalties);
     }
 
     /** @notice transfer ownership of a collection to a new owner */
@@ -472,8 +483,10 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         view
         override(IERC2981Upgradeable)
     returns (address receiver, uint256 royaltyAmount) {
-        royaltyAmount = salePrice * burnFee / 10000;
-        receiver = burnAddress;
+        LibPart.Part[] memory specifics = getRaribleV2Royalties(tokenId);
+        LibPart.Part memory part = specifics[0];
+        receiver = part.account;
+        royaltyAmount = part.value * salePrice / 10000;
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
