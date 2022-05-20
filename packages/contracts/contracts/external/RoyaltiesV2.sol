@@ -54,7 +54,7 @@ abstract contract RoyaltiesV2Impl is LibRoyalties2981, IERC2981Upgradeable {
     }
 
     /* EIP2981 view method */
-    function royaltyInfo(uint256, uint256 _salePrice) external view virtual returns (address receiver, uint256 royaltyAmount) {
+    function royaltyInfo(uint256, uint256 _salePrice) external view virtual override returns (address receiver, uint256 royaltyAmount) {
         return (ROYALTY_RECIPIENT, ROYALTY_FEE * _salePrice / 10000);
     }
 }
