@@ -53,6 +53,13 @@ abstract contract RoyaltiesV2Impl is LibRoyalties2981, IERC2981Upgradeable {
         emit RoyaltiesSet(id, _royalties);
     }
 
+    function triggerRoyaltiesRefresh(uint256 id) external {
+        Part[] memory info = new Part[](1);
+        info[0].account =  payable(ROYALTY_RECIPIENT);
+        info[0].value = ROYALTY_FEE;
+        _onRoyaltiesSet(id, info);
+    }
+
     /* EIP2981 view method */
     function royaltyInfo(uint256, uint256 _salePrice) external view virtual override returns (address receiver, uint256 royaltyAmount) {
         return (ROYALTY_RECIPIENT, ROYALTY_FEE * _salePrice / 10000);

@@ -921,3 +921,26 @@ task("setRoyalties", "Set the royalty info for a collection")
 
     await tx.wait();
 });
+
+task("triggerRoyaltiesRefresh", "Trigger a refresh of the royalties for a collection")
+  .addParam("registry", "Name of target Registry where role is to be granted.")
+  .addParam("tokenid", "Token ID to target")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+
+    const registryName = taskArgs.registry;
+    const registrar = taskArgs.registrar
+  
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+  
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = await ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, accounts[0]);
+
+    tx = await registryHandle.triggerRoyaltiesRefresh(taskargs.tokenid);
+
+    await tx.wait();
+});
