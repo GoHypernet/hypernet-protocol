@@ -7,7 +7,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "../external/RoyaltiesV2.sol";
 
 /**
  * @title Hypernet Protocol Non Fungible Registry
@@ -27,7 +28,8 @@ contract NonFungibleRegistryUpgradeable is
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC2981Upgradeable
+    OwnableUpgradeable,
+    RoyaltiesV2Impl
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -160,6 +162,7 @@ contract NonFungibleRegistryUpgradeable is
         __AccessControlEnumerable_init();
         __ERC721URIStorage_init();
         __ERC721_init(name_, symbol_);
+        __Ownable_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
         _setupRole(REGISTRAR_ROLE, _registrar);
@@ -176,6 +179,23 @@ contract NonFungibleRegistryUpgradeable is
         burnFee = 500; // basis points
         primaryRegistry = _primaryRegistry;
         frozen = false;
+
+        _transferOwnership(_admin);
+
+        ROYALTY_RECIPIENT = _admin;
+        ROYALTY_FEE = 0;
+    }
+
+    /** @notice sets the royalties for the given token id, the recipient, with the given percentage
+     *  @dev caller must be the current owner.
+     *  @param _royaltiesRecipientAddress address of the recipient of the royalties
+     *  @param _percentageBasisPoints percentage of each sale to be paid to the recipient
+     */
+    function setRoyaltyFee(address payable _royaltiesRecipientAddress, uint96 _percentageBasisPoints) public {
+        require(owner() == _msgSender(), "Not owner.");
+        
+        ROYALTY_RECIPIENT = _royaltiesRecipientAddress;
+        ROYALTY_FEE = _percentageBasisPoints;
     }
 
     /** @notice setRegistryParameters enable or disable the lazy registration feature
@@ -438,15 +458,6 @@ contract NonFungibleRegistryUpgradeable is
             }
             return string(uri);
         }
-    }
-
-    function royaltyInfo(uint256 tokenId, uint256 salePrice)
-        external
-        view
-        override(IERC2981Upgradeable)
-    returns (address receiver, uint256 royaltyAmount) {
-        royaltyAmount = salePrice * burnFee / 10000;
-        receiver = burnAddress;
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
