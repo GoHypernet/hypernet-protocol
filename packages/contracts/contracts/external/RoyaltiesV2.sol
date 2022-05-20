@@ -5,8 +5,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
 abstract contract LibRoyalties2981 {
-    uint96 ROYALTY_FEE;    
-    address ROYALTY_RECIPIENT;
+    uint96 ROYALTY_FEE;        // royalty fee in percentage basis points (between 0 and 10,000)
+    address ROYALTY_RECIPIENT; // address of the recipient of the royalty fee
 
     bytes4 constant _INTERFACE_ID_ROYALTIES = 0xcad96cca;
     bytes32 public constant PART_TYPE_HASH = keccak256("Part(address account,uint96 value)");
@@ -22,7 +22,7 @@ abstract contract LibRoyalties2981 {
         return keccak256(abi.encode(PART_TYPE_HASH, part.account, part.value));
     }
 
-    /*Method for converting amount to percent and forming LibPart*/
+    /* Method for converting amount to percent and forming LibPart */
     function calculateRoyalties(address to, uint256 amount) internal view returns (Part[] memory) {
         Part[] memory result;
         
@@ -41,6 +41,7 @@ abstract contract LibRoyalties2981 {
 }
 
 abstract contract RoyaltiesV2Impl is LibRoyalties2981, IERC2981Upgradeable {
+    /* Required method for Rarible to see what the royalties are */
     function getRaribleV2Royalties(uint256) external view virtual returns (Part[] memory info) {
         info = new Part[](1);
 
@@ -52,6 +53,7 @@ abstract contract RoyaltiesV2Impl is LibRoyalties2981, IERC2981Upgradeable {
         emit RoyaltiesSet(id, _royalties);
     }
 
+    /* EIP2981 view method */
     function royaltyInfo(uint256, uint256 _salePrice) external view virtual returns (address receiver, uint256 royaltyAmount) {
         return (ROYALTY_RECIPIENT, ROYALTY_FEE * _salePrice / 10000);
     }

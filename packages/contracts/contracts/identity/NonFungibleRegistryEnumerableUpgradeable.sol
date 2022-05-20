@@ -187,11 +187,15 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         ROYALTY_FEE = 0;
     }
 
-    /** @notice sets the royalties for the given token id, the recipient, with the given percentage */
-    function setRoyaltyFee(address payable _royaltiesReceipientAddress, uint96 _percentageBasisPoints) public {
+    /** @notice sets the royalties for the given token id, the recipient, with the given percentage
+     *  @dev caller must be the current owner.
+     *  @param _royaltiesRecipientAddress address of the recipient of the royalties
+     *  @param _percentageBasisPoints percentage of each sale to be paid to the recipient
+     */
+    function setRoyaltyFee(address payable _royaltiesRecipientAddress, uint96 _percentageBasisPoints) public {
         require(owner() == _msgSender(), "Not owner.");
         
-        ROYALTY_RECIPIENT = _royaltiesReceipientAddress;
+        ROYALTY_RECIPIENT = _royaltiesRecipientAddress;
         ROYALTY_FEE = _percentageBasisPoints;
     }
 
