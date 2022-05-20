@@ -183,6 +183,8 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         primaryRegistry = _primaryRegistry;
         frozen = false;
 
+        _transferOwnership(_admin);
+
         ROYALTY_RECIPIENT = _admin;
         ROYALTY_FEE = 0;
     }

@@ -112,7 +112,7 @@ const factoryAddress = function () {
   } else if (hre.hardhatArguments.network == "mumbai") {
     return "0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899"
   } else if (hre.hardhatArguments.network == "polygon") {
-    return "0xd93fbc9d330c5a1d242d01c0f10115483a062d7c"
+    return "0xa06d4792102406153Ca1F101322F933581d505bE"
   } else if (hre.hardhatArguments.network == "fuji") {
     return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
   } else if (hre.hardhatArguments.network == "avalanche") {
