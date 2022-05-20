@@ -433,6 +433,7 @@ task("listRegistryEntries", "Prints all NFI entries for the specified registry."
       accounts[0],
     );
     const registryAddress = await factoryHandle.nameToAddress(name);
+    console.log(`Registry Address: ${registryAddress}`);
     const registryHandle = new hre.ethers.Contract(
       registryAddress,
       NFR.abi,
@@ -891,4 +892,32 @@ task("transferOwnership", "Give the registrar role to a specified account.")
   await tx.wait();
 
   console.log("REGISTRAR_ROLE updated");
+});
+
+task("setRoyalties", "Set the royalty info for a collection")
+  .addParam("registry", "Name of target Registry where role is to be granted.")
+  .addParam("recipient", "Recipient of the royalty fees")
+  .addParam("percentage", "Percentage fee in basis points ([0,10000])")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+
+    const registryName = taskArgs.registry;
+    const registrar = taskArgs.registrar
+  
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+  
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = await ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, accounts[0]);
+
+    tx = await registryHandle.setRoyaltyFee(
+      taskArgs.recipient,
+      taskArgs.percentage,
+      await gasSettings()
+    );
+
+    await tx.wait();
 });

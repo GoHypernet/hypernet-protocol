@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../external/RoyaltiesV2.sol";
 
 /**
@@ -30,7 +30,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     AccessControlEnumerableUpgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC2981Upgradeable,
+    OwnableUpgradeable,
     RoyaltiesV2Impl
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -127,9 +127,6 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @dev The REGISTRAR_ROLE_ADMIN curates the address with REGISTRAR_ROLE permissions
     bytes32 public constant REGISTRAR_ROLE_ADMIN = keccak256("REGISTRAR_ROLE_ADMIN");
 
-    /// @dev The OWNER_ROLE manages the royalties for the NFIs
-    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
-
     /**
      * @dev Emitted when updateLabel is called successfully
      */
@@ -161,16 +158,16 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         address _primaryRegistry,
         address _registrar, 
         address _admin
-        ) 
+    ) 
         public initializer {
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __ERC721_init(name_, symbol_);
+        __Ownable_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _setupRole(OWNER_ROLE, _admin);
         _setupRole(REGISTRAR_ROLE, _registrar);
 
         _setRoleAdmin (REGISTRAR_ROLE, REGISTRAR_ROLE_ADMIN);
@@ -185,35 +182,17 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         burnFee = 500; // basis points, 500 bp = 5%
         primaryRegistry = _primaryRegistry;
         frozen = false;
+
+        ROYALTY_RECIPIENT = _admin;
+        ROYALTY_FEE = 0;
     }
 
     /** @notice sets the royalties for the given token id, the recipient, with the given percentage */
-    function setRoyalties(uint _tokenId, address payable _royaltiesReceipientAddress, uint96 _percentageBasisPoints) public {
-        require(hasRole(OWNER_ROLE, _msgSender()), "Not owner.");
-        LibPart.Part[] memory _royalties = new LibPart.Part[](1);
-        _royalties[0].value = _percentageBasisPoints;
-        _royalties[0].account = _royaltiesReceipientAddress;
-        _saveRoyalties(_tokenId, _royalties);
-    }
-
-    /** @notice transfer ownership of a collection to a new owner */
-    function transferOwnership(address newOwner) external {
-        require(hasRole(OWNER_ROLE, msg.sender));
-        _grantRole(OWNER_ROLE, newOwner);
-        _revokeRole(OWNER_ROLE, msg.sender);
-    }
-
-    /** @notice claim ownership of the registry; must have DEFAULT_ADMIN_ROLE and owner must not already be set */
-    function claimOwner() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
-        require(getRoleMemberCount(OWNER_ROLE) == 0, "NonFungibleRegistry: owner already set.");
-
-        grantRole(OWNER_ROLE, _msgSender());
-    }
-
-    /** @notice returns the owner */
-    function owner() external view returns (address) {
-        return getRoleMember(OWNER_ROLE, 0);
+    function setRoyaltyFee(address payable _royaltiesReceipientAddress, uint96 _percentageBasisPoints) public {
+        require(owner() == _msgSender(), "Not owner.");
+        
+        ROYALTY_RECIPIENT = _royaltiesReceipientAddress;
+        ROYALTY_FEE = _percentageBasisPoints;
     }
 
     /** @notice setRegistryParameters enable or disable the lazy registration feature
@@ -476,17 +455,6 @@ contract NonFungibleRegistryEnumerableUpgradeable is
             }
             return string(uri);
         }
-    }
-
-    function royaltyInfo(uint256 tokenId, uint256 salePrice)
-        external
-        view
-        override(IERC2981Upgradeable)
-    returns (address receiver, uint256 royaltyAmount) {
-        LibPart.Part[] memory specifics = getRaribleV2Royalties(tokenId);
-        LibPart.Part memory part = specifics[0];
-        receiver = part.account;
-        royaltyAmount = part.value * salePrice / 10000;
     }
 
     function _baseURI() internal view virtual override returns (string memory) {

@@ -2,8 +2,16 @@
 
 pragma solidity ^0.8.0;
 
-library LibPart {
-    bytes32 public constant TYPE_HASH = keccak256("Part(address account,uint96 value)");
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+
+abstract contract LibRoyalties2981 {
+    uint96 ROYALTY_FEE;    
+    address ROYALTY_RECIPIENT;
+
+    bytes4 constant _INTERFACE_ID_ROYALTIES = 0xcad96cca;
+    bytes32 public constant PART_TYPE_HASH = keccak256("Part(address account,uint96 value)");
+
+    event RoyaltiesSet(uint256 tokenId, Part[] royalties);
 
     struct Part {
         address payable account;
@@ -11,47 +19,41 @@ library LibPart {
     }
 
     function hash(Part memory part) internal pure returns (bytes32) {
-        return keccak256(abi.encode(TYPE_HASH, part.account, part.value));
+        return keccak256(abi.encode(PART_TYPE_HASH, part.account, part.value));
+    }
+
+    /*Method for converting amount to percent and forming LibPart*/
+    function calculateRoyalties(address to, uint256 amount) internal view returns (Part[] memory) {
+        Part[] memory result;
+        
+        if (amount == 0) return result;
+
+        uint256 percent = (amount * 100 / ROYALTY_FEE) * 100;
+        
+        require(percent < 10000, "Royalty cannot be higher than 100%");
+        
+        result = new Part[](1);
+        result[0].account = payable(to);
+        result[0].value = uint96(percent);
+
+        return result;
     }
 }
 
-interface RoyaltiesV2 {
-    event RoyaltiesSet(uint256 tokenId, LibPart.Part[] royalties);
+abstract contract RoyaltiesV2Impl is LibRoyalties2981, IERC2981Upgradeable {
+    function getRaribleV2Royalties(uint256) external view virtual returns (Part[] memory info) {
+        info = new Part[](1);
 
-    function getRaribleV2Royalties(uint256 id) external view returns (LibPart.Part[] memory);
+        info[0].account = payable(ROYALTY_RECIPIENT);
+        info[0].value = ROYALTY_FEE;
+    }
+
+    function _onRoyaltiesSet(uint256 id, Part[] memory _royalties) internal {
+        emit RoyaltiesSet(id, _royalties);
+    }
+
+    function royaltyInfo(uint256, uint256 _salePrice) external view virtual returns (address receiver, uint256 royaltyAmount) {
+        return (ROYALTY_RECIPIENT, ROYALTY_FEE * _salePrice / 10000);
+    }
 }
 
-abstract contract AbstractRoyalties {
-    mapping (uint256 => LibPart.Part[]) public royalties;
-
-    function _saveRoyalties(uint256 _id, LibPart.Part[] memory _royalties) internal {
-        for (uint i = 0; i < _royalties.length; i++) {
-            require(_royalties[i].account != address(0x0), "Recipient should be present");
-            require(_royalties[i].value != 0, "Royalty value should be positive");
-            royalties[_id].push(_royalties[i]);
-        }
-        _onRoyaltiesSet(_id, _royalties);
-    }
-
-    function _updateAccount(uint256 _id, address _from, address _to) internal {
-        uint length = royalties[_id].length;
-        for(uint i = 0; i < length; i++) {
-            if (royalties[_id][i].account == _from) {
-                royalties[_id][i].account = payable(address(uint160(_to)));
-            }
-        }
-    }
-
-    function _onRoyaltiesSet(uint256 _id, LibPart.Part[] memory _royalties) virtual internal;
-}
-
-abstract contract RoyaltiesV2Impl is AbstractRoyalties, RoyaltiesV2 {
-    function getRaribleV2Royalties(uint256 id) override public view returns (LibPart.Part[] memory) {
-        return royalties[id];
-    }
-
-    function _onRoyaltiesSet(uint256 _id, LibPart.Part[] memory _royalties) override internal {
-        emit RoyaltiesSet(_id, _royalties);
-    }
-
-}
