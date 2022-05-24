@@ -905,16 +905,41 @@ task("transferEntryOwnership", "Transfer ownership of an entry to a new address.
   )
   await tx.wait();
 
-  const updatedOwner = await registryHandle.owner()
+  const updatedOwner = await registryHandle.ownerOf(taskargs.tokenid)
 
   console.log(`OWNER Updated: ${updatedOwner}`);
 });
 
-task("batchTransferOwnership", "Transfer ownership of a set of NFTs to new owners.")
+task("batchTransferEntryOwnership", "Transfer ownership of a set of NFTs to new owners.")
   .addParam("registry", "Name of target registry")
-  .addParam("newOwners", "New owners of each entry. (array of strings)")
+  .addParam("tokenids", "Token IDs of the entries to be transferred.")
+  .addParam("newOwners", "New owners of each entry.")
   .setAction(async (taskArgs) => {
-    throw new Error("Method not yet written!")
+    if (taskArgs.tokenids.length !== taskArgs.newOwners.length) {
+      throw new Error("tokenids and newOwners must be the same length");
+    }
+
+    const accounts = await hre.ethers.getSigners();
+    const registryName = taskArgs.registry;
+  
+    const factoryHandle = await hre.ethers.getContractAt('UpgradeableRegistryFactory', factoryAddress());
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = await hre.ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, accounts[0]);
+
+    for (let i = 0; i < taskArgs.tokenids.length; i++) {
+      currentOwner = await registryHandle.ownerOf(taskArgs.tokenid);
+      tx = await registryHandle.transferFrom(
+        currentOwner,
+        taskargs.newOwners[i],
+        taskArgs.tokenid
+      )
+      await tx.wait();
+
+      const updatedOwner = await registryHandle.ownerOf(taskargs.tokenid)
+      console.log(`ID ${taskArgs.tokenids[i]} updated; new owner ${updatedOwner}`);
+    }
+
+    console.log(`Batch owner update complete.`)
 })
 
 task("setRoyalties", "Set the royalty info for a collection")
