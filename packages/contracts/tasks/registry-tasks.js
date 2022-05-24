@@ -1,5 +1,6 @@
 const { HT, RF, NFR,  BM, IBEACON, factoryAddress, hAddress, gasSettings } = require("./constants.js");
 const csv=require('csvtojson');
+const { types } = require("hardhat/config")
 
 task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon proxies and implementation contracts.")
   .setAction(async (taskArgs) => {
@@ -167,18 +168,10 @@ task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
 
     const accounts = await hre.ethers.getSigners();
 
-    const factoryHandle = new hre.ethers.Contract(
-      factoryAddress(),
-      RF.abi,
-      accounts[0],
-    );
+    const factoryHandle = await hre.ethers.getContractAt('UpgradeableRegistryFactory', factoryAddress())
 
     const registryAddress = await factoryHandle.nameToAddress(name);
-    const registryHandle = new hre.ethers.Contract(
-      registryAddress,
-      NFR.abi,
-      accounts[0],
-    );
+    const registryHandle = await hre.ethers.getContractAt('NonFungibleRegistryUpgradeable', registryAddress);
 
     tx = await registryHandle.setPrimaryRegistry(
         primaryregistry,
@@ -203,18 +196,13 @@ task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
     const enumerable = taskArgs.enumerable;
 
     const accounts = await hre.ethers.getSigners();
-    const factoryHandle = new hre.ethers.Contract(
-      factoryAddress(),
-      RF.abi,
-      accounts[0],
-    );
+    const factoryHandle = await hre.ethers.getContractAt("UpgradeableRegistryFactory", factoryAddress());
 
     tx = await factoryHandle.createRegistry(
       name,
       symbol,
       registrar,
-      enumerable,
-      await gasSettings()
+      enumerable
     );
     console.log(tx);
     const tx_rcpt = await tx.wait();
@@ -837,18 +825,10 @@ task("grantRegistrarRole", "Give the registrar role to a specified account.")
   const registryName = taskArgs.registry;
   const registrar = taskArgs.registrar
 
-  const factoryHandle = new hre.ethers.Contract(
-    factoryAddress(),
-    RF.abi,
-    accounts[0],
-  );
+  const factoryHandle = await hre.ethers.getContractAt('UpgradeableRegistryFactory', factoryAddress());
 
   const registryAddress = await factoryHandle.nameToAddress(registryName);
-  const registryHandle = new hre.ethers.Contract(
-    registryAddress,
-    NFR.abi,
-    accounts[0],
-  );
+  const registryHandle = await hre.ethers.getContractAt('NonFungibleRegistryUpgradeable', registryAddress);
 
   // call registerByToken on the NFR
   tx = await registryHandle.grantRole(
@@ -900,20 +880,21 @@ task("transferEntryOwnership", "Transfer ownership of an entry to a new address.
   currentOwner = await registryHandle.ownerOf(taskArgs.tokenid);
   tx = await registryHandle.transferFrom(
     currentOwner,
-    taskargs.newOwner,
-    taskArgs.tokenid
+    taskArgs.newOwner,
+    taskArgs.tokenid,
+    { gasPrice: hre.ethers.utils.parseUnits("50", "gwei") }
   )
   await tx.wait();
 
-  const updatedOwner = await registryHandle.ownerOf(taskargs.tokenid)
+  const updatedOwner = await registryHandle.ownerOf(taskArgs.tokenid)
 
-  console.log(`OWNER Updated: ${updatedOwner}`);
+  //console.log(`OWNER Updated: ${updatedOwner}`);
 });
 
 task("batchTransferEntryOwnership", "Transfer ownership of a set of NFTs to new owners.")
   .addParam("registry", "Name of target registry")
-  .addParam("tokenids", "Token IDs of the entries to be transferred.")
-  .addParam("newOwners", "New owners of each entry.")
+  .addParam("tokenids", "Token IDs of the entries to be transferred.", [], types.string)
+  .addParam("newOwners", "New owners of each entry.", [], types.json)
   .setAction(async (taskArgs) => {
     if (taskArgs.tokenids.length !== taskArgs.newOwners.length) {
       throw new Error("tokenids and newOwners must be the same length");
@@ -952,11 +933,7 @@ task("setRoyalties", "Set the royalty info for a collection")
     const registryName = taskArgs.registry;
     const registrar = taskArgs.registrar
   
-    const factoryHandle = new hre.ethers.Contract(
-      factoryAddress(),
-      RF.abi,
-      accounts[0],
-    );
+    const factoryHandle = await hre.ethers.getContractAt('UpgradeableRegistryFactory', factoryAddress());
   
     const registryAddress = await factoryHandle.nameToAddress(registryName);
     const registryHandle = await ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, accounts[0]);

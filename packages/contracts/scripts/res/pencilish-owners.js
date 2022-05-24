@@ -1,4 +1,4 @@
-export const addresses = [
+const addresses = [
     "0x5346b4Ff3e924508d33D93f352d11E392a7A9D3b",
     "0x582F42ECD09C3FDDD3C1f1f903C6051C3f66252F",
     "0xDa2f7579eFEd136D10B00EF553940f895e83a41b",
@@ -131,8 +131,9 @@ export const addresses = [
     "0xC1E69Aef752f3b9B8BE4E6b2e6c7A9c04D7f1166",
     "0x60D463F5621f93436cB014c7898d4B1889cc7959"
 ];
-export const tokenids = [
-    "8675309",
+
+const tokenids = [
+    "8675409",
     "279029758",
     "1985206544",
     "542747728",
@@ -264,3 +265,5 @@ export const tokenids = [
     "1263504258",
     "156459374"
 ]
+
+module.exports = { addresses, tokenids }

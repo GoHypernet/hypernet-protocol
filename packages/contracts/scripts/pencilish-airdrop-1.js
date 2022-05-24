@@ -7,6 +7,7 @@ const hre = require("hardhat");
 // const { NFR } = require("/tasks/constants.js");
 const { NFR, gasSettings } = require("../tasks/constants.js");
 const { addresses, tokenids } = require("./res/pencilish-owners.js");
+const newData = require("./res/pencilish-token-ids.ts");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -20,7 +21,20 @@ async function main() {
   console.log("Deployment Wallet Address:", owner.address);
   console.log("RPC URL:", hre.network.config.url);
 
-  await hre.run("batchTransferOwnership", { registry: "Pencilish Animation Studios Early Access Mint Pass", tokenids: tokenids, newOwners: addresses })
+  const newtokenids = ["8675409", ...newData.map(x => x.tokenId)];
+  console.log(`${newtokenids.length} new token ids`)
+
+  for (let i = 76; i < newtokenids.length; i++) {
+    const tokenid = newtokenids[i];
+    const address = addresses[i];
+
+    console.log(`${i} - Setting TokenId: ${tokenid} to Owner: ${address}`)
+
+    await hre.run("transferEntryOwnership", { 
+      registry: "Pencilish Animation Studios Early Access Mint Pass", 
+      tokenid: tokenid, 
+      newOwner: address })
+  }
 }
 
 main()
