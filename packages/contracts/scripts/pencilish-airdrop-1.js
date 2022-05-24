@@ -20,7 +20,7 @@ async function main() {
   console.log("Deployment Wallet Address:", owner.address);
   console.log("RPC URL:", hre.network.config.url);
 
-  await hre.run("batchTransferOwnership", { registry: "Pencilish Animation Studios Early Access Mint Pass", tokenids: addresses, newOwners: tokenids })
+  await hre.run("batchTransferOwnership", { registry: "Pencilish Animation Studios Early Access Mint Pass", tokenids: tokenids, newOwners: addresses })
 }
 
 main()
