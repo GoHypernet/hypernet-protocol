@@ -861,9 +861,9 @@ task("grantRegistrarRole", "Give the registrar role to a specified account.")
   console.log("REGISTRAR_ROLE updated");
 });
 
-task("transferOwnership", "Transfer ownership of a registry to a new role.")
+task("transferRegistryOwnership", "Transfer ownership of a registry to a new role.")
 .addParam("registry", "Name of target Registry where role is to be granted.")
-.addParam("owner", "Recipient of the OWNER_ROLE.")
+.addParam("owner", "New owner")
 .setAction(async (taskArgs) => {
   const accounts = await hre.ethers.getSigners();
 
@@ -883,10 +883,39 @@ task("transferOwnership", "Transfer ownership of a registry to a new role.")
   console.log(`OWNER Updated: ${updatedOwner}`);
 });
 
+task("transferEntryOwnership", "Transfer ownership of an entry to a new address.")
+.addParam("registry", "Name of target registry")
+.addParam("tokenid", "Token ID of the entry to be transferred.")
+.addParam("newOwner", "New owner of the entry.")
+.setAction(async (taskArgs) => {
+  const accounts = await hre.ethers.getSigners();
+
+  const registryName = taskArgs.registry;
+
+  const factoryHandle = await hre.ethers.getContractAt('UpgradeableRegistryFactory', factoryAddress());
+  const registryAddress = await factoryHandle.nameToAddress(registryName);
+  const registryHandle = await hre.ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, accounts[0]);
+
+  // call registerByToken on the NFR
+  currentOwner = await registryHandle.ownerOf(taskArgs.tokenid);
+  tx = await registryHandle.transferFrom(
+    currentOwner,
+    taskargs.newOwner,
+    taskArgs.tokenid
+  )
+  await tx.wait();
+
+  const updatedOwner = await registryHandle.owner()
+
+  console.log(`OWNER Updated: ${updatedOwner}`);
+});
+
 task("batchTransferOwnership", "Transfer ownership of a set of NFTs to new owners.")
+  .addParam("registry", "Name of target registry")
+  .addParam("newOwners", "New owners of each entry. (array of strings)")
   .setAction(async (taskArgs) => {
     throw new Error("Method not yet written!")
-  })
+})
 
 task("setRoyalties", "Set the royalty info for a collection")
   .addParam("registry", "Name of target Registry where role is to be granted.")
