@@ -6,6 +6,7 @@
 const hre = require("hardhat");
 // const { NFR } = require("/tasks/constants.js");
 const { NFR, gasSettings } = require("../tasks/constants.js");
+const { addresses, tokenids } = require("./res/pencilish-owners.js");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -19,7 +20,7 @@ async function main() {
   console.log("Deployment Wallet Address:", owner.address);
   console.log("RPC URL:", hre.network.config.url);
 
-  await hre.run("batchTransferOwnership", { registry: "", tokenids: [], newOwners: [] })
+  await hre.run("batchTransferOwnership", { registry: "Pencilish Animation Studios Early Access Mint Pass", tokenids: addresses, newOwners: tokenids })
 }
 
 main()
