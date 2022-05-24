@@ -9,7 +9,6 @@ require("@openzeppelin/hardhat-upgrades");
 require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 require("hardhat-tracer");
-require("ethers");
 
 require("./tasks/general-tasks.js");
 require("./tasks/governance-tasks.js");

@@ -63,7 +63,7 @@ task("setFactoryBeaconEnumerable", "Update the implementation address of the enu
     const newImpl = taskArgs.address;
     const factoryHandle = new hre.ethers.Contract(
       factoryAddress(),
-      RF.abi,
+      RF().abi,
       account,
     );
 
@@ -861,38 +861,32 @@ task("grantRegistrarRole", "Give the registrar role to a specified account.")
   console.log("REGISTRAR_ROLE updated");
 });
 
-task("transferOwnership", "Give the registrar role to a specified account.")
+task("transferOwnership", "Transfer ownership of a registry to a new role.")
 .addParam("registry", "Name of target Registry where role is to be granted.")
 .addParam("owner", "Recipient of the OWNER_ROLE.")
 .setAction(async (taskArgs) => {
   const accounts = await hre.ethers.getSigners();
 
   const registryName = taskArgs.registry;
-  const registrar = taskArgs.registrar
+  const newOwner = taskArgs.owner
 
-  const factoryHandle = new hre.ethers.Contract(
-    factoryAddress(),
-    RF.abi,
-    accounts[0],
-  );
-
+  const factoryHandle = await hre.ethers.getContractAt('UpgradeableRegistryFactory', factoryAddress());
   const registryAddress = await factoryHandle.nameToAddress(registryName);
-  const registryHandle = new hre.ethers.Contract(
-    registryAddress,
-    NFR.abi,
-    accounts[0],
-  );
+  const registryHandle = await hre.ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, accounts[0]);
 
   // call registerByToken on the NFR
-  tx = await registryHandle.grantRole(
-    registryHandle.REGISTRAR_ROLE(),
-    registrar,
-    await gasSettings()
-  );
+  tx = await registryHandle.transferOwnership(newOwner);
   await tx.wait();
 
-  console.log("REGISTRAR_ROLE updated");
+  const updatedOwner = await registryHandle.owner()
+
+  console.log(`OWNER Updated: ${updatedOwner}`);
 });
+
+task("batchTransferOwnership", "Transfer ownership of a set of NFTs to new owners.")
+  .setAction(async (taskArgs) => {
+    throw new Error("Method not yet written!")
+  })
 
 task("setRoyalties", "Set the royalty info for a collection")
   .addParam("registry", "Name of target Registry where role is to be granted.")

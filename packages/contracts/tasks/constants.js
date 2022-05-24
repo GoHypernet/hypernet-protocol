@@ -1,12 +1,19 @@
-const HT = require("../deployments/rinkeby-update-1-21-2022/governance/Hypertoken.sol/Hypertoken.json");
-const HG = require("../deployments/rinkeby-update-1-21-2022/governance/HypernetGovernor.sol/HypernetGovernor.json");
-const RF = require("../deployments/rinkeby-update-1-21-2022/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
-const NFR = require("../deployments/rinkeby-update-1-21-2022/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
-const BM = require("../deployments/rinkeby-update-1-21-2022/modules/BatchModule.sol/BatchModule.json");
+
+//const HT = require("../artifacts/contracts/governance/Hypertoken.sol/Hypertoken.json");
+//const HG = require("../artifacts/contracts/governance/HypernetGovernor.sol/HypernetGovernor.json");
+//const RF = require("../artifacts/contracts/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
+//const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryUpgradeable.sol/NonFungibleRegistryUpgradeable.json");
+//const BM = require("../artifacts/contracts/modules/BatchModule.sol/BatchModule.json");
 const IBEACON = require("./UpgradeableBeacon.json");
 
+const HT = (async () => { const hre = require("hardhat"); return (await hre.ethers.getContractFactory('Hypertoken')).createInterface() })
+const HG = (async () => { const hre = require("hardhat"); return (await hre.ethers.getContractFactory('HypernetGovernor')).createInterface() })
+const RF = (async () => { const hre = require("hardhat"); return (await hre.ethers.getContractFactory('UpgradeableRegistryFactory')).createInterface() })
+const NFR = (async () => { const hre = require("hardhat"); return (await hre.ethers.getContractFactory('NonFungibleRegistryUpgradeable')).createInterface() })
+const BM = (async () => { const hre = require("hardhat"); return (await hre.ethers.getContractFactory('BatchModule')).createInterface() })
+
 const gasSettings = async function (txCount) { 
-    const hre = require("hardhat");
+  const hre = require("hardhat");
     const [account] = await hre.ethers.getSigners();
     const feeData = await account.getFeeData();
     let gs;
@@ -112,7 +119,7 @@ const factoryAddress = function () {
   } else if (hre.hardhatArguments.network == "mumbai") {
     return "0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899"
   } else if (hre.hardhatArguments.network == "polygon") {
-    return ""
+    return "0x27D63626050CC0D0bf3Ec6ABDD452a9Bb49f4B39"
   } else if (hre.hardhatArguments.network == "fuji") {
     return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
   } else if (hre.hardhatArguments.network == "avalanche") {
