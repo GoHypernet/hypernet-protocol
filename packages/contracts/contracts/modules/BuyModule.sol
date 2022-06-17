@@ -40,6 +40,7 @@ contract BuyModule is Context {
         external 
         virtual 
         {
+            require(registry != address(0), "BuyModule: Invalid registry address.");
             address seller = INfr(registry).ownerOf(tokenId);
             uint256 price = INfr(registry).registrationFee();
             // the current owner of the tokenid must be an account in the REGISTRAR_ROLE

@@ -37,6 +37,8 @@ contract MerkleModule {
     function redeem(address to, string calldata label, string calldata registrationData, uint256 tokenId, bytes32[] calldata proof, address registry)
     external
     {
+        require(to != address(0), "MerkleModule: Invalid to address");
+        require(registry != address(0), "MerkleModule: Invalid registry address");
         bytes32 root = INfr(registry).merkleRoot();
         require(_verify(_leaf(to, label, registrationData, tokenId), proof, root), "MerkleModule: Invalid merkle proof");
         INfr(registry).register(to, label, registrationData, tokenId);
