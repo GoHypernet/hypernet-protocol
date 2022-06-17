@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -28,6 +29,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     Initializable,
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
+    ReentrancyGuardUpgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     OwnableUpgradeable,
@@ -381,7 +383,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @notice burn removes a token from the registry enumeration and refunds registration fee to burner
     /// @dev only callable by the owner, approved caller when allowTransfers is true or REGISTRAR_ROLE
     /// @param tokenId unique id to refence the target token
-    function burn(uint256 tokenId) public virtual {
+    function burn(uint256 tokenId) public virtual nonReentrant {
         //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _burn(tokenId);
