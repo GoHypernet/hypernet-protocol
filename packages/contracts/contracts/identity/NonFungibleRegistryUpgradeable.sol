@@ -293,7 +293,7 @@ contract NonFungibleRegistryUpgradeable is
         _createLabeledToken(to, label, registrationData, tokenId);
 
         uint256 burnAmount = registrationFee * burnFee / 10000;
-        IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
+        require(IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount), "NonFungibleRegistry: token transfer failed.");
         // the fee stays with the token, not the token owner
         identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
     }
