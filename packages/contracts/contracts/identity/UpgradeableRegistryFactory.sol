@@ -143,7 +143,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable, ReentrancyGuard 
     /// @param _registrationFee burn fee amount
     function setRegistrationFee(uint256 _registrationFee) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
-        require(registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
+        require(_registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
         registrationFee = _registrationFee;
     }
 
