@@ -3,6 +3,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Context.sol";
+import "../interfaces/INfr.sol";
 
 /**
  * @title Hypernet Protocol Batch Minting Module for NFRs
@@ -52,11 +53,4 @@ contract BatchModule is Context {
                 INfr(registry).register(recipients[i], labels[i], registrationDatas[i], tokenIds[i]);
             }
         }
-}
-
-/// @dev a minimal interface for interacting with Hypernet Protocol NFRs
-interface INfr {
-    function register(address to, string calldata label, string calldata registrationData, uint256 tokenId) external;
-    function hasRole(bytes32 role, address account) external view returns (bool);
-    function REGISTRAR_ROLE() external view returns (bytes32);
 }

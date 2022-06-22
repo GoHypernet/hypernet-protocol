@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "../interfaces/INfr.sol";
 
 /**
  * @title Hypernet Protocol Lazy Minting Module for NFRs
@@ -64,11 +65,4 @@ contract LazyMintModule is Context {
         require(signer != address(0), "LazyMintModule: Signer cannot be 0 address.");
         return INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), signer);
     }
-}
-
-/// @dev a minimal interface for interacting with Hypernet Protocol NFRs
-interface INfr {
-    function register(address to, string calldata label, string calldata registrationData, uint256 tokenId) external;
-    function hasRole(bytes32 role, address account) external view returns (bool);
-    function REGISTRAR_ROLE() external view returns (bytes32);
 }
