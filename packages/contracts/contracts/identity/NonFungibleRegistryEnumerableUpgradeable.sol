@@ -393,7 +393,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         if (identityStakes[tokenId].amount != 0) {
             // send the registration fee to the token burner
             // don't set a registration token you do not control/trust, otherwise, this could be used for re-entrancy attack
-            require(IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount), "NonFungibleRegistry: token tansfer failed.");
+            require(IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount), "NonFungibleRegistry: token transfer failed.");
             delete identityStakes[tokenId];
         }
     }
