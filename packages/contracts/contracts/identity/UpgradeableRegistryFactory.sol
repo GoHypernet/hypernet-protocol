@@ -123,26 +123,23 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable, ReentrancyGuard 
     /// @notice setProfileRegistryAddress change the address of the profile registry contract
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _hypernetProfileRegistry address of ERC721 token to use as profile contract
-    function setProfileRegistryAddress(address _hypernetProfileRegistry) external {
+    function setProfileRegistryAddress(address _hypernetProfileRegistry) external isAdmin {
         require(address(_hypernetProfileRegistry) != address(0), "NonFungibleRegistry: Invalid hypernetProfileRegistry address.");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         hypernetProfileRegistry = _hypernetProfileRegistry;
     }
 
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationToken address of ERC20 token burned during registration
-    function setRegistrationToken(address _registrationToken) external {
+    function setRegistrationToken(address _registrationToken) external isAdmin {
         require(_registrationToken != address(0), """RegistryFactory: Invalid registrationToken address");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         registrationToken = _registrationToken;
     }
 
     /// @notice setRegistrationFee setter function for configuring how much token is burned when adding new apps
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationFee burn fee amount
-    function setRegistrationFee(uint256 _registrationFee) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
+    function setRegistrationFee(uint256 _registrationFee) external isAdmin {
         require(_registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
         registrationFee = _registrationFee;
     }
@@ -150,8 +147,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable, ReentrancyGuard 
     /// @notice setBurnAddress setter function for configuring where tokens are sent when calling createRegistryByToken
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _burnAddress address where creation fee is to be sent
-    function setBurnAddress(address _burnAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
+    function setBurnAddress(address _burnAddress) external isAdmin {
         burnAddress = _burnAddress;
     }
 
@@ -219,5 +215,10 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable, ReentrancyGuard 
         // check if there if a profile is required and if so 
         // does the recipient have a non-zero balance. 
         return ((hypernetProfileRegistry == address(0)) || (IERC721Upgradeable(hypernetProfileRegistry).balanceOf(owner) > 0));
+    }
+
+    modifier isAdmin() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
+        _;
     }
 }
