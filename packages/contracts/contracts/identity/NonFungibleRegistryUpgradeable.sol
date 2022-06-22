@@ -242,7 +242,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param _primaryRegistry address to set as the primary registry
     function setPrimaryRegistry(address _primaryRegistry) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
-        // allow this feature to be disablled by setting to 0 address
+        // allow this feature to be disabled by setting to 0 address
         if (address(_primaryRegistry) == address(0)) {
             primaryRegistry = address(0); 
         } else {
