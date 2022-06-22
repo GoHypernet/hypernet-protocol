@@ -287,7 +287,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
     /// @param tokenId unique uint256 identifier for the newly created token
-    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
+    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual nonReentrant {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
         // user must approve the registry to collect the registration fee from their wallet
