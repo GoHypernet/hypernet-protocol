@@ -3,6 +3,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Context.sol";
+import "../interfaces/INfr.sol";
 
 /**
  * @title Hypernet Protocol Bulk Transfer Module for NFRs
@@ -48,11 +49,4 @@ contract BulkTransferModule is Context {
                 INfr(registry).safeTransferFrom(owner, recipients[i], tokenIds[i]);
             }
         }
-}
-
-/// @dev a minimal interface for interacting with Hypernet Protocol NFRs
-interface INfr {
-    function safeTransferFrom(address from, address to, uint256 tokenId) external;
-    function isApprovedForAll(address owner, address operator) external view returns (bool);
-    function REGISTRAR_ROLE() external view returns (bytes32);
 }

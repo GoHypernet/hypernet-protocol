@@ -77,8 +77,8 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         require(_names.length == _symbols.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(_symbols.length == _registrars.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(address(_enumerableRegistry) != address(0), "RegistryFactory: Invalid enumerableRegistry address.");
-        require(address(registry) != address(0), "RegistryFactory: Invalid registry address.");
-        require(address(registrationToken) != address(0), "RegistryFactory: Invalid registrationToken address.");
+        require(address(_registry) != address(0), "RegistryFactory: Invalid registry address.");
+        require(address(_registrationToken) != address(0), "RegistryFactory: Invalid registrationToken address.");
 
         // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
