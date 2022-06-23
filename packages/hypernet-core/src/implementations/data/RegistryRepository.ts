@@ -1549,6 +1549,8 @@ export class RegistryRepository implements IRegistryRepository {
                 lazyMintingSignature.registryAddress,
                 lazyMintingSignature.mintingSignature,
                 lazyMintingSignature.tokenId,
+                lazyMintingSignature.chainId,
+                lazyMintingSignature.nonce,
                 lazyMintingSignature.ownerAccountAddress,
                 lazyMintingSignature.registrationData,
               );
