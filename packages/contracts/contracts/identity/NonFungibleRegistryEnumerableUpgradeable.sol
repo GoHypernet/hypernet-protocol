@@ -340,7 +340,9 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
-        delete registryMap[reverseRegistryMap[tokenId]];
+        if(bytes(reverseRegistryMap[tokenId]).length > 0) {
+            delete registryMap[reverseRegistryMap[tokenId]];
+        }
         registryMap[label] = tokenId;
         reverseRegistryMap[tokenId] = label;
         emit LabelUpdated(tokenId, label);
