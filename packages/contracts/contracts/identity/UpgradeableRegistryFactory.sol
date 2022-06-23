@@ -8,6 +8,7 @@ import "./NonFungibleRegistryUpgradeable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title Hypernet Protocol Non Fungible Registry Factory
@@ -21,7 +22,7 @@ import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
  * See unit tests for example usage:
  * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/upgradeable-factory-test.js
  */
-contract UpgradeableRegistryFactory is AccessControlEnumerable {
+contract UpgradeableRegistryFactory is AccessControlEnumerable, ReentrancyGuard {
 
     /// @dev address of our upgradeble registry with enumeration proxy beacon
     address public enumerableRegistryBeacon;
@@ -76,6 +77,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
                 address _registrationToken)  {
         require(_names.length == _symbols.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(_symbols.length == _registrars.length, "RegistryFactory: Initializer arrays must be equal length.");
+        require(address(_enumerableRegistry) != address(0), "RegistryFactory: Invalid enumerableRegistry address.");
+        require(address(_registry) != address(0), "RegistryFactory: Invalid registry address.");
+        require(address(_registrationToken) != address(0), "RegistryFactory: Invalid registrationToken address.");
 
         // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -119,33 +123,31 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @notice setProfileRegistryAddress change the address of the profile registry contract
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _hypernetProfileRegistry address of ERC721 token to use as profile contract
-    function setProfileRegistryAddress(address _hypernetProfileRegistry) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
+    function setProfileRegistryAddress(address _hypernetProfileRegistry) external isAdmin {
+        require(address(_hypernetProfileRegistry) != address(0), "NonFungibleRegistry: Invalid hypernetProfileRegistry address.");
         hypernetProfileRegistry = _hypernetProfileRegistry;
     }
 
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationToken address of ERC20 token burned during registration
-    function setRegistrationToken(address _registrationToken) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
+    function setRegistrationToken(address _registrationToken) external isAdmin {
+        require(_registrationToken != address(0), """RegistryFactory: Invalid registrationToken address");
         registrationToken = _registrationToken;
     }
 
     /// @notice setRegistrationFee setter function for configuring how much token is burned when adding new apps
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationFee burn fee amount
-    function setRegistrationFee(uint256 _registrationFee) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
-        require(registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
+    function setRegistrationFee(uint256 _registrationFee) external isAdmin {
+        require(_registrationFee >= 0, "RegistryFactory: Registration fee must be nonnegative.");
         registrationFee = _registrationFee;
     }
 
     /// @notice setBurnAddress setter function for configuring where tokens are sent when calling createRegistryByToken
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _burnAddress address where creation fee is to be sent
-    function setBurnAddress(address _burnAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
+    function setBurnAddress(address _burnAddress) external isAdmin {
         burnAddress = _burnAddress;
     }
 
@@ -182,7 +184,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         }
     }
 
-    function _createEnumerableRegistry(string memory _name, string memory _symbol, address _registrar) private {
+    function _createEnumerableRegistry(string memory _name, string memory _symbol, address _registrar) private nonReentrant {
         require(_registrar != address(0), "RegistryFactory: Registrar address must not be 0.");
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
@@ -193,7 +195,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         emit RegistryCreated(address(proxy));
     }
 
-    function _createRegistry(string memory _name, string memory _symbol, address _registrar) private {
+    function _createRegistry(string memory _name, string memory _symbol, address _registrar) private nonReentrant {
         require(_registrar != address(0), "RegistryFactory: Registrar address must not be 0.");
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
@@ -213,5 +215,10 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         // check if there if a profile is required and if so 
         // does the recipient have a non-zero balance. 
         return ((hypernetProfileRegistry == address(0)) || (IERC721Upgradeable(hypernetProfileRegistry).balanceOf(owner) > 0));
+    }
+
+    modifier isAdmin() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
+        _;
     }
 }
