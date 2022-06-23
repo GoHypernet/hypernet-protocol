@@ -1276,6 +1276,8 @@ export default class HypernetIFrameProxy
     submitLazyMintSignature: (
       registryName: string,
       tokenId: RegistryTokenId,
+      chainId: Number,
+      nonce: Number,
       ownerAddress: EthereumAccountAddress,
       registrationData: string,
     ): ResultAsync<
@@ -1291,6 +1293,8 @@ export default class HypernetIFrameProxy
       return this._createCall("submitLazyMintSignature", {
         registryName,
         tokenId,
+        chainId,
+        nonce,
         ownerAddress,
         registrationData,
       });

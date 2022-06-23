@@ -1401,6 +1401,8 @@ export class RegistryRepository implements IRegistryRepository {
   public submitLazyMintSignature(
     registryName: RegistryName,
     tokenId: RegistryTokenId,
+    chainId: Number,
+    nonce: Number,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
   ): ResultAsync<
@@ -1464,6 +1466,8 @@ export class RegistryRepository implements IRegistryRepository {
                 registry.address,
                 signature,
                 tokenId,
+                chainId,
+                nonce,
                 ownerAddress,
                 registrationData,
                 signerAddress,
