@@ -8,6 +8,7 @@ import "./NonFungibleRegistryUpgradeable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title Hypernet Protocol Non Fungible Registry Factory
@@ -21,7 +22,7 @@ import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
  * See unit tests for example usage:
  * https://github.com/GoHypernet/hypernet-protocol/blob/dev/packages/contracts/test/upgradeable-factory-test.js
  */
-contract UpgradeableRegistryFactory is AccessControlEnumerable {
+contract UpgradeableRegistryFactory is AccessControlEnumerable, ReentrancyGuard {
 
     /// @dev address of our upgradeble registry with enumeration proxy beacon
     address public enumerableRegistryBeacon;
@@ -77,8 +78,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         require(_names.length == _symbols.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(_symbols.length == _registrars.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(address(_enumerableRegistry) != address(0), "RegistryFactory: Invalid enumerableRegistry address.");
-        require(address(registry) != address(0), "RegistryFactory: Invalid registry address.");
-        require(address(registrationToken) != address(0), "RegistryFactory: Invalid registrationToken address.");
+        require(address(_registry) != address(0), "RegistryFactory: Invalid registry address.");
+        require(address(_registrationToken) != address(0), "RegistryFactory: Invalid registrationToken address.");
+
 
         // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -184,7 +186,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         }
     }
 
-    function _createEnumerableRegistry(string memory _name, string memory _symbol, address _registrar) private {
+    function _createEnumerableRegistry(string memory _name, string memory _symbol, address _registrar) private nonReentrant {
         require(_registrar != address(0), "RegistryFactory: Registrar address must not be 0.");
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
@@ -195,7 +197,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         emit RegistryCreated(address(proxy));
     }
 
-    function _createRegistry(string memory _name, string memory _symbol, address _registrar) private {
+    function _createRegistry(string memory _name, string memory _symbol, address _registrar) private nonReentrant {
         require(_registrar != address(0), "RegistryFactory: Registrar address must not be 0.");
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
