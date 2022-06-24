@@ -214,6 +214,8 @@ export interface IRegistryService {
   submitLazyMintSignature(
     registryName: RegistryName,
     tokenId: RegistryTokenId,
+    chainId: Number,
+    nonce: Number,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
   ): ResultAsync<
