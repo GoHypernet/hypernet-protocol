@@ -6,9 +6,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "../external/RoyaltiesV2.sol";
 
 /**
  * @title Hypernet Protocol Enumerable Non Fungible Registry
@@ -27,9 +29,11 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     Initializable,
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
+    ReentrancyGuardUpgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC2981Upgradeable
+    OwnableUpgradeable,
+    RoyaltiesV2Impl
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -156,13 +160,14 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         address _primaryRegistry,
         address _registrar, 
         address _admin
-        ) 
+    ) 
         public initializer {
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __ERC721_init(name_, symbol_);
+        __Ownable_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
         _setupRole(REGISTRAR_ROLE, _registrar);
@@ -179,6 +184,23 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         burnFee = 500; // basis points, 500 bp = 5%
         primaryRegistry = _primaryRegistry;
         frozen = false;
+
+        _transferOwnership(_admin);
+
+        ROYALTY_RECIPIENT = _admin;
+        ROYALTY_FEE = 0;
+    }
+
+    /** @notice sets the royalties for the given token id, the recipient, with the given percentage
+     *  @dev caller must be the current owner.
+     *  @param _royaltiesRecipientAddress address of the recipient of the royalties
+     *  @param _percentageBasisPoints percentage of each sale to be paid to the recipient
+     */
+    function setRoyaltyFee(address payable _royaltiesRecipientAddress, uint96 _percentageBasisPoints) public {
+        require(owner() == _msgSender(), "Not owner.");
+        
+        ROYALTY_RECIPIENT = _royaltiesRecipientAddress;
+        ROYALTY_FEE = _percentageBasisPoints;
     }
 
     /** @notice setRegistryParameters enable or disable the lazy registration feature
@@ -265,7 +287,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
     /// @param tokenId unique uint256 identifier for the newly created token
-    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
+    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual nonReentrant {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
         // user must approve the registry to collect the registration fee from their wallet
@@ -274,7 +296,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         _createLabeledToken(to, label, registrationData, tokenId);
 
         uint256 burnAmount = registrationFee * burnFee / 10000;
-        IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
+        require(IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount), "NonFungibleRegistry: token transfer failed.");
         // the fee stays with the token, not the token owner
         identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
     }
@@ -320,6 +342,9 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
+        if(bytes(reverseRegistryMap[tokenId]).length > 0) {
+            delete registryMap[reverseRegistryMap[tokenId]];
+        }
         registryMap[label] = tokenId;
         reverseRegistryMap[tokenId] = label;
         emit LabelUpdated(tokenId, label);
@@ -361,7 +386,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @notice burn removes a token from the registry enumeration and refunds registration fee to burner
     /// @dev only callable by the owner, approved caller when allowTransfers is true or REGISTRAR_ROLE
     /// @param tokenId unique id to refence the target token
-    function burn(uint256 tokenId) public virtual {
+    function burn(uint256 tokenId) public virtual nonReentrant {
         //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _burn(tokenId);
@@ -370,7 +395,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         if (identityStakes[tokenId].amount != 0) {
             // send the registration fee to the token burner
             // don't set a registration token you do not control/trust, otherwise, this could be used for re-entrancy attack
-            require(IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount), "NonFungibleRegistry: token tansfer failed.");
+            require(IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount), "NonFungibleRegistry: token transfer failed.");
             delete identityStakes[tokenId];
         }
     }
@@ -441,15 +466,6 @@ contract NonFungibleRegistryEnumerableUpgradeable is
             }
             return string(uri);
         }
-    }
-
-    function royaltyInfo(uint256 tokenId, uint256 salePrice)
-        external
-        view
-        override(IERC2981Upgradeable)
-    returns (address receiver, uint256 royaltyAmount) {
-        royaltyAmount = salePrice * burnFee / 10000;
-        receiver = burnAddress;
     }
 
     function _baseURI() internal view virtual override returns (string memory) {

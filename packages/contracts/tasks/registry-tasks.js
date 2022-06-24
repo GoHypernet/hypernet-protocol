@@ -37,13 +37,28 @@ task("getFactoryBeaconInfo", "Prints the owners and addresses of the Beacon prox
     console.log("Enumerable Registry Beacon Address:", enumRegBeaconAddr);
     console.log("Enumerable Registry Implementation Address:", enumRegImplAddr);
     console.log("Enumerable Registry Beacon Owner:", enumRegBeaconOwner)
+
+    return {
+      registry: {
+        beacon: regBeaconAddr,
+        implementation: regImpleAddr,
+        owner: regBeaconOwner
+      },
+      enumerableRegistry: {
+        beacon: enumRegBeaconAddr,
+        implementation: enumRegImplAddr,
+        owner: enumRegBeaconOwner
+      }
+    }
   });
 
 task("setFactoryBeaconEnumerable", "Update the implementation address of the enumerable NFR beacon.")
   .addParam("address", "Address of the new implemenation.")
+  //.addOptionalParam("impersonate", "If we should impersonate the owner of the contract.")
   .setAction(async (taskArgs) => {
-
     const [account] = await hre.ethers.getSigners();
+    //const shouldImpersonate = taskArgs.impersonate;
+    //if (shouldImpersonate) console.log(`Will impersonate the owner.`);
 
     const newImpl = taskArgs.address;
     const factoryHandle = new hre.ethers.Contract(
@@ -54,29 +69,50 @@ task("setFactoryBeaconEnumerable", "Update the implementation address of the enu
 
     const enumRegBeaconAddr = await factoryHandle.enumerableRegistryBeacon();
 
-    const enumRegBeaconHandle = new hre.ethers.Contract(
+    let enumRegBeaconHandle = new hre.ethers.Contract(
         enumRegBeaconAddr,
         IBEACON.abi,
         account,
-      );
+    );
+
+    /*
+    if (shouldImpersonate) {
+      const owner = await enumRegBeaconHandle.owner();
+
+      await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [owner]
+      })
+
+      await network.provider.send("hardhat_setBalance", [
+        owner,
+        "0xFFFFFFFFFFFFFF",
+      ]);
+
+      const ownerSigner = await hre.ethers.getSigner(owner);
+
+      enumRegBeaconHandle = enumRegBeaconHandle.connect(ownerSigner)
+    }*/
 
     // set the new implementation address
-    let tx = await enumRegBeaconHandle.upgradeTo(newImpl, await gasSettings());
-    let txrcp = await tx.wait(2);
+    let tx = await enumRegBeaconHandle.upgradeTo(newImpl);
+    let txrcp = await tx.wait();
 
     const enumRegImplAddr = await enumRegBeaconHandle.implementation();
     const enumRegBeaconOwner = await enumRegBeaconHandle.owner();
 
     console.log("Enumerable Registry Implementation Address:", enumRegImplAddr);
     console.log("Enumerable Registry Beacon Owner:", enumRegBeaconOwner);
-    console.log("Gas Used:", txrcp.gasUsed.toString());
+    //console.log("Gas Used:", txrcp.gasUsed.toString());
   });
 
 task("setFactoryBeaconNonEnumerable", "Update the implementation address of the non-enumerable NFR beacon.")
   .addParam("address", "Address of the new implemenation.")
+  //.addOptionalParam("impersonate", "If we should impersonate the owner of the contract.")
   .setAction(async (taskArgs) => {
-
     const [account] = await hre.ethers.getSigners();
+    //const shouldImpersonate = taskArgs.impersonate;
+    //if (shouldImpersonate) console.log(`Will impersonate the owner.`);
 
     const newImpl = taskArgs.address;
     const factoryHandle = new hre.ethers.Contract(
@@ -87,22 +123,39 @@ task("setFactoryBeaconNonEnumerable", "Update the implementation address of the 
 
     const regBeaconAddr = await factoryHandle.registryBeacon();
 
-    const regBeaconHandle = new hre.ethers.Contract(
+    let regBeaconHandle = new hre.ethers.Contract(
         regBeaconAddr,
         IBEACON.abi,
         account,
-      );
+    );
+
+    /*if (shouldImpersonate) {
+      const owner = await regBeaconHandle.owner();
+
+      await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [owner]
+      })
+
+      await network.provider.send("hardhat_setBalance", [
+        owner,
+        "0xFFFFFFFFFFFFFF",
+      ]);
+
+      const ownerSigner = await hre.ethers.getSigner(owner);
+
+      regBeaconHandle = regBeaconHandle.connect(ownerSigner)
+    }*/
 
     // set the new implementation address
-    let tx = await regBeaconHandle.upgradeTo(newImpl, await gasSettings());
-    let txrcp = await tx.wait(2);
+    let tx = await regBeaconHandle.upgradeTo(newImpl);
+    let txrcp = await tx.wait();
 
     const regImplAddr = await regBeaconHandle.implementation();
     const regBeaconOwner = await regBeaconHandle.owner();
 
     console.log("Non-Enumerable Registry Implementation Address:", regImplAddr);
     console.log("Non-Enumerable Registry Beacon Owner:", regBeaconOwner);
-    console.log("Gas Used:", txrcp.gasUsed.toString());
   });
 
 task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
@@ -133,7 +186,6 @@ task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
     );
     const tx_rcpt = await tx.wait();
     console.log("Primary Registry Set");
-    console.log("Gas Used:", tx_rcpt.gasUsed.toString());
   });
 
   task("createRegistry", "Creates a registry if you are the factory admin.")
@@ -165,11 +217,10 @@ task("setPrimaryRegistry", "Sets primaryRegistry parameter of target NFR.")
       await gasSettings()
     );
     console.log(tx);
-    const tx_rcpt = await tx.wait(2);
+    const tx_rcpt = await tx.wait();
 
     const regAddress = await factoryHandle.nameToAddress(name);
     console.log("Registry Deployed to:", regAddress);
-    console.log("Gas Used:", tx_rcpt.gasUsed.toString());
   });
 
 task("createRegistryByToken", "Creates a registry by burning token.")
@@ -199,8 +250,7 @@ task("createRegistryByToken", "Creates a registry by burning token.")
 
     // approve the registry factory to pull hypertoken from the users wallet
     let tx = await hypertoken.approve(factoryHandle.address, regFee);
-    let tx_rcpt = await tx.wait(3);
-    console.log("Gas Used for Approval:", tx_rcpt.gasUsed.toString());
+    let tx_rcpt = await tx.wait();
 
     tx = await factoryHandle.createRegistryByToken(
       name,
@@ -209,11 +259,10 @@ task("createRegistryByToken", "Creates a registry by burning token.")
       enumerable,
       await gasSettings(),
     );
-    tx_rcpt = await tx.wait(2);
+    tx_rcpt = await tx.wait();
 
     const regAddress = await factoryHandle.nameToAddress(name);
     console.log("Registry Deployed to:", regAddress);
-    console.log("Gas Used for Deployment:", tx_rcpt.gasUsed.toString());
 });
 
 task("registryParameters", "Prints NFR  parameters.")
@@ -336,7 +385,7 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
       );
 
     const tx = await registryHandle.setRegistryParameters(params, await gasSettings());
-    const tx_rcpt = await tx.wait(3);
+    const tx_rcpt = await tx.wait();
 
     const REGISTRAR_ROLE = registryHandle.REGISTRAR_ROLE();
     const registrarAddress = await registryHandle.getRoleMember(
@@ -369,7 +418,6 @@ task("setRegistryParameters", "Set the parameters of a registry if you have the 
     console.log("Registration Token:", registrationToken);
     console.log("Registration Fee:", registrationFee.toString());
     console.log("Primary Registry:", primaryRegistry);
-    console.log("Gas Used:", tx_rcpt.gasUsed.toString());
   });
 
 task("listRegistryEntries", "Prints all NFI entries for the specified registry.")
@@ -385,6 +433,7 @@ task("listRegistryEntries", "Prints all NFI entries for the specified registry."
       accounts[0],
     );
     const registryAddress = await factoryHandle.nameToAddress(name);
+    console.log(`Registry Address: ${registryAddress}`);
     const registryHandle = new hre.ethers.Contract(
       registryAddress,
       NFR.abi,
@@ -691,8 +740,6 @@ task("register", "Register an NFI as the REGISTRAR_ROLE.")
       gassettings
     );
     const txrcpt = await tx.wait();
-
-    console.log("Gas Used:", txrcpt.gasUsed.toString());
 });
 
 task("registerWithToken", "Register an NFI with ERC20 token.")
@@ -738,7 +785,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
       tokenid,
       await gasSettings()
     );
-    await tx.wait(3);
+    await tx.wait();
 
     const tokenId = await registryHandle.registryMap(NFILabel);
     console.log("Token ID:", tokenId.toString());
@@ -812,4 +859,88 @@ task("grantRegistrarRole", "Give the registrar role to a specified account.")
   await tx.wait();
 
   console.log("REGISTRAR_ROLE updated");
+});
+
+task("transferOwnership", "Give the registrar role to a specified account.")
+.addParam("registry", "Name of target Registry where role is to be granted.")
+.addParam("owner", "Recipient of the OWNER_ROLE.")
+.setAction(async (taskArgs) => {
+  const accounts = await hre.ethers.getSigners();
+
+  const registryName = taskArgs.registry;
+  const registrar = taskArgs.registrar
+
+  const factoryHandle = new hre.ethers.Contract(
+    factoryAddress(),
+    RF.abi,
+    accounts[0],
+  );
+
+  const registryAddress = await factoryHandle.nameToAddress(registryName);
+  const registryHandle = new hre.ethers.Contract(
+    registryAddress,
+    NFR.abi,
+    accounts[0],
+  );
+
+  // call registerByToken on the NFR
+  tx = await registryHandle.grantRole(
+    registryHandle.REGISTRAR_ROLE(),
+    registrar,
+    await gasSettings()
+  );
+  await tx.wait();
+
+  console.log("REGISTRAR_ROLE updated");
+});
+
+task("setRoyalties", "Set the royalty info for a collection")
+  .addParam("registry", "Name of target Registry where role is to be granted.")
+  .addParam("recipient", "Recipient of the royalty fees")
+  .addParam("percentage", "Percentage fee in basis points ([0,10000])")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+
+    const registryName = taskArgs.registry;
+    const registrar = taskArgs.registrar
+  
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+  
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = await ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, accounts[0]);
+
+    tx = await registryHandle.setRoyaltyFee(
+      taskArgs.recipient,
+      taskArgs.percentage,
+      await gasSettings()
+    );
+
+    await tx.wait();
+});
+
+task("triggerRoyaltiesRefresh", "Trigger a refresh of the royalties for a collection")
+  .addParam("registry", "Name of target Registry where role is to be granted.")
+  .addParam("tokenid", "Token ID to target")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+
+    const registryName = taskArgs.registry;
+    const registrar = taskArgs.registrar
+  
+    const factoryHandle = new hre.ethers.Contract(
+      factoryAddress(),
+      RF.abi,
+      accounts[0],
+    );
+  
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = await ethers.getContractAt("NonFungibleRegistryUpgradeable", registryAddress, accounts[0]);
+
+    tx = await registryHandle.triggerRoyaltiesRefresh(taskargs.tokenid);
+
+    await tx.wait();
 });

@@ -29,6 +29,8 @@ interface ICreateIdentityFormValues {
   recipientAddress: string;
   tokenUri: string;
   tokenId: string;
+  chainId: number;
+  nonce: number;
 }
 
 const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
@@ -47,7 +49,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
     label,
     recipientAddress,
     tokenUri,
-    tokenId,
+    tokenId
   }: ICreateIdentityFormValues) => {
     setLoading(true);
 
@@ -73,6 +75,8 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
     recipientAddress,
     tokenUri,
     tokenId,
+    chainId,
+    nonce
   }: ICreateIdentityFormValues) => {
     setLoading(true);
 
@@ -80,6 +84,8 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
       .submitLazyMintSignature(
         RegistryName(registryName),
         RegistryTokenId(tokenId),
+        Number(chainId),
+        Number(nonce),
         EthereumAccountAddress(recipientAddress),
         tokenUri,
       )
@@ -122,6 +128,8 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
               recipientAddress: currentAccountAddress,
               tokenUri: "",
               tokenId: Math.floor(Math.random() * 10000000000).toString(),
+              chainId: 0,
+              nonce: 0
             }}
             onSubmit={(values) =>
               lazyMintModeEnabled

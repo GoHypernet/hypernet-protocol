@@ -101,7 +101,9 @@ const timelockAddress = function () {
 
 const factoryAddress = function () {
   const hre = require("hardhat");
-  if (hre.hardhatArguments.network == "dev") {
+  if (hre.hardhatArguments.network == "hardhat") {
+    return "0xd93fbc9d330c5a1d242d01c0f10115483a062d7c"
+  } if (hre.hardhatArguments.network == "dev") {
     return "0x610178dA211FEF7D417bC0e6FeD39F05609AD788";
   } else if (hre.hardhatArguments.network == "DevNet") {
     return "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254"
@@ -110,7 +112,7 @@ const factoryAddress = function () {
   } else if (hre.hardhatArguments.network == "mumbai") {
     return "0x6cd4a3319B5E2173Fb44e21B5b506da35ada9899"
   } else if (hre.hardhatArguments.network == "polygon") {
-    return "0xd93fbc9d330c5a1d242d01c0f10115483a062d7c"
+    return ""
   } else if (hre.hardhatArguments.network == "fuji") {
     return "0xc5b292502cDb63f6c19A9a85a29B5F5834b9146a"
   } else if (hre.hardhatArguments.network == "avalanche") {
