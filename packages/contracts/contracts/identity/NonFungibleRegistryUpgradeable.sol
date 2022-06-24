@@ -160,6 +160,10 @@ contract NonFungibleRegistryUpgradeable is
         address _admin
         ) 
         public initializer {
+        require(address(_primaryRegistry) != address(0), "NonFungibleRegistry: Invalid primaryRegistry address.");
+        require(address(_registrar) != address(0), "NonFungibleRegistry: Invalid registrar address.");
+        require(address(_admin) != address(0), "NonFungibleRegistry: Invalid admin address.");
+
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721URIStorage_init();

@@ -76,6 +76,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
                 address _registrationToken)  {
         require(_names.length == _symbols.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(_symbols.length == _registrars.length, "RegistryFactory: Initializer arrays must be equal length.");
+        require(address(_enumerableRegistry) != address(0), "RegistryFactory: Invalid enumerableRegistry address.");
+        require(address(registry) != address(0), "RegistryFactory: Invalid registry address.");
+        require(address(registrationToken) != address(0), "RegistryFactory: Invalid registrationToken address.");
 
         // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -120,6 +123,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _hypernetProfileRegistry address of ERC721 token to use as profile contract
     function setProfileRegistryAddress(address _hypernetProfileRegistry) external {
+        require(address(_hypernetProfileRegistry) != address(0), "NonFungibleRegistry: Invalid hypernetProfileRegistry address.");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         hypernetProfileRegistry = _hypernetProfileRegistry;
     }
@@ -128,6 +132,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationToken address of ERC20 token burned during registration
     function setRegistrationToken(address _registrationToken) external {
+        require(_registrationToken != address(0), """RegistryFactory: Invalid registrationToken address");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to set parameters");
         registrationToken = _registrationToken;
     }
