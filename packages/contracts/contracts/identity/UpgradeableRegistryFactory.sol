@@ -76,6 +76,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
                 address _registrationToken)  {
         require(_names.length == _symbols.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(_symbols.length == _registrars.length, "RegistryFactory: Initializer arrays must be equal length.");
+        require(address(_enumerableRegistry) != address(0), "RegistryFactory: Invalid enumerableRegistry address.");
+        require(address(registry) != address(0), "RegistryFactory: Invalid registry address.");
+        require(address(registrationToken) != address(0), "RegistryFactory: Invalid registrationToken address.");
 
         // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -127,6 +130,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationToken address of ERC20 token burned during registration
+
     function setRegistrationToken(address _registrationToken) external isAdmin {
         require(_registrationToken != address(0), """RegistryFactory: Invalid registrationToken address");
         registrationToken = _registrationToken;

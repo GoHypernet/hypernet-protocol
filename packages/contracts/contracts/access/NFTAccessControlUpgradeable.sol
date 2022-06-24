@@ -52,6 +52,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
  */
 abstract contract NFTAccessControlUpgradeable is Initializable, ContextUpgradeable, INFTAccessControlUpgradeable, ERC165Upgradeable {
     function __NFTAccessControl_init(address registry) internal initializer {
+        require(registry != address(0), "NFTAccessControlUpgradeable: Invalid registry address.");
         __Context_init_unchained();
         __ERC165_init_unchained();
         __NFTAccessControl_init_unchained();
