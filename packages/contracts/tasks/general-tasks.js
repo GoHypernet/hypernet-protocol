@@ -187,6 +187,5 @@ task("grantAdminRole", "Grants the admin role to an account")
     const tx = await factory.grantRole("0x0000000000000000000000000000000000000000000000000000000000000000", newAdmin)
     const receipt = await tx.wait();
 
-    console.log(`Result: ${receipt.status}`);
-    console.log(`Tx: ${JSON.stringify(receipt, null, 2)}`);
+    console.log(`Result: ${receipt.status}`);  
 });
