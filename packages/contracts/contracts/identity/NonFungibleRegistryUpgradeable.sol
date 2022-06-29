@@ -166,6 +166,7 @@ contract NonFungibleRegistryUpgradeable is
 
         __Context_init();
         __AccessControlEnumerable_init();
+        __ReentrancyGuard_init();
         __ERC721URIStorage_init();
         __ERC721_init(name_, symbol_);
         __Ownable_init();
