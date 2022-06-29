@@ -164,6 +164,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         public initializer {
         __Context_init();
         __AccessControlEnumerable_init();
+        __ReentrancyGuard_init();
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __ERC721_init(name_, symbol_);
