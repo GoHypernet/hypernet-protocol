@@ -8,6 +8,8 @@ export class LazyMintingSignature {
     public registryAddress: EthereumContractAddress,
     public mintingSignature: Signature,
     public tokenId: RegistryTokenId,
+    public chainId: Number,
+    public nonce: Number,
     public ownerAccountAddress: EthereumAccountAddress,
     public registrationData: string,
     public registrarAddress: EthereumAccountAddress,

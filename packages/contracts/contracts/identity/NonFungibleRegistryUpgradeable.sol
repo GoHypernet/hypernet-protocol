@@ -160,6 +160,10 @@ contract NonFungibleRegistryUpgradeable is
         address _admin
         ) 
         public initializer {
+        require(address(_primaryRegistry) != address(0), "NonFungibleRegistry: Invalid primaryRegistry address.");
+        require(address(_registrar) != address(0), "NonFungibleRegistry: Invalid registrar address.");
+        require(address(_admin) != address(0), "NonFungibleRegistry: Invalid admin address.");
+
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721URIStorage_init();
@@ -244,7 +248,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param _primaryRegistry address to set as the primary registry
     function setPrimaryRegistry(address _primaryRegistry) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
-        // allow this feature to be disablled by setting to 0 address
+        // allow this feature to be disabled by setting to 0 address
         if (address(_primaryRegistry) == address(0)) {
             primaryRegistry = address(0); 
         } else {
@@ -284,7 +288,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
     /// @param tokenId unique uint256 identifier for the newly created token
-    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
+    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual nonReentrant {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
         // user must approve the registry to collect the registration fee from their wallet
@@ -293,7 +297,7 @@ contract NonFungibleRegistryUpgradeable is
         _createLabeledToken(to, label, registrationData, tokenId);
 
         uint256 burnAmount = registrationFee * burnFee / 10000;
-        IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
+        require(IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount), "NonFungibleRegistry: token transfer failed.");
         // the fee stays with the token, not the token owner
         identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
     }
@@ -339,6 +343,9 @@ contract NonFungibleRegistryUpgradeable is
         require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
+         if(bytes(reverseRegistryMap[tokenId]).length > 0) {
+            delete registryMap[reverseRegistryMap[tokenId]];
+        }
         registryMap[label] = tokenId;
         reverseRegistryMap[tokenId] = label;
         emit LabelUpdated(tokenId, label);

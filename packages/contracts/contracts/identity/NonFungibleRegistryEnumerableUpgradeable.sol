@@ -287,7 +287,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
     /// @param tokenId unique uint256 identifier for the newly created token
-    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
+    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual nonReentrant {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
         // user must approve the registry to collect the registration fee from their wallet
@@ -296,7 +296,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         _createLabeledToken(to, label, registrationData, tokenId);
 
         uint256 burnAmount = registrationFee * burnFee / 10000;
-        IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
+        require(IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount), "NonFungibleRegistry: token transfer failed.");
         // the fee stays with the token, not the token owner
         identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
     }
@@ -342,6 +342,9 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
+        if(bytes(reverseRegistryMap[tokenId]).length > 0) {
+            delete registryMap[reverseRegistryMap[tokenId]];
+        }
         registryMap[label] = tokenId;
         reverseRegistryMap[tokenId] = label;
         emit LabelUpdated(tokenId, label);
@@ -392,7 +395,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         if (identityStakes[tokenId].amount != 0) {
             // send the registration fee to the token burner
             // don't set a registration token you do not control/trust, otherwise, this could be used for re-entrancy attack
-            require(IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount), "NonFungibleRegistry: token tansfer failed.");
+            require(IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount), "NonFungibleRegistry: token transfer failed.");
             delete identityStakes[tokenId];
         }
     }

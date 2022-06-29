@@ -655,6 +655,8 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         data: IIFrameCallData<{
           registryName: RegistryName;
           tokenId: RegistryTokenId;
+          chainId: Number,
+          nonce: Number, 
           ownerAddress: EthereumAccountAddress;
           registrationData: string;
         }>,
@@ -663,6 +665,8 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.registries.submitLazyMintSignature(
             data.data.registryName,
             data.data.tokenId,
+            data.data.chainId,
+            data.data.nonce,
             data.data.ownerAddress,
             data.data.registrationData,
           );
