@@ -198,6 +198,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
      */
     function setRoyaltyFee(address payable _royaltiesRecipientAddress, uint96 _percentageBasisPoints) public {
         require(owner() == _msgSender(), "Not owner.");
+        require(_royaltiesRecipientAddress != address(0), "invalid _royaltiesRecipient address");
         
         ROYALTY_RECIPIENT = _royaltiesRecipientAddress;
         ROYALTY_FEE = _percentageBasisPoints;
