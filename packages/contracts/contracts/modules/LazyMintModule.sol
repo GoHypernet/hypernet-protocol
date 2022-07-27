@@ -30,17 +30,17 @@ contract LazyMintModule is Context {
 
     /// @notice lazyRegister REGISTRAR_ROLE to offload gas cost of minting to reciever 
     /// @dev REGISTRAR_ROLE must provide a signature and allowLabelChange must be false to prevent replay
+    /// @dev NFR Contracts check for label existence and errors out if the label is already registerd. Preventing any replay.
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI 
     /// @param tokenId unique uint256 identifier for the newly created token
     /// @param signature signature from REGISTRAR_ROLE 
+
     function lazyRegister(address to, 
                           string calldata label, 
                           string calldata registrationData, 
                           uint256 tokenId,
-                          uint256 chainId,
-                          uint256 nonce,
                           bytes calldata signature,
                           address registry)
         external {        
@@ -48,23 +48,32 @@ contract LazyMintModule is Context {
         require(_msgSender() == to, "LazyMintModule: Caller is not recipient.");
         
         // require a valid signature from a member of REGISTRAR_ROLE
-        require(_isValidSignature(to, label, registrationData, tokenId, chainId, nonce, signature, registry), "LazyMintModule: signature failure.");
+        require(_isValidSignature(to, label, registrationData, tokenId,signature, registry), "LazyMintModule: signature failure.");
         
         // issue new token here
         INfr(registry).register(to, label, registrationData, tokenId);
     }
     
-    function _isValidSignature(address to, string memory label, string memory registrationData, uint256 tokenId,  uint256 chainId,  uint256 nonce, bytes memory signature, address registry)
+    function _isValidSignature(address to, string memory label, string memory registrationData, uint256 tokenId, bytes memory signature, address registry)
         internal
         view
         returns (bool)
     {
         // convert the payload to a 32 byte hash
-        bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData, tokenId, chainId, nonce)));
+        // Include the chainId as part of the check to prevent replay across chains.
+        bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData, tokenId, _getChainId())));
         
         // check that the signature is from REGISTRAR_ROLE
         address signer = ECDSA.recover(hash, signature);
         require(signer != address(0), "LazyMintModule: Signer cannot be 0 address.");
         return INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), signer);
+    }
+
+    // Get Chain Id from Chain
+    function _getChainId() internal view returns (uint256 id) 
+    {
+        assembly {
+            id := chainid()
+        }
     }
 }

@@ -14,8 +14,6 @@ export interface ILazyMintModuleContract {
     registryAddress: EthereumContractAddress,
     signature: Signature,
     tokenId: RegistryTokenId,
-    chainId: Number,
-    nonce: Number,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
     overrides?: ContractOverrides,

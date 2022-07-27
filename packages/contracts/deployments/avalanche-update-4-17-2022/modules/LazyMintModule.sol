@@ -38,8 +38,6 @@ contract LazyMintModule is Context {
                           string calldata label, 
                           string calldata registrationData, 
                           uint256 tokenId,
-                          uint256 chainId,
-                          uint256 nonce,
                           bytes calldata signature,
                           address registry)
         external {        
@@ -47,7 +45,7 @@ contract LazyMintModule is Context {
         require(_msgSender() == to, "LazyMintModule: Caller is not recipient.");
         
         // require a valid signature from a member of REGISTRAR_ROLE
-        require(_isValidSignature(to, label, registrationData, tokenId, chainId, nonce, signature, registry), "LazyMintModule: signature failure.");
+        require(_isValidSignature(to, label, registrationData, tokenId, signature, registry), "LazyMintModule: signature failure.");
         
         // issue new token here
         INfr(registry).register(to, label, registrationData, tokenId);
@@ -59,12 +57,19 @@ contract LazyMintModule is Context {
         returns (bool)
     {
         // convert the payload to a 32 byte hash
-        bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData, tokenId, chainId, nonce)));
+        bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData, tokenId, _getChainId())));
         
         // check that the signature is from REGISTRAR_ROLE
         address signer = ECDSA.recover(hash, signature);
         require(signer != address(0), "LazyMintModule: Signer cannot be 0 address.");
         return INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), signer);
+    }
+    // Get Chain Id from Chain
+    function _getChainId() internal view returns (uint256 id) 
+    {
+        assembly {
+            id := chainid()
+        }
     }
 }
 

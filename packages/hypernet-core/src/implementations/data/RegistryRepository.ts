@@ -1401,8 +1401,6 @@ export class RegistryRepository implements IRegistryRepository {
   public submitLazyMintSignature(
     registryName: RegistryName,
     tokenId: RegistryTokenId,
-    chainId: Number,
-    nonce: Number,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
   ): ResultAsync<
@@ -1439,12 +1437,15 @@ export class RegistryRepository implements IRegistryRepository {
           ),
         );
       }
-
+      if (this.provider == null) {
+        throw new Error("No provider available!");
+      }
+      let chainId = this.provider.getNetwork().then(function(network) { return network.chainId});
       // hash the data
       const hash = ethers.utils
         .solidityKeccak256(
-          ["address", "string", "string", "uint256"],
-          [ownerAddress, "", registrationData, tokenId],
+          ["address", "string", "string", "uint256", "uint256"],
+          [ownerAddress, "", registrationData, tokenId, chainId],
         )
         .toString();
 
@@ -1466,8 +1467,6 @@ export class RegistryRepository implements IRegistryRepository {
                 registry.address,
                 signature,
                 tokenId,
-                chainId,
-                nonce,
                 ownerAddress,
                 registrationData,
                 signerAddress,
@@ -1553,8 +1552,6 @@ export class RegistryRepository implements IRegistryRepository {
                 lazyMintingSignature.registryAddress,
                 lazyMintingSignature.mintingSignature,
                 lazyMintingSignature.tokenId,
-                lazyMintingSignature.chainId,
-                lazyMintingSignature.nonce,
                 lazyMintingSignature.ownerAccountAddress,
                 lazyMintingSignature.registrationData,
               );

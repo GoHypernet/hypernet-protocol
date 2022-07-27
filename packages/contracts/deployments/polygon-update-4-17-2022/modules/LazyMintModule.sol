@@ -53,18 +53,26 @@ contract LazyMintModule is Context {
         INfr(registry).register(to, label, registrationData, tokenId);
     }
     
-    function _isValidSignature(address to, string memory label, string memory registrationData, uint256 tokenId, uint256 chainId,  uint256 nonce, bytes memory signature, address registry)
+    function _isValidSignature(address to, string memory label, string memory registrationData, uint256 tokenId, bytes memory signature, address registry)
         internal
         view
         returns (bool)
     {
         // convert the payload to a 32 byte hash
-        bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData, tokenId, chainId, nonce)));
+        bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData, tokenId, _getChainId())));
         
         // check that the signature is from REGISTRAR_ROLE
         address signer = ECDSA.recover(hash, signature);
         require(signer != address(0), "LazyMintModule: Signer cannot be 0 address.");
         return INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), signer);
+    }
+
+     // Get Chain Id from Chain
+    function _getChainId() internal view returns (uint256 id) 
+    {
+        assembly {
+            id := chainid()
+        }
     }
 }
 
