@@ -1,6 +1,6 @@
 const { expectRevert } = require("@openzeppelin/test-helpers");
 const { expect } = require("chai");
-const { ethers, upgrades } = require("hardhat");
+const { ethers, upgrades, hre } = require("hardhat");
 const { MerkleTree } = require('merkletreejs');
 const keccak256 = require('keccak256');
 const tokens = require('./tokens.json');
@@ -661,11 +661,15 @@ it("Test lazy minting.", async function () {
     let registrationData = "00000000000000030000000061672e7d";
     let tokenId = 007;
 
+    // Get current chain id:
+
+    let chainId = hre.network.config.chainId;
+    
     // hash the data
     var hash = ethers.utils
       .solidityKeccak256(
-        ["address", "string", "string", "uint256"],
-        [addr1.address, label, registrationData, tokenId],
+        ["address", "string", "string", "uint256", "uint256"],
+        [addr1.address, label, registrationData, tokenId, chainId],
       )
       .toString("hex");
 

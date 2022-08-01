@@ -74,9 +74,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   const handlLazyMintIdentity = ({
     recipientAddress,
     tokenUri,
-    tokenId,
-    chainId,
-    nonce
+    tokenId
   }: ICreateIdentityFormValues) => {
     setLoading(true);
 
@@ -84,8 +82,6 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
       .submitLazyMintSignature(
         RegistryName(registryName),
         RegistryTokenId(tokenId),
-        Number(chainId),
-        Number(nonce),
         EthereumAccountAddress(recipientAddress),
         tokenUri,
       )

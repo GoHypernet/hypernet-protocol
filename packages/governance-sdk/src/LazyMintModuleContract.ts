@@ -33,8 +33,6 @@ export class LazyMintModuleContract implements ILazyMintModuleContract {
     registryAddress: EthereumContractAddress,
     signature: Signature,
     tokenId: RegistryTokenId,
-    chainId: Number,
-    nonce: Number,
     ownerAddress: EthereumAccountAddress,
     registrationData: string,
     overrides: ContractOverrides | null = null,
@@ -51,15 +49,13 @@ export class LazyMintModuleContract implements ILazyMintModuleContract {
             label,
             registrationData,
             tokenId,
-            chainId,
-            nonce,
             signature,
             registryAddress,
             { ...gasFee, ...overrides },
           ) as Promise<ethers.providers.TransactionResponse>,
           (e) => {
             return new LazyMintModuleContractError(
-              "Unable to call LazyMintModuleContract batchRegister()",
+              "Unable to call LazyMintModuleContract lazyRegister()",
               e,
             );
           },

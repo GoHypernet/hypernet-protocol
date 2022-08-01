@@ -2128,8 +2128,6 @@ export class HypernetCore implements IHypernetCore {
     submitLazyMintSignature: (
       registryName: RegistryName,
       tokenId: RegistryTokenId,
-      chainId: Number,
-      nonce: Number,
       ownerAddress: EthereumAccountAddress,
       registrationData: string,
     ): ResultAsync<
@@ -2144,8 +2142,6 @@ export class HypernetCore implements IHypernetCore {
       return this.registryService.submitLazyMintSignature(
         registryName,
         tokenId,
-        chainId,
-        nonce,
         ownerAddress,
         registrationData,
       );
