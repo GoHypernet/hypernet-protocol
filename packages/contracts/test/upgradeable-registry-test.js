@@ -1,6 +1,6 @@
 const { BN, expectRevert } = require("@openzeppelin/test-helpers");
 const { expect } = require("chai");
-const { ethers, upgrades, hre } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 const { MerkleTree } = require("merkletreejs");
 const keccak256 = require("keccak256");
 const tokens = require("./tokens.json");
@@ -100,7 +100,7 @@ describe("Registry with No Enumeration", function () {
     const royaltyInfo = await registry.royaltyInfo(1, hre.ethers.utils.parseUnits("1.0", 18));
     const royaltyReciever = await registry.burnAddress();
     expect(royaltyInfo[0]).to.equal(royaltyReciever);
-    expect(royaltyInfo[1]).to.equal(hre.ethers.utils.parseUnits("0.05", 18));
+    expect(royaltyInfo[1]).to.equal(hre.ethers.utils.parseUnits("0.00", 18));
   });
 
 

@@ -134,7 +134,6 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable, ReentrancyGuard 
     /// @param _registrationToken address of ERC20 token burned during registration
 
     function setRegistrationToken(address _registrationToken) external isAdmin {
-        require(_registrationToken != address(0), """RegistryFactory: Invalid registrationToken address");
         registrationToken = _registrationToken;
     }
 
